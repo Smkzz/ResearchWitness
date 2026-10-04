@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-graph-chromatic-bound",
+  "artifacts": {
+    "source.txt": "fedaada6012d281f95f01e8cee8842a371e46b3c38913cf546078082e6216366",
+    "correction-check.txt": "6499257f0e18cc2956486133719b9c287cf72dd694dfab40bafa20229ea01007",
+    "witness.json": "16d5b5b06463d5be2ea7fc909ae9734b0960dd0a01294932e3ee47517e030b6d"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:graph-chromatic-bound",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "The explicitly listed graph has chromatic number at least 3.",
+    "scope": "Only the listed three-vertex simple graph and the claimed lower bound are formalized.",
+    "assumptions": [
+      "The graph is finite, simple, and undirected."
+    ],
+    "excluded_claims": [
+      "This fixture is not a real paper or an independent discovery.",
+      "No search for the graph chromatic number is performed."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "The explicitly listed graph has chromatic number at least 3."
+    },
+    "formalization": {
+      "kind": "finite_graph_chromatic_lower_bound",
+      "vertices": [
+        "a",
+        "b",
+        "c"
+      ],
+      "edges": [
+        [
+          "a",
+          "b"
+        ],
+        [
+          "b",
+          "c"
+        ]
+      ],
+      "minimum_colors": 3
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

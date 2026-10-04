@@ -13,7 +13,12 @@ KINDS = {
     'finite_field_polynomial_residue',
     'finite_field_quadratic_quartic_residue_rule',
     'finite_map_fixed_point',
+    'finite_graph_chromatic_lower_bound',
 }
+
+MAX_GRAPH_VERTICES = 256
+MAX_GRAPH_EDGES = 8192
+MAX_GRAPH_LABEL_LENGTH = 64
 
 
 def capabilities() -> list[dict[str, Any]]:
@@ -48,6 +53,11 @@ def capabilities() -> list[dict[str, Any]]:
             'kind': 'finite_map_fixed_point',
             'proves': 'An explicit finite self-map has no fixed point when the formalized conclusion requires one.',
             'limits': 'Checks the finite-map conclusion only; theorem premises must be verified separately.',
+        },
+        {
+            'kind': 'finite_graph_chromatic_lower_bound',
+            'proves': 'A proper coloring of an explicit graph uses fewer colors than a claimed chromatic-number lower bound.',
+            'limits': 'Simple undirected graph; 1..256 vertices, 0..8,192 edges, labels up to 64 characters, and claimed bound 1..256. Checks a supplied coloring in O(V+E); does not search for an optimal coloring.',
         },
     ]
 
@@ -100,6 +110,8 @@ def check(formalization: Any, witness: Any, digits: int = 40) -> dict:
         return _finite_field_polynomial_residue(formalization, witness)
     if kind == 'finite_field_quadratic_quartic_residue_rule':
         return _finite_field_quadratic_quartic_residue_rule(formalization, witness)
+    if kind == 'finite_graph_chromatic_lower_bound':
+        return _finite_graph_chromatic_lower_bound(formalization, witness)
     return _finite_map_fixed_point(formalization, witness)
 
 
@@ -340,3 +352,58 @@ def _finite_map_fixed_point(spec: dict, witness: Any) -> dict:
         'fixed_points': fixed,
         'theorem_premises': 'NOT_ESTABLISHED_BY_THIS_CHECKER',
     }, 'finite_self_map_has_fixed_point')
+
+
+def _graph_label(value: Any) -> str:
+    value = text(value, MAX_GRAPH_LABEL_LENGTH)
+    require(all(ord(char) >= 32 for char in value), 'Graph labels must be printable')
+    return value
+
+
+def _finite_graph_chromatic_lower_bound(spec: dict, witness: Any) -> dict:
+    fields(spec, {'kind', 'vertices', 'edges', 'minimum_colors'})
+    fields(witness, {'kind', 'coloring'})
+    require(witness['kind'] == spec['kind'], 'Witness type mismatch')
+
+    vertices = spec['vertices']
+    require(type(vertices) is list and 1 <= len(vertices) <= MAX_GRAPH_VERTICES,
+            'Invalid finite graph vertex list')
+    vertices = [_graph_label(vertex) for vertex in vertices]
+    vertex_set = set(vertices)
+    require(len(vertex_set) == len(vertices), 'Duplicate graph vertex')
+
+    raw_edges = spec['edges']
+    require(type(raw_edges) is list and len(raw_edges) <= MAX_GRAPH_EDGES,
+            'Invalid finite graph edge list')
+    edges: list[tuple[str, str]] = []
+    edge_set: set[tuple[str, str]] = set()
+    for edge in raw_edges:
+        require(type(edge) is list and len(edge) == 2, 'Graph edges must be endpoint pairs')
+        left, right = (_graph_label(endpoint) for endpoint in edge)
+        require(left in vertex_set and right in vertex_set, 'Graph edge endpoint is not a vertex')
+        require(left != right, 'Self-loops are unsupported in simple graphs')
+        normalized = tuple(sorted((left, right)))
+        require(normalized not in edge_set, 'Duplicate graph edge')
+        edge_set.add(normalized)
+        edges.append(normalized)
+
+    minimum_colors = integer(spec['minimum_colors'], 1, MAX_GRAPH_VERTICES)
+    coloring = witness['coloring']
+    require(type(coloring) is dict and set(coloring) == vertex_set,
+            'Coloring domain must equal graph vertices exactly')
+    parsed_coloring = {vertex: _graph_label(coloring[vertex]) for vertex in vertices}
+    conflicts = [(left, right) for left, right in edges
+                 if parsed_coloring[left] == parsed_coloring[right]]
+    require(not conflicts, 'Witness coloring is not proper')
+
+    color_classes: dict[str, list[str]] = {}
+    for vertex, color in parsed_coloring.items():
+        color_classes.setdefault(color, []).append(vertex)
+    colors_used = len(color_classes)
+    return _predicate(colors_used < minimum_colors, {
+        'vertex_count': len(vertices),
+        'edge_count': len(edges),
+        'minimum_colors_claimed': minimum_colors,
+        'colors_used': colors_used,
+        'color_classes': color_classes,
+    }, 'chromatic_number_at_least_minimum_colors')

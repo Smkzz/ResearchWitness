@@ -1,0 +1,2 @@
+The explicitly listed graph has chromatic number at least 3.
+Fixture graph: a--b--c. This is a synthetic example, not a published result.

@@ -128,7 +128,28 @@ def make():
         'universe': arr(text(100), 1, 256),
         'conclusion': enum('has_fixed_point'),
     })
-    defs['formalization'] = {'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule, finite_map]}
+    graph_vertices = {
+        'type': 'array',
+        'items': text(64),
+        'minItems': 1,
+        'maxItems': 256,
+        'uniqueItems': True,
+    }
+    graph_edge = {'type': 'array', 'items': text(64), 'minItems': 2, 'maxItems': 2}
+    graph_edges = {
+        'type': 'array',
+        'items': graph_edge,
+        'minItems': 0,
+        'maxItems': 8192,
+        'uniqueItems': True,
+    }
+    finite_graph = obj({
+        'kind': enum('finite_graph_chromatic_lower_bound'),
+        'vertices': graph_vertices,
+        'edges': graph_edges,
+        'minimum_colors': {'type': 'integer', 'minimum': 1, 'maximum': 256},
+    })
+    defs['formalization'] = {'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule, finite_map, finite_graph]}
 
     case = obj({
         'schema_version': enum('1.0'),
