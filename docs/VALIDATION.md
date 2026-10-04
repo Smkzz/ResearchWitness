@@ -2,6 +2,8 @@
 
 **Date:** 2026-10-04
 
+This is the preserved qualification record for the `0.2.0` MVP. The unreleased `0.3.0.dev0` integration candidate has a separate, freshly generated record under [`validation/verifier-wave/`](../validation/verifier-wave/); do not apply this baseline's test count or wheel hash to that candidate.
+
 This document separates software qualification from scientific coverage. Passing the engineering suite does not mean ResearchWitness can verify arbitrary research papers.
 
 ## Engineering qualification
@@ -26,13 +28,9 @@ python tools/quality_gate.py
 
 ## Real-paper evidence carried into the MVP
 
-### Network reliability
+### Earlier network-reliability and QTT-Tucker claims
 
-The frozen historical suite contains the corrected `K3` upper-bound example. At `p=1/2`, exact reliability exceeds the disputed approximation by `5/64`. Both historical positive variants remain reproducible, while controls at `p=0` and `p=1` remain non-refuting.
-
-### QTT-Tucker orthogonality mechanism
-
-The historical erratum mechanism remains reproducible: at `alpha=1/2`, the squared non-orthogonality residual is exactly `1/64`; the `alpha=0` control does not refute the formalization.
+The `0.2.0` notes record a `K3` network-reliability margin of `5/64` and a QTT-Tucker residual of `1/64`. The recovered source tree contains no runnable bundles, source excerpts, correction evidence, or tests for those claims. They are preserved as historical documentation only and are **not** fresh reproductions or counted in the candidate's executable validation. The frozen screen still marks their mechanisms as representable at the mechanism level.
 
 ### Elliptic curve over F_29
 
@@ -66,7 +64,7 @@ python validation/mvp_real/run_validation.py
 
 ## Historical coverage screen
 
-The earlier frozen 15-corrigendum screen remains the correct warning against overclaiming. The MVP adds meaningful finite-field and finite-map coverage, but many historical corrections still require semantics not present in the trusted core: graph invariants, continuous probability/integration, PDE norms/asymptotics, infinite-index existence arguments, database-repair semantics, and other domain-specific logic.
+The earlier frozen 15-corrigendum screen remains the correct warning against overclaiming. The MVP adds finite-field and finite-map coverage, but the committed runnable historical set is only the two elliptic parameter cases plus one finite-map conclusion case. Many other frozen-screen entries require semantics not present in the trusted core: graph invariants beyond supplied colorings, continuous probability/integration, PDE norms/asymptotics, infinite-index existence arguments, database-repair semantics, and other domain-specific logic.
 
 ResearchWitness is therefore a **verification platform with extensible deterministic plugins**, not a general theorem prover.
 

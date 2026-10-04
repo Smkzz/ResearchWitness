@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-scalar-radical-comparison",
+  "artifacts": {
+    "source.txt": "a5319dd6aabe2b0b1d1678767ddb8b62e78f8f0ce8d0f6d7f6295f0e13d31ca9",
+    "correction-check.txt": "95ac4bc6184e49d10235bebac640f38aa9ffa59a77b052ba299c01efc08a7189",
+    "witness.json": "7f1c17f7d7d29773fa64fd5f320b2aba488ea908e25c01c2ffef3c93b4408d2e"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:scalar-radical-comparison",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "In the supplied exact comparison, sqrt(2) is at most 1.",
+    "scope": "Synthetic scalar-radical-comparison checker fixture only.",
+    "assumptions": [
+      "The supplied formalization and witness are exactly the inputs shown."
+    ],
+    "excluded_claims": [
+      "This fixture is synthetic and is not evidence about a real publication.",
+      "No source-to-formalization alignment or paper-level conclusion is asserted."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "In the supplied exact comparison, sqrt(2) is at most 1."
+    },
+    "formalization": {
+      "kind": "scalar_radical_comparison",
+      "left": {
+        "constant": "0",
+        "terms": [
+          {
+            "coefficient": "1",
+            "radicand": "2"
+          }
+        ]
+      },
+      "upper_bound": {
+        "constant": "1",
+        "terms": []
+      }
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

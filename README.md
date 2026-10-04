@@ -9,11 +9,11 @@ ResearchWitness is an open-source Python tool for the QEH-style workflow: a rese
 
 It is intentionally **not** an AI that declares whole papers wrong. A positive result means only that the supplied witness contradicts the supplied formalization.
 
-**Research Preview:** `0.2.0` · Python 3.11+ · runtime dependencies: none · Apache-2.0
+**Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
 
 ## Status
 
-ResearchWitness is a **research preview**. Its deterministic core is release-qualified, but verifier coverage is intentionally incomplete: the frozen 15-corrigendum screen currently has 2/15 faithfully encoded mechanisms, 2/15 important mechanism/conclusion-only cases, 1/15 partial case, and 10/15 unsupported cases. Unsupported mathematics fails closed.
+This branch is an **unreleased verifier-wave candidate**, not a public release. The frozen 15-corrigendum screen remains unchanged. Its post-wave mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. This is not a 15-paper discovery benchmark, and no sealed holdout has been evaluated. Unsupported mathematics fails closed.
 
 Use it to verify **explicit formalization/witness pairs**, not to infer that an entire paper, author, or research program is wrong.
 
@@ -67,11 +67,18 @@ The second line matters as much as the first.
 
 ## Quick start
 
-From a source checkout:
+This development candidate is not published on PyPI. From a source checkout, install the package locally and inspect its agent interfaces:
 
 ```bash
-python -m researchwitness capabilities
+python -m pip install .
+researchwitness --version
+python -m researchwitness capabilities --json
+python -m researchwitness schema intake
+python -m researchwitness scaffold finite_map_fixed_point --output work/fixed-point
+python -m researchwitness validate-intake work/fixed-point/audit.json
 ```
+
+`scaffold` creates a synthetic, editable example for one supported checker. Its source is marked `synthetic`, its correction search is `unchecked`, and it carries an unresolved objection. Replace those fields with source-pinned research material before treating the intake as a research case. `validate-intake` checks local artifact availability, quote anchoring, checker semantics, and witness validity without creating a bundle. The intake JSON Schema is also available at [`schemas/intake.schema.json`](schemas/intake.schema.json) and through `researchwitness schema intake` after installation.
 
 The easiest MVP workflow is `audit` using an agent-prepared intake file:
 
@@ -160,9 +167,9 @@ If the quote appears more than once, the agent must provide `quote_offset`. Rese
 
 See [`prompts/AGENT_PROTOCOL.md`](prompts/AGENT_PROTOCOL.md) for the preparation rules.
 
-## Deterministic verifier plugins in the MVP
+## Deterministic verifier plugins
 
-The MVP allowlists seven checker families:
+The `0.3.0.dev0` integration candidate allowlists ten checker families. Each registry entry includes the schema version, a concise input contract, exact resource bounds, what a positive witness proves and excludes, and an inline replay example with its source-checkout bundle path:
 
 1. **Scalar/radical comparison** — exact rationals plus certified square-root enclosures.
 2. **Polynomial upper-bound witness** — exact rational polynomial evaluation in a bounded domain.
@@ -173,6 +180,7 @@ The MVP allowlists seven checker families:
 7. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
 8. **Finite graph chromatic lower bound** — checks a supplied proper coloring and refutes a claimed lower bound when that coloring uses fewer colors; no chromatic-number search is performed.
 9. **Finite PMF bound** — exactly computes an event probability or expected payoff over a bounded finite state space and compares it with a rational bound.
+10. **Modular linear-system certificates** — verifies a solution vector or a left-annihilator certificate for a system over a bounded composite or prime modulus.
 
 The rational-expression grammar and exact evaluation limits are documented in [`docs/EXPRESSION_DSL.md`](docs/EXPRESSION_DSL.md). It evaluates only a supplied point and does not establish a global inequality.
 
@@ -188,28 +196,29 @@ The finite PMF checker establishes arithmetic facts only for the supplied distri
 python -m researchwitness verify examples/finite-pmf-probability --as-of 2026-10-04
 ```
 
-Unsupported mathematics is rejected rather than approximated into a misleading scalar check.
+Run the modular certificate example with `python -m researchwitness verify examples/modular-linear-system --as-of 2026-10-04`. Its left-annihilator certificate proves that `2x = 1 (mod 6)` has no solution, contradicting the supplied formalization.
+
+Unsupported mathematics is rejected rather than approximated into a misleading scalar check. Every family has a synthetic replay bundle under [`examples/`](examples/), and `capabilities --json` includes a copy of its formalization and witness.
 
 ```bash
-python -m researchwitness capabilities
+python -m researchwitness capabilities --json
 ```
 
-returns the current machine-readable capability list.
+returns the current machine-readable capability list. Synthetic examples exercise software behavior; they do not establish new historical-paper coverage.
 
 ## Real-paper validation
 
-The MVP was replayed against historical correction mechanisms. Important examples include:
+The committed executable historical fixtures cover the 2007 elliptic-curve corrigendum over `F_29` and the 2012 finite-map conclusion:
 
-- a 2025 network-reliability corrigendum: exact `K3` counterexample reproduced with margin `5/64`;
-- a QTT-Tucker erratum: non-orthogonality mechanism reproduced with exact squared residual `1/64`;
-- the 2007 elliptic-curve corrigendum over `F_29`: the MVP independently enumerates the curves, classifies `c`, and obtains:
-  - `c=4`: quadratic non-quartic, **40 points**, `0 mod 8` versus expected `4 mod 8`;
-  - `c=7`: quartic residue, **20 points**, `4 mod 8` versus expected `0 mod 8`;
-- the 2012 modular-metric fixed-point erratum: the explicit swap on `{0,1}` is confirmed to have no fixed point, while the unencoded modular-metric premise remains an open objection.
+- elliptic-curve `c=4`: 40 points, `0 mod 8` versus expected `4 mod 8`;
+- elliptic-curve `c=7`: 20 points, `4 mod 8` versus expected `0 mod 8`;
+- modular-metric fixed point: the explicit swap on `{0,1}` has no fixed point, while the unencoded premise remains an open objection.
+
+The earlier `0.2.0` validation notes also describe network-reliability `K3` and QTT-Tucker mechanisms, but their runnable fixtures are absent from this recovered source tree. They are not counted as freshly reproduced cases in this candidate.
 
 The historical cases intentionally return `NOT_READY` for contact when a published correction is already known or source alignment remains unresolved.
 
-The earlier frozen 15-paper screen remains useful: the MVP is **not yet a general theorem verifier**. Several corrigenda still require graph semantics, continuous probability/integration, PDE analysis, infinite-index arguments, database semantics, or domain-specific proof logic.
+The previous frozen 15-paper screen is a mechanism-level coverage map, not an end-to-end discovery benchmark. Several corrigenda still require continuous probability/integration, PDE analysis, infinite-index arguments, database semantics, or domain-specific proof logic. See the candidate-specific coverage review under [`validation/verifier-wave/`](validation/verifier-wave/) for which screen entries are executable in this tree.
 
 See [`validation/`](validation/) and [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
@@ -231,7 +240,7 @@ It **does not** mean:
 - an author should automatically be contacted;
 - misconduct occurred.
 
-`author_contact_authorized` is always `false` in the MVP.
+`author_contact_authorized` is always `false`.
 
 ## Evidence integrity
 

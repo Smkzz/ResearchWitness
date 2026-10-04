@@ -3,16 +3,18 @@ from __future__ import annotations
 
 import argparse
 from datetime import date
+from importlib.resources import files as package_files
 import json
 from pathlib import Path
 import sys
 import zipfile
 
 from .capsule import VERSION, evaluate_loaded, load_bundle, subject_digest
-from .checkers import capabilities
-from .intake import prepare
+from .checkers import KINDS, capabilities
+from .intake import prepare, validate_intake_file
 from .product import contact_draft, contact_readiness, html_report
 from .resolution import project
+from .scaffold import scaffold as scaffold_intake
 from .strict import Invalid, canonical
 
 
@@ -56,13 +58,25 @@ def main(argv: list[str] | None = None) -> int:
     command.add_argument('intake', type=Path)
     command.add_argument('--output', type=Path, required=True)
 
+    command = sub.add_parser('validate-intake')
+    command.add_argument('intake', type=Path)
+
+    command = sub.add_parser('scaffold')
+    command.add_argument('kind', choices=sorted(KINDS))
+    command.add_argument('--output', type=Path, required=True, help='New directory for the synthetic intake scaffold')
+
+    command = sub.add_parser('schema')
+    command.add_argument('name', choices=('case', 'intake'))
+
     command = sub.add_parser('audit')
     command.add_argument('intake', type=Path)
     command.add_argument('--output', type=Path, required=True, help='New evidence-bundle directory')
     command.add_argument('--as-of', type=date.fromisoformat, default=date.today())
     command.add_argument('--html', type=Path, default=None)
 
-    sub.add_parser('capabilities')
+    command = sub.add_parser('capabilities')
+    command.add_argument('--json', action='store_true',
+                         help='Emit the machine-readable capability registry (the default format).')
 
     command = sub.add_parser('timeline')
     command.add_argument('bundle', type=Path)
@@ -74,6 +88,19 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == 'capabilities':
             print(json.dumps({'version': VERSION, 'checkers': capabilities()}, indent=2))
+            return 0
+        if args.command == 'validate-intake':
+            print(json.dumps(validate_intake_file(args.intake), indent=2))
+            return 0
+        if args.command == 'scaffold':
+            root = scaffold_intake(args.kind, args.output)
+            print(json.dumps({'scaffold': str(root), 'kind': args.kind,
+                              'source_capture_status': 'synthetic',
+                              'correction_status': 'unchecked'}, indent=2))
+            return 0
+        if args.command == 'schema':
+            schema = package_files('researchwitness').joinpath('schemas', f'{args.name}.schema.json')
+            print(schema.read_text(encoding='utf-8'), end='')
             return 0
         if args.command == 'prepare':
             root = prepare(args.intake, args.output)

@@ -49,7 +49,8 @@ def test_coloring_using_at_least_the_claimed_number_does_not_refute():
 @pytest.mark.parametrize('mutation', [
     'self-loop', 'reversed-duplicate-edge', 'unknown-endpoint', 'duplicate-vertex',
     'missing-color', 'improper-coloring', 'wrong-kind', 'extra-formalization-field',
-    'boolean-lower-bound', 'control-character-label', 'long-color-label',
+    'boolean-lower-bound', 'control-character-label', 'c1-control-label',
+    'delete-control-label', 'long-color-label',
 ])
 def test_malformed_graph_or_coloring_fails_closed(mutation):
     formalization, witness = graph_pair()
@@ -72,8 +73,20 @@ def test_malformed_graph_or_coloring_fails_closed(mutation):
     elif mutation == 'boolean-lower-bound':
         formalization['minimum_colors'] = True
     elif mutation == 'control-character-label':
-        formalization['vertices'][0] = 'a\nb'
-        witness['coloring'] = {'a\nb': 'red', 'b': 'blue', 'c': 'red'}
+        label = 'a\nb'
+        formalization['vertices'][0] = label
+        formalization['edges'] = [[label, 'b'], ['b', 'c']]
+        witness['coloring'] = {label: 'red', 'b': 'blue', 'c': 'red'}
+    elif mutation == 'c1-control-label':
+        label = 'a\u0085b'
+        formalization['vertices'][0] = label
+        formalization['edges'] = [[label, 'b'], ['b', 'c']]
+        witness['coloring'] = {label: 'red', 'b': 'blue', 'c': 'red'}
+    elif mutation == 'delete-control-label':
+        label = 'a\u007fb'
+        formalization['vertices'][0] = label
+        formalization['edges'] = [[label, 'b'], ['b', 'c']]
+        witness['coloring'] = {label: 'red', 'b': 'blue', 'c': 'red'}
     elif mutation == 'long-color-label':
         witness['coloring']['a'] = 'x' * 65
 

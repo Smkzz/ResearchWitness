@@ -5,6 +5,7 @@ from itertools import product
 from typing import Any
 from .strict import fields, require, integer, text
 from .arithmetic import rational, radical_sum, sqrt_interval, Interval, bounded_fraction
+from .example_data import capability_examples
 
 KINDS = {
     'scalar_radical_comparison',
@@ -16,6 +17,7 @@ KINDS = {
     'finite_map_fixed_point',
     'finite_graph_chromatic_lower_bound',
     'finite_pmf_bound',
+    'modular_linear_system',
 }
 
 MAX_GRAPH_VERTICES = 256
@@ -28,7 +30,7 @@ MAX_EXPRESSION_VALUE_BITS = 8192
 
 def capabilities() -> list[dict[str, Any]]:
     """Return machine-readable checker capabilities for research agents."""
-    return [
+    records = [
         {
             'kind': 'scalar_radical_comparison',
             'proves': 'An explicit radical/scalar expression exceeds an explicit bound.',
@@ -109,7 +111,208 @@ def capabilities() -> list[dict[str, Any]]:
                        'categorical outcomes and exact rational masses/payoffs. Empirical validity and '
                        'population/generalized conclusions are outside scope.'),
         },
+        {
+            'kind': 'modular_linear_system',
+            'proves': 'Proves solvability with a solution vector and inconsistency with a left-annihilator certificate.',
+            'limits': 'Modulus 2..4096; at most 16 equations and 16 variables; verifies certificates only.',
+            'input_schema_version': '1.0',
+            'input_schema': {
+                'formalization': {
+                    'required_fields': ['kind', 'modulus', 'matrix', 'rhs', 'conclusion'],
+                    'kind': {'const': 'modular_linear_system'},
+                    'modulus': {'type': 'integer', 'minimum': 2, 'maximum': 4096},
+                    'matrix': {
+                        'type': 'array', 'min_items': 1, 'max_items': 16,
+                        'rows': {
+                            'type': 'array', 'min_items': 1, 'max_items': 16,
+                            'items': {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000},
+                        },
+                        'rectangular': True,
+                    },
+                    'rhs': {
+                        'type': 'array', 'min_items': 1, 'max_items': 16,
+                        'length_equals': 'matrix row count',
+                        'items': {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000},
+                    },
+                    'conclusion': {'enum': ['has_solution', 'no_solution']},
+                },
+                'witness': {
+                    'required_fields': ['kind', 'certificate'],
+                    'kind': {'const': 'modular_linear_system'},
+                    'certificate': {
+                        'required_fields': ['type', 'vector'],
+                        'type': {'enum': ['solution', 'annihilator']},
+                        'vector': {
+                            'type': 'array',
+                            'length_by_certificate_type': {
+                                'solution': 'matrix column count',
+                                'annihilator': 'matrix row count',
+                            },
+                            'items': {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000},
+                        },
+                    },
+                },
+            },
+            'what_it_does_not_prove': 'It does not search for certificates, prove claims beyond the encoded modular system, or establish source-to-formalization alignment.',
+            'deterministic_semantics': 'Reduce inputs modulo m. A solution certificate verifies A*x = b. An annihilator certificate verifies y^T*A = 0 and y^T*b != 0, which proves no solution. The result refutes the formalized conclusion exactly when the certificate proves its opposite.',
+            'resource_bounds': {
+                'modulus': {'minimum': 2, 'maximum': 4096},
+                'equations': {'minimum': 1, 'maximum': 16},
+                'variables': {'minimum': 1, 'maximum': 16},
+                'matrix_entries_maximum': 256,
+                'integer_input': {'minimum': -1000000000, 'maximum': 1000000000},
+                'multiply_add_terms_per_certificate_maximum': 272,
+            },
+        },
     ]
+
+    schemas = {
+        'scalar_radical_comparison': (['kind', 'left', 'upper_bound'], ['kind']),
+        'polynomial_upper_bound': (['kind', 'domain', 'terms', 'upper_bound'], ['kind', 'point']),
+        'rational_expression_upper_bound': (['kind', 'domain', 'expression', 'upper_bound'], ['kind', 'point']),
+        'uc_binary_upper_bound': (['kind', 'functional', 'upper_bound'], ['kind', 'gamma', 'alpha', 'b0']),
+        'finite_field_polynomial_residue': (
+            ['kind', 'prime', 'variables', 'parameters', 'terms', 'point_count_adjustment', 'modulus', 'allowed_residues'],
+            ['kind', 'parameters']),
+        'finite_field_quadratic_quartic_residue_rule': (
+            ['kind', 'prime', 'variables', 'parameters', 'terms', 'point_count_adjustment', 'modulus',
+             'classification_parameter', 'expected_residues'], ['kind', 'parameters']),
+        'finite_map_fixed_point': (['kind', 'universe', 'conclusion'], ['kind', 'mapping']),
+        'finite_graph_chromatic_lower_bound': (
+            ['kind', 'vertices', 'edges', 'minimum_colors'], ['kind', 'coloring']),
+        'finite_pmf_bound': (
+            ['kind', 'operation', 'domains', 'relation', 'bound'], ['kind', 'atoms']),
+        'modular_linear_system': (['kind', 'modulus', 'matrix', 'rhs', 'conclusion'], ['kind', 'certificate']),
+    }
+    resource_bounds = {
+        'scalar_radical_comparison': {
+            'radical_terms_per_expression_maximum': 32, 'rational_input_digits_maximum': 64,
+            'arithmetic_numerator_denominator_bits_maximum': 8192,
+            'square_root_precision_digits': {'minimum': 1, 'maximum': 80},
+        },
+        'polynomial_upper_bound': {
+            'variables_maximum': 8, 'terms_maximum': 64, 'total_degree_maximum': 12,
+            'rational_input_digits_maximum': 64, 'arithmetic_numerator_denominator_bits_maximum': 8192,
+        },
+        'rational_expression_upper_bound': {
+            'variables_maximum': 8, 'expression_nodes_maximum': MAX_EXPRESSION_NODES,
+            'expression_depth_maximum': MAX_EXPRESSION_DEPTH, 'power_maximum': 12,
+            'exact_value_bits_maximum': MAX_EXPRESSION_VALUE_BITS,
+        },
+        'uc_binary_upper_bound': {
+            'independent_sources': 2, 'latent_outcomes_per_source': 4,
+            'conditional_kernel_rows': 4, 'conditional_kernel_columns': 4,
+            'arithmetic_numerator_denominator_bits_maximum': 8192,
+            'square_root_precision_digits': {'minimum': 1, 'maximum': 80},
+        },
+        'finite_field_polynomial_residue': {
+            'prime': {'minimum': 2, 'maximum': 251}, 'enumerated_variables': {'minimum': 1, 'maximum': 3},
+            'witness_parameters_maximum': 4, 'terms_maximum': 64, 'total_degree_maximum': 12,
+            'enumeration_points_maximum': 2000000, 'point_term_evaluations_maximum': 5000000,
+        },
+        'finite_field_quadratic_quartic_residue_rule': {
+            'prime': {'minimum': 2, 'maximum': 251}, 'enumerated_variables': {'minimum': 1, 'maximum': 3},
+            'witness_parameters_maximum': 4, 'terms_maximum': 64, 'total_degree_maximum': 12,
+            'enumeration_points_maximum': 2000000, 'point_term_evaluations_maximum': 5000000,
+        },
+        'finite_map_fixed_point': {'universe_size': {'minimum': 1, 'maximum': 256}, 'element_text_length_maximum': 100},
+        'finite_graph_chromatic_lower_bound': {
+            'vertices': {'minimum': 1, 'maximum': MAX_GRAPH_VERTICES},
+            'edges_maximum': MAX_GRAPH_EDGES, 'label_length_maximum': MAX_GRAPH_LABEL_LENGTH,
+            'coloring_entries_equal_vertex_count': True,
+        },
+        'finite_pmf_bound': {
+            'variables': {'minimum': 1, 'maximum': 8}, 'outcomes_per_variable_maximum': 64,
+            'joint_states_maximum': 256, 'event_clauses_maximum': 64,
+            'expectation_payoff_rows_maximum': 256,
+        },
+        'modular_linear_system': {
+            'modulus': {'minimum': 2, 'maximum': 4096},
+            'equations': {'minimum': 1, 'maximum': 16},
+            'variables': {'minimum': 1, 'maximum': 16},
+            'matrix_entries_maximum': 256,
+            'integer_input': {'minimum': -1000000000, 'maximum': 1000000000},
+        },
+    }
+    limitations = {
+        'scalar_radical_comparison': 'It proves only the supplied exact radical/scalar comparison; it does not establish source alignment or a broader scientific claim.',
+        'polynomial_upper_bound': 'It checks only the supplied in-domain point; it does not prove a global polynomial bound, theorem premises, or source alignment.',
+        'rational_expression_upper_bound': 'It checks only the supplied point and expression; it does not prove a global inequality, theorem premises, or source alignment.',
+        'uc_binary_upper_bound': 'It checks only the encoded binary functional and supplied strategy; it does not establish model equivalence to a paper or a global optimum.',
+        'finite_field_polynomial_residue': 'It proves only the enumerated solution-count residue for the supplied polynomial and parameter values; it does not establish source alignment or a universal theorem.',
+        'finite_field_quadratic_quartic_residue_rule': 'It checks only the supplied parameter and encoded residue rule; it does not establish a universal classification theorem or source alignment.',
+        'finite_map_fixed_point': 'It decides only whether the explicit finite self-map has a fixed point; theorem premises and source alignment remain unverified.',
+        'finite_graph_chromatic_lower_bound': 'It checks a supplied proper coloring against the encoded lower bound; it does not search for an optimal coloring or establish source alignment.',
+        'finite_pmf_bound': 'It proves arithmetic facts only for the supplied finite PMF; it does not validate empirical data or infer population/generalized conclusions.',
+        'modular_linear_system': 'It verifies the supplied algebraic certificate only; it does not search for certificates, establish source alignment, or prove claims beyond the encoded system.',
+    }
+    example_bundles = {
+        'scalar_radical_comparison': 'scalar-radical-comparison',
+        'polynomial_upper_bound': 'counterexample',
+        'rational_expression_upper_bound': 'rational-expression',
+        'uc_binary_upper_bound': 'uc-binary-upper-bound',
+        'finite_field_polynomial_residue': 'finite-field-polynomial-residue',
+        'finite_field_quadratic_quartic_residue_rule': 'finite-field-quadratic-quartic-residue-rule',
+        'finite_map_fixed_point': 'finite-map-fixed-point',
+        'finite_graph_chromatic_lower_bound': 'graph-chromatic-lower-bound',
+        'finite_pmf_bound': 'finite-pmf-probability',
+        'modular_linear_system': 'modular-linear-system',
+    }
+
+    for record in records:
+        kind = record['kind']
+        formalization_fields, witness_fields = schemas[kind]
+        record.update({
+            'case_schema_version': '1.0',
+            'input_schema_version': '0.1',
+            'formalization_schema_version': '1.0',
+            'schema_package_resource': 'researchwitness/schemas/intake.schema.json',
+            'input_schema': record.get('input_schema', {}),
+            'formalization_fields': formalization_fields,
+            'witness_fields': witness_fields,
+            'positive_proves': record['proves'],
+            'what_it_does_not_prove': limitations[kind],
+            'resource_bounds': resource_bounds[kind],
+            'deterministic': True,
+            'determinism_guarantee': (
+                'For identical valid inputs and checker version, replay uses no randomness, network, '
+                'wall-clock state, or case-supplied code; exact rational, finite enumeration, or '
+                'certified interval operations determine the result.'
+            ),
+            'example_bundle': f"examples/{example_bundles[kind]}/",
+            'example_command': (
+                f"python -m researchwitness verify examples/{example_bundles[kind]} --as-of 2026-10-04"
+            ),
+            'example_expected_status': 'REFUTED_FOR_FORMALIZATION',
+        })
+        example = dict(capability_examples()[kind])
+        example['classification'] = 'SYNTHETIC_REPLAY_FIXTURE'
+        example['bundle'] = record['example_bundle']
+        example['command'] = record['example_command']
+        record['example'] = example
+        record['input_schema'] = {
+            'schema_file': 'schemas/intake.schema.json',
+            'package_resource': 'researchwitness/schemas/intake.schema.json',
+            'case_schema_version': '1.0',
+            'intake_schema_version': '0.1',
+            'formalization': {
+                'kind': {'const': kind},
+                'required_fields': formalization_fields,
+            },
+            'witness': {
+                'kind': {'const': kind},
+                'required_fields': witness_fields,
+            },
+            **record['input_schema'],
+        }
+        if kind == 'finite_pmf_bound':
+            record['input_schema']['formalization']['conditional_required_fields'] = {
+                'probability': ['event'],
+                'expectation': ['payoffs'],
+            }
+        if kind == 'rational_expression_upper_bound':
+            record['checker_grammar'] = 'rational-expression/1'
+    return records
 
 
 def _comparison(left: Interval, right: Interval, detail: dict | None = None) -> dict:
@@ -166,6 +369,8 @@ def check(formalization: Any, witness: Any, digits: int = 40) -> dict:
         return _finite_graph_chromatic_lower_bound(formalization, witness)
     if kind == 'finite_pmf_bound':
         return _finite_pmf_bound(formalization, witness)
+    if kind == 'modular_linear_system':
+        return _modular_linear_system(formalization, witness)
     return _finite_map_fixed_point(formalization, witness)
 
 
@@ -608,6 +813,75 @@ def _finite_field_quadratic_quartic_residue_rule(spec: dict, witness: Any) -> di
         'enumeration_size': p ** len(variables),
     }, 'solution_count_residue_matches_quadratic_quartic_power_class_rule')
 
+
+def _modular_linear_system(spec: dict, witness: Any) -> dict:
+    """Verify a modular solution or a separating left-annihilator certificate.
+
+    An annihilator y proves A x = b (mod m) impossible when y^T A = 0
+    (mod m) and y^T b != 0 (mod m). This implication holds for composite m too.
+    """
+    fields(spec, {'kind', 'modulus', 'matrix', 'rhs', 'conclusion'})
+    fields(witness, {'kind', 'certificate'})
+    require(witness['kind'] == spec['kind'], 'Witness type mismatch')
+
+    modulus = integer(spec['modulus'], 2, 4096)
+    raw_matrix = spec['matrix']
+    require(type(raw_matrix) is list and 1 <= len(raw_matrix) <= 16,
+            'Invalid modular matrix row count')
+    require(all(type(row) is list for row in raw_matrix), 'Invalid modular matrix row')
+    columns = len(raw_matrix[0])
+    require(1 <= columns <= 16 and all(len(row) == columns for row in raw_matrix),
+            'Invalid modular matrix column count')
+    matrix = [[integer(value, -10**9, 10**9) % modulus for value in row]
+              for row in raw_matrix]
+    rhs = spec['rhs']
+    require(type(rhs) is list and len(rhs) == len(matrix), 'RHS length must match matrix rows')
+    rhs_mod = [integer(value, -10**9, 10**9) % modulus for value in rhs]
+    conclusion = spec['conclusion']
+    require(type(conclusion) is str and conclusion in ('has_solution', 'no_solution'),
+            'Unsupported modular-system conclusion')
+
+    certificate = witness['certificate']
+    fields(certificate, {'type', 'vector'})
+    certificate_type = certificate['type']
+    require(type(certificate_type) is str and certificate_type in ('solution', 'annihilator'),
+            'Unsupported modular-system certificate')
+    raw_vector = certificate['vector']
+    expected_length = columns if certificate_type == 'solution' else len(matrix)
+    require(type(raw_vector) is list and len(raw_vector) == expected_length,
+            'Certificate vector dimension mismatch')
+    vector = [integer(value, -10**9, 10**9) % modulus for value in raw_vector]
+
+    detail: dict[str, Any] = {
+        'modulus': modulus,
+        'equation_count': len(matrix),
+        'variable_count': columns,
+        'certificate_type': certificate_type,
+        'certificate_vector_mod_m': vector,
+        'formalized_conclusion': conclusion,
+    }
+    if certificate_type == 'solution':
+        lhs_mod = [sum(a * x for a, x in zip(row, vector)) % modulus for row in matrix]
+        require(lhs_mod == rhs_mod, 'Solution certificate does not satisfy the system')
+        certified_conclusion = 'has_solution'
+        detail['left_hand_side_mod_m'] = lhs_mod
+        detail['right_hand_side_mod_m'] = rhs_mod
+    else:
+        annihilator_mod = [sum(vector[i] * matrix[i][j] for i in range(len(matrix))) % modulus
+                           for j in range(columns)]
+        separating_rhs_mod = sum(y * b for y, b in zip(vector, rhs_mod)) % modulus
+        require(all(value == 0 for value in annihilator_mod),
+                'Annihilator certificate does not annihilate the matrix')
+        require(separating_rhs_mod != 0, 'Annihilator certificate does not separate the RHS')
+        certified_conclusion = 'no_solution'
+        detail['annihilator_times_matrix_mod_m'] = annihilator_mod
+        detail['annihilator_times_rhs_mod_m'] = separating_rhs_mod
+
+    detail['certified_conclusion'] = certified_conclusion
+    return _predicate(certified_conclusion != conclusion, detail,
+                      'modular_linear_system_conclusion_matches_certificate')
+
+
 def _finite_map_fixed_point(spec: dict, witness: Any) -> dict:
     fields(spec, {'kind', 'universe', 'conclusion'})
     fields(witness, {'kind', 'mapping'})
@@ -631,7 +905,7 @@ def _finite_map_fixed_point(spec: dict, witness: Any) -> dict:
 
 def _graph_label(value: Any) -> str:
     value = text(value, MAX_GRAPH_LABEL_LENGTH)
-    require(all(ord(char) >= 32 for char in value), 'Graph labels must be printable')
+    require(value.isprintable(), 'Graph labels must be printable')
     return value
 
 

@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-uc-binary-upper-bound",
+  "artifacts": {
+    "source.txt": "c0bf4aea6dc2ade71d40fee305cdac5947605ffaad93a9ad1def24d20f4ce722",
+    "correction-check.txt": "95ac4bc6184e49d10235bebac640f38aa9ffa59a77b052ba299c01efc08a7189",
+    "witness.json": "617ec07e4ef73b6a277acf35945bb919221998e271866e5f6e6e9b0b27439107"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:uc-binary-upper-bound",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "For the supplied binary-source strategy, the functional is at most -19.",
+    "scope": "Synthetic uc-binary-upper-bound checker fixture only.",
+    "assumptions": [
+      "The supplied formalization and witness are exactly the inputs shown."
+    ],
+    "excluded_claims": [
+      "This fixture is synthetic and is not evidence about a real publication.",
+      "No source-to-formalization alignment or paper-level conclusion is asserted."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "For the supplied binary-source strategy, the functional is at most -19."
+    },
+    "formalization": {
+      "kind": "uc_binary_upper_bound",
+      "functional": "uc_sqrt_penalty_v1",
+      "upper_bound": {
+        "constant": "-19",
+        "terms": []
+      }
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-finite-field-quadratic-quartic-residue-rule",
+  "artifacts": {
+    "source.txt": "672bba5ca90a1ba9c108e882212e900244cce4a2455c62b93a754b1b16e2eaed",
+    "correction-check.txt": "95ac4bc6184e49d10235bebac640f38aa9ffa59a77b052ba299c01efc08a7189",
+    "witness.json": "dbede5e893c43f14a115f800b388fe2972753fb6c72a13571c5b1a7b46351cb5"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:finite-field-quadratic-quartic-residue-rule",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "For c = 1 over F_5, the quadratic/quartic class predicts count residue 1 modulo 2.",
+    "scope": "Synthetic finite-field-quadratic-quartic-residue-rule checker fixture only.",
+    "assumptions": [
+      "The supplied formalization and witness are exactly the inputs shown."
+    ],
+    "excluded_claims": [
+      "This fixture is synthetic and is not evidence about a real publication.",
+      "No source-to-formalization alignment or paper-level conclusion is asserted."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "For c = 1 over F_5, the quadratic/quartic class predicts count residue 1 modulo 2."
+    },
+    "formalization": {
+      "kind": "finite_field_quadratic_quartic_residue_rule",
+      "prime": 5,
+      "variables": [
+        "x"
+      ],
+      "parameters": [
+        "c"
+      ],
+      "terms": [
+        {
+          "coefficient": 1,
+          "powers": {
+            "x": 2
+          }
+        },
+        {
+          "coefficient": -1,
+          "powers": {
+            "c": 1
+          }
+        }
+      ],
+      "point_count_adjustment": 0,
+      "modulus": 2,
+      "classification_parameter": "c",
+      "expected_residues": {
+        "quartic_residue": [
+          1
+        ],
+        "quadratic_nonquartic": [
+          0
+        ],
+        "quadratic_nonresidue": [
+          0
+        ]
+      }
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

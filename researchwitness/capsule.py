@@ -9,7 +9,7 @@ from typing import Any
 from .strict import Bundle, fields, text, integer, require, loads, digest, byte_hash, HASH_RE, relative_path
 from .checkers import check, KINDS
 
-VERSION = '0.2.0'
+VERSION = '0.3.0.dev0'
 PROTOCOL = 'ResearchWitness/1.1'
 SCHEMA_VERSION = '1.0'
 POLICY_VERSION = 'formalization-only-1.1'

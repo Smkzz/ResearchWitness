@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-finite-map-fixed-point",
+  "artifacts": {
+    "source.txt": "2d0ac198aa75ba77751215804b39d76157c049ab78a9154f0e2c9b7a7d106ba4",
+    "correction-check.txt": "95ac4bc6184e49d10235bebac640f38aa9ffa59a77b052ba299c01efc08a7189",
+    "witness.json": "5b429d41eacdcfa1a99886021ae0ef95b20b9ae8fb8247644a5d8b80d685ae04"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:finite-map-fixed-point",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "The supplied finite self-map has a fixed point.",
+    "scope": "Synthetic finite-map-fixed-point checker fixture only.",
+    "assumptions": [
+      "The supplied formalization and witness are exactly the inputs shown."
+    ],
+    "excluded_claims": [
+      "This fixture is synthetic and is not evidence about a real publication.",
+      "No source-to-formalization alignment or paper-level conclusion is asserted."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "The supplied finite self-map has a fixed point."
+    },
+    "formalization": {
+      "kind": "finite_map_fixed_point",
+      "universe": [
+        "0",
+        "1"
+      ],
+      "conclusion": "has_fixed_point"
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

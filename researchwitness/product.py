@@ -6,6 +6,16 @@ import json
 from typing import Any
 
 
+def _single_line(value: str) -> str:
+    """Keep untrusted text from creating template-level lines in a draft."""
+    return ' '.join(value.split())
+
+
+def _quoted_block(value: str) -> str:
+    """Visually isolate untrusted multiline prose from the surrounding template."""
+    return '\n'.join('> ' + line for line in value.splitlines())
+
+
 def contact_readiness(report: dict[str, Any]) -> dict[str, Any]:
     """Assess whether a verified formalization is worth *user* review for author contact.
 
@@ -67,18 +77,23 @@ td,th{{border:1px solid #ccc;padding:.45rem;text-align:left}}</style></head><bod
 def contact_draft(case: dict[str, Any], report: dict[str, Any], readiness: dict[str, Any]) -> str:
     if readiness['status'] != 'READY_FOR_USER_REVIEW':
         raise ValueError('Case is not ready for a contact draft: ' + ', '.join(readiness['blockers']))
-    return f'''Subject: Possible issue with {case['claim']['id']} — reproducible verification inquiry
+    source_identifier = _single_line(case['source']['identifier'])
+    source_version = _single_line(case['source']['version'])
+    claim_id = _single_line(case['claim']['id'])
+    statement = _quoted_block(case['claim']['statement'])
+    scope = _quoted_block(case['claim']['scope'])
+    return f'''Subject: Possible issue with {claim_id} — reproducible verification inquiry
 
 Hello,
 
-I am writing about the following claim in {case['source']['identifier']} ({case['source']['version']}):
+I am writing about the following claim in {source_identifier} ({source_version}):
 
-{case['claim']['statement']}
+{statement}
 
 I found an explicit witness that a deterministic checker reports as contradicting the formalization I reconstructed from the cited claim. The result is intentionally narrow: it does not establish that the paper as a whole is incorrect, and I would appreciate confirmation that I have interpreted the claim and its assumptions correctly.
 
 Scope checked:
-{case['claim']['scope']}
+{scope}
 
 ResearchWitness decision: {report['decision']}
 Subject SHA-256: {report['subject_sha256']}

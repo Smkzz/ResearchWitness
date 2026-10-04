@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "researchwitness"
-version = "0.2.0"
+version = "0.3.0.dev0"
 description = "Agent-oriented deterministic evidence capsules for scientific claim verification"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -38,6 +38,9 @@ dev = ["pytest>=8,<10", "jsonschema>=4,<5"]
 
 [tool.setuptools.packages.find]
 include = ["researchwitness*"]
+
+[tool.setuptools.package-data]
+researchwitness = ["capability_examples.json", "schemas/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

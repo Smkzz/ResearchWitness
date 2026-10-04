@@ -2,30 +2,33 @@
 
 ResearchWitness is deliberately growing verifier breadth before growing marketing or automation surface.
 
-## Current — 0.2.x research preview
+## Current local branch — 0.3.0.dev0 integration candidate (unreleased)
 
 - Agent-prepared structured intake.
 - Deterministic evidence capsules and replay.
-- Nine bounded verifier families, including exact finite PMF arithmetic and exact-rational expression evaluation at one witness point.
+- Ten bounded verifier families: scalar/radical, polynomial, rational-expression, binary UC, finite-field residue, quadratic/quartic residue rule, finite-map fixed point, finite-graph coloring, finite-PMF bounds, and modular linear-system certificates.
+- Machine-readable capability contracts, one replayable synthetic bundle per family, agent-intake JSON Schema, scaffold, and read-only intake validation.
 - Offline HTML / JSON reporting and deterministic evidence export.
 - Historical corrected-paper replay cases.
 - Conservative contact-readiness output; no external actions.
+- No unseen historical-corrigenda holdout has been run; this candidate is not release-qualified.
 
-## Next verifier wave
+## Next validation gate
 
-Priority comes from the frozen historical corrigenda screen rather than from demo appeal:
+Freeze the verifier code and establish whether the added families improve historical coverage. Keep the 15-case screen immutable and report mechanism-level representability separately from end-to-end rediscovery. Build an independent public-source development corpus and sealed holdout before using discovery recall or false-positive rates as release claims.
 
-1. finite graph witnesses and invariants;
-2. broader exact finite probability/distribution primitives;
-3. recurrence and sequence witnesses;
-4. broader modular / finite-field constructions;
-5. symbolic identity and inequality adapters with independently checkable certificates.
+The remaining gate work is:
 
-Every new verifier must fail closed, state exactly what it proves, enforce a resource budget, and add positive/negative/adversarial validation cases.
+1. recover or build source-pinned runnable artifacts for the 13 frozen-screen entries without committed fixtures;
+2. create independent development and sealed holdout sets with source/version records and negative controls;
+3. measure useful discovery coverage, unsupported rate, false formalization counterexamples, scope errors, and repeatability;
+4. decide whether the modular verifier wave merits a 0.3.0 research preview.
+
+Do not tag or publish `0.3.0` until the exact public commit passes the engineering and scientific gates.
 
 ## Next empirical milestone
 
-Run a frozen **unseen historical-corrigenda discovery benchmark** with external research agents. The deterministic verifier must remain unchanged during an evaluation wave. Report unsupported cases and source-interpretation failures rather than silently excluding them.
+Run a frozen **unseen historical-corrigenda discovery benchmark** with independent research agents. The deterministic verifier must remain unchanged during an evaluation wave. Report unsupported cases and source-interpretation failures rather than silently excluding them.
 
 Metrics of interest include:
 

@@ -55,3 +55,7 @@ On Python 3.12.14 in this review environment:
 - `python validation/mvp_real/run_validation.py` — **3/3 historical MVP cases matched**.
 
 The quality-gate wheel hash differs from the committed release-validation record because the latter records Python 3.13.5, while this run used Python 3.12.14. The current run independently confirmed reproducibility within its own environment.
+
+## Integration-candidate remediation
+
+The multiline contact-draft issue is fixed on the verifier-wave integration branch: source identifiers and claim IDs are collapsed to one line, while claim statements and scope are emitted as quoted blocks. A regression test supplies injected subject and sign-off lines and confirms they remain inside those blocks. The original finding above remains an accurate record of the public `0.2.0` target reviewed here; it does not describe the integration candidate.

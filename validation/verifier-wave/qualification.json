@@ -1,0 +1,21 @@
+{
+  "version": "0.3.0.dev0",
+  "python": "3.12.14",
+  "tests": "324 passed in 1.65s",
+  "synthetic_cases": 500,
+  "synthetic_matched": 500,
+  "mvp_real_cases": 3,
+  "mvp_real_matched": 3,
+  "trusted_core_static_scan": "PASS",
+  "source_checksums": "PASS",
+  "schema_drift": "PASS",
+  "intake_schema_drift": "PASS",
+  "capability_examples_drift": "PASS",
+  "frozen_screen_review": "PASS",
+  "compileall": "PASS",
+  "wheel_sha256": "c6e64f95db49573da6102f4664bfdea46460f24556bf6e98195c0168ce165c50",
+  "wheel_reproducible": "PASS",
+  "wheel_install_smoke": "PASS",
+  "agent_cli_smoke": "PASS",
+  "runtime_dependencies": []
+}
