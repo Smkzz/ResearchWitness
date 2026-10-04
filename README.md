@@ -166,22 +166,27 @@ The MVP allowlists seven checker families:
 
 1. **Scalar/radical comparison** — exact rationals plus certified square-root enclosures.
 2. **Polynomial upper-bound witness** — exact rational polynomial evaluation in a bounded domain.
-3. **Binary UC functional** — the QEH-derived finite independent-source regression checker.
-4. **Finite-field polynomial solution-count residue** — exhaustive prime-field enumeration with a hard work budget.
-5. **Finite-field quadratic/quartic residue rule** — additionally classifies a parameter by power-residue class and tests the resulting count-residue rule.
-6. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
-7. **Finite graph chromatic lower bound** — checks a supplied proper coloring and refutes a claimed lower bound when that coloring uses fewer colors; no chromatic-number search is performed.
+3. **Rational-expression upper-bound witness** — exact evaluation of a closed bounded rational AST at one in-domain point; it does not prove a global inequality.
+4. **Binary UC functional** — the QEH-derived finite independent-source regression checker.
+5. **Finite-field polynomial solution-count residue** — exhaustive prime-field enumeration with a hard work budget.
+6. **Finite-field quadratic/quartic residue rule** — additionally classifies a parameter by power-residue class and tests the resulting count-residue rule.
+7. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
+8. **Finite graph chromatic lower bound** — checks a supplied proper coloring and refutes a claimed lower bound when that coloring uses fewer colors; no chromatic-number search is performed.
+9. **Finite PMF bound** — exactly computes an event probability or expected payoff over a bounded finite state space and compares it with a rational bound.
 
-For the graph checker, formalizations describe a simple undirected graph with 1–256 vertices, 0–8,192 edges, and labels no longer than 64 characters. The witness supplies one color for each vertex; checking takes O(V+E) time and validates only the stated lower bound for that graph.
+The rational-expression grammar and exact evaluation limits are documented in [`docs/EXPRESSION_DSL.md`](docs/EXPRESSION_DSL.md). It evaluates only a supplied point and does not establish a global inequality.
 
-The synthetic path-graph example replays with:
+The graph checker accepts simple undirected graphs with 1–256 vertices and 0–8,192 edges. It verifies a supplied proper coloring in O(V+E) time; it does not search for an optimal coloring. Replay the synthetic path-graph example with:
 
 ```bash
 python -m researchwitness verify examples/graph-chromatic-lower-bound --as-of 2026-10-04
 ```
-8. **Finite PMF bound** — exactly computes an event probability or expected payoff over a bounded finite state space and compares it with a rational bound.
 
-The finite PMF checker establishes arithmetic facts only for the supplied distribution. It does not establish that a PMF is empirically valid or that a result extends to a population or a broader scientific claim.
+The finite PMF checker establishes arithmetic facts only for the supplied distribution. It does not validate empirical data or extend a result to a population or broader scientific claim. Replay its synthetic example with:
+
+```bash
+python -m researchwitness verify examples/finite-pmf-probability --as-of 2026-10-04
+```
 
 Unsupported mathematics is rejected rather than approximated into a misleading scalar check.
 

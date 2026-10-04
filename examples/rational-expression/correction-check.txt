@@ -1,0 +1,1 @@
+Synthetic fixture v1: this is test metadata, not an external search.

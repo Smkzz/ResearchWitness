@@ -71,6 +71,10 @@ A claim contains:
 
 The anchor is verified against the supplied text bytes. It does not authenticate the publication.
 
+The `rational_expression_upper_bound` checker evaluates a closed exact-rational
+AST at one in-domain witness point. Its node grammar, limits, and scope are
+described in [Exact rational expression checker](EXPRESSION_DSL.md).
+
 ### Witness
 
 `witness_artifact` points to checker-specific JSON. A witness cannot override the target bound or formalization supplied by the claim.

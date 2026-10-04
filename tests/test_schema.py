@@ -16,7 +16,7 @@ def test_schema_is_valid():
 
 @pytest.mark.parametrize('name', [
     'counterexample', 'no-finding', 'already-corrected', 'unverified-source', 'open-objection',
-    'graph-chromatic-lower-bound', 'finite-pmf-probability',
+    'graph-chromatic-lower-bound', 'finite-pmf-probability', 'rational-expression',
 ])
 def test_example_structures(name):
     VALIDATOR.validate(json.loads((ROOT / 'examples' / name / 'case.json').read_text()))
@@ -51,3 +51,20 @@ def test_schema_accepts_finite_pmf_expectation(bundle):
         'bound': '0',
     }
     assert not list(VALIDATOR.iter_errors(case))
+
+
+def test_schema_accepts_bounded_rational_expression_shape(bundle):
+    root, case, data = bundle
+    case['claim']['formalization'] = {
+        'kind': 'rational_expression_upper_bound',
+        'domain': {'x': {'lower': '1', 'upper': '3', 'lower_closed': False, 'upper_closed': True}},
+        'expression': {
+            'op': 'div',
+            'left': {'op': 'pow', 'base': {'op': 'var', 'name': 'x'}, 'exponent': 2},
+            'right': {'op': 'const', 'value': '2'},
+        },
+        'upper_bound': '2',
+    }
+    assert VALIDATOR.is_valid(case)
+    case['claim']['formalization']['expression'] = {'op': 'eval', 'source': 'x + 1'}
+    assert list(VALIDATOR.iter_errors(case))

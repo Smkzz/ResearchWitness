@@ -9,6 +9,7 @@ from .arithmetic import rational, radical_sum, sqrt_interval, Interval, bounded_
 KINDS = {
     'scalar_radical_comparison',
     'polynomial_upper_bound',
+    'rational_expression_upper_bound',
     'uc_binary_upper_bound',
     'finite_field_polynomial_residue',
     'finite_field_quadratic_quartic_residue_rule',
@@ -20,6 +21,9 @@ KINDS = {
 MAX_GRAPH_VERTICES = 256
 MAX_GRAPH_EDGES = 8192
 MAX_GRAPH_LABEL_LENGTH = 64
+MAX_EXPRESSION_NODES = 256
+MAX_EXPRESSION_DEPTH = 20
+MAX_EXPRESSION_VALUE_BITS = 8192
 
 
 def capabilities() -> list[dict[str, Any]]:
@@ -34,6 +38,44 @@ def capabilities() -> list[dict[str, Any]]:
             'kind': 'polynomial_upper_bound',
             'proves': 'A rational point in a bounded domain violates an explicit polynomial upper bound.',
             'limits': 'At most 8 variables, degree 12, 64 terms.',
+        },
+        {
+            'kind': 'rational_expression_upper_bound',
+            'proves': 'An exact rational-expression value at one rational point exceeds an explicit upper bound.',
+            'limits': 'Rational AST only; at most 8 variables, 256 nodes, depth 20, powers 0..12, and 8192-bit exact values.',
+            'case_schema_version': '1.0',
+            'checker_grammar': 'rational-expression/1',
+            'deterministic': True,
+            'example_bundle': 'examples/rational-expression/',
+            'example': {
+                'formalization': {
+                    'kind': 'rational_expression_upper_bound',
+                    'domain': {
+                        'x': {'lower': '1', 'upper': '3',
+                              'lower_closed': False, 'upper_closed': True},
+                    },
+                    'expression': {
+                        'op': 'div',
+                        'left': {
+                            'op': 'sub',
+                            'left': {'op': 'pow', 'base': {'op': 'var', 'name': 'x'}, 'exponent': 2},
+                            'right': {'op': 'const', 'value': '1'},
+                        },
+                        'right': {
+                            'op': 'sub',
+                            'left': {'op': 'var', 'name': 'x'},
+                            'right': {'op': 'const', 'value': '1'},
+                        },
+                    },
+                    'upper_bound': '2',
+                },
+                'witness': {
+                    'kind': 'rational_expression_upper_bound',
+                    'point': {'x': '2'},
+                },
+                'expected_status': 'REFUTED_FOR_FORMALIZATION',
+                'expected_value_exact': '3',
+            },
         },
         {
             'kind': 'uc_binary_upper_bound',
@@ -112,6 +154,8 @@ def check(formalization: Any, witness: Any, digits: int = 40) -> dict:
                            radical_sum(formalization['upper_bound'], digits))
     if kind == 'polynomial_upper_bound':
         return _polynomial(formalization, witness)
+    if kind == 'rational_expression_upper_bound':
+        return _rational_expression(formalization, witness)
     if kind == 'uc_binary_upper_bound':
         return _uc_binary(formalization, witness, digits)
     if kind == 'finite_field_polynomial_residue':
@@ -296,6 +340,89 @@ def _polynomial(spec: dict, witness: Any) -> dict:
         total = bounded_fraction(total + bounded_fraction(value))
     bound = rational(spec['upper_bound'])
     return _comparison(Interval(total, total), Interval(bound, bound), {'point': point, 'value_exact': str(total)})
+
+
+def _expression_variable_name(value: Any) -> str:
+    require(type(value) is str and 1 <= len(value) <= 24 and value.isascii() and value.isidentifier(),
+            'Invalid rational-expression variable name')
+    return value
+
+
+def _expression_value(node: Any, values: dict[str, F], budget: list[int], depth: int = 0) -> F:
+    """Evaluate the closed rational AST; it has no calls, attributes or source text."""
+    require(depth <= MAX_EXPRESSION_DEPTH, 'Rational-expression depth budget exceeded')
+    budget[0] += 1
+    require(budget[0] <= MAX_EXPRESSION_NODES, 'Rational-expression node budget exceeded')
+    require(type(node) is dict and type(node.get('op')) is str, 'Invalid rational-expression node')
+    op = node['op']
+
+    if op == 'const':
+        fields(node, {'op', 'value'})
+        return bounded_fraction(rational(node['value']))
+    if op == 'var':
+        fields(node, {'op', 'name'})
+        name = _expression_variable_name(node['name'])
+        require(name in values, 'Unknown rational-expression variable')
+        return values[name]
+    if op in ('add', 'mul'):
+        fields(node, {'op', 'args'})
+        args = node['args']
+        require(type(args) is list and 2 <= len(args) <= 8, 'Invalid rational-expression arity')
+        result = _expression_value(args[0], values, budget, depth + 1)
+        for arg in args[1:]:
+            other = _expression_value(arg, values, budget, depth + 1)
+            result = bounded_fraction(result + other if op == 'add' else result * other)
+        return result
+    if op in ('sub', 'div'):
+        fields(node, {'op', 'left', 'right'})
+        left = _expression_value(node['left'], values, budget, depth + 1)
+        right = _expression_value(node['right'], values, budget, depth + 1)
+        if op == 'sub':
+            return bounded_fraction(left - right)
+        require(right != 0, 'Rational-expression division by zero')
+        return bounded_fraction(left / right)
+    if op == 'neg':
+        fields(node, {'op', 'arg'})
+        return bounded_fraction(-_expression_value(node['arg'], values, budget, depth + 1))
+    if op == 'pow':
+        fields(node, {'op', 'base', 'exponent'})
+        base = _expression_value(node['base'], values, budget, depth + 1)
+        exponent = integer(node['exponent'], 0, 12)
+        estimated_bits = max(base.numerator.bit_length(), base.denominator.bit_length()) * exponent
+        if exponent and estimated_bits > MAX_EXPRESSION_VALUE_BITS:
+            require(False, 'Rational-expression power resource limit exceeded')
+        return bounded_fraction(base ** exponent)
+    require(False, 'Unsupported rational-expression operation')
+
+
+def _rational_expression(spec: dict, witness: Any) -> dict:
+    fields(spec, {'kind', 'domain', 'expression', 'upper_bound'})
+    fields(witness, {'kind', 'point'})
+    require(witness['kind'] == spec['kind'], 'Witness type mismatch')
+    domain, point = spec['domain'], witness['point']
+    require(type(domain) is dict and 1 <= len(domain) <= 8, 'Invalid domain')
+    require(type(point) is dict and set(point) == set(domain), 'Point variables must match domain exactly')
+    values: dict[str, F] = {}
+    for name, bounds in domain.items():
+        _expression_variable_name(name)
+        fields(bounds, {'lower', 'upper', 'lower_closed', 'upper_closed'})
+        require(type(bounds['lower_closed']) is bool and type(bounds['upper_closed']) is bool,
+                'Endpoint flags must be booleans')
+        lower, upper = rational(bounds['lower']), rational(bounds['upper'])
+        require(lower <= upper, 'Reversed domain')
+        require(lower != upper or (bounds['lower_closed'] and bounds['upper_closed']), 'Empty domain')
+        value = rational(point[name])
+        require((value >= lower if bounds['lower_closed'] else value > lower) and
+                (value <= upper if bounds['upper_closed'] else value < upper), 'Witness outside domain')
+        values[name] = value
+
+    budget = [0]
+    value = _expression_value(spec['expression'], values, budget)
+    bound = rational(spec['upper_bound'])
+    normalized_point = {name: str(values[name]) for name in sorted(values)}
+    return _comparison(Interval(value, value), Interval(bound, bound),
+                       {'point': normalized_point, 'value_exact': str(value),
+                        'expression_nodes': budget[0]})
 
 
 def uc_table(witness: Any) -> dict[tuple[int, int, int], F]:

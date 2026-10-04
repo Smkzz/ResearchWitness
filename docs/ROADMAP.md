@@ -6,7 +6,7 @@ ResearchWitness is deliberately growing verifier breadth before growing marketin
 
 - Agent-prepared structured intake.
 - Deterministic evidence capsules and replay.
-- Seven bounded verifier families, including exact finite event-probability and expected-payoff arithmetic.
+- Nine bounded verifier families, including exact finite PMF arithmetic and exact-rational expression evaluation at one witness point.
 - Offline HTML / JSON reporting and deterministic evidence export.
 - Historical corrected-paper replay cases.
 - Conservative contact-readiness output; no external actions.
