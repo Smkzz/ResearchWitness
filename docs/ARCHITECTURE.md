@@ -59,6 +59,8 @@ Verifier kinds are allowlisted by `checkers.KINDS`. Each checker must:
 
 The finite-field plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.”
 
+The rational-expression checker uses a closed JSON AST for exact rational arithmetic. It can check rational-function witnesses such as quotients at one bounded point, while making no claim about the expression elsewhere in the domain.
+
 ## Contact readiness
 
 The product layer can label a case `READY_FOR_USER_REVIEW`, but never `authorized`. It blocks when the counterexample is absent, the source is not captured, correction status is unclear/stale/present, or objections remain.

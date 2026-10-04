@@ -88,6 +88,24 @@ def make():
     })
     symbol = {'type': 'string', 'minLength': 1, 'maxLength': 24,
               'pattern': '^[A-Za-z_][A-Za-z0-9_]*$'}
+    expression = ref('expression')
+    defs['expression'] = {'oneOf': [
+        obj({'op': enum('const'), 'value': ref('rational')}),
+        obj({'op': enum('var'), 'name': symbol}),
+        obj({'op': enum('add'), 'args': arr(expression, 2, 8)}),
+        obj({'op': enum('sub'), 'left': expression, 'right': expression}),
+        obj({'op': enum('mul'), 'args': arr(expression, 2, 8)}),
+        obj({'op': enum('div'), 'left': expression, 'right': expression}),
+        obj({'op': enum('neg'), 'arg': expression}),
+        obj({'op': enum('pow'), 'base': expression,
+             'exponent': {'type': 'integer', 'minimum': 0, 'maximum': 12}}),
+    ]}
+    rational_expression = obj({
+        'kind': enum('rational_expression_upper_bound'),
+        'domain': domain,
+        'expression': expression,
+        'upper_bound': ref('rational'),
+    })
     ff_powers = {
         'type': 'object', 'maxProperties': 7,
         'additionalProperties': {'type': 'integer', 'minimum': 0, 'maximum': 12},
@@ -128,7 +146,8 @@ def make():
         'universe': arr(text(100), 1, 256),
         'conclusion': enum('has_fixed_point'),
     })
-    defs['formalization'] = {'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule, finite_map]}
+    defs['formalization'] = {'oneOf': [scalar, polynomial, rational_expression, uc,
+                                      finite_field, finite_field_power_rule, finite_map]}
 
     case = obj({
         'schema_version': enum('1.0'),

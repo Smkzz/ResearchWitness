@@ -32,3 +32,20 @@ def test_schema_rejects_numeric_floats_for_claim_bound(bundle):
     root, case, data = bundle
     case['claim']['formalization']['upper_bound'] = 0.5
     assert list(VALIDATOR.iter_errors(case))
+
+
+def test_schema_accepts_bounded_rational_expression_shape(bundle):
+    root, case, data = bundle
+    case['claim']['formalization'] = {
+        'kind': 'rational_expression_upper_bound',
+        'domain': {'x': {'lower': '1', 'upper': '3', 'lower_closed': False, 'upper_closed': True}},
+        'expression': {
+            'op': 'div',
+            'left': {'op': 'pow', 'base': {'op': 'var', 'name': 'x'}, 'exponent': 2},
+            'right': {'op': 'const', 'value': '2'},
+        },
+        'upper_bound': '2',
+    }
+    assert VALIDATOR.is_valid(case)
+    case['claim']['formalization']['expression'] = {'op': 'eval', 'source': 'x + 1'}
+    assert list(VALIDATOR.iter_errors(case))

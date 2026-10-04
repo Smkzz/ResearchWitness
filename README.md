@@ -162,14 +162,17 @@ See [`prompts/AGENT_PROTOCOL.md`](prompts/AGENT_PROTOCOL.md) for the preparation
 
 ## Deterministic verifier plugins in the MVP
 
-The MVP allowlists six checker families:
+The MVP allowlists seven checker families:
 
 1. **Scalar/radical comparison** — exact rationals plus certified square-root enclosures.
 2. **Polynomial upper-bound witness** — exact rational polynomial evaluation in a bounded domain.
-3. **Binary UC functional** — the QEH-derived finite independent-source regression checker.
-4. **Finite-field polynomial solution-count residue** — exhaustive prime-field enumeration with a hard work budget.
-5. **Finite-field quadratic/quartic residue rule** — additionally classifies a parameter by power-residue class and tests the resulting count-residue rule.
-6. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
+3. **Rational-expression upper-bound witness** — exact evaluation of a closed bounded rational AST at one in-domain point; it does not prove a global inequality.
+4. **Binary UC functional** — the QEH-derived finite independent-source regression checker.
+5. **Finite-field polynomial solution-count residue** — exhaustive prime-field enumeration with a hard work budget.
+6. **Finite-field quadratic/quartic residue rule** — additionally classifies a parameter by power-residue class and tests the resulting count-residue rule.
+7. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
+
+The rational-expression grammar and exact evaluation limits are documented in [`docs/EXPRESSION_DSL.md`](docs/EXPRESSION_DSL.md).
 
 Unsupported mathematics is rejected rather than approximated into a misleading scalar check.
 
