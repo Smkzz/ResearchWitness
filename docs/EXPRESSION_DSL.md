@@ -5,6 +5,11 @@ bounded domain makes a restricted rational expression strictly greater than an
 explicit rational upper bound. It evaluates one witness; it does not prove a
 global inequality or the assumptions of a theorem.
 
+The case uses schema version `1.0`; the capability record identifies this node
+grammar as `rational-expression/1` and marks evaluation deterministic. It also
+includes a compact formalization/witness example and points to the replayable
+bundle at `examples/rational-expression/`.
+
 The checker receives structured JSON nodes. It never parses expression text and
 never evaluates Python, imports names, calls functions, accesses attributes, or
 loads code from a case. Every node has exactly the fields shown below:

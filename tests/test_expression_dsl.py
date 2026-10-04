@@ -1,8 +1,15 @@
 """The rational-expression checker evaluates a small closed AST with exact arithmetic."""
+from datetime import date
+from pathlib import Path
+
 import pytest
 
 from researchwitness.checkers import check
+from researchwitness.capsule import evaluate
 from researchwitness.strict import Invalid
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def const(value):
@@ -101,3 +108,11 @@ def test_power_and_exact_fraction_size_are_bounded():
     expression = {'op': 'pow', 'base': expression, 'exponent': 4}
     with pytest.raises(Invalid, match='resource limit'):
         check(spec(expression), witness())
+
+
+def test_example_bundle_replays():
+    report = evaluate(ROOT / 'examples' / 'rational-expression', date(2026, 10, 4))
+    assert report['decision'] == 'FORMALIZATION_COUNTEREXAMPLE_VERIFIED'
+    result = report['formalization_result']
+    assert result['status'] == 'REFUTED_FOR_FORMALIZATION'
+    assert result['detail']['value_exact'] == '3'

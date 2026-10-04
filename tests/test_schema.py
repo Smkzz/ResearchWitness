@@ -14,7 +14,8 @@ def test_schema_is_valid():
     Draft202012Validator.check_schema(SCHEMA)
 
 
-@pytest.mark.parametrize('name', ['counterexample', 'no-finding', 'already-corrected', 'unverified-source', 'open-objection'])
+@pytest.mark.parametrize('name', ['counterexample', 'no-finding', 'already-corrected',
+                                  'unverified-source', 'open-objection', 'rational-expression'])
 def test_example_structures(name):
     VALIDATOR.validate(json.loads((ROOT / 'examples' / name / 'case.json').read_text()))
 

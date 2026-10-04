@@ -109,9 +109,17 @@ def test_html_report_escapes_untrusted_text(tmp_path):
 def test_capabilities_cli_lists_new_checkers():
     out = subprocess.run([sys.executable, '-m', 'researchwitness', 'capabilities'],
                          capture_output=True, text=True, check=True)
-    kinds = {x['kind'] for x in json.loads(out.stdout)['checkers']}
+    checkers = json.loads(out.stdout)['checkers']
+    kinds = {x['kind'] for x in checkers}
     assert {'finite_field_polynomial_residue', 'finite_map_fixed_point',
             'rational_expression_upper_bound'} <= kinds
+    rational = next(x for x in checkers if x['kind'] == 'rational_expression_upper_bound')
+    assert rational['case_schema_version'] == '1.0'
+    assert rational['checker_grammar'] == 'rational-expression/1'
+    assert rational['deterministic'] is True
+    assert rational['example_bundle'] == 'examples/rational-expression/'
+    assert rational['example']['expected_status'] == 'REFUTED_FOR_FORMALIZATION'
+    assert rational['example']['expected_value_exact'] == '3'
 
 
 def test_audit_cli_creates_bundle_and_html(tmp_path):

@@ -38,6 +38,39 @@ def capabilities() -> list[dict[str, Any]]:
             'kind': 'rational_expression_upper_bound',
             'proves': 'An exact rational-expression value at one rational point exceeds an explicit upper bound.',
             'limits': 'Rational AST only; at most 8 variables, 256 nodes, depth 20, powers 0..12, and 8192-bit exact values.',
+            'case_schema_version': '1.0',
+            'checker_grammar': 'rational-expression/1',
+            'deterministic': True,
+            'example_bundle': 'examples/rational-expression/',
+            'example': {
+                'formalization': {
+                    'kind': 'rational_expression_upper_bound',
+                    'domain': {
+                        'x': {'lower': '1', 'upper': '3',
+                              'lower_closed': False, 'upper_closed': True},
+                    },
+                    'expression': {
+                        'op': 'div',
+                        'left': {
+                            'op': 'sub',
+                            'left': {'op': 'pow', 'base': {'op': 'var', 'name': 'x'}, 'exponent': 2},
+                            'right': {'op': 'const', 'value': '1'},
+                        },
+                        'right': {
+                            'op': 'sub',
+                            'left': {'op': 'var', 'name': 'x'},
+                            'right': {'op': 'const', 'value': '1'},
+                        },
+                    },
+                    'upper_bound': '2',
+                },
+                'witness': {
+                    'kind': 'rational_expression_upper_bound',
+                    'point': {'x': '2'},
+                },
+                'expected_status': 'REFUTED_FOR_FORMALIZATION',
+                'expected_value_exact': '3',
+            },
         },
         {
             'kind': 'uc_binary_upper_bound',
