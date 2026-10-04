@@ -112,7 +112,7 @@ def test_capabilities_cli_lists_new_checkers():
     kinds = {x['kind'] for x in json.loads(out.stdout)['checkers']}
     assert {
         'finite_field_polynomial_residue', 'finite_map_fixed_point',
-        'finite_graph_chromatic_lower_bound',
+        'finite_graph_chromatic_lower_bound', 'finite_pmf_bound',
     } <= kinds
 
 

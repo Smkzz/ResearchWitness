@@ -29,9 +29,9 @@ A research agent finds a potentially wrong objective claim in a paper. It should
 
 ## Next milestones after MVP
 
-1. Expand bounded graph-witness coverage beyond the finite chromatic lower-bound checker.
-2. Add exact finite probability/distribution primitives.
-3. Add sequence/recurrence and modular-number-theory plugins.
-4. Add code-vs-paper consistency capsules in a sandboxed adapter.
-5. Run a frozen unseen-corrigenda discovery benchmark.
-6. Add optional integrations for paper retrieval and agent harnesses without putting model trust inside the verifier core.
+1. Expand graph coverage from chromatic lower-bound certificates to paths, connectivity, and graph mechanisms in the frozen screen.
+2. Extend finite probability from explicit PMF event and expectation arithmetic to marginals, conditionals, and independence certificates.
+3. Add recurrence and sequence certificates, then broaden exact modular and linear-algebra claims where historical cases justify them.
+4. Run a frozen unseen-corrigenda benchmark before claiming increased real-paper coverage.
+5. Add code-vs-paper consistency capsules in a sandboxed adapter.
+6. Add optional paper retrieval and agent-harness integrations without putting model trust inside the verifier core.

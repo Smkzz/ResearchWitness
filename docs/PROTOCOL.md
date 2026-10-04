@@ -75,6 +75,27 @@ The anchor is verified against the supplied text bytes. It does not authenticate
 
 `witness_artifact` points to checker-specific JSON. A witness cannot override the target bound or formalization supplied by the claim.
 
+### Finite PMF arithmetic
+
+`finite_pmf_bound` formalizations support two exact operations over an explicitly declared finite categorical sample space. The sample space is the Cartesian product of `domains`; it may contain at most 256 states across at most 8 variables. The witness lists distinct positive-mass atoms using exact rational strings. Unlisted states have probability zero, and the listed masses must sum exactly to one.
+
+For an event probability, `event` is a union of partial assignments. An empty event list denotes the empty event, while an empty assignment in the list denotes the whole sample space. Overlapping clauses count each atom once. `relation` is `at_most` or `at_least`; equality satisfies either bound and therefore produces no refutation.
+
+```json
+{
+  "kind": "finite_pmf_bound",
+  "operation": "probability",
+  "domains": {"coin": ["H", "T"], "weather": ["sun", "rain"]},
+  "event": [{"coin": "H"}, {"weather": "sun"}],
+  "relation": "at_most",
+  "bound": "2/3"
+}
+```
+
+For an expected payoff, `payoffs` must assign an exact rational value to every state in the declared sample space exactly once. The checker sums `probability × payoff` over the supplied PMF. Both operations validate all PMF masses and arithmetic exactly; neither makes an observation-to-distribution inference.
+
+The reported result is scoped to arithmetic over that supplied finite PMF and formalization. Empirical validity, sampling assumptions, population probabilities and broader generalized conclusions remain outside the checker.
+
 ## 3. Formalization results
 
 All checkers return one of:

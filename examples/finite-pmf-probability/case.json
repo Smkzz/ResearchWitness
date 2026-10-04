@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-finite-pmf-probability",
+  "artifacts": {
+    "source.txt": "1ad23826014c33b9372a9249e0142c1db97e81d5913145e966ef4a9df699144f",
+    "correction-check.txt": "1d5b224d46bcdaf61086328c8a8455678b36a0c66e3c5b5d41971cd0cd422cd1",
+    "witness.json": "1f1d2a96910437f5a6848450968fd11344ff17c577e8a67af8473ad60bc32864"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:finite-pmf-probability",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "In the supplied finite model, P(coin = H or weather = sun) <= 2/3.",
+    "scope": "Only the exact event probability in the explicitly supplied finite PMF.",
+    "assumptions": [
+      "The finite state space and PMF are exactly the ones formalized below."
+    ],
+    "excluded_claims": [
+      "This synthetic fixture is not evidence about a publication or empirical process.",
+      "No population probability or generalized scientific conclusion is asserted."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "In the supplied finite model, P(coin = H or weather = sun) <= 2/3."
+    },
+    "formalization": {
+      "kind": "finite_pmf_bound",
+      "operation": "probability",
+      "domains": {
+        "coin": [
+          "H",
+          "T"
+        ],
+        "weather": [
+          "sun",
+          "rain"
+        ]
+      },
+      "event": [
+        {
+          "coin": "H"
+        },
+        {
+          "weather": "sun"
+        }
+      ],
+      "relation": "at_most",
+      "bound": "2/3"
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

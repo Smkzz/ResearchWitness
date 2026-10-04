@@ -1,0 +1,33 @@
+{
+  "kind": "finite_pmf_bound",
+  "atoms": [
+    {
+      "assignment": {
+        "coin": "H",
+        "weather": "sun"
+      },
+      "probability": "1/4"
+    },
+    {
+      "assignment": {
+        "coin": "H",
+        "weather": "rain"
+      },
+      "probability": "1/4"
+    },
+    {
+      "assignment": {
+        "coin": "T",
+        "weather": "sun"
+      },
+      "probability": "1/4"
+    },
+    {
+      "assignment": {
+        "coin": "T",
+        "weather": "rain"
+      },
+      "probability": "1/4"
+    }
+  ]
+}

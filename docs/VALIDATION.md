@@ -50,6 +50,10 @@ Historical replay:
 
 Both cases are known corrigenda, so the product-level contact gate correctly returns `NOT_READY`.
 
+### Exact finite PMF arithmetic
+
+The synthetic [finite-PMF probability example](../examples/finite-pmf-probability/) checks a four-state categorical PMF. It computes `P(coin = H or weather = sun) = 3/4`, counting the overlapping event clause once, and refutes the supplied `at_most 2/3` bound. Focused tests also replay exact expected payoffs and fail closed when PMF mass, domains, payoff coverage or the 256-state limit is invalid. This demonstrates only arithmetic over an explicit finite PMF; it supplies no empirical or population inference evidence.
+
 ### Modular-metric fixed-point counterexample
 
 The finite-map plugin confirms that the explicit swap `0→1, 1→0` on `{0,1}` has no fixed point. It deliberately reports that the original theorem's modular-metric premise is **not established by this checker**. The fixture carries that gap as an open objection and returns `NOT_READY`.

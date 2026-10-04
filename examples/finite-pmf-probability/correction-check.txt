@@ -1,0 +1,1 @@
+Synthetic fixture metadata only; no external correction search.

@@ -179,6 +179,9 @@ The synthetic path-graph example replays with:
 ```bash
 python -m researchwitness verify examples/graph-chromatic-lower-bound --as-of 2026-10-04
 ```
+8. **Finite PMF bound** — exactly computes an event probability or expected payoff over a bounded finite state space and compares it with a rational bound.
+
+The finite PMF checker establishes arithmetic facts only for the supplied distribution. It does not establish that a PMF is empirically valid or that a result extends to a population or a broader scientific claim.
 
 Unsupported mathematics is rejected rather than approximated into a misleading scalar check.
 
