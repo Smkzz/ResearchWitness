@@ -172,6 +172,8 @@ The MVP allowlists seven checker families:
 6. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
 7. **Modular linear-system certificates** — verifies a solution vector or a left-annihilator certificate for a system over a bounded composite or prime modulus.
 
+Run the modular certificate example with `python -m researchwitness verify examples/modular-linear-system --as-of 2026-10-04`. Its left-annihilator certificate proves that `2x = 1 (mod 6)` has no solution, contradicting the supplied formalization.
+
 Unsupported mathematics is rejected rather than approximated into a misleading scalar check.
 
 ```bash

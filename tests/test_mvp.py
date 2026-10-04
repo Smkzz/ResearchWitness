@@ -72,6 +72,16 @@ def test_modular_linear_system_routes_through_agent_intake(tmp_path):
     assert report['formalization_result']['detail']['certified_conclusion'] == 'has_solution'
 
 
+def test_modular_linear_system_example_replays():
+    example = Path(__file__).resolve().parents[1] / 'examples' / 'modular-linear-system'
+    report = evaluate(example, TODAY)
+    assert report['decision'] == 'FORMALIZATION_COUNTEREXAMPLE_VERIFIED'
+    detail = report['formalization_result']['detail']
+    assert detail['certificate_type'] == 'annihilator'
+    assert detail['annihilator_times_matrix_mod_m'] == [0]
+    assert detail['annihilator_times_rhs_mod_m'] == 3
+
+
 def test_ambiguous_quote_requires_offset(tmp_path):
     doc = intake_doc()
     (tmp_path / 'source.txt').write_text('Every qualifying map has a fixed point.\nEvery qualifying map has a fixed point.\n')
@@ -131,6 +141,12 @@ def test_capabilities_cli_lists_new_checkers():
     modular = next(x for x in checkers if x['kind'] == 'modular_linear_system')
     assert 'left-annihilator' in modular['proves']
     assert 'at most 16 equations and 16 variables' in modular['limits']
+    assert modular['input_schema_version'] == '1.0'
+    assert 'does not search for certificates' in modular['what_it_does_not_prove']
+    assert 'Reduce inputs modulo m' in modular['deterministic_semantics']
+    assert modular['resource_bounds']['matrix_entries_maximum'] == 256
+    assert modular['input_schema']['formalization']['matrix']['rectangular'] is True
+    assert modular['input_schema']['witness']['certificate']['type']['enum'] == ['solution', 'annihilator']
 
 
 def test_audit_cli_creates_bundle_and_html(tmp_path):

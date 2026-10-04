@@ -54,6 +54,60 @@ def capabilities() -> list[dict[str, Any]]:
             'kind': 'modular_linear_system',
             'proves': 'Proves solvability with a solution vector and inconsistency with a left-annihilator certificate.',
             'limits': 'Modulus 2..4096; at most 16 equations and 16 variables; verifies certificates only.',
+            'input_schema_version': '1.0',
+            'input_schema': {
+                'formalization': {
+                    'required_fields': ['kind', 'modulus', 'matrix', 'rhs', 'conclusion'],
+                    'kind': {'const': 'modular_linear_system'},
+                    'modulus': {'type': 'integer', 'minimum': 2, 'maximum': 4096},
+                    'matrix': {
+                        'type': 'array',
+                        'min_items': 1,
+                        'max_items': 16,
+                        'rows': {
+                            'type': 'array',
+                            'min_items': 1,
+                            'max_items': 16,
+                            'items': {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000},
+                        },
+                        'rectangular': True,
+                    },
+                    'rhs': {
+                        'type': 'array',
+                        'min_items': 1,
+                        'max_items': 16,
+                        'length_equals': 'matrix row count',
+                        'items': {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000},
+                    },
+                    'conclusion': {'enum': ['has_solution', 'no_solution']},
+                },
+                'witness': {
+                    'required_fields': ['kind', 'certificate'],
+                    'kind': {'const': 'modular_linear_system'},
+                    'certificate': {
+                        'required_fields': ['type', 'vector'],
+                        'type': {'enum': ['solution', 'annihilator']},
+                        'vector': {
+                            'type': 'array',
+                            'length_by_certificate_type': {
+                                'solution': 'matrix column count',
+                                'annihilator': 'matrix row count',
+                            },
+                            'items': {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000},
+                        },
+                    },
+                },
+            },
+            'what_it_does_not_prove': 'It does not search for certificates, prove claims beyond the encoded modular system, or establish source-to-formalization alignment.',
+            'deterministic_semantics': 'Reduce inputs modulo m. A solution certificate verifies A*x = b. An annihilator certificate verifies y^T*A = 0 and y^T*b != 0, which proves no solution. The result refutes the formalized conclusion exactly when the certificate proves its opposite.',
+            'resource_bounds': {
+                'modulus': {'minimum': 2, 'maximum': 4096},
+                'equations': {'minimum': 1, 'maximum': 16},
+                'variables': {'minimum': 1, 'maximum': 16},
+                'matrix_entries_maximum': 256,
+                'integer_input': {'minimum': -1000000000, 'maximum': 1000000000},
+                'multiply_add_terms_per_certificate_maximum': 272,
+            },
         },
     ]
 

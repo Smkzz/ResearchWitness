@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "case_id": "modular-linear-system-demo",
+  "artifacts": {
+    "source.txt": "8885fcbc0d1fceb98c1b4c0928bd0ad83f2f37966c77473acae608e147219562",
+    "correction-check.txt": "ff87f2e242a9a16a801d409348c26484e369c366a16c3540dfd3ed6cdbdc05a0",
+    "witness.json": "07432b12f6962d93a9b4b64bf68531c81fb10ab6a763620ff0560a4d8d4ee466"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:modular-linear-system",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "unchecked",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "The congruence 2x = 1 modulo 6 has a solution.",
+    "scope": "Only the supplied linear congruence over integers modulo 6.",
+    "assumptions": [
+      "The equation is interpreted in the ring of integers modulo 6."
+    ],
+    "excluded_claims": [
+      "This synthetic example is not evidence about a publication."
+    ],
+    "anchor": {
+      "offset": 19,
+      "quote": "the congruence 2x = 1 modulo 6 has a solution."
+    },
+    "formalization": {
+      "kind": "modular_linear_system",
+      "modulus": 6,
+      "matrix": [[2]],
+      "rhs": [1],
+      "conclusion": "has_solution"
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

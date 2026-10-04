@@ -1,0 +1,7 @@
+{
+  "kind": "modular_linear_system",
+  "certificate": {
+    "type": "annihilator",
+    "vector": [3]
+  }
+}
