@@ -1,0 +1,8 @@
+{
+  "intake_version":"0.1",
+  "case_id":"modular-fixed-point-swap",
+  "source":{"identifier":"doi:10.1186/1687-1812-2011-93","version":"original theorem, historical validation fixture","text_file":"source.txt","capture_status":"unverified","correction_check":{"checked_on":"2026-10-04","status":"present","evidence_file":"correction.txt"}},
+  "claim":{"id":"theorem-3.2-conclusion","statement":"The qualifying self-map has a unique fixed point.","scope":"Only the finite self-map conclusion for X={0,1} and f swapping 0 and 1.","assumptions":["The universe is exactly {0,1}.","The supplied mapping is f(0)=1,f(1)=0."],"excluded_claims":["The modular-metric contraction premise is not established by the finite-map checker.","Uniqueness is irrelevant once existence fails."],"quote":"Then, f has a unique fixed point","formalization":{"kind":"finite_map_fixed_point","universe":["0","1"],"conclusion":"has_fixed_point"}},
+  "witness":{"kind":"finite_map_fixed_point","mapping":{"0":"1","1":"0"}},
+  "unresolved_objections":["The finite-map checker verifies absence of a fixed point but does not independently encode the original modular-metric contraction premise."]
+}

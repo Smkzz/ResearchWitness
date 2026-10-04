@@ -1,0 +1,1 @@
+A published corrigendum is present: Inam et al., Communications of the Korean Mathematical Society 22(2), 207-208 (2007), DOI 10.4134/CKMS.2007.22.2.207. It gives p=29,c=4 as a counterexample.

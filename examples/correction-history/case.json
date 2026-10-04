@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-correction-history",
+  "artifacts": {
+    "source.txt": "6633c6d5f4e6a3bd58b20b47d3d4a9903cdb1b4f42fe2ba7ef1bd4c7694230e3",
+    "correction-check.txt": "f66201ed111f34f7a1e45e271a6e1ffdfbe28dd7a2d35d76e36dc857ff7ea0f7",
+    "witness.json": "4f2fb46e5f62351acb20a9fb705ef764df9d05a5f7c2dd1d8f785dc50b6ac33a",
+    "revision-v2.txt": "a79159102c1c6bc430c1fed1eaa903f41ada573b5a0187ab317c18d7b89e18cd",
+    "revision-formalization.json": "28c9927c8635f81b691b9495d8c7f69b8a78fd845cf141714ae026511488a3a3",
+    "synthetic-correspondence.txt": "7d0aae41764547966c3208555e26bc062853f86647c444678cced64970dac6d6"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:polynomial-example",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "For every x in [0,1], x^2 <= 1/2.",
+    "scope": "Synthetic claim C1 in v1 only.",
+    "assumptions": [
+      "x is real and lies in the stated closed interval."
+    ],
+    "excluded_claims": [
+      "This fixture is not a real paper or an independent discovery.",
+      "No global optimum or paper-level error is asserted."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "For every x in [0,1], x^2 <= 1/2."
+    },
+    "formalization": {
+      "kind": "polynomial_upper_bound",
+      "domain": {
+        "x": {
+          "lower": "0",
+          "upper": "1",
+          "lower_closed": true,
+          "upper_closed": true
+        }
+      },
+      "terms": [
+        {
+          "coefficient": "1",
+          "powers": {
+            "x": 2
+          }
+        }
+      ],
+      "upper_bound": "1/2"
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}

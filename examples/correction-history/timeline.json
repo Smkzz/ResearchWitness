@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "subject_sha256": "0bcebfe3f890a461e3b0a7d7d67607cc920ab6ce407becc4187342c259bb3571",
+  "events": [
+    {
+      "seq": 1,
+      "previous_sha256": "a520fcd55aa3033b08e6e61a094ca18d6b3dc463d3fc7f03c1ae3518003ca9a9",
+      "kind": "INQUIRY_RECORDED",
+      "on": "2026-10-04",
+      "actor_id": "synthetic-operator",
+      "evidence_artifact": "synthetic-correspondence.txt",
+      "data": {
+        "note": "Fictional inquiry, not sent."
+      }
+    },
+    {
+      "seq": 2,
+      "previous_sha256": "5fe1af6c06a7f9c2387d43ae466ac87e2a4e5f1f323431611ecb65be6aa0144d",
+      "kind": "AUTHOR_POSITION_RECORDED",
+      "on": "2026-10-04",
+      "actor_id": "synthetic-operator",
+      "evidence_artifact": "synthetic-correspondence.txt",
+      "data": {
+        "position": "agrees",
+        "note": "Fictional agreement; not proof."
+      }
+    },
+    {
+      "seq": 3,
+      "previous_sha256": "d9a2b1496446d0cf593b53be4850c35f61433814eabbe51bff04bbb9c5c85c1b",
+      "kind": "CORRECTION_NOTICE_RECORDED",
+      "on": "2026-10-04",
+      "actor_id": "synthetic-operator",
+      "evidence_artifact": "synthetic-correspondence.txt",
+      "data": {
+        "revision_artifact": "revision-v2.txt",
+        "version": "synthetic-v2"
+      }
+    },
+    {
+      "seq": 4,
+      "previous_sha256": "97451c908556fd232a91ad205dbcb55da4878ad2715240ffe18ebacbf81a32b6",
+      "kind": "REVISION_WITNESS_RECHECK",
+      "on": "2026-10-04",
+      "actor_id": "synthetic-operator",
+      "evidence_artifact": "synthetic-correspondence.txt",
+      "data": {
+        "revision_sha256": "a79159102c1c6bc430c1fed1eaa903f41ada573b5a0187ab317c18d7b89e18cd",
+        "formalization_artifact": "revision-formalization.json"
+      }
+    }
+  ]
+}

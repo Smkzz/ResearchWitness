@@ -1,0 +1,137 @@
+[
+  {
+    "id": "network-reliability-2025",
+    "title": "Degree-Based Approximations for Network Reliability Polynomials",
+    "correction": "arXiv:2510.06247 (2025 corrigendum)",
+    "domain": "network reliability",
+    "mechanism": "For K3, exact all-terminal reliability exceeds both proposed degree-based upper-bound approximations.",
+    "coverage": "ENCODABLE",
+    "reason": "For K3 both disputed formulas reduce to an explicit degree-6 polynomial inequality in p, within polynomial_upper_bound."
+  },
+  {
+    "id": "qtt-tucker-2016",
+    "title": "Two-Level QTT-Tucker Format for Optimized Tensor Calculus",
+    "correction": "SIAM J. Matrix Anal. Appl. 37 (2016), DOI 10.1137/15M104089X",
+    "domain": "tensor calculus",
+    "mechanism": "Erratum identifies non-orthogonal dropped components; their inner product is -alpha^3 for alpha != 0.",
+    "coverage": "ENCODABLE_MECHANISM_ONLY",
+    "reason": "The stated orthogonality failure can be reduced to alpha^6 <= 0, but the full tensor rounding theorem is outside the core."
+  },
+  {
+    "id": "log-concavity-2023",
+    "title": "Log-concavity of some independence polynomials via a partial ordering",
+    "correction": "Discrete Math. 346 (2023) 113608, DOI 10.1016/j.disc.2023.113608",
+    "domain": "algebraic combinatorics",
+    "mechanism": "The flawed definition allows x^3+x^4 \u227c 1+x, conflicting with a downstream degree condition.",
+    "coverage": "PARTIAL_ONLY",
+    "reason": "The arithmetic endpoint 4 <= 1 is checkable, but the trusted core cannot establish the antecedent relation \u227c from Definition 2.3."
+  },
+  {
+    "id": "modular-fixed-point-2012",
+    "title": "Fixed point theorems for contraction mappings in modular metric spaces",
+    "correction": "Fixed Point Theory Appl. 2012:103, DOI 10.1186/1687-1812-2012-103",
+    "domain": "fixed point theory",
+    "mechanism": "Two-point self-map satisfies the stated modular contraction setup but has no fixed point.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires finite mappings, extended-valued modular metrics, theorem predicates, and fixed-point existence logic."
+  },
+  {
+    "id": "goss-polynomials-2023",
+    "title": "Goss polynomials, q-adic expansions, and Sheats compositions",
+    "correction": "J. Number Theory 246 (2023) 328-331",
+    "domain": "number theory",
+    "mechanism": "Explicit q=4, n=693 Sheats i-composition contradicts the published merge rule.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires Sheats-composition algorithm/number representation semantics, not merely scalar comparison."
+  },
+  {
+    "id": "elliptic-points-2007",
+    "title": "The number of points on elliptic curves E:y^2=x^3+cx over F_p mod 8",
+    "correction": "Commun. Korean Math. Soc. 22 (2007) 207-208",
+    "domain": "elliptic curves",
+    "mechanism": "For p=29,c=4 the curve has 40 points, contradicting the original residue-class prediction mod 8.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires finite-field arithmetic, residue classification, point enumeration, and modular congruence checking."
+  },
+  {
+    "id": "chebyshev-centers-2024",
+    "title": "Strong uniqueness and alternation theorems for relative Chebyshev centers",
+    "correction": "J. Approx. Theory 302 (2024) 106067, DOI 10.1016/j.jat.2024.106067",
+    "domain": "approximation theory",
+    "mechanism": "Explicit functions on [0,1] satisfy one theorem condition while another required condition cannot be fulfilled.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires function spaces, sup norms, relative Chebyshev centers, uniqueness and quantified theorem conditions."
+  },
+  {
+    "id": "power-graph-2019",
+    "title": "Vertex connectivity of the power graph of a finite cyclic group II",
+    "correction": "Erratum published 2019/2020",
+    "domain": "graph/number theory",
+    "mechanism": "Large explicit factorization with p_j=17,p_k=19 refutes Lemma 3.4.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires Euler-totient/factorization-derived graph formulas and lemma semantics."
+  },
+  {
+    "id": "multiproduct-2021",
+    "title": "Multiproduct equilibrium price dispersion",
+    "correction": "J. Econ. Theory 196 (2021) 105304, DOI 10.1016/j.jet.2021.105304",
+    "domain": "economics",
+    "mechanism": "Explicit joint distribution gives a constant-profits equilibrium violating Theorem 7's necessary condition.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires probability densities, integration, marginal verification, support constraints and equilibrium semantics."
+  },
+  {
+    "id": "borwein-preiss-2026",
+    "title": "Borwein-Preiss variational principle revisited",
+    "correction": "J. Math. Anal. Appl. 557 (2026) 130344, DOI 10.1016/j.jmaa.2025.130344",
+    "domain": "variational analysis",
+    "mechanism": "Counterexample to conclusion (iv) in the infinite-index case.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires metric/gauge spaces, lower-semicontinuous functions and infinite indexed constructions."
+  },
+  {
+    "id": "backward-heat-2023",
+    "title": "Lipschitz Stability for Backward Heat Equation with Application to Fluorescence Microscopy",
+    "correction": "SIAM J. Math. Anal. 55 (2023) 2467-2473, DOI 10.1137/22M1534882",
+    "domain": "PDE/inverse problems",
+    "mechanism": "sin(ky) initial data keeps L1 norm 4 while observed heat solution can decay, defeating an unconditional Lipschitz estimate.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires PDE solution operators, integrals/norms, exponential/asymptotic estimates and quantification over k."
+  },
+  {
+    "id": "monophonic-rank-2024",
+    "title": "On the monophonic rank of a graph",
+    "correction": "DMTCS 25:2 (2024), DOI 10.46298/dmtcs.11423",
+    "domain": "graph theory",
+    "mechanism": "Corrigendum supplies a graph counterexample to Theorem 5.2.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires graph ingestion, induced paths, convex hulls and monophonic rank computation."
+  },
+  {
+    "id": "rockafellar-costs-2025",
+    "title": "A Rockafellar-type theorem for non-traditional costs",
+    "correction": "Adv. Math. 469 (2025) 110227, DOI 10.1016/j.aim.2025.110227",
+    "domain": "optimal transport/analysis",
+    "mechanism": "Uncountable-index system defeats a claimed solvability theorem; countability/black-hole condition repairs it.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires uncountable index systems, extended-real inequalities and existence reasoning."
+  },
+  {
+    "id": "finite-field-range-2018",
+    "title": "On the numerical range of matrices over a finite field",
+    "correction": "Linear Algebra Appl. 556 (2018) 421-427, DOI 10.1016/j.laa.2018.07.027",
+    "domain": "finite-field linear algebra",
+    "mechanism": "Corrigendum corrects propositions involving isotropic vectors and finite-field numerical ranges.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires finite-field arithmetic, Hermitian forms and numerical-range set membership."
+  },
+  {
+    "id": "database-repairs-2019",
+    "title": "Counting Database Repairs that Satisfy Conjunctive Queries with Self-Joins",
+    "correction": "arXiv:1903.12469 (2019 corrigendum)",
+    "domain": "database theory/complexity",
+    "mechanism": "Helping Lemma 7 is false; theorem is repaired with a different proof.",
+    "coverage": "UNSUPPORTED",
+    "reason": "Requires relational schemas, repair semantics, conjunctive queries and complexity reductions."
+  }
+]

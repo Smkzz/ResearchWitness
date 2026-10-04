@@ -1,0 +1,46 @@
+name: Verifier request
+description: Propose a new bounded deterministic verifier family
+title: "[Verifier]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        New verifier families must have bounded, deterministic semantics and a precise statement of what a positive result proves. General LLM judgment is not a trusted-core verifier.
+  - type: input
+    id: domain
+    attributes:
+      label: Domain / claim family
+      placeholder: e.g. finite graphs, recurrence sequences, exact finite probability
+    validations:
+      required: true
+  - type: textarea
+    id: semantics
+    attributes:
+      label: Proposed deterministic semantics
+      description: Describe the structured input and the exact computation.
+    validations:
+      required: true
+  - type: textarea
+    id: proves
+    attributes:
+      label: What would a positive result prove?
+    validations:
+      required: true
+  - type: textarea
+    id: does_not_prove
+    attributes:
+      label: What would it explicitly not prove?
+    validations:
+      required: true
+  - type: textarea
+    id: bounds
+    attributes:
+      label: Resource bounds
+      description: Explain how input size / arithmetic / enumeration work is bounded.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation cases
+      description: Include public historical or synthetic positive, negative, boundary, and adversarial cases if available.

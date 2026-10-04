@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "python": "3.13.5",
+  "tests": "250 passed in 8.77s",
+  "synthetic_cases": 500,
+  "synthetic_matched": 500,
+  "mvp_real_cases": 3,
+  "mvp_real_matched": 3,
+  "trusted_core_static_scan": "PASS",
+  "schema_drift": "PASS",
+  "compileall": "PASS",
+  "wheel_sha256": "fd3cdb699daaaf06fa393189bcde02419889e7a802caeead9b6e88dfba4668e5",
+  "wheel_reproducible": "PASS",
+  "wheel_install_smoke": "PASS",
+  "runtime_dependencies": []
+}

@@ -1,0 +1,1 @@
+The 2012 open-access erratum states that the original conditions were insufficient and gives X={0,1} with f(0)=1 and f(1)=0 as a counterexample; it adds a finiteness condition in the repaired theorem.

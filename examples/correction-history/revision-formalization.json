@@ -1,0 +1,1 @@
+{"kind": "polynomial_upper_bound", "domain": {"x": {"lower": "0", "upper": "1", "lower_closed": true, "upper_closed": true}}, "terms": [{"coefficient": "1", "powers": {"x": 2}}], "upper_bound": "1"}

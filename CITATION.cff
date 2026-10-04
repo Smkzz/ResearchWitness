@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If ResearchWitness contributes to your research workflow, please cite this software and pin the exact version or commit you used."
+title: "ResearchWitness"
+type: software
+authors:
+  - name: "ResearchWitness contributors"
+version: "0.2.0"
+date-released: 2026-10-04
+repository-code: "https://github.com/Smkzz/ResearchWitness"
+url: "https://github.com/Smkzz/ResearchWitness"
+license: Apache-2.0
+abstract: "Agent-oriented deterministic evidence capsules for narrowly scoped scientific claim verification."
+keywords:
+  - scientific verification
+  - reproducibility
+  - research auditing
+  - evidence capsules
+  - deterministic verification

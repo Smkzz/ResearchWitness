@@ -1,0 +1,1 @@
+SYNTHETIC v2: For every x in [0,1], x^2 <= 1.

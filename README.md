@@ -9,7 +9,7 @@ ResearchWitness is an open-source Python tool for the QEH-style workflow: a rese
 
 It is intentionally **not** an AI that declares whole papers wrong. A positive result means only that the supplied witness contradicts the supplied formalization.
 
-**Research Preview:** `0.2.0` · Python 3.11+ · runtime dependencies: none · MIT
+**Research Preview:** `0.2.0` · Python 3.11+ · runtime dependencies: none · Apache-2.0
 
 ## Status
 
@@ -276,4 +276,4 @@ The next product step is broader verifier coverage and a frozen discovery benchm
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md).
+Apache-2.0. See [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md).

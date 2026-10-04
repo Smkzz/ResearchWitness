@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a reproducible defect in ResearchWitness
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve ResearchWitness. Do not include private manuscripts, credentials, unpublished correspondence, or sensitive security details in a public issue.
+  - type: input
+    id: version
+    attributes:
+      label: ResearchWitness version
+      placeholder: e.g. 0.2.0
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI / packaging
+        - Evidence bundle / provenance
+        - Verifier logic
+        - Intake / routing
+        - HTML report / product layer
+        - Validation / benchmark
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction
+      description: Prefer a synthetic case that can be shared publicly.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: OS, Python version, command used
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed private research material, credentials, and personal data from this report.
+          required: true

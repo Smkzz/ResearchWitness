@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "researchwitness"
+version = "0.2.0"
+description = "Agent-oriented deterministic evidence capsules for scientific claim verification"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [{name = "ResearchWitness contributors"}]
+dependencies = []
+keywords = ["research", "verification", "reproducibility", "scientific-computing", "evidence"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.urls]
+Homepage = "https://github.com/Smkzz/ResearchWitness"
+Repository = "https://github.com/Smkzz/ResearchWitness"
+Issues = "https://github.com/Smkzz/ResearchWitness/issues"
+Documentation = "https://github.com/Smkzz/ResearchWitness#readme"
+
+[project.scripts]
+researchwitness = "researchwitness.__main__:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "jsonschema>=4,<5"]
+
+[tool.setuptools.packages.find]
+include = ["researchwitness*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
