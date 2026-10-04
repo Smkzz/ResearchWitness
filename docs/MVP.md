@@ -29,7 +29,7 @@ A research agent finds a potentially wrong objective claim in a paper. It should
 
 ## Next milestones after MVP
 
-1. Add graph-witness plugins.
+1. Expand bounded graph-witness coverage beyond the finite chromatic lower-bound checker.
 2. Add exact finite probability/distribution primitives.
 3. Add sequence/recurrence and modular-number-theory plugins.
 4. Add code-vs-paper consistency capsules in a sandboxed adapter.

@@ -634,6 +634,55 @@
             "conclusion"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_graph_chromatic_lower_bound"
+              ]
+            },
+            "vertices": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "minItems": 1,
+              "maxItems": 256,
+              "uniqueItems": true
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "minItems": 0,
+              "maxItems": 8192,
+              "uniqueItems": true
+            },
+            "minimum_colors": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            }
+          },
+          "required": [
+            "kind",
+            "vertices",
+            "edges",
+            "minimum_colors"
+          ],
+          "additionalProperties": false
         }
       ]
     }

@@ -76,7 +76,12 @@ def base_case():
 
 def main():
     out = Path(__file__).resolve().parents[1] / 'examples'
-    for child in out.iterdir() if out.exists() else []:
+    generated = (
+        'counterexample', 'no-finding', 'already-corrected', 'unverified-source',
+        'open-objection', 'graph-chromatic-lower-bound',
+    )
+    for name in generated:
+        child = out / name
         if child.is_dir():
             import shutil
             shutil.rmtree(child)
@@ -100,6 +105,36 @@ def main():
         elif name == 'open-objection':
             case['unresolved_objections'] = ['Example objection: the transcription may omit a restriction.']
         write_case(out / name, case, data)
+
+    statement = 'The explicitly listed graph has chromatic number at least 3.'
+    case, data = base_case()
+    case['case_id'] = 'synthetic-graph-chromatic-bound'
+    case['source']['identifier'] = 'synthetic:graph-chromatic-bound'
+    case['claim']['statement'] = statement
+    case['claim']['scope'] = 'Only the listed three-vertex simple graph and the claimed lower bound are formalized.'
+    case['claim']['assumptions'] = ['The graph is finite, simple, and undirected.']
+    case['claim']['excluded_claims'] = [
+        'This fixture is not a real paper or an independent discovery.',
+        'No search for the graph chromatic number is performed.',
+    ]
+    case['claim']['anchor']['quote'] = statement
+    data['correction-check.txt'] = b'Synthetic graph fixture: no external correction search was performed.\n'
+    case['claim']['formalization'] = {
+        'kind': 'finite_graph_chromatic_lower_bound',
+        'vertices': ['a', 'b', 'c'],
+        'edges': [['a', 'b'], ['b', 'c']],
+        'minimum_colors': 3,
+    }
+    source_text = (
+        statement + '\n'
+        'Fixture graph: a--b--c. This is a synthetic example, not a published result.\n'
+    )
+    data['source.txt'] = source_text.encode()
+    data['witness.json'] = json.dumps({
+        'kind': 'finite_graph_chromatic_lower_bound',
+        'coloring': {'a': 'red', 'b': 'blue', 'c': 'red'},
+    }, sort_keys=True, separators=(',', ':')).encode()
+    write_case(out / 'graph-chromatic-lower-bound', case, data)
 
 
 if __name__ == '__main__':

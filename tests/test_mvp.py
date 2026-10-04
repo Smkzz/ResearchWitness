@@ -110,7 +110,10 @@ def test_capabilities_cli_lists_new_checkers():
     out = subprocess.run([sys.executable, '-m', 'researchwitness', 'capabilities'],
                          capture_output=True, text=True, check=True)
     kinds = {x['kind'] for x in json.loads(out.stdout)['checkers']}
-    assert {'finite_field_polynomial_residue', 'finite_map_fixed_point'} <= kinds
+    assert {
+        'finite_field_polynomial_residue', 'finite_map_fixed_point',
+        'finite_graph_chromatic_lower_bound',
+    } <= kinds
 
 
 def test_audit_cli_creates_bundle_and_html(tmp_path):
