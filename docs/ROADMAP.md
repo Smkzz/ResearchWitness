@@ -6,7 +6,7 @@ ResearchWitness is deliberately growing verifier breadth before growing marketin
 
 - Agent-prepared structured intake.
 - Deterministic evidence capsules and replay.
-- Six bounded verifier families.
+- Seven bounded verifier families, including exact finite event-probability and expected-payoff arithmetic.
 - Offline HTML / JSON reporting and deterministic evidence export.
 - Historical corrected-paper replay cases.
 - Conservative contact-readiness output; no external actions.
@@ -16,7 +16,7 @@ ResearchWitness is deliberately growing verifier breadth before growing marketin
 Priority comes from the frozen historical corrigenda screen rather than from demo appeal:
 
 1. finite graph witnesses and invariants;
-2. exact finite probability/distribution primitives;
+2. broader exact finite probability/distribution primitives;
 3. recurrence and sequence witnesses;
 4. broader modular / finite-field constructions;
 5. symbolic identity and inequality adapters with independently checkable certificates.

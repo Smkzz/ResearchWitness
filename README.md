@@ -162,7 +162,7 @@ See [`prompts/AGENT_PROTOCOL.md`](prompts/AGENT_PROTOCOL.md) for the preparation
 
 ## Deterministic verifier plugins in the MVP
 
-The MVP allowlists six checker families:
+The MVP allowlists seven checker families:
 
 1. **Scalar/radical comparison** — exact rationals plus certified square-root enclosures.
 2. **Polynomial upper-bound witness** — exact rational polynomial evaluation in a bounded domain.
@@ -170,6 +170,9 @@ The MVP allowlists six checker families:
 4. **Finite-field polynomial solution-count residue** — exhaustive prime-field enumeration with a hard work budget.
 5. **Finite-field quadratic/quartic residue rule** — additionally classifies a parameter by power-residue class and tests the resulting count-residue rule.
 6. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
+7. **Finite PMF bound** — exactly computes an event probability or expected payoff over a bounded finite state space and compares it with a rational bound.
+
+The finite PMF checker establishes arithmetic facts only for the supplied distribution. It does not establish that a PMF is empirically valid or that a result extends to a population or a broader scientific claim.
 
 Unsupported mathematics is rejected rather than approximated into a misleading scalar check.
 

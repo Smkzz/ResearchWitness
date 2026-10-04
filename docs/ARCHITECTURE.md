@@ -57,7 +57,7 @@ Verifier kinds are allowlisted by `checkers.KINDS`. Each checker must:
 5. enforce a computational work budget;
 6. avoid importing or executing case-supplied code.
 
-The finite-field plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.”
+The finite-field and finite-PMF plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.” The PMF plugin handles finite event probabilities and expected payoffs over a declared categorical state space; it does not infer a distribution from data or extend the arithmetic result to a population.
 
 ## Contact readiness
 

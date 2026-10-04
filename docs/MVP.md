@@ -30,7 +30,7 @@ A research agent finds a potentially wrong objective claim in a paper. It should
 ## Next milestones after MVP
 
 1. Add graph-witness plugins.
-2. Add exact finite probability/distribution primitives.
+2. Extend finite probability/distribution support beyond bounded event probabilities and expected payoffs for explicit finite PMFs.
 3. Add sequence/recurrence and modular-number-theory plugins.
 4. Add code-vs-paper consistency capsules in a sandboxed adapter.
 5. Run a frozen unseen-corrigenda discovery benchmark.

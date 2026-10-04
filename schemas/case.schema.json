@@ -634,6 +634,157 @@
             "conclusion"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_pmf_bound"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "probability"
+              ]
+            },
+            "domains": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "minItems": 1,
+                "maxItems": 64,
+                "uniqueItems": true
+              }
+            },
+            "event": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "maxProperties": 8,
+                "propertyNames": {
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+                },
+                "additionalProperties": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "relation": {
+              "enum": [
+                "at_most",
+                "at_least"
+              ]
+            },
+            "bound": {
+              "$ref": "#/$defs/rational"
+            }
+          },
+          "required": [
+            "kind",
+            "operation",
+            "domains",
+            "event",
+            "relation",
+            "bound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_pmf_bound"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "expectation"
+              ]
+            },
+            "domains": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "minItems": 1,
+                "maxItems": 64,
+                "uniqueItems": true
+              }
+            },
+            "payoffs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "assignment": {
+                    "type": "object",
+                    "maxProperties": 8,
+                    "propertyNames": {
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "value": {
+                    "$ref": "#/$defs/rational"
+                  }
+                },
+                "required": [
+                  "assignment",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 256
+            },
+            "relation": {
+              "enum": [
+                "at_most",
+                "at_least"
+              ]
+            },
+            "bound": {
+              "$ref": "#/$defs/rational"
+            }
+          },
+          "required": [
+            "kind",
+            "operation",
+            "domains",
+            "payoffs",
+            "relation",
+            "bound"
+          ],
+          "additionalProperties": false
         }
       ]
     }

@@ -128,7 +128,39 @@ def make():
         'universe': arr(text(100), 1, 256),
         'conclusion': enum('has_fixed_point'),
     })
-    defs['formalization'] = {'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule, finite_map]}
+    pmf_outcomes = arr(text(100), 1, 64)
+    pmf_outcomes['uniqueItems'] = True
+    pmf_domains = {
+        'type': 'object',
+        'minProperties': 1,
+        'maxProperties': 8,
+        'propertyNames': {'pattern': '^[A-Za-z_][A-Za-z0-9_]{0,23}$'},
+        'additionalProperties': pmf_outcomes,
+    }
+    pmf_assignment = {
+        'type': 'object',
+        'maxProperties': 8,
+        'propertyNames': {'pattern': '^[A-Za-z_][A-Za-z0-9_]{0,23}$'},
+        'additionalProperties': text(100),
+    }
+    pmf_probability = obj({
+        'kind': enum('finite_pmf_bound'),
+        'operation': enum('probability'),
+        'domains': pmf_domains,
+        'event': arr(pmf_assignment, 0, 64),
+        'relation': enum('at_most', 'at_least'),
+        'bound': ref('rational'),
+    })
+    pmf_expectation = obj({
+        'kind': enum('finite_pmf_bound'),
+        'operation': enum('expectation'),
+        'domains': pmf_domains,
+        'payoffs': arr(obj({'assignment': pmf_assignment, 'value': ref('rational')}), 1, 256),
+        'relation': enum('at_most', 'at_least'),
+        'bound': ref('rational'),
+    })
+    defs['formalization'] = {'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule,
+                                       finite_map, pmf_probability, pmf_expectation]}
 
     case = obj({
         'schema_version': enum('1.0'),

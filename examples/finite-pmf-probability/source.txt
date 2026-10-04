@@ -1,0 +1,2 @@
+In the supplied finite model, P(coin = H or weather = sun) <= 2/3.
+SYNTHETIC, NOT A PUBLISHED PAPER.

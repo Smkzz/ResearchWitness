@@ -14,7 +14,8 @@ def test_schema_is_valid():
     Draft202012Validator.check_schema(SCHEMA)
 
 
-@pytest.mark.parametrize('name', ['counterexample', 'no-finding', 'already-corrected', 'unverified-source', 'open-objection'])
+@pytest.mark.parametrize('name', ['counterexample', 'no-finding', 'already-corrected', 'unverified-source',
+                                  'open-objection', 'finite-pmf-probability'])
 def test_example_structures(name):
     VALIDATOR.validate(json.loads((ROOT / 'examples' / name / 'case.json').read_text()))
 
@@ -32,3 +33,19 @@ def test_schema_rejects_numeric_floats_for_claim_bound(bundle):
     root, case, data = bundle
     case['claim']['formalization']['upper_bound'] = 0.5
     assert list(VALIDATOR.iter_errors(case))
+
+
+def test_schema_accepts_finite_pmf_expectation(bundle):
+    root, case, data = bundle
+    case['claim']['formalization'] = {
+        'kind': 'finite_pmf_bound',
+        'operation': 'expectation',
+        'domains': {'x': ['low', 'high']},
+        'payoffs': [
+            {'assignment': {'x': 'low'}, 'value': '-1/2'},
+            {'assignment': {'x': 'high'}, 'value': '3/2'},
+        ],
+        'relation': 'at_least',
+        'bound': '0',
+    }
+    assert not list(VALIDATOR.iter_errors(case))

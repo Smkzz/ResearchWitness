@@ -13,6 +13,7 @@ KINDS = {
     'finite_field_polynomial_residue',
     'finite_field_quadratic_quartic_residue_rule',
     'finite_map_fixed_point',
+    'finite_pmf_bound',
 }
 
 
@@ -48,6 +49,13 @@ def capabilities() -> list[dict[str, Any]]:
             'kind': 'finite_map_fixed_point',
             'proves': 'An explicit finite self-map has no fixed point when the formalized conclusion requires one.',
             'limits': 'Checks the finite-map conclusion only; theorem premises must be verified separately.',
+        },
+        {
+            'kind': 'finite_pmf_bound',
+            'proves': 'An exact finite PMF event probability or expected payoff violates a rational bound.',
+            'limits': ('At most 8 variables, 64 outcomes per variable, 256 joint states and 64 event clauses; '
+                       'categorical outcomes and exact rational masses/payoffs. Empirical validity and '
+                       'population/generalized conclusions are outside scope.'),
         },
     ]
 
@@ -100,7 +108,147 @@ def check(formalization: Any, witness: Any, digits: int = 40) -> dict:
         return _finite_field_polynomial_residue(formalization, witness)
     if kind == 'finite_field_quadratic_quartic_residue_rule':
         return _finite_field_quadratic_quartic_residue_rule(formalization, witness)
+    if kind == 'finite_pmf_bound':
+        return _finite_pmf_bound(formalization, witness)
     return _finite_map_fixed_point(formalization, witness)
+
+
+def _pmf_name(value: Any) -> str:
+    name = text(value, 24)
+    require(name.isascii() and name.isidentifier(), 'Invalid PMF variable name')
+    return name
+
+
+def _pmf_domains(raw: Any) -> tuple[list[str], dict[str, list[str]], list[tuple[str, ...]]]:
+    require(type(raw) is dict and 1 <= len(raw) <= 8, 'Need 1 to 8 finite PMF variables')
+    names: list[str] = []
+    domains: dict[str, list[str]] = {}
+    sample_size = 1
+    for raw_name, raw_values in raw.items():
+        name = _pmf_name(raw_name)
+        require(name not in domains, 'Duplicate PMF variable name')
+        require(type(raw_values) is list and 1 <= len(raw_values) <= 64,
+                'Each PMF variable needs 1 to 64 outcomes')
+        values = [text(value, 100) for value in raw_values]
+        require(len(set(values)) == len(values), 'Duplicate PMF outcome')
+        sample_size *= len(values)
+        require(sample_size <= 256, 'Finite PMF sample-space limit exceeded')
+        names.append(name)
+        domains[name] = values
+    states = list(product(*(domains[name] for name in names)))
+    return names, domains, states
+
+
+def _pmf_assignment(value: Any, names: list[str], domains: dict[str, list[str]],
+                    *, partial: bool) -> tuple[str, ...] | dict[str, str]:
+    require(type(value) is dict, 'PMF assignment must be an object')
+    keys = set(value)
+    require(keys <= set(names), 'Unknown PMF variable')
+    if not partial:
+        require(keys == set(names), 'PMF assignment must name every variable')
+    parsed: dict[str, str] = {}
+    for name, outcome in value.items():
+        require(type(name) is str and name in domains, 'Unknown PMF variable')
+        label = text(outcome, 100)
+        require(label in domains[name], 'PMF outcome outside declared domain')
+        parsed[name] = label
+    if partial:
+        return parsed
+    return tuple(parsed[name] for name in names)
+
+
+def _finite_pmf_bound(spec: Any, witness: Any) -> dict:
+    require(type(spec) is dict, 'Formalization must be an object')
+    operation = spec.get('operation')
+    if operation == 'probability':
+        fields(spec, {'kind', 'operation', 'domains', 'event', 'relation', 'bound'})
+    elif operation == 'expectation':
+        fields(spec, {'kind', 'operation', 'domains', 'payoffs', 'relation', 'bound'})
+    else:
+        require(False, 'Unsupported finite PMF operation')
+    require(spec['kind'] == 'finite_pmf_bound', 'Formalization type mismatch')
+    require(spec['relation'] in ('at_most', 'at_least'), 'Unsupported PMF bound relation')
+    bound = rational(spec['bound'])
+    names, domains, states = _pmf_domains(spec['domains'])
+    if operation == 'probability':
+        require(0 <= bound <= 1, 'Probability bound must lie in [0,1]')
+
+    fields(witness, {'kind', 'atoms'})
+    require(witness['kind'] == spec['kind'], 'Witness type mismatch')
+    atoms = witness['atoms']
+    require(type(atoms) is list and 1 <= len(atoms) <= 256, 'Invalid finite PMF support')
+    masses: dict[tuple[str, ...], F] = {}
+    total = F(0)
+    for atom in atoms:
+        fields(atom, {'assignment', 'probability'})
+        state = _pmf_assignment(atom['assignment'], names, domains, partial=False)
+        require(state not in masses, 'Duplicate PMF support atom')
+        mass = rational(atom['probability'])
+        require(0 < mass <= 1, 'PMF support masses must lie in (0,1]')
+        masses[state] = mass
+        total = bounded_fraction(total + mass)
+    require(total == 1, 'PMF support masses must sum exactly to one')
+
+    if operation == 'probability':
+        events = spec['event']
+        require(type(events) is list and len(events) <= 64, 'Too many PMF event clauses')
+        clauses = [_pmf_assignment(clause, names, domains, partial=True) for clause in events]
+        value = F(0)
+        for state, mass in masses.items():
+            env = dict(zip(names, state))
+            if any(all(env[name] == outcome for name, outcome in clause.items())
+                   for clause in clauses):
+                value = bounded_fraction(value + mass)
+        arithmetic = 'event_probability'
+        result_detail: dict[str, Any] = {
+            'event_union': clauses,
+        }
+        predicate = 'finite_pmf_event_probability_violates_bound'
+    else:
+        payoffs = spec['payoffs']
+        require(type(payoffs) is list and len(payoffs) == len(states),
+                'Payoff table must cover the complete finite sample space')
+        payoff_by_state: dict[tuple[str, ...], F] = {}
+        for row in payoffs:
+            fields(row, {'assignment', 'value'})
+            state = _pmf_assignment(row['assignment'], names, domains, partial=False)
+            require(state not in payoff_by_state, 'Duplicate payoff assignment')
+            payoff_by_state[state] = rational(row['value'])
+        require(set(payoff_by_state) == set(states),
+                'Payoff table must cover every finite sample-space state exactly once')
+        value = F(0)
+        for state, mass in masses.items():
+            term = bounded_fraction(mass * payoff_by_state[state])
+            value = bounded_fraction(value + term)
+        arithmetic = 'expected_payoff'
+        result_detail = {'payoff_states': len(payoff_by_state)}
+        predicate = 'finite_pmf_expected_payoff_violates_bound'
+
+    margin = bounded_fraction(value - bound)
+    violates = margin > 0 if spec['relation'] == 'at_most' else margin < 0
+    detail = {
+        'operation': arithmetic,
+        'sample_space_size': len(states),
+        'positive_mass_atom_count': len(masses),
+        'total_probability_exact': str(total),
+        'quantity_exact': str(value),
+        'relation': spec['relation'],
+        'bound_exact': str(bound),
+        'signed_margin_exact': str(margin),
+        'omitted_states_have_probability': '0',
+        'empirical_or_generalized_conclusion': 'NOT_ESTABLISHED_BY_THIS_CHECKER',
+        **result_detail,
+    }
+    return {
+        'status': 'REFUTED_FOR_FORMALIZATION' if violates else 'NO_REFUTATION_AT_WITNESS',
+        'left': None,
+        'upper_bound': None,
+        'margin': None,
+        'detail': detail,
+        'predicate': predicate,
+        'scope': ('Exact arithmetic for the supplied finite PMF and formalization only; '
+                  'empirical validity and population/generalized conclusions are not established.'),
+    }
 
 
 def _polynomial(spec: dict, witness: Any) -> dict:
