@@ -13,6 +13,7 @@ KINDS = {
     'finite_field_polynomial_residue',
     'finite_field_quadratic_quartic_residue_rule',
     'finite_map_fixed_point',
+    'modular_linear_system',
 }
 
 
@@ -48,6 +49,11 @@ def capabilities() -> list[dict[str, Any]]:
             'kind': 'finite_map_fixed_point',
             'proves': 'An explicit finite self-map has no fixed point when the formalized conclusion requires one.',
             'limits': 'Checks the finite-map conclusion only; theorem premises must be verified separately.',
+        },
+        {
+            'kind': 'modular_linear_system',
+            'proves': 'Proves solvability with a solution vector and inconsistency with a left-annihilator certificate.',
+            'limits': 'Modulus 2..4096; at most 16 equations and 16 variables; verifies certificates only.',
         },
     ]
 
@@ -100,6 +106,8 @@ def check(formalization: Any, witness: Any, digits: int = 40) -> dict:
         return _finite_field_polynomial_residue(formalization, witness)
     if kind == 'finite_field_quadratic_quartic_residue_rule':
         return _finite_field_quadratic_quartic_residue_rule(formalization, witness)
+    if kind == 'modular_linear_system':
+        return _modular_linear_system(formalization, witness)
     return _finite_map_fixed_point(formalization, witness)
 
 
@@ -320,6 +328,75 @@ def _finite_field_quadratic_quartic_residue_rule(spec: dict, witness: Any) -> di
         'expected_residues_for_class': allowed,
         'enumeration_size': p ** len(variables),
     }, 'solution_count_residue_matches_quadratic_quartic_power_class_rule')
+
+
+def _modular_linear_system(spec: dict, witness: Any) -> dict:
+    """Verify a modular solution or a separating left-annihilator certificate.
+
+    An annihilator y proves A x = b (mod m) impossible when y^T A = 0
+    (mod m) and y^T b != 0 (mod m). This implication holds for composite m too.
+    """
+    fields(spec, {'kind', 'modulus', 'matrix', 'rhs', 'conclusion'})
+    fields(witness, {'kind', 'certificate'})
+    require(witness['kind'] == spec['kind'], 'Witness type mismatch')
+
+    modulus = integer(spec['modulus'], 2, 4096)
+    raw_matrix = spec['matrix']
+    require(type(raw_matrix) is list and 1 <= len(raw_matrix) <= 16,
+            'Invalid modular matrix row count')
+    require(all(type(row) is list for row in raw_matrix), 'Invalid modular matrix row')
+    columns = len(raw_matrix[0])
+    require(1 <= columns <= 16 and all(len(row) == columns for row in raw_matrix),
+            'Invalid modular matrix column count')
+    matrix = [[integer(value, -10**9, 10**9) % modulus for value in row]
+              for row in raw_matrix]
+    rhs = spec['rhs']
+    require(type(rhs) is list and len(rhs) == len(matrix), 'RHS length must match matrix rows')
+    rhs_mod = [integer(value, -10**9, 10**9) % modulus for value in rhs]
+    conclusion = spec['conclusion']
+    require(type(conclusion) is str and conclusion in ('has_solution', 'no_solution'),
+            'Unsupported modular-system conclusion')
+
+    certificate = witness['certificate']
+    fields(certificate, {'type', 'vector'})
+    certificate_type = certificate['type']
+    require(type(certificate_type) is str and certificate_type in ('solution', 'annihilator'),
+            'Unsupported modular-system certificate')
+    raw_vector = certificate['vector']
+    expected_length = columns if certificate_type == 'solution' else len(matrix)
+    require(type(raw_vector) is list and len(raw_vector) == expected_length,
+            'Certificate vector dimension mismatch')
+    vector = [integer(value, -10**9, 10**9) % modulus for value in raw_vector]
+
+    detail: dict[str, Any] = {
+        'modulus': modulus,
+        'equation_count': len(matrix),
+        'variable_count': columns,
+        'certificate_type': certificate_type,
+        'certificate_vector_mod_m': vector,
+        'formalized_conclusion': conclusion,
+    }
+    if certificate_type == 'solution':
+        lhs_mod = [sum(a * x for a, x in zip(row, vector)) % modulus for row in matrix]
+        require(lhs_mod == rhs_mod, 'Solution certificate does not satisfy the system')
+        certified_conclusion = 'has_solution'
+        detail['left_hand_side_mod_m'] = lhs_mod
+        detail['right_hand_side_mod_m'] = rhs_mod
+    else:
+        annihilator_mod = [sum(vector[i] * matrix[i][j] for i in range(len(matrix))) % modulus
+                           for j in range(columns)]
+        separating_rhs_mod = sum(y * b for y, b in zip(vector, rhs_mod)) % modulus
+        require(all(value == 0 for value in annihilator_mod),
+                'Annihilator certificate does not annihilate the matrix')
+        require(separating_rhs_mod != 0, 'Annihilator certificate does not separate the RHS')
+        certified_conclusion = 'no_solution'
+        detail['annihilator_times_matrix_mod_m'] = annihilator_mod
+        detail['annihilator_times_rhs_mod_m'] = separating_rhs_mod
+
+    detail['certified_conclusion'] = certified_conclusion
+    return _predicate(certified_conclusion != conclusion, detail,
+                      'modular_linear_system_conclusion_matches_certificate')
+
 
 def _finite_map_fixed_point(spec: dict, witness: Any) -> dict:
     fields(spec, {'kind', 'universe', 'conclusion'})

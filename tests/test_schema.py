@@ -32,3 +32,15 @@ def test_schema_rejects_numeric_floats_for_claim_bound(bundle):
     root, case, data = bundle
     case['claim']['formalization']['upper_bound'] = 0.5
     assert list(VALIDATOR.iter_errors(case))
+
+
+def test_schema_accepts_bounded_modular_linear_system(bundle):
+    root, case, data = bundle
+    case['claim']['formalization'] = {
+        'kind': 'modular_linear_system', 'modulus': 6, 'matrix': [[2]],
+        'rhs': [1], 'conclusion': 'no_solution',
+    }
+    assert not list(VALIDATOR.iter_errors(case))
+
+    case['claim']['formalization']['modulus'] = 1
+    assert list(VALIDATOR.iter_errors(case))

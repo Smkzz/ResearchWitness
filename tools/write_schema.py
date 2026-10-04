@@ -128,7 +128,17 @@ def make():
         'universe': arr(text(100), 1, 256),
         'conclusion': enum('has_fixed_point'),
     })
-    defs['formalization'] = {'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule, finite_map]}
+    modular_value = {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000}
+    modular = obj({
+        'kind': enum('modular_linear_system'),
+        'modulus': {'type': 'integer', 'minimum': 2, 'maximum': 4096},
+        'matrix': arr(arr(modular_value, 1, 16), 1, 16),
+        'rhs': arr(modular_value, 1, 16),
+        'conclusion': enum('has_solution', 'no_solution'),
+    })
+    defs['formalization'] = {
+        'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule, finite_map, modular]
+    }
 
     case = obj({
         'schema_version': enum('1.0'),

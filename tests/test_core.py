@@ -492,6 +492,90 @@ def test_finite_map_must_be_self_map():
         check(spec, {'kind': 'finite_map_fixed_point', 'mapping': {'0': '1', '1': '2'}})
 
 
+def modular_system_spec(conclusion='no_solution'):
+    return {
+        'kind': 'modular_linear_system',
+        'modulus': 6,
+        'matrix': [[2]],
+        'rhs': [1],
+        'conclusion': conclusion,
+    }
+
+
+def test_modular_linear_annihilator_proves_inconsistency_over_composite_modulus():
+    result = check(modular_system_spec(), {
+        'kind': 'modular_linear_system',
+        'certificate': {'type': 'annihilator', 'vector': [3]},
+    })
+    assert result['status'] == 'NO_REFUTATION_AT_WITNESS'
+    assert result['detail']['annihilator_times_matrix_mod_m'] == [0]
+    assert result['detail']['annihilator_times_rhs_mod_m'] == 3
+    assert result['detail']['certified_conclusion'] == 'no_solution'
+
+
+def test_modular_linear_solution_refutes_no_solution_claim():
+    spec = modular_system_spec()
+    spec['rhs'] = [2]
+    result = check(spec, {
+        'kind': 'modular_linear_system',
+        'certificate': {'type': 'solution', 'vector': [1]},
+    })
+    assert result['status'] == 'REFUTED_FOR_FORMALIZATION'
+    assert result['detail']['left_hand_side_mod_m'] == [2]
+    assert result['detail']['right_hand_side_mod_m'] == [2]
+
+
+def test_modular_linear_certificate_refutes_opposite_claim():
+    result = check(modular_system_spec('has_solution'), {
+        'kind': 'modular_linear_system',
+        'certificate': {'type': 'annihilator', 'vector': [3]},
+    })
+    assert result['status'] == 'REFUTED_FOR_FORMALIZATION'
+    assert result['detail']['certified_conclusion'] == 'no_solution'
+
+
+@pytest.mark.parametrize('spec,witness', [
+    (modular_system_spec(), {
+        'kind': 'modular_linear_system',
+        'certificate': {'type': 'annihilator', 'vector': [1]},
+    }),
+    (modular_system_spec(), {
+        'kind': 'modular_linear_system',
+        'certificate': {'type': 'solution', 'vector': [0]},
+    }),
+])
+def test_modular_linear_invalid_certificates_rejected(spec, witness):
+    with pytest.raises(Invalid):
+        check(spec, witness)
+
+
+def test_modular_linear_contract_and_resource_limits_fail_closed():
+    spec = modular_system_spec()
+    spec['extra'] = True
+    with pytest.raises(Invalid, match='Unknown field'):
+        check(spec, {
+            'kind': 'modular_linear_system',
+            'certificate': {'type': 'annihilator', 'vector': [3]},
+        })
+
+    spec = modular_system_spec()
+    spec['matrix'] = [[1] for _ in range(17)]
+    spec['rhs'] = [0] * 17
+    with pytest.raises(Invalid, match='row count'):
+        check(spec, {
+            'kind': 'modular_linear_system',
+            'certificate': {'type': 'annihilator', 'vector': [1] * 17},
+        })
+
+    spec = modular_system_spec()
+    spec['modulus'] = 4097
+    with pytest.raises(Invalid, match='outside allowed bounds'):
+        check(spec, {
+            'kind': 'modular_linear_system',
+            'certificate': {'type': 'annihilator', 'vector': [3]},
+        })
+
+
 def elliptic_power_rule_spec():
     return {
         'kind': 'finite_field_quadratic_quartic_residue_rule',

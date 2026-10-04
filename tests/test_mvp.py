@@ -56,6 +56,22 @@ def test_prepare_and_verify_agent_intake(tmp_path):
     assert report['formalization_result']['detail']['fixed_points'] == []
 
 
+def test_modular_linear_system_routes_through_agent_intake(tmp_path):
+    doc = intake_doc()
+    doc['claim']['formalization'] = {
+        'kind': 'modular_linear_system', 'modulus': 6, 'matrix': [[2]],
+        'rhs': [2], 'conclusion': 'no_solution',
+    }
+    doc['witness'] = {
+        'kind': 'modular_linear_system',
+        'certificate': {'type': 'solution', 'vector': [1]},
+    }
+    bundle = prepare(write_intake(tmp_path, doc), tmp_path / 'bundle')
+    report = evaluate(bundle, TODAY)
+    assert report['decision'] == 'FORMALIZATION_COUNTEREXAMPLE_VERIFIED'
+    assert report['formalization_result']['detail']['certified_conclusion'] == 'has_solution'
+
+
 def test_ambiguous_quote_requires_offset(tmp_path):
     doc = intake_doc()
     (tmp_path / 'source.txt').write_text('Every qualifying map has a fixed point.\nEvery qualifying map has a fixed point.\n')
@@ -109,8 +125,12 @@ def test_html_report_escapes_untrusted_text(tmp_path):
 def test_capabilities_cli_lists_new_checkers():
     out = subprocess.run([sys.executable, '-m', 'researchwitness', 'capabilities'],
                          capture_output=True, text=True, check=True)
-    kinds = {x['kind'] for x in json.loads(out.stdout)['checkers']}
-    assert {'finite_field_polynomial_residue', 'finite_map_fixed_point'} <= kinds
+    checkers = json.loads(out.stdout)['checkers']
+    kinds = {x['kind'] for x in checkers}
+    assert {'finite_field_polynomial_residue', 'finite_map_fixed_point', 'modular_linear_system'} <= kinds
+    modular = next(x for x in checkers if x['kind'] == 'modular_linear_system')
+    assert 'left-annihilator' in modular['proves']
+    assert 'at most 16 equations and 16 variables' in modular['limits']
 
 
 def test_audit_cli_creates_bundle_and_html(tmp_path):

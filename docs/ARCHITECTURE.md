@@ -57,7 +57,7 @@ Verifier kinds are allowlisted by `checkers.KINDS`. Each checker must:
 5. enforce a computational work budget;
 6. avoid importing or executing case-supplied code.
 
-The finite-field plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.”
+The finite-field and modular linear-system plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.” The modular linear-system checker verifies either an exact solution or a left-annihilator certificate, including over composite moduli.
 
 ## Contact readiness
 
