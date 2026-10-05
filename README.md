@@ -3,46 +3,75 @@
 [![CI](https://github.com/Smkzz/ResearchWitness/actions/workflows/ci.yml/badge.svg)](https://github.com/Smkzz/ResearchWitness/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Smkzz/ResearchWitness/actions/workflows/codeql.yml/badge.svg)](https://github.com/Smkzz/ResearchWitness/actions/workflows/codeql.yml)
 
-**Agent-oriented, deterministic evidence capsules for scientific claim verification.**
+**Open-source research verification for published scientific papers.**
 
-ResearchWitness is an open-source Python tool for the QEH-style workflow: a research agent identifies a narrow, testable claim and proposes a counterexample; ResearchWitness independently replays the formalized claim with an allowlisted deterministic verifier, binds the result to source/evidence bytes, and produces a scoped evidence capsule.
+ResearchWitness is being built around a simple goal: **give it a research paper and have it independently check the work for things that may not add up.**
 
-It is intentionally **not** an AI that declares whole papers wrong. A positive result means only that the supplied witness contradicts the supplied formalization.
+That can include incorrect calculations, claims that are not supported by the presented evidence, contradictions inside the paper, reproducibility problems, and other anomalies worth a closer look. When ResearchWitness finds something, the goal is not just to flag it, but to produce a reproducible trail showing what was checked and why it was flagged.
+
+The current software is an early step toward that goal. Today, ResearchWitness can rigorously verify certain narrow, formalized claims after an investigator or research agent has extracted the claim and supplied a possible counterexample. It does **not yet** take an arbitrary paper and fact-check the whole thing automatically.
+
+That is a current capability limit, not the product goal.
 
 **Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
 
 ## Status
 
-This branch is an **unreleased verifier-wave candidate**, not a public release. The frozen 15-corrigendum screen remains unchanged. Its post-wave mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. This is not a 15-paper discovery benchmark, and no sealed holdout has been evaluated. Unsupported mathematics fails closed.
+This branch is an **unreleased verifier-wave candidate**, not a public release. The current implementation is the verification core of the larger ResearchWitness idea; end-to-end paper ingestion, automatic claim discovery, and broad anomaly detection are still under development.
 
-Use it to verify **explicit formalization/witness pairs**, not to infer that an entire paper, author, or research program is wrong.
+The frozen 15-corrigendum screen remains unchanged. Its post-wave mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. This is not yet a 15-paper discovery benchmark, and no sealed holdout has been evaluated. Unsupported mathematics fails closed.
+
+For now, use it to verify **explicit formalization/witness pairs**. A verified anomaly is evidence about a specific checked claim; it is not automatically a verdict on an entire paper, an author, or misconduct.
 
 See [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-## MVP product loop
+## What we are building
+
+The intended product is easy to explain:
+
+```text
+research paper
+      |
+      v
+ResearchWitness
+  - reads the paper
+  - identifies important checkable claims
+  - looks for calculations, evidence or results that may not add up
+  - independently checks what it can
+  - separates verified findings from unresolved suspicions
+      |
+      v
+reproducible verification report
+```
+
+The aim is not to replace peer review or to label papers as simply "true" or "false". The aim is to make independent checking easier, faster, and reproducible.
+
+## Current MVP loop
+
+Today, the discovery step is still external to the deterministic core:
 
 ```text
 paper / source text
        |
        v
-research agent
+investigator / research agent
   - extracts one atomic claim
-  - searches for a witness
-  - records assumptions/objections
+  - searches for a possible counterexample
+  - records assumptions and objections
        |
        v
-agent intake JSON
+structured intake
        |
        v
 ResearchWitness
-  - prepares immutable evidence bundle
-  - routes to deterministic verifier
-  - replays witness exactly
+  - prepares an immutable evidence bundle
+  - routes the claim to a deterministic verifier
+  - replays the proposed witness exactly
   - hashes source + evidence
   - preserves unresolved objections
        |
        +--> JSON evidence report
-       +--> private deterministic ZIP
+       +--> deterministic ZIP
        +--> static HTML report
        +--> contact readiness: READY_FOR_USER_REVIEW / NOT_READY
        +--> conservative author-inquiry draft (user review required)
@@ -52,9 +81,11 @@ ResearchWitness never sends mail, publishes accusations, infers misconduct, or a
 
 ## Why this split exists
 
-LLMs and research agents are good at flexible tasks such as reading papers, reconstructing claims, proposing attacks, searching for counterexamples, and noticing inconsistencies. They are not proof certificates.
+Finding a possible problem and proving that the problem is real are different jobs.
 
-ResearchWitness therefore treats the agent as an **untrusted investigator** and the checker as a **small deterministic replay layer**. The useful output is not “the AI says this paper is wrong,” but something like:
+Flexible research tools can read papers, reconstruct claims, search for counterexamples, and notice inconsistencies. ResearchWitness then treats those proposed findings as untrusted until a smaller deterministic checker can reproduce them.
+
+That separation is important because the useful output is not “a tool says this paper is wrong.” It is a specific, inspectable result such as:
 
 ```text
 FORMALIZATION_COUNTEREXAMPLE_VERIFIED
@@ -296,9 +327,13 @@ The verifier has no runtime dependencies outside Python's standard library.
 
 ## Current product boundary
 
-The MVP deliberately does **not** bundle an LLM provider or paid API. The intended user is a research agent/harness that can read literature and produce the structured intake. This keeps the OSS core model-agnostic and usable with subscription-based agent workflows.
+The current open-source core starts **after** a paper has been read and a specific claim has been selected for checking. It deliberately does not bundle a paid model provider or API, so the verification layer remains model-agnostic and reproducible.
 
-The next product step is broader verifier coverage and a frozen discovery benchmark on unseen historical corrections—not a larger marketing surface. See the public [`roadmap`](docs/ROADMAP.md).
+This is an implementation boundary, not the intended final product boundary.
+
+The direction for ResearchWitness is to move progressively closer to the full workflow: ingest a public research paper, identify claims worth checking, search for anomalies, verify supported findings with reproducible methods, and return a clear report that distinguishes confirmed problems from unresolved questions.
+
+The next steps are broader verifier coverage, stronger paper ingestion and claim extraction, anomaly discovery, and a frozen benchmark on unseen historical corrections. See the public [`roadmap`](docs/ROADMAP.md).
 
 ## License
 
