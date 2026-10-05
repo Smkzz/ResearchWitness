@@ -1,12 +1,13 @@
 """Low-friction agent intake for building strict evidence bundles."""
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 from typing import Any
 
-from .strict import Bundle, byte_hash, canonical, fields, loads, relative_path, require, text
+from .strict import Bundle, Invalid, byte_hash, canonical, fields, loads, relative_path, require, text
 from .capsule import SCHEMA_VERSION, validate_case
-from .checkers import KINDS
+from .checkers import KINDS, check
 
 INTAKE_VERSION = '0.1'
 
@@ -54,6 +55,49 @@ def validate_intake(doc: Any) -> None:
         relative_path(item)
 
 
+def _quote_offset(claim: dict, source_bytes: bytes) -> int:
+    quote = claim['quote'].encode('utf-8')
+    if 'quote_offset' in claim:
+        offset = claim['quote_offset']
+        require(type(offset) is int and 0 <= offset <= len(source_bytes), 'Invalid quote offset')
+        require(source_bytes[offset:offset + len(quote)] == quote, 'Quote does not match supplied offset')
+        return offset
+    first = source_bytes.find(quote)
+    require(first >= 0, 'Claim quote not found in source text')
+    require(source_bytes.find(quote, first + 1) < 0, 'Claim quote is ambiguous; supply quote_offset')
+    return first
+
+
+def validate_intake_file(intake_path: Path | str) -> dict[str, Any]:
+    """Validate an intake and its local artifacts without writing an evidence bundle."""
+    intake_path = Path(intake_path).absolute()
+    base = intake_path.parent
+    doc = loads(Bundle(base).read(intake_path.name, 2 * 1024 * 1024))
+    validate_intake(doc)
+    source_bytes = _read_relative(base, doc['source']['text_file'])
+    _read_relative(base, doc['source']['correction_check']['evidence_file'])
+    for name in doc.get('notes_files', []):
+        _read_relative(base, name)
+    _quote_offset(doc['claim'], source_bytes)
+    checked_on = doc['source']['correction_check']['checked_on']
+    require(type(checked_on) is str and len(checked_on) == 10
+            and checked_on[4] == '-' and checked_on[7] == '-',
+            'Expected ISO correction-check date')
+    try:
+        date.fromisoformat(checked_on)
+    except (TypeError, ValueError) as exc:
+        raise Invalid('Invalid correction-check date') from exc
+    result = check(doc['claim']['formalization'], doc['witness'])
+    return {
+        'valid': True,
+        'case_id': doc['case_id'],
+        'verifier_kind': doc['claim']['formalization']['kind'],
+        'witness_status': result['status'],
+        'source_anchor': 'VERIFIED_IN_SUPPLIED_BYTES',
+        'source_provenance': 'NOT_AUTHENTICATED',
+    }
+
+
 def prepare(intake_path: Path | str, output: Path | str) -> Path:
     """Convert a convenient agent intake into the strict ResearchWitness bundle format."""
     intake_path = Path(intake_path).absolute()
@@ -67,16 +111,7 @@ def prepare(intake_path: Path | str, output: Path | str) -> Path:
     correction_bytes = _read_relative(base, doc['source']['correction_check']['evidence_file'])
     witness_bytes = canonical(doc['witness']) + b'\n'
 
-    quote = doc['claim']['quote'].encode('utf-8')
-    if 'quote_offset' in doc['claim']:
-        offset = doc['claim']['quote_offset']
-        require(type(offset) is int and 0 <= offset <= len(source_bytes), 'Invalid quote offset')
-        require(source_bytes[offset:offset + len(quote)] == quote, 'Quote does not match supplied offset')
-    else:
-        first = source_bytes.find(quote)
-        require(first >= 0, 'Claim quote not found in source text')
-        require(source_bytes.find(quote, first + 1) < 0, 'Claim quote is ambiguous; supply quote_offset')
-        offset = first
+    offset = _quote_offset(doc['claim'], source_bytes)
 
     artifacts: dict[str, bytes] = {
         'source.txt': source_bytes,

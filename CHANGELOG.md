@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0.dev0 — verifier-wave integration candidate — unreleased
+
+- Added bounded rational-expression, finite-graph coloring, finite-PMF probability/expectation, and modular linear-system verifiers.
+- Added per-family exact resource contracts and replayable synthetic examples to `capabilities --json`.
+- Added agent-intake JSON Schema, packaged schema access, synthetic `scaffold`, and read-only `validate-intake` CLI commands.
+- Fixed multiline intake values from reshaping generated contact drafts by rendering claim and scope as quoted blocks and normalizing subject fields to one line.
+- Preserved the frozen 15-case screen and added a separate post-wave representability review; no sealed holdout or new-paper discovery evaluation is claimed.
+- This development candidate is not a published release. See `docs/ROADMAP.md` for the release gate.
+
 ## 0.2.0 — 2026-10-04 — MVP research preview
 
 ### Product workflow

@@ -1,0 +1,114 @@
+{
+  "classification": "BOUNDED CHECKER PERFORMANCE PROFILE, NOT SCIENTIFIC DISCOVERY EVALUATION",
+  "measured_at_utc": "2026-10-04T23:34:51+00:00",
+  "python": "3.12.14",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "core_sha256": "5e05ce515b777de8025c4deb28241de948141880d1efab003864b2ec193d936a",
+  "repeats_per_workload": 3,
+  "results": [
+    {
+      "name": "scalar_radical_32_terms",
+      "workload": "32 radical terms; exact rational inputs; 40-digit certified enclosures",
+      "formalization_witness_sha256": "a942fe586ede697a5511527ff71a91d9faf5f07e4e030167f489e1a74430b3f0",
+      "expected_checker_kind": "scalar_radical_comparison",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 0.686,
+      "minimum_ms": 0.684,
+      "maximum_ms": 0.69
+    },
+    {
+      "name": "polynomial_8_variables_64_terms",
+      "workload": "8 variables; 64 degree-1 terms; exact rational point",
+      "formalization_witness_sha256": "601adde95c9ffbd6abada181ef0d3c4bf38d1f472f4d381c0f96bfc66333a332",
+      "expected_checker_kind": "polynomial_upper_bound",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 0.527,
+      "minimum_ms": 0.498,
+      "maximum_ms": 1.794
+    },
+    {
+      "name": "rational_expression_255_nodes",
+      "workload": "255 expression nodes; depth 8; exact rational values",
+      "formalization_witness_sha256": "8e89ee304149596b989cca9c3aba802cea1734514751a56686914f60ac78d953",
+      "expected_checker_kind": "rational_expression_upper_bound",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 0.687,
+      "minimum_ms": 0.677,
+      "maximum_ms": 0.729
+    },
+    {
+      "name": "finite_map_256_elements",
+      "workload": "256-element explicit self-map",
+      "formalization_witness_sha256": "5d70d1a0c8d7e0015b04815413f5fa808d90b5c44c6b46c7f10f9314964af95d",
+      "expected_checker_kind": "finite_map_fixed_point",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 0.902,
+      "minimum_ms": 0.897,
+      "maximum_ms": 0.975
+    },
+    {
+      "name": "finite_graph_256_vertices_8192_edges",
+      "workload": "256 vertices; 8,192 edges; supplied proper 2-coloring",
+      "formalization_witness_sha256": "c9bc690e2b7b7c78fc313bbdab7404ce581952baefd8301497ae47ab1d8334dd",
+      "expected_checker_kind": "finite_graph_chromatic_lower_bound",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 19.594,
+      "minimum_ms": 19.409,
+      "maximum_ms": 26.163
+    },
+    {
+      "name": "finite_pmf_256_states_64_clauses",
+      "workload": "8 binary variables; 256 joint states; 64 event clauses",
+      "formalization_witness_sha256": "c51a3bb725e2a9945fc8454588961d33a81bcc1f9daa3d28f05d7eb7c29bb694",
+      "expected_checker_kind": "finite_pmf_bound",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 6.704,
+      "minimum_ms": 6.639,
+      "maximum_ms": 8.308
+    },
+    {
+      "name": "modular_system_16_by_16",
+      "workload": "modulus 4,096; 16 equations; 16 variables; 256 matrix entries",
+      "formalization_witness_sha256": "6e9b52b6c088b8390ca634ef0dff1e8dd77b4e9d37245800921c258cae1ac36b",
+      "expected_checker_kind": "modular_linear_system",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 0.052,
+      "minimum_ms": 0.049,
+      "maximum_ms": 0.069
+    },
+    {
+      "name": "finite_field_4_3m_term_evaluations",
+      "workload": "113^3 = 1,442,897 points; 3 terms; 4,328,691 point-term evaluations",
+      "formalization_witness_sha256": "1009f9b92b51b9b8aae2f8d77f0d79af1e45fd70398e5d545c9f88832b0f338e",
+      "expected_checker_kind": "finite_field_polynomial_residue",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 915.514,
+      "minimum_ms": 895.109,
+      "maximum_ms": 988.624
+    },
+    {
+      "name": "finite_field_power_rule_4_3m_term_evaluations",
+      "workload": "113^3 = 1,442,897 points; 3 terms; 4,328,691 point-term evaluations",
+      "formalization_witness_sha256": "42d87d766181804887320c01ff3dd8938ac94d03ca7cb8f0d86b715bba327379",
+      "expected_checker_kind": "finite_field_quadratic_quartic_residue_rule",
+      "result_status": "REFUTED_FOR_FORMALIZATION",
+      "repeats": 3,
+      "median_ms": 978.567,
+      "minimum_ms": 965.678,
+      "maximum_ms": 1004.712
+    }
+  ],
+  "limitations": [
+    "Wall times depend on the machine, Python build, and concurrent load.",
+    "The workloads target checker limits and do not measure agent discovery or source interpretation.",
+    "Resource caps, not these wall-time samples, define accepted input size."
+  ]
+}

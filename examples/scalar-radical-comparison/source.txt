@@ -1,0 +1,2 @@
+In the supplied exact comparison, sqrt(2) is at most 1.
+SYNTHETIC CHECKER FIXTURE, NOT A PUBLISHED CLAIM.

@@ -1,0 +1,2 @@
+For c = 0 over F_3, the solution-count residue modulo 2 is 0.
+SYNTHETIC CHECKER FIXTURE, NOT A PUBLISHED CLAIM.

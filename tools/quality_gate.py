@@ -45,7 +45,26 @@ def scan_core() -> None:
                 if root in BANNED_IMPORT_ROOTS:
                     raise RuntimeError(f'banned import in trusted core: {path.name}: {root}')
             elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in BANNED_CALLS:
-                raise RuntimeError(f'banned dynamic call in trusted core: {path.name}: {node.func.id}')
+                    raise RuntimeError(f'banned dynamic call in trusted core: {path.name}: {node.func.id}')
+
+
+def check_source_checksums() -> None:
+    from tools.make_release import included_files
+
+    manifest = ROOT / 'CHECKSUMS.sha256'
+    recorded = {}
+    for line in manifest.read_text(encoding='utf-8').splitlines():
+        expected, relative = line.split('  ', 1)
+        if relative in recorded:
+            raise RuntimeError(f'duplicate source checksum entry: {relative}')
+        recorded[relative] = expected
+    files = {path.relative_to(ROOT).as_posix(): path
+             for path in included_files(include_checksums=False)}
+    if set(recorded) != set(files):
+        raise RuntimeError('source checksum manifest does not match release-file selection')
+    for relative, path in files.items():
+        if sha256(path) != recorded[relative]:
+            raise RuntimeError(f'source checksum mismatch: {relative}')
 
 
 def main() -> int:
@@ -53,13 +72,29 @@ def main() -> int:
     version = pyproject['project']['version']
     sys.path.insert(0, str(ROOT))
     from researchwitness import VERSION
-    from tools.write_schema import make as make_schema
+    from tools.write_schema import make as make_schema, make_intake_schema
+    from tools.make_examples import build_capability_examples
+    from tools.review_frozen_screen import run as review_frozen_screen
     from benchmarks.run_synthetic import run as run_synthetic
 
     if VERSION != version:
         raise RuntimeError(f'version mismatch: package={VERSION} pyproject={version}')
+    check_source_checksums()
     if json.loads((ROOT / 'schemas/case.schema.json').read_text()) != make_schema():
         raise RuntimeError('generated schema drift')
+    if json.loads((ROOT / 'schemas/intake.schema.json').read_text()) != make_intake_schema():
+        raise RuntimeError('generated intake schema drift')
+    if json.loads((ROOT / 'researchwitness/schemas/case.schema.json').read_text()) != make_schema():
+        raise RuntimeError('packaged case schema drift')
+    if json.loads((ROOT / 'researchwitness/schemas/intake.schema.json').read_text()) != make_intake_schema():
+        raise RuntimeError('packaged intake schema drift')
+    if json.loads((ROOT / 'researchwitness/capability_examples.json').read_text()) != build_capability_examples(ROOT / 'examples'):
+        raise RuntimeError('packaged capability example drift')
+    stored_screen_review = json.loads((ROOT / 'validation/verifier-wave/screening-15-review.json').read_text())
+    fresh_screen_review = review_frozen_screen()
+    for key in ('case_count_by_category', 'cases', 'execution', 'sealed_holdout'):
+        if stored_screen_review[key] != fresh_screen_review[key]:
+            raise RuntimeError(f'frozen-screen review drift: {key}')
     if not compileall.compile_dir(CORE, quiet=1):
         raise RuntimeError('compileall failed')
     scan_core()
@@ -95,6 +130,10 @@ def main() -> int:
                 raise RuntimeError('wheel contains development artifacts')
             if not any(name == 'researchwitness/__main__.py' for name in names):
                 raise RuntimeError('wheel missing CLI module')
+            if 'researchwitness/capability_examples.json' not in names:
+                raise RuntimeError('wheel missing capability example data')
+            if 'researchwitness/schemas/intake.schema.json' not in names:
+                raise RuntimeError('wheel missing agent-intake JSON Schema')
 
         env = temp / 'venv'
         venv.EnvBuilder(with_pip=True, clear=True).create(env)
@@ -110,6 +149,17 @@ def main() -> int:
             raise RuntimeError('installed-wheel smoke check failed')
         if smoke['paper_error_established'] or smoke['external_actions'] != 'OUT_OF_SCOPE':
             raise RuntimeError('scope invariant failed in installed wheel')
+        capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)
+        if len(capabilities['checkers']) != 10:
+            raise RuntimeError('installed capability registry is incomplete')
+        schema = json.loads(run(str(cli), 'schema', 'intake', cwd=temp).stdout)
+        if schema['title'] != 'ResearchWitness agent intake 0.1':
+            raise RuntimeError('installed intake schema command failed')
+        scaffold = temp / 'agent-scaffold'
+        run(str(cli), 'scaffold', 'finite_map_fixed_point', '--output', str(scaffold), cwd=temp)
+        checked = json.loads(run(str(cli), 'validate-intake', str(scaffold / 'audit.json'), cwd=temp).stdout)
+        if checked['valid'] is not True or checked['source_provenance'] != 'NOT_AUTHENTICATED':
+            raise RuntimeError('installed scaffold/validate-intake smoke check failed')
 
         summary = {
             'version': version,
@@ -120,11 +170,16 @@ def main() -> int:
             'mvp_real_cases': real['cases'],
             'mvp_real_matched': real['matched'],
             'trusted_core_static_scan': 'PASS',
+            'source_checksums': 'PASS',
             'schema_drift': 'PASS',
+            'intake_schema_drift': 'PASS',
+            'capability_examples_drift': 'PASS',
+            'frozen_screen_review': 'PASS',
             'compileall': 'PASS',
             'wheel_sha256': sha256(wheel),
             'wheel_reproducible': 'PASS',
             'wheel_install_smoke': 'PASS',
+            'agent_cli_smoke': 'PASS',
             'runtime_dependencies': pyproject['project'].get('dependencies', []),
         }
         print(json.dumps(summary, indent=2))

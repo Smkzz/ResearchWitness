@@ -1,0 +1,1779 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:researchwitness:agent-intake:0.1",
+  "title": "ResearchWitness agent intake 0.1",
+  "description": "Structural validation for agent-prepared intake. The Python validator additionally checks safe local paths, artifact availability, unique quote anchoring, witness semantics, and exact arithmetic.",
+  "type": "object",
+  "properties": {
+    "intake_version": {
+      "enum": [
+        "0.1"
+      ]
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "text_file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "capture_status": {
+          "enum": [
+            "unverified",
+            "captured",
+            "synthetic"
+          ]
+        },
+        "correction_check": {
+          "type": "object",
+          "properties": {
+            "checked_on": {
+              "type": "string",
+              "format": "date",
+              "minLength": 10,
+              "maxLength": 10
+            },
+            "status": {
+              "enum": [
+                "unchecked",
+                "none_found",
+                "present"
+              ]
+            },
+            "evidence_file": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 240
+            }
+          },
+          "required": [
+            "checked_on",
+            "status",
+            "evidence_file"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "identifier",
+        "version",
+        "text_file",
+        "capture_status",
+        "correction_check"
+      ],
+      "additionalProperties": false
+    },
+    "claim": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        },
+        "excluded_claims": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "minItems": 1,
+          "maxItems": 10000
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8000
+        },
+        "quote_offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16777216
+        },
+        "formalization": {
+          "$ref": "#/$defs/formalization"
+        }
+      },
+      "required": [
+        "id",
+        "statement",
+        "scope",
+        "assumptions",
+        "excluded_claims",
+        "quote",
+        "formalization"
+      ],
+      "additionalProperties": false
+    },
+    "witness": {
+      "$ref": "#/$defs/intake_witness"
+    },
+    "unresolved_objections": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "minItems": 0,
+      "maxItems": 10000
+    },
+    "notes_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 240
+      },
+      "minItems": 0,
+      "maxItems": 32
+    }
+  },
+  "required": [
+    "intake_version",
+    "case_id",
+    "source",
+    "claim",
+    "witness",
+    "unresolved_objections"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "scalar_radical_comparison"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "scalar_radical_comparison"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "polynomial_upper_bound"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "polynomial_upper_bound"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "rational_expression_upper_bound"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "rational_expression_upper_bound"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "uc_binary_upper_bound"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "uc_binary_upper_bound"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "finite_field_polynomial_residue"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "finite_field_polynomial_residue"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "finite_field_quadratic_quartic_residue_rule"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "finite_field_quadratic_quartic_residue_rule"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "finite_map_fixed_point"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "finite_map_fixed_point"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "finite_graph_chromatic_lower_bound"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "finite_graph_chromatic_lower_bound"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "finite_pmf_bound"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "finite_pmf_bound"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "claim"
+        ],
+        "properties": {
+          "claim": {
+            "required": [
+              "formalization"
+            ],
+            "properties": {
+              "formalization": {
+                "required": [
+                  "kind"
+                ],
+                "properties": {
+                  "kind": {
+                    "const": "modular_linear_system"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "witness": {
+            "properties": {
+              "kind": {
+                "const": "modular_linear_system"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[A-Za-z0-9_.-]+$"
+    },
+    "rational": {
+      "type": "string",
+      "maxLength": 130,
+      "pattern": "^-?(?:0|[1-9][0-9]{0,63})(?:/[1-9][0-9]{0,63})?$"
+    },
+    "strings": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4000
+      },
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true
+    },
+    "radical": {
+      "type": "object",
+      "properties": {
+        "constant": {
+          "$ref": "#/$defs/rational"
+        },
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "coefficient": {
+                "$ref": "#/$defs/rational"
+              },
+              "radicand": {
+                "$ref": "#/$defs/rational"
+              }
+            },
+            "required": [
+              "coefficient",
+              "radicand"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "constant",
+        "terms"
+      ],
+      "additionalProperties": false
+    },
+    "bounds": {
+      "type": "object",
+      "properties": {
+        "lower": {
+          "$ref": "#/$defs/rational"
+        },
+        "upper": {
+          "$ref": "#/$defs/rational"
+        },
+        "lower_closed": {
+          "type": "boolean"
+        },
+        "upper_closed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "lower",
+        "upper",
+        "lower_closed",
+        "upper_closed"
+      ],
+      "additionalProperties": false
+    },
+    "expression": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "const"
+              ]
+            },
+            "value": {
+              "$ref": "#/$defs/rational"
+            }
+          },
+          "required": [
+            "op",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "var"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 24,
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            }
+          },
+          "required": [
+            "op",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "add"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/expression"
+              },
+              "minItems": 2,
+              "maxItems": 8
+            }
+          },
+          "required": [
+            "op",
+            "args"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "sub"
+              ]
+            },
+            "left": {
+              "$ref": "#/$defs/expression"
+            },
+            "right": {
+              "$ref": "#/$defs/expression"
+            }
+          },
+          "required": [
+            "op",
+            "left",
+            "right"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "mul"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/expression"
+              },
+              "minItems": 2,
+              "maxItems": 8
+            }
+          },
+          "required": [
+            "op",
+            "args"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "div"
+              ]
+            },
+            "left": {
+              "$ref": "#/$defs/expression"
+            },
+            "right": {
+              "$ref": "#/$defs/expression"
+            }
+          },
+          "required": [
+            "op",
+            "left",
+            "right"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "neg"
+              ]
+            },
+            "arg": {
+              "$ref": "#/$defs/expression"
+            }
+          },
+          "required": [
+            "op",
+            "arg"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "enum": [
+                "pow"
+              ]
+            },
+            "base": {
+              "$ref": "#/$defs/expression"
+            },
+            "exponent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 12
+            }
+          },
+          "required": [
+            "op",
+            "base",
+            "exponent"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "formalization": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "scalar_radical_comparison"
+              ]
+            },
+            "left": {
+              "$ref": "#/$defs/radical"
+            },
+            "upper_bound": {
+              "$ref": "#/$defs/radical"
+            }
+          },
+          "required": [
+            "kind",
+            "left",
+            "upper_bound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "polynomial_upper_bound"
+              ]
+            },
+            "domain": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/bounds"
+              }
+            },
+            "terms": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "coefficient": {
+                    "$ref": "#/$defs/rational"
+                  },
+                  "powers": {
+                    "type": "object",
+                    "maxProperties": 8,
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 12
+                    }
+                  }
+                },
+                "required": [
+                  "coefficient",
+                  "powers"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "upper_bound": {
+              "$ref": "#/$defs/rational"
+            }
+          },
+          "required": [
+            "kind",
+            "domain",
+            "terms",
+            "upper_bound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "rational_expression_upper_bound"
+              ]
+            },
+            "domain": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/bounds"
+              }
+            },
+            "expression": {
+              "$ref": "#/$defs/expression"
+            },
+            "upper_bound": {
+              "$ref": "#/$defs/rational"
+            }
+          },
+          "required": [
+            "kind",
+            "domain",
+            "expression",
+            "upper_bound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "uc_binary_upper_bound"
+              ]
+            },
+            "functional": {
+              "enum": [
+                "uc_sqrt_penalty_v1"
+              ]
+            },
+            "upper_bound": {
+              "$ref": "#/$defs/radical"
+            }
+          },
+          "required": [
+            "kind",
+            "functional",
+            "upper_bound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_field_polynomial_residue"
+              ]
+            },
+            "prime": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 251
+            },
+            "variables": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 24,
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "parameters": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 24,
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              },
+              "minItems": 0,
+              "maxItems": 4
+            },
+            "terms": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "coefficient": {
+                    "type": "integer",
+                    "minimum": -1000000000,
+                    "maximum": 1000000000
+                  },
+                  "powers": {
+                    "type": "object",
+                    "maxProperties": 7,
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 12
+                    }
+                  }
+                },
+                "required": [
+                  "coefficient",
+                  "powers"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "point_count_adjustment": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000
+            },
+            "modulus": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 4096
+            },
+            "allowed_residues": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4095
+              },
+              "minItems": 1,
+              "maxItems": 4096
+            }
+          },
+          "required": [
+            "kind",
+            "prime",
+            "variables",
+            "parameters",
+            "terms",
+            "point_count_adjustment",
+            "modulus",
+            "allowed_residues"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_field_quadratic_quartic_residue_rule"
+              ]
+            },
+            "prime": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 251
+            },
+            "variables": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 24,
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              },
+              "minItems": 1,
+              "maxItems": 3
+            },
+            "parameters": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 24,
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              },
+              "minItems": 0,
+              "maxItems": 4
+            },
+            "terms": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "coefficient": {
+                    "type": "integer",
+                    "minimum": -1000000000,
+                    "maximum": 1000000000
+                  },
+                  "powers": {
+                    "type": "object",
+                    "maxProperties": 7,
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 12
+                    }
+                  }
+                },
+                "required": [
+                  "coefficient",
+                  "powers"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "point_count_adjustment": {
+              "type": "integer",
+              "minimum": -1000,
+              "maximum": 1000
+            },
+            "modulus": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 4096
+            },
+            "classification_parameter": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 24,
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+            },
+            "expected_residues": {
+              "type": "object",
+              "properties": {
+                "quartic_residue": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4095
+                  },
+                  "minItems": 1,
+                  "maxItems": 4096
+                },
+                "quadratic_nonquartic": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4095
+                  },
+                  "minItems": 1,
+                  "maxItems": 4096
+                },
+                "quadratic_nonresidue": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4095
+                  },
+                  "minItems": 1,
+                  "maxItems": 4096
+                }
+              },
+              "required": [
+                "quartic_residue",
+                "quadratic_nonquartic",
+                "quadratic_nonresidue"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "prime",
+            "variables",
+            "parameters",
+            "terms",
+            "point_count_adjustment",
+            "modulus",
+            "classification_parameter",
+            "expected_residues"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_map_fixed_point"
+              ]
+            },
+            "universe": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "minItems": 1,
+              "maxItems": 256
+            },
+            "conclusion": {
+              "enum": [
+                "has_fixed_point"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "universe",
+            "conclusion"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_graph_chromatic_lower_bound"
+              ]
+            },
+            "vertices": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "minItems": 1,
+              "maxItems": 256,
+              "uniqueItems": true
+            },
+            "edges": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "minItems": 0,
+              "maxItems": 8192,
+              "uniqueItems": true
+            },
+            "minimum_colors": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            }
+          },
+          "required": [
+            "kind",
+            "vertices",
+            "edges",
+            "minimum_colors"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_pmf_bound"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "probability"
+              ]
+            },
+            "domains": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "minItems": 1,
+                "maxItems": 64,
+                "uniqueItems": true
+              }
+            },
+            "event": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "maxProperties": 8,
+                "propertyNames": {
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+                },
+                "additionalProperties": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "minItems": 0,
+              "maxItems": 64
+            },
+            "relation": {
+              "enum": [
+                "at_most",
+                "at_least"
+              ]
+            },
+            "bound": {
+              "$ref": "#/$defs/rational"
+            }
+          },
+          "required": [
+            "kind",
+            "operation",
+            "domains",
+            "event",
+            "relation",
+            "bound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_pmf_bound"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "expectation"
+              ]
+            },
+            "domains": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "minItems": 1,
+                "maxItems": 64,
+                "uniqueItems": true
+              }
+            },
+            "payoffs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "assignment": {
+                    "type": "object",
+                    "maxProperties": 8,
+                    "propertyNames": {
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "value": {
+                    "$ref": "#/$defs/rational"
+                  }
+                },
+                "required": [
+                  "assignment",
+                  "value"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 256
+            },
+            "relation": {
+              "enum": [
+                "at_most",
+                "at_least"
+              ]
+            },
+            "bound": {
+              "$ref": "#/$defs/rational"
+            }
+          },
+          "required": [
+            "kind",
+            "operation",
+            "domains",
+            "payoffs",
+            "relation",
+            "bound"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "modular_linear_system"
+              ]
+            },
+            "modulus": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 4096
+            },
+            "matrix": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "minItems": 1,
+                "maxItems": 16
+              },
+              "minItems": 1,
+              "maxItems": 16
+            },
+            "rhs": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": -1000000000,
+                "maximum": 1000000000
+              },
+              "minItems": 1,
+              "maxItems": 16
+            },
+            "conclusion": {
+              "enum": [
+                "has_solution",
+                "no_solution"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "modulus",
+            "matrix",
+            "rhs",
+            "conclusion"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "intake_witness": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "scalar_radical_comparison"
+              ]
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "polynomial_upper_bound"
+              ]
+            },
+            "point": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/rational"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "point"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "rational_expression_upper_bound"
+              ]
+            },
+            "point": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 8,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "$ref": "#/$defs/rational"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "point"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "uc_binary_upper_bound"
+              ]
+            },
+            "gamma": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/rational"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "alpha": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/rational"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "b0": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/rational"
+                },
+                "minItems": 4,
+                "maxItems": 4
+              },
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
+          "required": [
+            "kind",
+            "gamma",
+            "alpha",
+            "b0"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_field_polynomial_residue"
+              ]
+            },
+            "parameters": {
+              "type": "object",
+              "maxProperties": 4,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": -1000000000,
+                "maximum": 1000000000
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "parameters"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_field_quadratic_quartic_residue_rule"
+              ]
+            },
+            "parameters": {
+              "type": "object",
+              "maxProperties": 4,
+              "propertyNames": {
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": -1000000000,
+                "maximum": 1000000000
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "parameters"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_map_fixed_point"
+              ]
+            },
+            "mapping": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 256,
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "mapping"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_graph_chromatic_lower_bound"
+              ]
+            },
+            "coloring": {
+              "type": "object",
+              "minProperties": 1,
+              "maxProperties": 256,
+              "propertyNames": {
+                "maxLength": 64
+              },
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "coloring"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "finite_pmf_bound"
+              ]
+            },
+            "atoms": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "assignment": {
+                    "type": "object",
+                    "maxProperties": 8,
+                    "propertyNames": {
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,23}$"
+                    },
+                    "additionalProperties": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "probability": {
+                    "$ref": "#/$defs/rational"
+                  }
+                },
+                "required": [
+                  "assignment",
+                  "probability"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 256
+            }
+          },
+          "required": [
+            "kind",
+            "atoms"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "modular_linear_system"
+              ]
+            },
+            "certificate": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "solution",
+                    "annihilator"
+                  ]
+                },
+                "vector": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": -1000000000,
+                    "maximum": 1000000000
+                  },
+                  "minItems": 1,
+                  "maxItems": 16
+                }
+              },
+              "required": [
+                "type",
+                "vector"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "certificate"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

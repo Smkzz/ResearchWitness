@@ -88,6 +88,24 @@ def make():
     })
     symbol = {'type': 'string', 'minLength': 1, 'maxLength': 24,
               'pattern': '^[A-Za-z_][A-Za-z0-9_]*$'}
+    expression = ref('expression')
+    defs['expression'] = {'oneOf': [
+        obj({'op': enum('const'), 'value': ref('rational')}),
+        obj({'op': enum('var'), 'name': symbol}),
+        obj({'op': enum('add'), 'args': arr(expression, 2, 8)}),
+        obj({'op': enum('sub'), 'left': expression, 'right': expression}),
+        obj({'op': enum('mul'), 'args': arr(expression, 2, 8)}),
+        obj({'op': enum('div'), 'left': expression, 'right': expression}),
+        obj({'op': enum('neg'), 'arg': expression}),
+        obj({'op': enum('pow'), 'base': expression,
+             'exponent': {'type': 'integer', 'minimum': 0, 'maximum': 12}}),
+    ]}
+    rational_expression = obj({
+        'kind': enum('rational_expression_upper_bound'),
+        'domain': domain,
+        'expression': expression,
+        'upper_bound': ref('rational'),
+    })
     ff_powers = {
         'type': 'object', 'maxProperties': 7,
         'additionalProperties': {'type': 'integer', 'minimum': 0, 'maximum': 12},
@@ -128,7 +146,71 @@ def make():
         'universe': arr(text(100), 1, 256),
         'conclusion': enum('has_fixed_point'),
     })
-    defs['formalization'] = {'oneOf': [scalar, polynomial, uc, finite_field, finite_field_power_rule, finite_map]}
+    graph_vertices = {
+        'type': 'array',
+        'items': text(64),
+        'minItems': 1,
+        'maxItems': 256,
+        'uniqueItems': True,
+    }
+    graph_edge = {'type': 'array', 'items': text(64), 'minItems': 2, 'maxItems': 2}
+    graph_edges = {
+        'type': 'array',
+        'items': graph_edge,
+        'minItems': 0,
+        'maxItems': 8192,
+        'uniqueItems': True,
+    }
+    finite_graph = obj({
+        'kind': enum('finite_graph_chromatic_lower_bound'),
+        'vertices': graph_vertices,
+        'edges': graph_edges,
+        'minimum_colors': {'type': 'integer', 'minimum': 1, 'maximum': 256},
+    })
+    pmf_outcomes = arr(text(100), 1, 64)
+    pmf_outcomes['uniqueItems'] = True
+    pmf_domains = {
+        'type': 'object',
+        'minProperties': 1,
+        'maxProperties': 8,
+        'propertyNames': {'pattern': '^[A-Za-z_][A-Za-z0-9_]{0,23}$'},
+        'additionalProperties': pmf_outcomes,
+    }
+    pmf_assignment = {
+        'type': 'object',
+        'maxProperties': 8,
+        'propertyNames': {'pattern': '^[A-Za-z_][A-Za-z0-9_]{0,23}$'},
+        'additionalProperties': text(100),
+    }
+    pmf_probability = obj({
+        'kind': enum('finite_pmf_bound'),
+        'operation': enum('probability'),
+        'domains': pmf_domains,
+        'event': arr(pmf_assignment, 0, 64),
+        'relation': enum('at_most', 'at_least'),
+        'bound': ref('rational'),
+    })
+    pmf_expectation = obj({
+        'kind': enum('finite_pmf_bound'),
+        'operation': enum('expectation'),
+        'domains': pmf_domains,
+        'payoffs': arr(obj({'assignment': pmf_assignment, 'value': ref('rational')}), 1, 256),
+        'relation': enum('at_most', 'at_least'),
+        'bound': ref('rational'),
+    })
+    modular_value = {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000}
+    modular = obj({
+        'kind': enum('modular_linear_system'),
+        'modulus': {'type': 'integer', 'minimum': 2, 'maximum': 4096},
+        'matrix': arr(arr(modular_value, 1, 16), 1, 16),
+        'rhs': arr(modular_value, 1, 16),
+        'conclusion': enum('has_solution', 'no_solution'),
+    })
+    defs['formalization'] = {
+        'oneOf': [scalar, polynomial, rational_expression, uc, finite_field,
+                  finite_field_power_rule, finite_map, finite_graph,
+                  pmf_probability, pmf_expectation, modular]
+    }
 
     case = obj({
         'schema_version': enum('1.0'),
@@ -180,7 +262,126 @@ def make():
     }
 
 
+def make_intake_schema():
+    """Generate the agent-facing intake schema, including all checker witnesses."""
+    capsule = make()
+    defs = capsule['$defs']
+    rational = ref('rational')
+    symbol_pattern = '^[A-Za-z_][A-Za-z0-9_]{0,23}$'
+    variable_values = {
+        'type': 'object', 'minProperties': 1, 'maxProperties': 8,
+        'propertyNames': {'pattern': symbol_pattern}, 'additionalProperties': rational,
+    }
+    finite_parameters = {
+        'type': 'object', 'maxProperties': 4,
+        'propertyNames': {'pattern': symbol_pattern},
+        'additionalProperties': {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000},
+    }
+    pmf_assignment = {
+        'type': 'object', 'maxProperties': 8,
+        'propertyNames': {'pattern': symbol_pattern}, 'additionalProperties': text(100),
+    }
+    witness_schemas = [
+        obj({'kind': enum('scalar_radical_comparison')}, ['kind']),
+        obj({'kind': enum('polynomial_upper_bound'), 'point': variable_values}),
+        obj({'kind': enum('rational_expression_upper_bound'), 'point': variable_values}),
+        obj({'kind': enum('uc_binary_upper_bound'),
+             'gamma': arr(rational, 4, 4), 'alpha': arr(rational, 4, 4),
+             'b0': arr(arr(rational, 4, 4), 4, 4)}),
+        obj({'kind': enum('finite_field_polynomial_residue'), 'parameters': finite_parameters}),
+        obj({'kind': enum('finite_field_quadratic_quartic_residue_rule'), 'parameters': finite_parameters}),
+        obj({'kind': enum('finite_map_fixed_point'),
+             'mapping': {'type': 'object', 'minProperties': 1, 'maxProperties': 256,
+                         'additionalProperties': text(100)}}),
+        obj({'kind': enum('finite_graph_chromatic_lower_bound'),
+             'coloring': {'type': 'object', 'minProperties': 1, 'maxProperties': 256,
+                          'propertyNames': {'maxLength': 64}, 'additionalProperties': text(64)}}),
+        obj({'kind': enum('finite_pmf_bound'),
+             'atoms': arr(obj({'assignment': pmf_assignment, 'probability': rational}), 1, 256)}),
+    ]
+    modular_integer = {'type': 'integer', 'minimum': -1000000000, 'maximum': 1000000000}
+    witness_schemas.append(obj({
+        'kind': enum('modular_linear_system'),
+        'certificate': obj({
+            'type': enum('solution', 'annihilator'),
+            'vector': arr(modular_integer, 1, 16),
+        }),
+    }))
+    defs['intake_witness'] = {'oneOf': witness_schemas}
+
+    path = text(240)
+    date_schema = {'type': 'string', 'format': 'date', 'minLength': 10, 'maxLength': 10}
+    intake = obj({
+        'intake_version': enum('0.1'),
+        'case_id': text(100),
+        'source': obj({
+            'identifier': text(2000), 'version': text(100), 'text_file': path,
+            'capture_status': enum('unverified', 'captured', 'synthetic'),
+            'correction_check': obj({
+                'checked_on': date_schema,
+                'status': enum('unchecked', 'none_found', 'present'),
+                'evidence_file': path,
+            }),
+        }),
+        'claim': obj({
+            'id': text(100), 'statement': text(8000), 'scope': text(4000),
+            'assumptions': arr(text(4000), 1, 10000),
+            'excluded_claims': arr(text(4000), 1, 10000),
+            'quote': text(8000),
+            'quote_offset': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+            'formalization': ref('formalization'),
+        }, required=['id', 'statement', 'scope', 'assumptions', 'excluded_claims', 'quote', 'formalization']),
+        'witness': ref('intake_witness'),
+        'unresolved_objections': arr(text(4000), 0, 10000),
+        'notes_files': arr(path, 0, 32),
+    }, required=['intake_version', 'case_id', 'source', 'claim', 'witness', 'unresolved_objections'])
+
+    kind_names = [
+        'scalar_radical_comparison', 'polynomial_upper_bound', 'rational_expression_upper_bound',
+        'uc_binary_upper_bound', 'finite_field_polynomial_residue',
+        'finite_field_quadratic_quartic_residue_rule', 'finite_map_fixed_point',
+        'finite_graph_chromatic_lower_bound', 'finite_pmf_bound', 'modular_linear_system',
+    ]
+    intake['allOf'] = [
+        {
+            'if': {
+                'required': ['claim'],
+                'properties': {'claim': {
+                    'required': ['formalization'],
+                    'properties': {'formalization': {
+                        'required': ['kind'],
+                        'properties': {'kind': {'const': kind}},
+                    }},
+                }},
+            },
+            'then': {'properties': {'witness': {
+                'properties': {'kind': {'const': kind}},
+            }}},
+        }
+        for kind in kind_names
+    ]
+    return {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': 'urn:researchwitness:agent-intake:0.1',
+        'title': 'ResearchWitness agent intake 0.1',
+        'description': (
+            'Structural validation for agent-prepared intake. The Python validator additionally checks '
+            'safe local paths, artifact availability, unique quote anchoring, witness semantics, and exact arithmetic.'
+        ),
+        **intake,
+        '$defs': defs,
+    }
+
+
 if __name__ == '__main__':
     out = ROOT / 'schemas'
     out.mkdir(exist_ok=True)
-    (out / 'case.schema.json').write_text(json.dumps(make(), indent=2) + '\n')
+    package_out = ROOT / 'researchwitness' / 'schemas'
+    package_out.mkdir(exist_ok=True)
+    for name, schema in (
+        ('case.schema.json', make()),
+        ('intake.schema.json', make_intake_schema()),
+    ):
+        rendered = json.dumps(schema, indent=2) + '\n'
+        (out / name).write_text(rendered, encoding='utf-8')
+        (package_out / name).write_text(rendered, encoding='utf-8')

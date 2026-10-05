@@ -1,0 +1,2 @@
+For c = 1 over F_5, the quadratic/quartic class predicts count residue 1 modulo 2.
+SYNTHETIC CHECKER FIXTURE, NOT A PUBLISHED CLAIM.

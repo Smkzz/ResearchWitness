@@ -1,0 +1,244 @@
+{
+  "title": "ResearchWitness frozen 15-case representability review",
+  "reviewed_at_utc": "2026-10-04T23:34:37+00:00",
+  "candidate_version": "0.3.0.dev0",
+  "assessment_type": "CAPABILITY_REPRESENTABILITY_REVIEW_PLUS_AVAILABLE_FIXTURE_REPLAYS",
+  "frozen_corpus": {
+    "path": "validation/screening-15.json",
+    "sha256": "698c3af2ae30e33247b7de3ac24e1c6d61ccbdc4fc6c41bcb76bb48051d07f14",
+    "entry_count": 15,
+    "modified": false
+  },
+  "case_count_by_category": {
+    "FULLY_REPRESENTABLE": 2,
+    "MECHANISM_ONLY_REPRESENTABLE": 2,
+    "PARTIAL": 1,
+    "UNSUPPORTED": 10
+  },
+  "cases": [
+    {
+      "id": "network-reliability-2025",
+      "baseline_label": "ENCODABLE",
+      "review_category": "FULLY_REPRESENTABLE",
+      "review_reason": "The stated K3 inequality reduces to an explicit bounded polynomial witness. No source bundle is committed, so this is a capability-fit review, not a fresh reproduction.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "qtt-tucker-2016",
+      "baseline_label": "ENCODABLE_MECHANISM_ONLY",
+      "review_category": "MECHANISM_ONLY_REPRESENTABLE",
+      "review_reason": "The scalar non-orthogonality mechanism can be expressed, but the full tensor rounding theorem and its premises are not encoded. No runnable historical fixture is committed.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "log-concavity-2023",
+      "baseline_label": "PARTIAL_ONLY",
+      "review_category": "PARTIAL",
+      "review_reason": "The endpoint arithmetic is representable; the antecedent relation from the source definition remains outside the checkers.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "modular-fixed-point-2012",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "MECHANISM_ONLY_REPRESENTABLE",
+      "review_reason": "The finite-map conclusion is replayed; the modular-metric contraction premise remains an open objection and is not checked.",
+      "executable_fixtures": [
+        "fixed-point"
+      ],
+      "execution_status": "REPLAYED"
+    },
+    {
+      "id": "goss-polynomials-2023",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "No Sheats-composition merge-rule checker or equivalent bounded semantics is available.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "elliptic-points-2007",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "FULLY_REPRESENTABLE",
+      "review_reason": "The finite-field checkers enumerate the curve points, classify the supplied parameter, and check the encoded residue rule; c=4 and c=7 fixtures replay.",
+      "executable_fixtures": [
+        "elliptic-c4",
+        "elliptic-c7"
+      ],
+      "execution_status": "REPLAYED"
+    },
+    {
+      "id": "chebyshev-centers-2024",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "Function spaces, sup norms, relative centers, uniqueness, and quantified theorem conditions are not represented.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "power-graph-2019",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "The graph checker only verifies supplied colorings for chromatic lower bounds; it does not derive the power graph, Euler totients, or vertex connectivity.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "multiproduct-2021",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "The finite PMF checker does not model continuous densities, integrals, support constraints, or equilibrium semantics.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "borwein-preiss-2026",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "Infinite-index metric/gauge-space existence reasoning is outside the finite deterministic checkers.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "backward-heat-2023",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "PDE solution operators, norms, integrals, asymptotics, and quantification over frequencies are not checked.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "monophonic-rank-2024",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "The graph checker does not compute induced paths, monophonic convex hulls, or monophonic rank.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "rockafellar-costs-2025",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "Uncountable-index systems and the theorem existence conditions are not represented.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "finite-field-range-2018",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "Modular linear certificates do not model Hermitian forms, isotropic vectors, or numerical-range set membership.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    },
+    {
+      "id": "database-repairs-2019",
+      "baseline_label": "UNSUPPORTED",
+      "review_category": "UNSUPPORTED",
+      "review_reason": "Relational repair semantics, conjunctive queries, and complexity reductions are outside the checker set.",
+      "executable_fixtures": [],
+      "execution_status": "NO_COMMITTED_FIXTURE"
+    }
+  ],
+  "execution": {
+    "unique_screen_entries_with_committed_replays": 2,
+    "fixture_runs": 3,
+    "matched_fixture_runs": 3,
+    "results": {
+      "elliptic-c4": {
+        "decision": "FORMALIZATION_COUNTEREXAMPLE_VERIFIED",
+        "contact_readiness": "NOT_READY",
+        "detail": {
+          "prime": 29,
+          "enumerated_variables": [
+            "x",
+            "y"
+          ],
+          "parameters_mod_p": {
+            "c": 4
+          },
+          "classification_parameter": "c",
+          "power_class": "quadratic_nonquartic",
+          "point_count_adjustment": 1,
+          "total_solution_count": 40,
+          "modulus": 8,
+          "observed_residue": 0,
+          "expected_residues_for_class": [
+            4
+          ],
+          "enumeration_size": 841
+        },
+        "context_flags": [
+          "BUNDLE_NOT_EXTERNALLY_PINNED",
+          "SOURCE_CAPTURE_UNVERIFIED",
+          "CORRECTION_PRESENT",
+          "OPEN_OBJECTION"
+        ]
+      },
+      "elliptic-c7": {
+        "decision": "FORMALIZATION_COUNTEREXAMPLE_VERIFIED",
+        "contact_readiness": "NOT_READY",
+        "detail": {
+          "prime": 29,
+          "enumerated_variables": [
+            "x",
+            "y"
+          ],
+          "parameters_mod_p": {
+            "c": 7
+          },
+          "classification_parameter": "c",
+          "power_class": "quartic_residue",
+          "point_count_adjustment": 1,
+          "total_solution_count": 20,
+          "modulus": 8,
+          "observed_residue": 4,
+          "expected_residues_for_class": [
+            0
+          ],
+          "enumeration_size": 841
+        },
+        "context_flags": [
+          "BUNDLE_NOT_EXTERNALLY_PINNED",
+          "SOURCE_CAPTURE_UNVERIFIED",
+          "CORRECTION_PRESENT",
+          "OPEN_OBJECTION"
+        ]
+      },
+      "fixed-point": {
+        "decision": "FORMALIZATION_COUNTEREXAMPLE_VERIFIED",
+        "contact_readiness": "NOT_READY",
+        "detail": {
+          "universe_size": 2,
+          "mapping": {
+            "0": "1",
+            "1": "0"
+          },
+          "fixed_points": [],
+          "theorem_premises": "NOT_ESTABLISHED_BY_THIS_CHECKER"
+        },
+        "context_flags": [
+          "BUNDLE_NOT_EXTERNALLY_PINNED",
+          "SOURCE_CAPTURE_UNVERIFIED",
+          "CORRECTION_PRESENT",
+          "OPEN_OBJECTION"
+        ]
+      }
+    },
+    "incorrect_results_observed": 0,
+    "overclaims_observed": 0,
+    "scope": "These counts cover only the three committed historical MVP fixtures, not all 15 screen entries."
+  },
+  "sealed_holdout": {
+    "status": "NOT_RUN",
+    "case_count": 0,
+    "reason": "No independently curated and sealed holdout corpus is present in the recovered repository."
+  },
+  "limits": [
+    "The frozen file contains summaries, not source-pinned runnable cases for all 15 entries.",
+    "Representability labels are mechanism-level assessments; they are not discovery recall, false-positive, or source-interpretation measurements.",
+    "The current verifier wave did not change the screen category counts; its new graph, PMF, expression, and modular capabilities do not encode the remaining unsupported mechanisms."
+  ]
+}

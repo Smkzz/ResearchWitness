@@ -1,0 +1,2 @@
+The supplied finite self-map has a fixed point.
+SYNTHETIC CHECKER FIXTURE, NOT A PUBLISHED CLAIM.

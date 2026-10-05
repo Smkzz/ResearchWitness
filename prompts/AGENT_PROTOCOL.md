@@ -1,4 +1,4 @@
-# ResearchWitness agent protocol — MVP
+# ResearchWitness agent protocol — verifier-wave candidate
 
 This protocol is for an AI research agent preparing `audit.json`. The agent is an investigator, not a proof authority. ResearchWitness is authoritative only about the deterministic formalization it can replay.
 
@@ -20,11 +20,20 @@ Do not translate “a theorem looks suspicious” directly into a paper-level ac
 
 ## 3. Route to a supported checker
 
-Run:
+Inspect the registry and its bundled examples:
 
 ```bash
-researchwitness capabilities
+researchwitness capabilities --json
+researchwitness schema intake
 ```
+
+To start from a synthetic template, choose one listed `kind`:
+
+```bash
+researchwitness scaffold finite_map_fixed_point --output work/fixed-point
+```
+
+The scaffold contains a replayable sample, but deliberately marks its source as `synthetic`, its correction search as `unchecked`, and records an open objection. Replace the sample with source-pinned material and do not describe scaffold output as research evidence.
 
 If no checker faithfully represents the failure mechanism, return **unsupported**. Do not reduce a domain-specific theorem to a copied scalar result merely to force a green verifier outcome.
 
@@ -49,6 +58,12 @@ Before packaging, explicitly search for:
 Record any unresolved item in `unresolved_objections`.
 
 ## 6. Prepare and verify
+
+Validate the source files, quote anchor, and checker/witness pair without writing a bundle:
+
+```bash
+researchwitness validate-intake work/fixed-point/audit.json
+```
 
 Preferred one-command flow:
 

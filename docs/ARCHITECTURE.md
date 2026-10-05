@@ -57,7 +57,11 @@ Verifier kinds are allowlisted by `checkers.KINDS`. Each checker must:
 5. enforce a computational work budget;
 6. avoid importing or executing case-supplied code.
 
-The finite-field plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.”
+The finite-field and finite-PMF plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.” The PMF plugin handles finite event probabilities and expected payoffs over a declared categorical state space; it does not infer a distribution from data or extend the arithmetic result to a population.
+
+The rational-expression checker uses a closed JSON AST for exact rational arithmetic. It can check rational-function witnesses such as quotients at one bounded point, while making no claim about the expression elsewhere in the domain.
+
+The modular linear-system checker verifies either an exact solution or a left-annihilator certificate, including over composite moduli. It checks only the supplied certificate and encoded system.
 
 ## Contact readiness
 

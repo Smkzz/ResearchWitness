@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "case_id": "synthetic-rational-expression",
+  "artifacts": {
+    "source.txt": "37ffbbf68b4161715104b70b6fe84b0921892bece665cd4a83e57869ae980559",
+    "correction-check.txt": "f66201ed111f34f7a1e45e271a6e1ffdfbe28dd7a2d35d76e36dc857ff7ea0f7",
+    "witness.json": "e9d9ce186cadff759d84add4382e7ff20eafd93cdabaa6e4230112cbb1f9193b"
+  },
+  "source": {
+    "artifact": "source.txt",
+    "text_artifact": "source.txt",
+    "identifier": "synthetic:rational-expression-example",
+    "version": "v1",
+    "capture_status": "synthetic",
+    "correction_check": {
+      "checked_on": "2026-10-04",
+      "status": "none_found",
+      "evidence_artifact": "correction-check.txt"
+    }
+  },
+  "claim": {
+    "id": "C1",
+    "statement": "For every x in (1,3], (x^2 - 1)/(x - 1) <= 2.",
+    "scope": "Synthetic claim C1 in v1 only.",
+    "assumptions": [
+      "x is real and lies in the stated interval."
+    ],
+    "excluded_claims": [
+      "This fixture is not a real paper or an independent discovery.",
+      "One witness does not establish a global inequality."
+    ],
+    "anchor": {
+      "offset": 0,
+      "quote": "For every x in (1,3], (x^2 - 1)/(x - 1) <= 2."
+    },
+    "formalization": {
+      "kind": "rational_expression_upper_bound",
+      "domain": {
+        "x": {
+          "lower": "1",
+          "upper": "3",
+          "lower_closed": false,
+          "upper_closed": true
+        }
+      },
+      "expression": {
+        "op": "div",
+        "left": {
+          "op": "sub",
+          "left": {
+            "op": "pow",
+            "base": {
+              "op": "var",
+              "name": "x"
+            },
+            "exponent": 2
+          },
+          "right": {
+            "op": "const",
+            "value": "1"
+          }
+        },
+        "right": {
+          "op": "sub",
+          "left": {
+            "op": "var",
+            "name": "x"
+          },
+          "right": {
+            "op": "const",
+            "value": "1"
+          }
+        }
+      },
+      "upper_bound": "2"
+    }
+  },
+  "witness_artifact": "witness.json",
+  "unresolved_objections": [],
+  "disclosure": "private"
+}
