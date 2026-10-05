@@ -5,6 +5,9 @@ ResearchWitness is deliberately growing verifier breadth before growing marketin
 ## Current local branch — 0.3.0.dev0 integration candidate (unreleased)
 
 - Agent-prepared structured intake.
+- Multi-area paper-review ledger covering citations, internal consistency, mathematics, statistics, data, methods, code, figures/tables, interpretation, and ethics/reporting. Reviewer candidates are not automatically verified.
+- A bounded `paper-audit` screen for conflicting explicit `n=` / `N=` integer markers in UTF-8 text, Markdown, or optional born-digital PDF extraction. It reports candidates only and does not infer that counts share a scope.
+- Exact univariate tabular-summary check for count, sum, mean, median, minimum, maximum and variance, with explicit rounding tolerances and bounded local CSV/TSV column extraction.
 - Deterministic evidence capsules and replay.
 - Ten bounded verifier families: scalar/radical, polynomial, rational-expression, binary UC, finite-field residue, quadratic/quartic residue rule, finite-map fixed point, finite-graph coloring, finite-PMF bounds, and modular linear-system certificates.
 - Machine-readable capability contracts, one replayable synthetic bundle per family, agent-intake JSON Schema, scaffold, and read-only intake validation.
@@ -29,6 +32,8 @@ Do not tag or publish `0.3.0` until the exact public commit passes the engineeri
 ## Next empirical milestone
 
 Run a frozen **unseen historical-corrigenda discovery benchmark** with independent research agents. The deterministic verifier must remain unchanged during an evaluation wave. Report unsupported cases and source-interpretation failures rather than silently excluding them.
+
+The broad review ledger is an observation and coverage layer, not a general error detector. The automatic paper scan currently covers only explicit count-marker conflicts; it has no measured discovery precision or recall. The exact tabular checker covers univariate summaries over supplied tabular data. Use benchmark results to prioritize further deterministic checkers for recurring, source-grounded failure mechanisms, including prose/table count reconciliation, code-parameter reconciliation, and citation-to-claim support. Keep each detector narrow, replayable, and explicit about what its result does not establish.
 
 Metrics of interest include:
 

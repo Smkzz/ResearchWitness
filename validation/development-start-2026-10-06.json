@@ -1,0 +1,41 @@
+{
+  "record_version": "1",
+  "captured_on": "2026-10-06",
+  "purpose": "Record the state observed when the broad-review, tabular-summary, and paper-screening continuation began.",
+  "starting_commit": {
+    "sha": "f5e0b98b48b3b63feedc3d210890f008a2508b9f",
+    "subject": "Merge pull request #4 from Smkzz/codex/researchwitness-verifier-wave-2026-10-05"
+  },
+  "starting_worktree": {
+    "dirty": true,
+    "modified_tracked_files": 11,
+    "note": "The tree already contained uncommitted review-ledger and tabular-summary work. The measurements below describe that dirty tree, not the clean starting commit alone."
+  },
+  "environment": {
+    "python": "3.12",
+    "development_environment": "/tmp/rw-dev-venv",
+    "temporary_build_tools_installed": ["setuptools", "wheel"]
+  },
+  "baseline_results": {
+    "pytest": {
+      "passed": 324,
+      "failed": 0
+    },
+    "synthetic_conformance": {
+      "matched": 500,
+      "total": 500
+    },
+    "historical_mvp_fixture_runs": {
+      "matched": 3,
+      "total": 3,
+      "unique_screen_entries": 2
+    },
+    "release_gate": "PASS",
+    "reproducible_wheel_sha256": "30bbdd0464cf8e3b50c7838837c69d6afb28e9aaa61c204df73a4a07d0e3ad9b"
+  },
+  "limitations": [
+    "These results were captured before the new paper-audit scanner and its tests.",
+    "The historical fixtures replay explicit formalizations; they are not a paper-text discovery benchmark.",
+    "No independent discovery corpus or sealed holdout was present."
+  ]
+}

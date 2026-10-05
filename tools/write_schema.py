@@ -1,6 +1,7 @@
 """Generate the v1 interchange schema. Cross-file and arithmetic checks live in the core."""
 import json
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -373,6 +374,275 @@ def make_intake_schema():
     }
 
 
+def make_review_schema():
+    """Generate the broad, multi-area paper-review ledger schema."""
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from researchwitness.review import AREA_STATUSES, FINDING_STATUSES, REVIEW_AREAS
+
+    path = text(240)
+    hash_files = dict(arr(path, 0, 32), uniqueItems=True)
+    area = lambda: obj({
+        'status': enum(*sorted(AREA_STATUSES)),
+        'method': text(2000),
+        'notes': text(4000),
+        'evidence_files': hash_files,
+    })
+    areas = obj({name: area() for name in REVIEW_AREAS})
+    finding = obj({
+        'id': {'type': 'string', 'minLength': 1, 'maxLength': 100,
+               'pattern': '^[A-Za-z0-9_.-]+$'},
+        'area': enum(*REVIEW_AREAS),
+        'status': enum(*sorted(FINDING_STATUSES)),
+        'location': text(1000),
+        'statement': text(8000),
+        'quote': text(8000),
+        'rationale': text(4000),
+        'evidence_files': hash_files,
+        'quote_offset': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+        'verification_bundle': path,
+        'summary_check': path,
+    }, required=['id', 'area', 'status', 'location', 'statement', 'quote', 'rationale', 'evidence_files'])
+    finding['allOf'] = [
+        {
+            'if': {'properties': {'status': {'const': 'formalization_replay'}}, 'required': ['status']},
+            'then': {'required': ['verification_bundle'], 'not': {'required': ['summary_check']}},
+        },
+        {
+            'if': {'properties': {'status': {'const': 'tabular_summary_replay'}}, 'required': ['status']},
+            'then': {'required': ['summary_check'], 'not': {'required': ['verification_bundle']}},
+        },
+        {
+            'if': {
+                'properties': {'status': {'enum': ['candidate', 'unsupported', 'dismissed']}},
+                'required': ['status'],
+            },
+            'then': {'not': {'anyOf': [
+                {'required': ['verification_bundle']}, {'required': ['summary_check']},
+            ]}},
+        },
+    ]
+    review = obj({
+        'review_version': enum('0.1'),
+        'review_id': text(100),
+        'reviewed_on': {'type': 'string', 'format': 'date', 'minLength': 10, 'maxLength': 10},
+        'source': obj({
+            'identifier': text(2000),
+            'version': text(100),
+            'text_file': path,
+            'capture_status': enum('unverified', 'captured', 'synthetic'),
+        }),
+        'areas': areas,
+        'findings': arr(finding, 0, 256),
+    })
+    return {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': 'urn:researchwitness:paper-review:0.1',
+        'title': 'ResearchWitness broad paper-review ledger 0.1',
+        'description': (
+            'Structural schema for a multi-area research-paper review. Candidate observations are unverified; '
+            'the Python validator checks source quote anchors, local evidence files, and linked checker replays.'
+        ),
+        **review,
+    }
+
+
+def make_summary_check_schema():
+    """Generate the exact input schema for univariate tabular-summary checks."""
+    rational = {
+        'type': 'string',
+        'maxLength': 130,
+        'pattern': r'^-?(?:0|[1-9][0-9]{0,63})(?:/[1-9][0-9]{0,63})?$',
+    }
+    path = text(240)
+    source = obj({
+        'identifier': text(2000),
+        'version': text(100),
+        'text_file': path,
+        'capture_status': enum('unverified', 'captured', 'synthetic'),
+        'quote': text(8000),
+        'quote_offset': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+    }, required=['identifier', 'version', 'text_file', 'capture_status', 'quote'])
+    csv_file = obj({
+        'path': path,
+        'format': enum('csv', 'tsv'),
+        'header': {'const': True},
+        'column_name': text(200),
+        'missing_values': arr({'type': 'string', 'maxLength': 200}, 0, 32),
+        'missing_policy': enum('reject', 'drop'),
+    })
+    csv_file['properties']['missing_values']['uniqueItems'] = True
+    indexed_file = obj({
+        'path': path,
+        'format': enum('csv', 'tsv'),
+        'header': {'const': False},
+        'column_index': {'type': 'integer', 'minimum': 0, 'maximum': 255},
+        'missing_values': arr({'type': 'string', 'maxLength': 200}, 0, 32),
+        'missing_policy': enum('reject', 'drop'),
+    })
+    indexed_file['properties']['missing_values']['uniqueItems'] = True
+    file_input = {
+        'oneOf': [csv_file, indexed_file],
+    }
+    data = obj({
+        'column': text(200),
+        'data_source': text(2000),
+        'transformation': text(2000),
+        'values': arr(rational, 1, 4096),
+        'file': file_input,
+    }, required=['column', 'data_source', 'transformation'])
+    data['oneOf'] = [
+        {'required': ['values'], 'not': {'required': ['file']}},
+        {'required': ['file'], 'not': {'required': ['values']}},
+    ]
+    count_summary = obj({
+        'statistic': enum('count'),
+        'value': {'type': 'integer', 'minimum': 0, 'maximum': 4096},
+        'tolerance': rational,
+    })
+    numeric_summary = obj({
+        'statistic': enum('sum', 'mean', 'median', 'minimum', 'maximum',
+                          'sample_variance', 'population_variance'),
+        'value': rational,
+        'tolerance': rational,
+    })
+    report = {
+        'type': 'array',
+        'items': {'oneOf': [count_summary, numeric_summary]},
+        'minItems': 1,
+        'maxItems': 32,
+    }
+    report['uniqueItems'] = True
+    check = obj({
+        'summary_check_version': enum('0.1'),
+        'source': source,
+        'data': data,
+        'reported': report,
+    })
+    return {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': 'urn:researchwitness:tabular-summary-check:0.1',
+        'title': 'ResearchWitness exact tabular-summary check 0.1',
+        'description': (
+            'Exact univariate descriptive-statistic recomputation from supplied rational values or a bounded '
+            'local CSV/TSV column. File extraction selects one column and applies an explicit missing-value '
+            'policy; arbitrary filtering, grouping, and transformations are not performed.'
+        ),
+        **check,
+        '$defs': {'rational': rational},
+    }
+
+
+def make_paper_audit_schema():
+    """Generate the bounded screening-report schema (not a paper-truth schema)."""
+    hash_value = {'type': 'string', 'pattern': '^[a-f0-9]{64}$'}
+    empty_or_text = {'type': 'string', 'maxLength': 2000}
+    anchor = obj({
+        'text_file': enum('extracted-text.txt'),
+        'quote': text(75),
+        'start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+        'end_byte': {'type': 'integer', 'minimum': 1, 'maximum': 32 * 1024 * 1024},
+        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 32 * 1024 * 1024},
+        'context': {'type': 'string', 'maxLength': 2000},
+        'page_number': {'type': 'integer', 'minimum': 1, 'maximum': 500},
+        'page_offset_start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 512 * 1024},
+        'page_offset_end_byte': {'type': 'integer', 'minimum': 1, 'maximum': 512 * 1024},
+        'section': {'type': 'string', 'maxLength': 2000},
+    }, required=['text_file', 'quote', 'start_byte', 'end_byte', 'line_number', 'context'])
+    assertion = obj({
+        'id': {'type': 'string', 'pattern': '^count-[0-9]{4}$'},
+        'kind': enum('explicit_count_marker'),
+        'marker': enum('n', 'N'),
+        'surface_value': {'type': 'string', 'pattern': '^[0-9]{1,9}$'},
+        'value_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'},
+        'anchor': anchor,
+    })
+    page = obj({
+        'page_number': {'type': 'integer', 'minimum': 1, 'maximum': 500},
+        'character_count': {'type': 'integer', 'minimum': 0, 'maximum': 512 * 1024},
+        'status': enum('TEXT_EXTRACTED', 'NO_EXTRACTABLE_TEXT'),
+        'text_start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+        'text_end_byte': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+    })
+    section = obj({
+        'heading': empty_or_text,
+        'level': {'type': 'integer', 'minimum': 1, 'maximum': 6},
+        'start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 32 * 1024 * 1024},
+    })
+    anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^conflicting-[nN]-values$'},
+        'type': enum('CONFLICTING_EXPLICIT_COUNT_MARKERS'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'marker': enum('n', 'N'),
+        'values_exact': arr({'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'}, 2, 512),
+        'assertion_ids': arr({'type': 'string', 'pattern': '^count-[0-9]{4}$'}, 2, 512),
+        'source_anchors': arr(anchor, 2, 512),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    report = obj({
+        'paper_audit_version': enum('0.1'),
+        'decision': enum(
+            'CANDIDATES_FOUND', 'CANDIDATES_FOUND_IN_INCOMPLETE_SCAN',
+            'NO_CANDIDATES_IN_SUPPORTED_SCAN', 'SCAN_INCOMPLETE_NO_CANDIDATES',
+            'EXTRACTION_UNAVAILABLE_OR_EMPTY',
+        ),
+        'source': obj({
+            'identifier': text(2000),
+            'version': text(100),
+            'capture_status': enum('unverified'),
+            'source_file': enum('source.txt', 'source.md', 'source.markdown', 'source.pdf'),
+            'sha256': hash_value,
+        }),
+        'extraction': obj({
+            'status': enum(
+                'TEXT_AVAILABLE', 'PARTIAL_TEXT', 'NO_EXTRACTABLE_TEXT',
+                'PARSER_UNAVAILABLE', 'MALFORMED_OR_UNSUPPORTED', 'LIMIT_OR_UNSUPPORTED',
+            ),
+            'extractor': text(200),
+            'original_format': enum('txt', 'md', 'markdown', 'pdf'),
+            'source_bytes': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+            'text_file': enum('extracted-text.txt'),
+            'text_sha256': hash_value,
+            'text_bytes': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+            'page_count': {'oneOf': [{'type': 'null'}, {'type': 'integer', 'minimum': 0, 'maximum': 500}]},
+            'page_map': arr(page, 0, 500),
+            'warnings': arr(text(5000), 0, 16),
+            'ocr_performed': {'const': False},
+        }),
+        'paper_structure': obj({
+            'sections': arr(section, 0, 512),
+            'layout_status': enum('TEXT_OR_MARKDOWN_OFFSETS', 'PDF_PAGE_AND_EXTRACTED_TEXT_OFFSETS_ONLY'),
+        }),
+        'discovery': obj({
+            'provider': enum('deterministic_local_heuristic'),
+            'discoverer': enum('explicit_count_marker_scan'),
+            'scan_complete': {'type': 'boolean'},
+            'assertions': arr(assertion, 0, 512),
+            'limitations': arr(text(1000), 1, 16),
+        }),
+        'candidate_anomalies': arr(anomaly, 0, 256),
+        'checks_attempted': arr(enum('explicit_count_marker_scan'), 0, 1),
+        'verified_findings': arr({'type': 'object'}, 0, 0),
+        'unresolved_questions': arr(text(1000), 0, 256),
+        'unsupported_checks': arr(text(500), 1, 16),
+        'known_corrections': obj({'status': enum('NOT_CHECKED')}),
+        'paper_error_established': {'const': False},
+        'meaning': text(1000),
+    })
+    return {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': 'urn:researchwitness:paper-audit-report:0.1',
+        'title': 'ResearchWitness bounded paper-screening report 0.1',
+        'description': (
+            'A bounded local scan for conflicting explicit n/N integer markers. Candidate anomalies are not '
+            'verified errors; a negative result covers only the supported extracted-text scan.'
+        ),
+        **report,
+    }
+
+
 if __name__ == '__main__':
     out = ROOT / 'schemas'
     out.mkdir(exist_ok=True)
@@ -381,6 +651,9 @@ if __name__ == '__main__':
     for name, schema in (
         ('case.schema.json', make()),
         ('intake.schema.json', make_intake_schema()),
+        ('review.schema.json', make_review_schema()),
+        ('summary-check.schema.json', make_summary_check_schema()),
+        ('paper-audit.schema.json', make_paper_audit_schema()),
     ):
         rendered = json.dumps(schema, indent=2) + '\n'
         (out / name).write_text(rendered, encoding='utf-8')

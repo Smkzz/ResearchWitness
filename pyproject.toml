@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "researchwitness"
 version = "0.3.0.dev0"
-description = "Agent-oriented deterministic evidence capsules for scientific claim verification"
+description = "Offline research-paper screening, review ledgers, and deterministic claim verification"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
@@ -34,7 +34,8 @@ Documentation = "https://github.com/Smkzz/ResearchWitness#readme"
 researchwitness = "researchwitness.__main__:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "jsonschema>=4,<5"]
+dev = ["pytest>=8,<10", "jsonschema>=4,<5", "setuptools>=68", "wheel", "pypdf>=5,<7"]
+paper = ["pypdf>=5,<7"]
 
 [tool.setuptools.packages.find]
 include = ["researchwitness*"]

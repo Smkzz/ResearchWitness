@@ -25,7 +25,7 @@ The core rejects or bounds:
 
 Artifact bytes are checked against their SHA-256 manifest entries. Proof-boundary checks use explicit exceptions rather than Python `assert`, including when Python is run with `-O`.
 
-The runtime imports only its own modules and the Python standard library. It has no network client, shell execution, arbitrary dynamic code loading, pickle deserialization, model call, email sender, browser integration, or publication client.
+The default runtime imports only its own modules and the Python standard library. The optional `paper` extra adds `pypdf` for PDF text extraction. ResearchWitness has no network client, arbitrary dynamic code loading, pickle deserialization, model call, email sender, browser integration, or publication client.
 
 ## What hashes do and do not prove
 
@@ -46,6 +46,8 @@ A source quote is checked against supplied text bytes at the declared byte offse
 
 `capture_status: captured` is contextual metadata, not cryptographic authentication. The report therefore keeps `paper_error_established: false` even when the formalization-level counterexample is exact.
 
+`paper-audit` is an untrusted discovery layer outside the proof boundary. Its optional PDF parser runs in-process and is not an OS sandbox. The byte, page, and extracted-text limits do not constrain every parser-internal allocation or CPU operation. Do not use PDF extraction on hostile documents where process isolation is required; use a trusted local parser or isolate conversion externally, then provide a verified UTF-8 text capture.
+
 ## Filesystem threat model
 
 ResearchWitness rejects symlinks and hard links and uses `O_NOFOLLOW` where the platform exposes it. It verifies the opened file is regular and checks its size while reading.
@@ -62,7 +64,7 @@ The supported deployment assumes a trusted local process and a bundle directory 
 
 ## Resource limits
 
-The parser and checkers contain explicit structural and arithmetic limits intended to keep malformed input bounded. These are engineering controls, not a formally proved denial-of-service defense or an OS-level CPU/RAM quota.
+The parser and checkers contain explicit structural and arithmetic limits intended to keep malformed input bounded. These are engineering controls, not a formally proved denial-of-service defense or an OS-level CPU/RAM quota. This limitation especially applies to `pypdf` when processing complex PDFs.
 
 Do not add an unbounded CAS, SMT solver, optimizer, PDF parser, or arbitrary repository execution path to the trusted core without a separate threat model.
 

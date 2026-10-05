@@ -1,12 +1,26 @@
-# Validation — ResearchWitness 0.2.0 MVP
+# Validation — ResearchWitness MVP and development candidate
 
-**Date:** 2026-10-04
+**Historical MVP qualification:** 2026-10-04 · **Development continuation:** 2026-10-06
 
-This is the preserved qualification record for the `0.2.0` MVP. The unreleased `0.3.0.dev0` integration candidate has a separate, freshly generated record under [`validation/verifier-wave/`](../validation/verifier-wave/); do not apply this baseline's test count or wheel hash to that candidate.
+The `0.2.0` MVP material below is a preserved historical record. The unreleased `0.3.0.dev0` development candidate has since added review-ledger, tabular-summary, and paper-screening workflows. The archived [`validation/verifier-wave/qualification.json`](../validation/verifier-wave/qualification.json) predates those changes and must not be treated as qualification for the current source tree.
 
 This document separates software qualification from scientific coverage. Passing the engineering suite does not mean ResearchWitness can verify arbitrary research papers.
 
+The current gate is intended to qualify software behavior, not scientific coverage. It does not measure cross-domain detection precision/recall or establish exhaustive paper correctness. The summary checker proves only arithmetic agreement or mismatch for the exact supplied values or extracted CSV/TSV column and declared rounding tolerances. The automatic paper screen only searches for conflicting explicit `n=` / `N=` integer markers; candidate flags require human scope review.
+
+## Current development candidate scope
+
+The candidate now has a broad review ledger, bounded exact tabular-summary checker, and `paper-audit` ingestion/screening command. The current gate includes their tests, generated schemas, package contents, and installed-command smoke checks. Text/Markdown inputs are preserved byte-for-byte; optional `pypdf` extraction supports born-digital PDFs without OCR. The PDF parser runs locally in-process and is not an OS sandbox. Input/output limits do not guarantee that every parser-internal operation is bounded.
+
+The paper screen's tests include synthetic positive and negative controls, byte-anchor checks, oversized-line/incomplete-scan behavior, optional-parser absence, and a generated two-page PDF. These are software fixtures, not real-paper discovery evaluations. The historical MVP cases exercise deterministic formalizations, not the paper-text screen. No independent source-pinned discovery corpus or sealed holdout is available, so discovery recall, false-positive rate on real papers, and cross-field performance remain unmeasured.
+
+The initial state for this continuation was already dirty at commit `f5e0b98b48b3b63feedc3d210890f008a2508b9f`; the first baseline's test and gate results therefore describe that dirty tree, not the clean commit. The recorded baseline is [`validation/development-start-2026-10-06.json`](../validation/development-start-2026-10-06.json).
+
 ## Engineering qualification
+
+The updated offline quality gate passed on 2026-10-06 using Python 3.12.14: **348 tests passed**, the synthetic verifier suite matched **500/500**, and **3/3 historical MVP fixture runs** matched (two unique frozen-screen entries). The gate also passed source checksums, all generated schemas, capability-example/frozen-screen drift, compilation, static scanning, two byte-identical wheel builds, a clean no-network wheel install, and installed CLI smoke checks for intake, review, summary, and paper screening. The reproducible wheel SHA-256 was `8a20100908d379581872a3acb15bc8e111f88e2d9b08d9a6e331a284b3045f47`; runtime dependencies remain empty. The archived gate output remains the older verifier-wave record; rerun the command below to qualify a later tree.
+
+The `paper-audit` smoke input is explicitly synthetic. It surfaces differing count values that describe recruitment and post-exclusion samples, which may both be correct. No real-paper count-marker anomaly was rediscovered or evaluated in this run.
 
 The release gate runs offline and checks:
 

@@ -72,7 +72,13 @@ def main() -> int:
     version = pyproject['project']['version']
     sys.path.insert(0, str(ROOT))
     from researchwitness import VERSION
-    from tools.write_schema import make as make_schema, make_intake_schema
+    from tools.write_schema import (
+        make as make_schema,
+        make_intake_schema,
+        make_paper_audit_schema,
+        make_review_schema,
+        make_summary_check_schema,
+    )
     from tools.make_examples import build_capability_examples
     from tools.review_frozen_screen import run as review_frozen_screen
     from benchmarks.run_synthetic import run as run_synthetic
@@ -88,6 +94,15 @@ def main() -> int:
         raise RuntimeError('packaged case schema drift')
     if json.loads((ROOT / 'researchwitness/schemas/intake.schema.json').read_text()) != make_intake_schema():
         raise RuntimeError('packaged intake schema drift')
+    for schema_name, schema_factory in (
+        ('review.schema.json', make_review_schema),
+        ('summary-check.schema.json', make_summary_check_schema),
+        ('paper-audit.schema.json', make_paper_audit_schema),
+    ):
+        expected = schema_factory()
+        for directory in (ROOT / 'schemas', ROOT / 'researchwitness/schemas'):
+            if json.loads((directory / schema_name).read_text()) != expected:
+                raise RuntimeError(f'{directory.name}/{schema_name} drift')
     if json.loads((ROOT / 'researchwitness/capability_examples.json').read_text()) != build_capability_examples(ROOT / 'examples'):
         raise RuntimeError('packaged capability example drift')
     stored_screen_review = json.loads((ROOT / 'validation/verifier-wave/screening-15-review.json').read_text())
@@ -134,6 +149,14 @@ def main() -> int:
                 raise RuntimeError('wheel missing capability example data')
             if 'researchwitness/schemas/intake.schema.json' not in names:
                 raise RuntimeError('wheel missing agent-intake JSON Schema')
+            if 'researchwitness/schemas/review.schema.json' not in names:
+                raise RuntimeError('wheel missing review-ledger JSON Schema')
+            if 'researchwitness/schemas/summary-check.schema.json' not in names:
+                raise RuntimeError('wheel missing summary-check JSON Schema')
+            if 'researchwitness/schemas/paper-audit.schema.json' not in names:
+                raise RuntimeError('wheel missing paper-audit JSON Schema')
+            if 'researchwitness/paper_audit.py' not in names:
+                raise RuntimeError('wheel missing paper-audit command module')
 
         env = temp / 'venv'
         venv.EnvBuilder(with_pip=True, clear=True).create(env)
@@ -152,9 +175,38 @@ def main() -> int:
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)
         if len(capabilities['checkers']) != 10:
             raise RuntimeError('installed capability registry is incomplete')
+        if (len(capabilities['paper_screens']) != 1
+                or capabilities['paper_screens'][0]['role'] != 'candidate_discovery_only'):
+            raise RuntimeError('installed paper-screen capability registry is incomplete')
         schema = json.loads(run(str(cli), 'schema', 'intake', cwd=temp).stdout)
         if schema['title'] != 'ResearchWitness agent intake 0.1':
             raise RuntimeError('installed intake schema command failed')
+        paper_schema = json.loads(run(str(cli), 'schema', 'paper-audit', cwd=temp).stdout)
+        if paper_schema['title'] != 'ResearchWitness bounded paper-screening report 0.1':
+            raise RuntimeError('installed paper-audit schema command failed')
+        paper_result = json.loads(run(
+            str(cli), 'paper-audit', str(ROOT / 'examples/paper-audit/paper.md'),
+            '--identifier', 'synthetic:paper-audit', '--source-version', 'fixture-v1',
+            '--output', str(temp / 'paper-audit'), cwd=temp,
+        ).stdout)
+        if (paper_result['decision'] != 'CANDIDATES_FOUND'
+                or paper_result['paper_error_established']
+                or paper_result['candidate_anomalies'] != 1):
+            raise RuntimeError('installed paper-audit smoke check failed')
+        review_result = json.loads(run(
+            str(cli), 'validate-review', str(ROOT / 'examples/paper-review-ledger/review.json'), cwd=temp,
+        ).stdout)
+        if (review_result['paper_error_established']
+                or review_result['coverage']['areas_not_reviewed'] != 9
+                or review_result['coverage']['all_areas_accounted_for'] is not False
+                or review_result['findings'][0]['verification']['decision']
+                != 'TABULAR_SUMMARY_MISMATCH_VERIFIED'):
+            raise RuntimeError('installed review-ledger smoke check failed')
+        summary_result = json.loads(run(
+            str(cli), 'check-summary', str(ROOT / 'examples/paper-review-ledger/summary-check.json'), cwd=temp,
+        ).stdout)
+        if summary_result['paper_error_established']:
+            raise RuntimeError('installed summary-check smoke check failed')
         scaffold = temp / 'agent-scaffold'
         run(str(cli), 'scaffold', 'finite_map_fixed_point', '--output', str(scaffold), cwd=temp)
         checked = json.loads(run(str(cli), 'validate-intake', str(scaffold / 'audit.json'), cwd=temp).stdout)
@@ -173,6 +225,9 @@ def main() -> int:
             'source_checksums': 'PASS',
             'schema_drift': 'PASS',
             'intake_schema_drift': 'PASS',
+            'review_schema_drift': 'PASS',
+            'summary_schema_drift': 'PASS',
+            'paper_audit_schema_drift': 'PASS',
             'capability_examples_drift': 'PASS',
             'frozen_screen_review': 'PASS',
             'compileall': 'PASS',
@@ -180,6 +235,8 @@ def main() -> int:
             'wheel_reproducible': 'PASS',
             'wheel_install_smoke': 'PASS',
             'agent_cli_smoke': 'PASS',
+            'review_summary_cli_smoke': 'PASS',
+            'paper_audit_cli_smoke': 'PASS',
             'runtime_dependencies': pyproject['project'].get('dependencies', []),
         }
         print(json.dumps(summary, indent=2))
