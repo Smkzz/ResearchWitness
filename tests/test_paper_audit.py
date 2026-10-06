@@ -186,6 +186,67 @@ def _pdf_with_text(pypdf, pages: list[str]) -> bytes:
     return output.getvalue()
 
 
+def _pdf_with_positioned_unicode_text(pypdf) -> bytes:
+    from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
+
+    writer = pypdf.PdfWriter()
+    page = writer.add_blank_page(width=612, height=792)
+    font = DictionaryObject({
+        NameObject('/Type'): NameObject('/Font'),
+        NameObject('/Subtype'): NameObject('/Type1'),
+        NameObject('/BaseFont'): NameObject('/Helvetica'),
+        NameObject('/Encoding'): NameObject('/WinAnsiEncoding'),
+    })
+    page[NameObject('/Resources')] = DictionaryObject({
+        NameObject('/Font'): DictionaryObject({NameObject('/F1'): font}),
+    })
+    entries = [
+        (72, 760, 'Cohort – naïve participants'),
+        (72, 720, 'Left column: Group A n=20'),
+        (320, 720, 'Right column: Group B n=18'),
+        (72, 36, 'Footer · page 1'),
+    ]
+    operations = []
+    for x, y, text in entries:
+        encoded = text.encode('cp1252').replace(b'\\', b'\\\\').replace(b'(', b'\\(').replace(b')', b'\\)')
+        operations.append(f'BT /F1 10 Tf {x} {y} Td '.encode('ascii') + b'(' + encoded + b') Tj ET')
+    stream = DecodedStreamObject()
+    stream.set_data(b'\n'.join(operations))
+    page[NameObject('/Contents')] = writer._add_object(stream)
+    import io
+    output = io.BytesIO()
+    writer.write(output)
+    return output.getvalue()
+
+
+def _image_only_pdf(pypdf) -> bytes:
+    from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject, NumberObject
+
+    writer = pypdf.PdfWriter()
+    page = writer.add_blank_page(width=612, height=792)
+    image = DecodedStreamObject()
+    image.set_data(b'\x7f')
+    image.update({
+        NameObject('/Type'): NameObject('/XObject'),
+        NameObject('/Subtype'): NameObject('/Image'),
+        NameObject('/Width'): NumberObject(1),
+        NameObject('/Height'): NumberObject(1),
+        NameObject('/ColorSpace'): NameObject('/DeviceGray'),
+        NameObject('/BitsPerComponent'): NumberObject(8),
+    })
+    image_ref = writer._add_object(image)
+    page[NameObject('/Resources')] = DictionaryObject({
+        NameObject('/XObject'): DictionaryObject({NameObject('/Im0'): image_ref}),
+    })
+    content = DecodedStreamObject()
+    content.set_data(b'q 100 0 0 100 72 600 cm /Im0 Do Q')
+    page[NameObject('/Contents')] = writer._add_object(content)
+    import io
+    output = io.BytesIO()
+    writer.write(output)
+    return output.getvalue()
+
+
 def test_born_digital_pdf_maps_count_markers_back_to_physical_pages(tmp_path):
     import pypdf
 
@@ -197,6 +258,38 @@ def test_born_digital_pdf_maps_count_markers_back_to_physical_pages(tmp_path):
     assert report['extraction']['page_count'] == 2
     assert {anchor['page_number'] for anchor in report['candidate_anomalies'][0]['source_anchors']} == {1, 2}
     assert (output / 'source.pdf').read_bytes() == pdf
+
+
+def test_two_column_unicode_pdf_preserves_extracted_text_and_page_anchors(tmp_path):
+    import pypdf
+
+    pdf = _pdf_with_positioned_unicode_text(pypdf)
+    _, report, output = _run(tmp_path, pdf, '.pdf')
+
+    extracted = (output / 'extracted-text.txt').read_text(encoding='utf-8')
+    assert report['extraction']['status'] == 'TEXT_AVAILABLE'
+    assert 'Cohort – naïve participants' in extracted
+    assert 'Left column: Group A n=20' in extracted
+    assert 'Right column: Group B n=18' in extracted
+    assertion_pages = {
+        item['anchor']['page_number'] for item in report['discovery']['assertions']
+    }
+    assert assertion_pages == {1}
+    assert report['extraction']['page_count'] == 1
+
+
+def test_image_only_pdf_reports_no_extractable_text_and_no_ocr(tmp_path):
+    import pypdf
+
+    pdf = _image_only_pdf(pypdf)
+    _, report, _ = _run(tmp_path, pdf, '.pdf')
+
+    assert report['extraction']['status'] == 'NO_EXTRACTABLE_TEXT'
+    assert report['extraction']['ocr_performed'] is False
+    assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
+    assert report['candidate_anomalies'] == []
+    assert report['discovery']['scan_complete'] is False
+    assert any('no OCR was attempted' in item for item in report['extraction']['warnings'])
 
 
 def test_partial_pdf_extraction_never_returns_a_clean_scan(tmp_path):
@@ -328,7 +421,7 @@ def test_table_percentages_recompute_with_rounding_and_exact_byte_anchors(tmp_pa
         '| At least 75%, n (%) | 23 (73.3) | 23 (70) |\n'
     )
     content = source_text.encode('utf-8')
-    _, report, _ = _run(tmp_path, content, '.md')
+    _, report, output = _run(tmp_path, content, '.md')
 
     assert report['decision'] == 'CANDIDATES_FOUND'
     findings = report['arithmetic_screens']['table_percentages']['findings']
@@ -337,9 +430,88 @@ def test_table_percentages_recompute_with_rounding_and_exact_byte_anchors(tmp_pa
     ]
     assert all(item['status'] == 'CANDIDATE_ANOMALY' for item in findings)
     assert report['verified_findings'] == []
+    html = (output / 'report.html').read_text(encoding='utf-8')
+    assert 'Possible table percentage arithmetic mismatch' in html
+    assert 'Candidate anomaly · requires review.' in html
+    assert "has not determined whether this affects the paper's conclusions" in html
     for finding in findings:
         for anchor in finding['source_anchors']:
             assert content[anchor['start_byte']:anchor['end_byte']].decode('utf-8') == anchor['quote']
+
+
+def test_irregular_pipe_table_discards_candidates_and_reports_incomplete_coverage(tmp_path):
+    source_text = (
+        '# Table 1 Results\n'
+        '| Outcome | Group A (n=10) | Group B (n=10) |\n'
+        '| --- | ---: | ---: |\n'
+        '| Responders, n (%) | 9 (50) | 9 (50) |\n'
+        '| Grouped header with a missing stub | |\n'
+    )
+    _, report, output = _run(tmp_path, source_text.encode(), '.md')
+
+    assert report['arithmetic_screens']['table_percentages']['findings'] == []
+    assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
+    assert report['arithmetic_screens']['table_percentages']['scan_complete'] is False
+    assert any('inconsistent row widths' in item for item in report['unsupported_checks'])
+    html = (output / 'report.html').read_text(encoding='utf-8')
+    assert 'No candidate was identified, but extraction or scan coverage was incomplete.' in html
+    assert 'inconsistent row widths' in html
+
+
+def test_missing_stub_header_and_jagged_data_row_are_not_column_aligned(tmp_path):
+    source_text = (
+        '# Table 2 Results\n'
+        '| Outcome | All participants (n=100) | Follow-up subset (n=50) |\n'
+        '| --- | ---: | ---: |\n'
+        '| 80 (80) | 25 (50) |\n'
+    )
+    _, report, _ = _run(tmp_path, source_text.encode(), '.md')
+
+    assert report['arithmetic_screens']['table_percentages']['findings'] == []
+    assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
+    assert any('inconsistent row widths' in item for item in report['unsupported_checks'])
+
+
+def test_row_local_denominator_or_footnoted_percentage_label_is_skipped(tmp_path):
+    source_text = (
+        '| Outcome | Group A (n=30) | Group B (n=30) |\n'
+        '| --- | ---: | ---: |\n'
+        '| Participants with data (n=25) | 20 (50) | 20 (50) |\n'
+        '| Follow-up complete, n (%)a | 20 (50) | 20 (50) |\n'
+    )
+    _, report, _ = _run(tmp_path, source_text.encode(), '.md')
+
+    assert report['arithmetic_screens']['table_percentages']['findings'] == []
+    assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
+    assert any('local denominator or footnoted n (%) label' in item
+               for item in report['unsupported_checks'])
+
+
+def test_footnoted_column_denominator_is_omitted_but_unambiguous_column_remains_usable(tmp_path):
+    source_text = (
+        '| Outcome | Group A (n=30a) | Group B (n=30) |\n'
+        '| --- | ---: | ---: |\n'
+        '| Responders, n (%) | 20 (50) | 15 (50) |\n'
+    )
+    _, report, _ = _run(tmp_path, source_text.encode(), '.md')
+
+    assert report['arithmetic_screens']['table_percentages']['findings'] == []
+    assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
+    assert any('attached footnote marker' in item for item in report['unsupported_checks'])
+
+
+def test_count_percentage_cell_with_footnote_is_omitted_and_reported(tmp_path):
+    source_text = (
+        '| Outcome | Group A (n=30) | Group B (n=30) |\n'
+        '| --- | ---: | ---: |\n'
+        '| Responders, n (%) | 20 (50)a | 15 (50) |\n'
+    )
+    _, report, _ = _run(tmp_path, source_text.encode(), '.md')
+
+    assert report['arithmetic_screens']['table_percentages']['findings'] == []
+    assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
+    assert any('count/percentage cell with an attached footnote marker' in item
+               for item in report['unsupported_checks'])
 
 
 def test_repeated_smaller_denominators_are_scope_notes_not_error_candidates(tmp_path):

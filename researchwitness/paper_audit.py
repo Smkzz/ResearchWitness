@@ -50,6 +50,13 @@ COUNT_MARKER = re.compile(
 MARKDOWN_HEADING = re.compile(rb'^ {0,3}(?P<marks>#{1,6})[ \t]+(?P<title>.*?)[ \t]*#*[ \t]*$')
 TABLE_ROW = re.compile(r'^\s*\|.*\|\s*$')
 TABLE_DENOMINATOR = re.compile(r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})(?![0-9])')
+TABLE_PERCENTAGE_FOOTNOTE_LABEL = re.compile(
+    r'\bn\s*\(%\)\s*(?:[([]\s*)?[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]\s*[)\]]?\s*$', re.IGNORECASE,
+)
+TABLE_COUNT_PERCENT_WITH_FOOTNOTE = re.compile(
+    r'^\s*[0-9]{1,9}\s*\(\s*[0-9]{1,3}(?:\.[0-9]{1,6})?\s*%?\s*\)'
+    r'\s*[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]\s*$', re.IGNORECASE,
+)
 TABLE_COUNT_PERCENT = re.compile(
     r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*(?P<mark>%?)\s*\)\s*$'
 )
@@ -443,6 +450,13 @@ def _markdown_cells(line: str) -> list[tuple[str, int, int]]:
     return output
 
 
+def _has_denominator_footnote(cell: str, match: re.Match[str]) -> bool:
+    """Detect a footnote marker attached to an explicit table denominator."""
+    tail = cell[match.end():].lstrip()
+    tail = re.sub(r'^[)\]}]+', '', tail).lstrip()
+    return re.match(r'[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰](?=$|[\s)\]},.;:])', tail, re.IGNORECASE) is not None
+
+
 def _bounded_flow_number(raw: str) -> int | None:
     if len(raw) > 75:
         return None
@@ -481,7 +495,12 @@ class TablePercentageDiscoverer:
         column_labels: list[str] = []
         denominators: dict[int, dict[str, Any]] = {}
         truncated = False
+        coverage_incomplete = False
         cells_scanned = 0
+        table_width: int | None = None
+        table_finding_start = 0
+        table_checked_start = 0
+        table_shape_mismatch = False
         while line_start < len(text_bytes):
             newline = text_bytes.find(b'\n', line_start)
             line_end = len(text_bytes) if newline < 0 else newline
@@ -495,21 +514,48 @@ class TablePercentageDiscoverer:
                 if heading:
                     section = heading.group('title').decode('utf-8').strip()[:2000]
                     table_active = False
+                    table_width = None
+                    table_shape_mismatch = False
                     caption = section if section.lower().startswith('table ') else ''
                     column_labels = []
                     denominators = {}
             if TABLE_ROW.match(decoded):
+                if not table_active:
+                    table_width = None
+                    table_shape_mismatch = False
+                    table_finding_start = len(findings)
+                    table_checked_start = checked
                 table_active = True
                 cells = _markdown_cells(decoded)
                 cells_scanned += len(cells)
                 if cells_scanned > MAX_TABLE_CELLS_SCANNED:
                     truncated = True
                     break
-                if not re.fullmatch(r'[\s:|\-]+', decoded):
+                if table_width is None:
+                    table_width = len(cells)
+                elif len(cells) != table_width and not table_shape_mismatch:
+                    table_shape_mismatch = True
+                    del findings[table_finding_start:]
+                    checked = table_checked_start
+                    denominators = {}
+                    column_labels = []
+                    coverage_incomplete = True
+                    limitations.append(
+                        'A pipe table with inconsistent row widths was skipped because its columns could not be aligned safely.'
+                    )
+                if not re.fullmatch(r'[\s:|\-]+', decoded) and not table_shape_mismatch:
                     current: dict[int, dict[str, Any]] = {}
+                    denominator_row = False
                     for column, (cell, cell_start, cell_end) in enumerate(cells):
                         match = TABLE_DENOMINATOR.search(cell)
                         if match and column > 0:
+                            denominator_row = True
+                            if _has_denominator_footnote(cell, match):
+                                coverage_incomplete = True
+                                limitations.append(
+                                    'A denominator with an attached footnote marker was omitted because its scope may be row-specific.'
+                                )
+                                continue
                             number = int(match.group('value'))
                             match_start = cell_start + match.start()
                             match_end = cell_start + match.end()
@@ -535,13 +581,30 @@ class TablePercentageDiscoverer:
                                 'anchor': anchor,
                                 'group_label': ' / '.join(labels)[:200],
                             }
-                    if current:
+                    if denominator_row:
                         denominators = current
                     elif denominators:
                         row_label = cells[0][0] if cells else ''
+                        row_has_local_denominator = (
+                            TABLE_DENOMINATOR.search(row_label) is not None
+                            or TABLE_PERCENTAGE_FOOTNOTE_LABEL.search(row_label) is not None
+                        )
+                        if row_has_local_denominator:
+                            coverage_incomplete = True
+                            limitations.append(
+                                'A table row with a local denominator or footnoted n (%) label was omitted from percentage checks.'
+                            )
                         for column, (cell, cell_start, _cell_end) in enumerate(cells[1:], start=1):
+                            if row_has_local_denominator:
+                                continue
                             parsed = TABLE_COUNT_PERCENT.fullmatch(cell)
                             if parsed is None or column not in denominators:
+                                if (column in denominators
+                                        and TABLE_COUNT_PERCENT_WITH_FOOTNOTE.fullmatch(cell)):
+                                    coverage_incomplete = True
+                                    limitations.append(
+                                        'A count/percentage cell with an attached footnote marker was omitted from arithmetic checks.'
+                                    )
                                 continue
                             if not parsed.group('mark') and not re.search(r'\bn\s*\(%\)', row_label, re.IGNORECASE):
                                 continue
@@ -635,24 +698,28 @@ class TablePercentageDiscoverer:
                                     'version before treating this arithmetic difference as an error.'
                                 ),
                             })
-                    if not column_labels:
-                        column_labels = [TABLE_DENOMINATOR.sub('', cell).strip(' ()') for cell, _, _ in cells]
-                    else:
-                        for column, (cell, _, _) in enumerate(cells):
-                            if column >= len(column_labels):
-                                column_labels.append('')
-                            if TABLE_DENOMINATOR.search(cell):
-                                label = TABLE_DENOMINATOR.sub('', cell).strip(' ()')
-                                if label:
-                                    column_labels[column] = label
+                if not table_shape_mismatch and not column_labels:
+                    column_labels = [TABLE_DENOMINATOR.sub('', cell).strip(' ()') for cell, _, _ in cells]
+                elif not table_shape_mismatch:
+                    for column, (cell, _, _) in enumerate(cells):
+                        if column >= len(column_labels):
+                            column_labels.append('')
+                        if TABLE_DENOMINATOR.search(cell):
+                            label = TABLE_DENOMINATOR.sub('', cell).strip(' ()')
+                            if label:
+                                column_labels[column] = label
             elif not decoded.strip():
                 if table_active:
                     table_active = False
+                    table_width = None
+                    table_shape_mismatch = False
                     caption = ''
                     column_labels = []
                     denominators = {}
             elif not decoded.lstrip().startswith('#') and table_active:
                 table_active = False
+                table_width = None
+                table_shape_mismatch = False
                 caption = ''
                 column_labels = []
                 denominators = {}
@@ -712,8 +779,8 @@ class TablePercentageDiscoverer:
             'checked_cells': checked,
             'cells_scanned': cells_scanned,
             'supported': True,
-            'scan_complete': not truncated,
-            'limitations': limitations,
+            'scan_complete': not truncated and not coverage_incomplete,
+            'limitations': list(dict.fromkeys(limitations)),
         }
 
 
@@ -855,9 +922,11 @@ def capabilities() -> list[dict[str, Any]]:
             'formats': ['UTF-8 .md', 'UTF-8 .markdown'],
             'patterns': ['count (percentage) in one cell with an explicit n/N header in the same column'],
             'limits': (
-                'Checks only pipe-table cells with an explicit same-column group denominator; rounding tolerance is '
-                'one half of the last displayed percentage unit; scans at most 100,000 Markdown table cells. Repeated '
-                'compatible smaller denominators are surfaced as scope differences, not arithmetic candidates.'
+                'Checks only rectangular pipe tables with an explicit same-column denominator; inconsistent row widths '
+                'are skipped. Rows or denominators with local denominator/footnote cues are omitted and mark coverage '
+                'incomplete. Rounding tolerance is one half of the last displayed percentage unit; scans at most '
+                '100,000 Markdown table cells. Repeated compatible smaller denominators are surfaced as scope '
+                'differences, not arithmetic candidates.'
             ),
             'output_schema': 'schemas/paper-audit.schema.json',
             'does_not_prove': (
@@ -899,7 +968,7 @@ def _html_report(report: dict[str, Any]) -> str:
             title = f"Different {anomaly['marker']} counts appear in separate passages"
             summary = 'Values found: ' + ', '.join(anomaly['values_exact']) + '.'
         elif anomaly['type'] == 'TABLE_PERCENTAGE_ARITHMETIC_MISMATCH':
-            title = 'A table percentage does not match the displayed column denominator'
+            title = 'Possible table percentage arithmetic mismatch'
             summary = (
                 f"The cell reports {anomaly['reported_percent']}%, while "
                 f"{anomaly['numerator_exact']}/{anomaly['denominator_exact']} is "
@@ -917,8 +986,10 @@ def _html_report(report: dict[str, Any]) -> str:
             title = 'A numeric passage needs review'
             summary = anomaly.get('interpretation', 'A supported screen found a numeric discrepancy candidate.')
         candidates.append(
-            '<article><h3>' + escape(title) + '</h3><p>' + escape(summary) +
+            '<article><h3>' + escape(title) + '</h3><p><strong>Status:</strong> Candidate anomaly · requires review.</p><p>'
+            + escape(summary) +
             ' This is a review candidate; the paper may give a different row denominator or an additional flow step.</p>'
+            '<p>ResearchWitness has not determined whether this affects the paper\'s conclusions.</p>'
             '<ul>' + ''.join(assertions) + '</ul><p>' + escape(anomaly['required_review']) + '</p></article>'
         )
     if candidates:
@@ -1058,6 +1129,9 @@ def run_paper_audit(
         'The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.',
         'Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked.',
     ]
+    unsupported_checks = list(dict.fromkeys(
+        unsupported_checks + table_screen.get('limitations', []) + flow_screen.get('limitations', [])
+    ))
 
     report = {
         'paper_audit_version': PAPER_AUDIT_VERSION,

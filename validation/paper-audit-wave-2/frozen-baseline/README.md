@@ -29,3 +29,6 @@ same-record publisher PDFs with their JATS-derived Markdown sources. Results
 are in `SOURCE_FORMAT_SUMMARY.json` and excluded from primary metrics. The
 candidate differences mix PDF extraction with the frozen detector's
 Markdown-only table coverage, so they do not isolate parser effects.
+
+Post-lock detector changes and the separate wave-1 development replay are
+documented in [`../POST_LOCK_DEVELOPMENT.md`](../POST_LOCK_DEVELOPMENT.md).
