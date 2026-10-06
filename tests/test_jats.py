@@ -12,6 +12,7 @@ from researchwitness.paper_audit import run_paper_audit
 from researchwitness.paper_contracts import contract_registry
 from researchwitness.paper_document import NumericAssertion
 from researchwitness.strict import Invalid
+from researchwitness.table_arithmetic import check_structured_table_percentages
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = json.loads((ROOT / 'schemas/paper-audit.schema.json').read_text(encoding='utf-8'))
@@ -52,6 +53,11 @@ def test_jats_tables_use_source_linked_model_and_exact_percentage_contract(tmp_p
     }
     assert report['paper_structure']['layout_status'] == 'JATS_ELEMENT_PATHS_AND_TABLE_GRIDS'
     assert report['paper_structure']['document_model']['table_count'] == 1
+    assert report['coverage']['paper']['tables']['discovered'] == 1
+    coverage = {item['detector_id']: item for item in report['coverage']['detectors']}
+    assert coverage['table_percentage_recomputation']['scope'] == 'table'
+    assert coverage['table_percentage_recomputation']['object_counts']['potential'] == 1
+    assert coverage['jats_cell_ratio_percentage_recomputation']['tables'][0]['parser_status'] == 'STRUCTURE_RELIABLE'
     assert (output / 'paper-document.json').is_file()
     model = json.loads((output / 'paper-document.json').read_text(encoding='utf-8'))
     assert model['source_sha256'] == report['source']['sha256']
@@ -68,7 +74,152 @@ def test_jats_tables_use_source_linked_model_and_exact_percentage_contract(tmp_p
     assert report['paper_error_established'] is False
     html = (output / 'report.html').read_text(encoding='utf-8')
     assert 'What this source could support' in html
+    assert 'Capability coverage' in html and '1/1 tables checked' in html
     assert "ResearchWitness has not determined whether this affects the paper's conclusions." in html
+
+
+def test_direct_cell_ratio_is_reported_with_exact_jats_anchor(tmp_path):
+    source = _source(
+        '<table-wrap id="T-ratio"><label>Table 2</label><caption><title>Disposition</title></caption>'
+        '<table><thead><tr><th>Group</th><th>Value</th></tr></thead><tbody>'
+        '<tr><th scope="row">Transferred</th><td>11/233 (1.8%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    )
+    _, report, _ = _run_jats(tmp_path, source)
+
+    candidates = [item for item in report['candidate_anomalies']
+                  if item['type'] == 'JATS_CELL_RATIO_PERCENTAGE_MISMATCH']
+    assert len(candidates) == 1
+    candidate = candidates[0]
+    assert (candidate['numerator_exact'], candidate['denominator_exact']) == ('11', '233')
+    assert candidate['recomputed_at_display_precision'] == '4.7'
+    assert candidate['source_anchors'][0]['element_path'].endswith('/tbody[1]/tr[1]/td[1]')
+    ratio_coverage = next(item for item in report['coverage']['detectors']
+                          if item['detector_id'] == 'jats_cell_ratio_percentage_recomputation')
+    assert ratio_coverage['tables'][0]['counts']['operands']['checked'] == 1
+
+
+def test_source_mapped_flow_candidate_reaches_report_and_coverage(tmp_path):
+    prose = (
+        'Of the 100 participants in cohort Alpha, we excluded 10 with condition A and '
+        '5 with condition B. The exclusion categories were mutually exclusive and exhaustive, '
+        'and all remaining participants were included. Finally, 80 participants in cohort Alpha '
+        'were included.'
+    )
+    _, report, _ = _run_jats(tmp_path, _source('', '<p>' + prose + '</p>'))
+
+    flow_finding = next(item for item in report['candidate_anomalies']
+                        if item['type'] == 'JATS_SAMPLE_FLOW_ARITHMETIC_MISMATCH')
+    assert flow_finding['expected_included_exact'] == '85'
+    flow_screen = report['arithmetic_screens']['source_mapped_sample_flow']
+    assert flow_screen['status'] == 'ELIGIBLE'
+    assert flow_screen['checked_objects'] == 1
+    flow_coverage = next(item for item in report['coverage']['detectors']
+                         if item['detector_id'] == 'jats_sample_flow_arithmetic')
+    assert flow_coverage['object_counts']['checked'] == 1
+    assert flow_coverage['object_counts']['candidates'] == 1
+
+
+def test_prisma_figure_is_explicitly_unsupported_without_image_or_ocr(tmp_path):
+    source = (
+        '<article><front><article-meta><title-group><article-title>Review</article-title>'
+        '</title-group></article-meta></front><body><sec><fig id="flow1"><label>Figure 1</label>'
+        '<caption><title>PRISMA flow diagram of study selection</title></caption>'
+        '<graphic href="flow.png"/></fig></sec></body></article>'
+    ).encode('utf-8')
+    _, report, _ = _run_jats(tmp_path, source)
+
+    screen = report['arithmetic_screens']['prisma_synthesis_flow']
+    assert screen['status'] == 'UNSUPPORTED'
+    assert screen['limitations'] == ['UNSUPPORTED_IMAGE_FLOW']
+    assert screen['image_contents_read'] is False
+    assert screen['ocr_performed'] is False
+    coverage = next(item for item in report['coverage']['detectors']
+                    if item['detector_id'] == 'prisma_synthesis_flow')
+    assert coverage['object_counts']['potential'] == 1
+    assert coverage['object_counts']['checked'] == 0
+
+
+def test_explicit_prisma_count_candidate_reaches_report_and_coverage(tmp_path):
+    source = _source(
+        '',
+        '<p>PRISMA systematic review: records identified: 100; duplicates removed: 20; '
+        'records screened: 79.</p>',
+    )
+    _, report, _ = _run_jats(tmp_path, source)
+
+    finding = next(item for item in report['candidate_anomalies']
+                   if item['type'] == 'JATS_PRISMA_FLOW_ARITHMETIC_MISMATCH')
+    assert finding['expected_screened_exact'] == '80'
+    assert len(finding['source_anchors']) == 4
+    screen = report['arithmetic_screens']['prisma_synthesis_flow']
+    assert screen['status'] == 'ELIGIBLE'
+    assert screen['relations'][0]['status'] == 'PRISMA_FLOW_ARITHMETIC_CANDIDATE'
+    coverage = next(item for item in report['coverage']['detectors']
+                    if item['detector_id'] == 'prisma_synthesis_flow')
+    assert coverage['object_counts']['checked'] == 1
+    assert coverage['object_counts']['candidates'] == 1
+
+
+def test_unadjusted_two_by_two_candidate_reaches_report_and_granular_coverage(tmp_path):
+    source = _source(
+        '<table-wrap id="T-2x2"><label>Table 4</label>'
+        '<caption><title>2x2 mortality at 30 days</title></caption><table><thead><tr>'
+        '<th>Outcome</th><th>Exposed event</th><th>Exposed non-event</th>'
+        '<th>Unexposed event</th><th>Unexposed non-event</th>'
+        '<th>Unadjusted odds ratio (exposed vs unexposed)</th></tr></thead><tbody>'
+        '<tr><th scope="row">30-day mortality</th><td>12</td><td>88</td><td>6</td>'
+        '<td>94</td><td>2.20</td></tr></tbody></table></table-wrap>'
+    )
+    _, report, _ = _run_jats(tmp_path, source)
+
+    finding = next(item for item in report['candidate_anomalies']
+                   if item['type'] == 'JATS_UNADJUSTED_2X2_ODDS_RATIO_MISMATCH')
+    assert finding['recomputed_at_display_precision'] == '2.14'
+    assert len(finding['source_anchors']) == 5
+    screen = report['arithmetic_screens']['jats_unadjusted_2x2_odds_ratio']
+    assert screen['tables'][0]['status'] == 'ELIGIBLE'
+    assert screen['tables'][0]['checked_objects'] == 1
+    coverage = next(item for item in report['coverage']['detectors']
+                    if item['detector_id'] == 'jats_unadjusted_2x2_odds_ratio')
+    assert coverage['object_counts']['eligible'] == 1
+    assert coverage['operand_counts']['checked'] == 1
+
+
+def test_structured_percentage_candidate_limit_is_bounded_and_incomplete():
+    rows = ''.join(
+        f'<tr><th scope="row">Outcome {index}</th><td>1 (0%)</td></tr>'
+        for index in range(257)
+    )
+    source = _source(
+        '<table-wrap id="T-limit"><label>Table 1</label><table><thead><tr>'
+        '<th>Outcome</th><th>n (%) N=100</th></tr></thead><tbody>' + rows
+        + '</tbody></table></table-wrap>'
+    )
+    report = check_structured_table_percentages(parse_jats(source))
+
+    assert len(report['findings']) == 256
+    assert report['scan_complete'] is False
+    assert report['tables'][0]['status'] == 'INCOMPLETE'
+    assert 'STRUCTURED_TABLE_CANDIDATE_LIMIT' in report['tables'][0]['reasons']
+
+
+def test_figure_caption_is_source_mapped_without_reading_graphic_content():
+    source = (
+        '<article><body><fig id="f1"><label>Figure 1</label>'
+        '<caption><title>PRISMA flow diagram of study selection</title></caption>'
+        '<graphic href="flow.png"/></fig></body></article>'
+    ).encode('utf-8')
+    document = parse_jats(source, 'source.xml')
+
+    assert len(document.figures) == 1
+    figure = document.figures[0]
+    assert figure.label == 'Figure 1'
+    assert figure.caption == 'PRISMA flow diagram of study selection'
+    assert figure.graphic_present is True
+    assert figure.source_anchor.source_sha256 == document.source_sha256
+    assert figure.source_anchor.element_path.endswith('/fig[1]')
+    assert figure.source_anchor.quote == figure.caption
 
 
 def test_grouped_two_row_headers_keep_all_and_no_columns_aligned():
@@ -278,10 +429,14 @@ def test_strict_identity_key_requires_every_scope_dimension():
 
 def test_contract_registry_covers_every_reported_detector():
     registry = {item['detector_id']: item for item in contract_registry()}
-    assert len(registry) == 7
-    assert registry['table_percentage_recomputation']['implementation_status'] == 'ACTIVE_JATS_TABLE_DETECTOR'
-    assert registry['explicit_sample_flow_arithmetic']['implementation_status'] == 'PURE_MODEL_NOT_SOURCE_MAPPED'
-    assert registry['two_by_two_effect_size_recomputation']['implementation_status'] == 'PURE_OPERAND_CALCULATOR_NOT_SOURCE_MAPPED'
+    assert len(registry) == 13
+    assert registry['table_percentage_recomputation']['implementation_status'] == 'ACTIVE_SOURCE_MAPPED'
+    assert registry['explicit_sample_flow_arithmetic']['implementation_status'] == 'IMPLEMENTED_HELPER'
+    assert registry['two_by_two_effect_size_recomputation']['implementation_status'] == 'IMPLEMENTED_HELPER'
+    assert registry['jats_sample_flow_arithmetic']['implementation_status'] == 'ACTIVE_SOURCE_MAPPED'
+    assert registry['prisma_synthesis_flow']['implementation_status'] == 'ACTIVE_SOURCE_MAPPED'
+    assert registry['jats_unadjusted_2x2_odds_ratio']['implementation_status'] == 'ACTIVE_SOURCE_MAPPED'
+    assert registry['jats_sd_se_n_recomputation']['implementation_status'] == 'EXPERIMENTAL'
     assert 'PDF table layout' in registry[
         'table_percentage_recomputation'
     ]['exclusions']

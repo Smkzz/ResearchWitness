@@ -1,0 +1,77 @@
+{
+  "record_version": "1",
+  "status": "SYNTHETIC_AND_UNIT_REGRESSION_EVIDENCE",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "positive_candidate_fixture_counts": {
+    "table_percentage_recomputation": 1,
+    "jats_cell_ratio_percentage_recomputation": 1,
+    "jats_sample_flow_arithmetic": 1,
+    "prisma_synthesis_flow": 1,
+    "jats_unadjusted_2x2_odds_ratio": 1,
+    "jats_sd_se_n_recomputation_experimental": 1
+  },
+  "hard_negative_scenarios": [
+    {
+      "detector_id": "table_percentage_recomputation",
+      "scenarios": 10,
+      "false_candidate_outputs": 0,
+      "test_file": "tests/test_jats.py",
+      "coverage": "local and smaller subgroup denominators, rate units, footnoted denominators and labels, weighted/adjusted/multiple-response/missingness cues, ragged rows"
+    },
+    {
+      "detector_id": "markdown_table_percentage_recomputation",
+      "scenarios": 6,
+      "false_candidate_outputs": 0,
+      "test_file": "tests/test_paper_audit.py",
+      "coverage": "missing stub and ragged rows, local denominators, footnoted headers and cells, repeated smaller-denominator scope notes"
+    },
+    {
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "scenarios": 11,
+      "false_candidate_outputs": 0,
+      "test_file": "tests/test_paper_ratio.py",
+      "coverage": "invalid numeric domains, multiple-response/available-case/changing-denominator and unknown footnotes, unsafe row or table cues, referenced cells"
+    },
+    {
+      "detector_id": "jats_sample_flow_arithmetic",
+      "scenarios": 6,
+      "false_candidate_outputs": 0,
+      "test_file": "tests/test_paper_flow_source.py",
+      "coverage": "unproven or overlapping exclusions, unit and group mismatch, synthetic multi-exclusion ambiguity, non-JATS input"
+    },
+    {
+      "detector_id": "prisma_synthesis_flow",
+      "scenarios": 7,
+      "false_candidate_outputs": 0,
+      "test_files": [
+        "tests/test_paper_prisma_flow.py",
+        "tests/test_jats.py"
+      ],
+      "coverage": "multiple database and later-stage scope, unlabelled/non-review counts, malformed and oversized operands, image-only flow with no OCR"
+    },
+    {
+      "detector_id": "jats_unadjusted_2x2_odds_ratio",
+      "scenarios": 9,
+      "false_candidate_outputs": 0,
+      "test_file": "tests/test_paper_two_by_two_source.py",
+      "coverage": "adjusted/missing/reversed OR direction, zero cells, missing timepoint, weighted context, CI text, noninteger counts, multiple outcome rows"
+    },
+    {
+      "detector_id": "jats_sd_se_n_recomputation",
+      "scenarios": 17,
+      "false_candidate_outputs": 0,
+      "test_file": "tests/test_paper_statistics_source.py",
+      "coverage": "SEM ambiguity, weighted/adjusted/repeated/transformed values, footnotes and cross-references, missing or duplicate columns, unit/time scope, oversized numbers, unreliable grid, non-JATS input"
+    }
+  ],
+  "totals": {
+    "positive_candidate_fixtures": 6,
+    "hard_negative_scenarios": 66,
+    "false_candidate_outputs_on_hard_negative_scenarios": 0
+  },
+  "limitations": [
+    "Counts are explicit synthetic/unit input scenarios in regression tests, not independent papers or estimates of real-world false-positive rates.",
+    "The SD/SE/n screen is experimental and has no correction-backed positive in the source corpus.",
+    "Rate recomputation and source-mapped cross-section identity are not implemented detectors and are not included as active-family regression counts."
+  ]
+}

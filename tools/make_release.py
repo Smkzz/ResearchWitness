@@ -24,6 +24,14 @@ TOP_DIRS = {'.github', 'researchwitness', 'schemas', 'examples', 'benchmarks', '
 EXCLUDED_PARTS = {'.git', '.pytest_cache', '__pycache__', 'build', 'dist', 'researchwitness.egg-info'}
 EXCLUDED_SUFFIXES = {'.pyc', '.pyo'}
 EXCLUDED_REL_PATHS = {'evidence/synthetic-scenarios.jsonl', 'evidence/synthetic-summary.json'}
+# These case-level source corpora carry paper identifiers and per-source hashes.
+# Keep them in the source archive, but do not duplicate those paths and hashes
+# in the package-wide checksum manifest.
+CHECKSUM_EXCLUDED_PREFIXES = (
+    'validation/paper-audit-wave-1/',
+    'validation/paper-audit-wave-2/',
+    'validation/paper-audit-capability-wave/',
+)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -57,9 +65,16 @@ def included_files(include_checksums: bool = True) -> list[Path]:
     return sorted(files, key=lambda p: p.relative_to(ROOT).as_posix())
 
 
+def checksum_files() -> list[Path]:
+    return [
+        path for path in included_files(include_checksums=False)
+        if not path.relative_to(ROOT).as_posix().startswith(CHECKSUM_EXCLUDED_PREFIXES)
+    ]
+
+
 def write_checksums() -> None:
     lines = []
-    for path in included_files(include_checksums=False):
+    for path in checksum_files():
         rel = path.relative_to(ROOT).as_posix()
         lines.append(f'{sha256_file(path)}  {rel}')
     (ROOT / 'CHECKSUMS.sha256').write_text('\n'.join(lines) + '\n', encoding='utf-8')

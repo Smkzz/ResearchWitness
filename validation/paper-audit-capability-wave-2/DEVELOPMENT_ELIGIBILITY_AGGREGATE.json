@@ -1,0 +1,21 @@
+{
+  "record_version": "1",
+  "status": "AGGREGATE_ONLY_DEVELOPMENT_ELIGIBILITY",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "classification_timing": "POST_HOC_DEVELOPMENT_CLASSIFICATION",
+  "classification_counts": {
+    "correction_issues_total": 16,
+    "supported_by_current_contract": 2,
+    "unsupported_by_current_contract": 14
+  },
+  "eligible_issues_by_detector": {
+    "jats_cell_ratio_percentage_recomputation": 1,
+    "table_percentage_recomputation": 1
+  },
+  "artifact_scope": "Aggregate counts only. Individual source identifiers, hashes, issue descriptions, and case-level labels are omitted.",
+  "limitations": [
+    "The two supported correction issues are both within the count/percentage family.",
+    "The classification is post-hoc and is not an independent or sealed evaluation.",
+    "Fourteen considered correction issues do not satisfy the active contracts in this development corpus."
+  ]
+}

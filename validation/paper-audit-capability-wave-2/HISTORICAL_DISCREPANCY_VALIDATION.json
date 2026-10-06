@@ -1,0 +1,32 @@
+{
+  "record_version": "1",
+  "evaluation_use": "AGGREGATE_ONLY_DEVELOPMENT_VALIDATION",
+  "artifact_scope": "Aggregate counts only. Source identifiers, source hashes, candidate arithmetic, and individual case records are omitted.",
+  "cases_total": 15,
+  "classification_counts": {
+    "KNOWN_CORRECTION": 1,
+    "SOURCE_REPRODUCED_INTERNAL_DISCREPANCY": 14
+  },
+  "external_validation_status_counts": {
+    "UNRESOLVED": 15
+  },
+  "confirmed_resolution_counts": {
+    "KNOWN_CORRECTION_MAPPING": 0,
+    "RESOLVED_BY_SUPPLEMENT": 0,
+    "FORMAT_ARTIFACT": 0,
+    "BENIGN_PRESENTATION": 0,
+    "UNRESOLVED": 15
+  },
+  "publisher_pdf_pair_records_available": 8,
+  "publisher_pdf_pairs_with_candidate_signature_difference": 8,
+  "supplement_resolved_cases": 0,
+  "later_version_resolved_cases": 0,
+  "scientific_consequence_assessed_cases": 0,
+  "limitations": [
+    "The 14 source-reproduced labels mean the archived arithmetic candidate and JATS-derived rendered input reproduce under their recorded hashes; they are not scientific discoveries.",
+    "Publisher PDF comparisons are available for only a subset, and aggregate candidate-signature differences do not identify whether a particular finding was independently confirmed.",
+    "No supplements, corrigenda beyond the recorded correction pointer, later versions, or scientific consequences were independently reviewed.",
+    "This public summary does not include source-specific allegations or individual findings.",
+    "No author was contacted and no public accusation is made."
+  ]
+}

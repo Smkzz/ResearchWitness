@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from bisect import bisect_right
 import base64
+from dataclasses import asdict
 from html import escape
 import json
 import os
@@ -20,10 +21,16 @@ from typing import Any, Protocol
 
 from .jats import parse_jats
 from .paper_contracts import contract_registry, eligibility, source_capabilities
+from .paper_coverage import build_paper_coverage
+from .paper_flow_source import map_jats_sample_flows
+from .paper_prisma_flow import map_jats_prisma_relations
+from .paper_ratio import check_jats_cell_ratio_percentages
+from .paper_statistics_source import check_jats_sd_se_n_tables
+from .paper_two_by_two_source import check_jats_unadjusted_2x2_tables
 from .strict import Bundle, Invalid, byte_hash, canonical, require, text
 from .table_arithmetic import check_structured_table_percentages
 
-PAPER_AUDIT_VERSION = '0.3'
+PAPER_AUDIT_VERSION = '0.4'
 MAX_SOURCE_BYTES = 32 * 1024 * 1024
 MAX_PDF_PAGES = 500
 MAX_EXTRACTED_TEXT_BYTES = 16 * 1024 * 1024
@@ -974,13 +981,349 @@ def capabilities() -> list[dict[str, Any]]:
     ]
 
 
+def _mapped_sample_flow_screen(document) -> tuple[dict[str, Any], dict[str, Any]]:
+    mapped_results = map_jats_sample_flows(document, limit=MAX_ARITHMETIC_FINDINGS + 1)
+    flow_results_truncated = len(mapped_results) > MAX_ARITHMETIC_FINDINGS
+    mapped = mapped_results[:MAX_ARITHMETIC_FINDINGS]
+    flows: list[dict[str, Any]] = []
+    findings: list[dict[str, Any]] = []
+    for index, flow in enumerate(mapped, start=1):
+        arithmetic = flow.arithmetic or {'status': flow.status, 'reason': flow.reason}
+        flow_item = {
+            'id': f'source-flow-{index:04d}',
+            'status': flow.status,
+            'reason': flow.reason,
+            'source_anchor': asdict(flow.relation_anchor),
+            'operands': [asdict(operand) for operand in flow.operands],
+            'population': asdict(flow.population) if flow.population else None,
+            'stages': [asdict(stage) for stage in flow.stages],
+            'transitions': [asdict(transition) for transition in flow.transitions],
+            'exclusions': [asdict(exclusion) for exclusion in flow.exclusions],
+            'arithmetic_relation': (
+                asdict(flow.arithmetic_relation) if flow.arithmetic_relation else None
+            ),
+            'arithmetic_status': arithmetic.get('status', flow.status),
+        }
+        flows.append(flow_item)
+        candidate = arithmetic.get('candidate')
+        if flow.status != 'FLOW_ARITHMETIC_CANDIDATE' or not isinstance(candidate, dict):
+            continue
+        total = next((operand for operand in flow.operands if operand.role == 'total'), None)
+        included = next((operand for operand in flow.operands if operand.role == 'included'), None)
+        exclusions = [operand for operand in flow.operands if operand.role == 'exclusion']
+        if total is None or included is None or not exclusions:
+            continue
+        anchor_list = [asdict(operand.source_anchor) for operand in flow.operands]
+        anchor_list.append(asdict(flow.relation_anchor))
+        findings.append({
+            'id': f'jats-sample-flow-{len(findings) + 1:04d}',
+            'type': 'JATS_SAMPLE_FLOW_ARITHMETIC_MISMATCH',
+            'status': 'CANDIDATE_ANOMALY',
+            'source_total_exact': str(total.count),
+            'excluded_values_exact': [str(operand.count) for operand in exclusions],
+            'reported_included_exact': str(included.count),
+            'expected_included_exact': str(candidate['expected_count']),
+            'difference_exact': str(candidate['difference']),
+            'source_anchors': anchor_list,
+            'interpretation': (
+                f"The explicit flow relation gives {candidate['expected_count']} included "
+                f"{total.unit} after the listed exclusions, while the paragraph reports {included.count}."
+            ),
+            'required_review': (
+                'Confirm the source anchors, count units, population, and explicit flow relation. '
+                'This arithmetic candidate does not establish which count is wrong or whether any conclusion changes.'
+            ),
+        })
+
+    statuses = [flow.status for flow in mapped]
+    checked_statuses = {'FLOW_BALANCED', 'FLOW_ARITHMETIC_CANDIDATE'}
+    has_checked = any(status in checked_statuses for status in statuses)
+    has_unresolved = any(status not in checked_statuses for status in statuses) or flow_results_truncated
+    if flow_results_truncated:
+        status = 'INCOMPLETE'
+    elif not mapped:
+        status = 'NOT_APPLICABLE'
+    elif has_checked and not has_unresolved:
+        status = 'ELIGIBLE'
+    elif any(item == 'FLOW_RELATION_AMBIGUOUS' for item in statuses) or has_checked:
+        status = 'INCOMPLETE'
+    else:
+        status = 'UNSUPPORTED'
+    reasons = list(dict.fromkeys(flow.reason for flow in mapped if flow.reason))
+    if flow_results_truncated:
+        reasons.append('FLOW_RESULT_LIMIT_REACHED')
+    screen = {
+        'detector_id': 'jats_sample_flow_arithmetic',
+        'flows': flows,
+        'findings': findings,
+        'status': status,
+        'potential_objects': len(mapped) + int(flow_results_truncated),
+        'applicable_objects': len(mapped) + int(flow_results_truncated),
+        'eligible_objects': sum(item in checked_statuses for item in statuses),
+        'checked_objects': sum(item in checked_statuses for item in statuses),
+        'skipped_objects': sum(item not in checked_statuses for item in statuses) + int(flow_results_truncated),
+        'candidate_count': len(findings),
+        'scan_complete': not has_unresolved and not flow_results_truncated,
+        'limitations': reasons,
+    }
+    coverage_record = {
+        **screen,
+        'object_unit': 'source_mapped_flow_relation',
+        'operand_unit': 'flow_count_operand',
+        'potential_operands': (None if flow_results_truncated else
+                               sum(len(flow.operands) for flow in mapped)),
+        'checked_operands': sum(len(flow.operands) for flow in mapped if flow.status in checked_statuses),
+        'skipped_operands': (None if flow_results_truncated else
+                             sum(len(flow.operands) for flow in mapped if flow.status not in checked_statuses)),
+    }
+    return screen, coverage_record
+
+
+_PRISMA_SINGLE_CUE = re.compile(
+    r'\b(?:prisma|flow diagram|study selection flow|records identified)\b', re.IGNORECASE,
+)
+_PRISMA_STAGE_CUE = re.compile(
+    r'\b(?:duplicates? removed|records? screened|full[- ]texts? assessed|'
+    r'studies? included|qualitative synthesis|quantitative synthesis)\b', re.IGNORECASE,
+)
+
+
+def _prisma_synthesis_screen(document) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Check one explicitly labelled review-flow relation and locate the rest."""
+    objects: list[dict[str, Any]] = []
+    image_flow = False
+    object_limit_reached = False
+
+    def append_object(item: dict[str, Any]) -> bool:
+        nonlocal object_limit_reached
+        if len(objects) >= 256:
+            object_limit_reached = True
+            return False
+        objects.append(item)
+        return True
+
+    for figure in document.figures:
+        label_caption = figure.label + ' ' + figure.caption
+        if not _PRISMA_SINGLE_CUE.search(label_caption):
+            continue
+        image_flow = image_flow or figure.graphic_present
+        if not append_object({
+            'kind': 'figure',
+            'label': figure.label[:500],
+            'caption': figure.caption[:2000],
+            'graphic_present': figure.graphic_present,
+            'source_anchor': asdict(figure.source_anchor),
+        }):
+            break
+    for table in document.tables:
+        if object_limit_reached:
+            break
+        label_caption = table.label + ' ' + table.caption
+        stage_count = len(list(_PRISMA_STAGE_CUE.finditer(label_caption)))
+        if _PRISMA_SINGLE_CUE.search(label_caption) or stage_count >= 2:
+            if not append_object({
+                'kind': 'table',
+                'label': table.label[:500],
+                'caption': table.caption[:2000],
+                'source_anchor': asdict(table.source_anchor),
+            }):
+                break
+    for paragraph in document.paragraphs:
+        if object_limit_reached:
+            break
+        stage_count = len(list(_PRISMA_STAGE_CUE.finditer(paragraph.text)))
+        if _PRISMA_SINGLE_CUE.search(paragraph.text) or stage_count >= 2:
+            if not append_object({
+                'kind': 'prose',
+                'text': paragraph.text[:4000],
+                'source_anchor': asdict(paragraph.source_anchor),
+            }):
+                break
+    mapped_results = map_jats_prisma_relations(document, limit=257)
+    relations_truncated = len(mapped_results) > 256
+    mapped = mapped_results[:256]
+    relation_dicts = [relation.to_dict() for relation in mapped]
+    supported_statuses = {'PRISMA_FLOW_BALANCED', 'PRISMA_FLOW_ARITHMETIC_CANDIDATE'}
+    checked_relations = [relation for relation in mapped if relation.status in supported_statuses]
+    mapped_paths = {
+        item['source_anchor']['element_path']
+        for relation in relation_dicts for item in relation['source_anchors']
+    }
+    unsupported_image_objects = [
+        item for item in objects
+        if item['kind'] == 'figure' and item.get('graphic_present') is True
+        and item['source_anchor']['element_path'] not in mapped_paths
+    ]
+    unhandled_objects = [
+        item for item in objects
+        if item['source_anchor']['element_path'] not in mapped_paths
+        and item not in unsupported_image_objects
+    ]
+    reasons: list[str] = []
+    if image_flow:
+        reasons.append('UNSUPPORTED_IMAGE_FLOW')
+    if relations_truncated or object_limit_reached:
+        reasons.append('PRISMA_SOURCE_OBJECT_LIMIT')
+    reasons.extend(
+        relation.reason for relation in mapped if relation.reason is not None
+    )
+    if unhandled_objects:
+        reasons.append('PRISMA_FLOW_RELATION_NOT_IMPLEMENTED')
+    if not objects and not mapped:
+        reasons.append('NO_PRISMA_OR_SYNTHESIS_FLOW_CUE')
+    reasons = list(dict.fromkeys(reasons))
+    if not reasons:
+        status = 'ELIGIBLE' if checked_relations else 'NOT_APPLICABLE'
+    elif checked_relations:
+        status = 'INCOMPLETE'
+    elif reasons == ['NO_PRISMA_OR_SYNTHESIS_FLOW_CUE']:
+        status = 'NOT_APPLICABLE'
+    else:
+        status = 'UNSUPPORTED'
+    scan_complete = not reasons or reasons == ['NO_PRISMA_OR_SYNTHESIS_FLOW_CUE']
+    findings = []
+    for relation in mapped:
+        if relation.status != 'PRISMA_FLOW_ARITHMETIC_CANDIDATE':
+            continue
+        raw = relation.to_dict()
+        anchors = [item['source_anchor'] for item in raw['source_anchors']]
+        findings.append({
+            'id': f'jats-prisma-flow-{len(findings) + 1:04d}',
+            'type': 'JATS_PRISMA_FLOW_ARITHMETIC_MISMATCH',
+            'status': 'CANDIDATE_ANOMALY',
+            'records_identified_exact': raw['records_identified_exact'],
+            'duplicates_removed_exact': raw['duplicates_removed_exact'],
+            'reported_screened_exact': raw['records_screened_exact'],
+            'expected_screened_exact': raw['expected_screened_exact'],
+            'difference_exact': raw['difference_exact'],
+            'source_anchors': anchors,
+            'interpretation': (
+                f"The labelled review sequence gives {relation.expected_screened} screened records after "
+                f"removing {relation.duplicates_removed} duplicates from {relation.records_identified}, "
+                f"while the source reports {relation.records_screened}."
+            ),
+            'required_review': (
+                'Confirm that these are the same record set and source version. This arithmetic candidate '
+                'does not verify downstream screening, study inclusion, or the review conclusions.'
+            ),
+        })
+    known_operand_relations = [
+        relation for relation in mapped
+        if relation.records_identified is not None and relation.duplicates_removed is not None
+        and relation.records_screened is not None
+    ]
+    skipped_relations = len(mapped) - len(checked_relations)
+    extra_unchecked = (len(unhandled_objects) + len(unsupported_image_objects)
+                       + int(relations_truncated or object_limit_reached))
+    potential_objects = len(mapped) + extra_unchecked
+    operand_potential = (None if len(known_operand_relations) != len(mapped)
+                         else 3 * len(known_operand_relations))
+    operand_checked = 3 * len(checked_relations)
+    operand_skipped = (None if operand_potential is None else operand_potential - operand_checked)
+    screen = {
+        'detector_id': 'prisma_synthesis_flow',
+        'status': status,
+        'objects': objects[:256],
+        'relations': relation_dicts,
+        'findings': findings,
+        'scan_complete': scan_complete,
+        'limitations': reasons,
+        'image_contents_read': False,
+        'ocr_performed': False,
+    }
+    coverage_record = {
+        'detector_id': 'prisma_synthesis_flow',
+        'status': status,
+        'reasons': reasons,
+        'potential_objects': potential_objects,
+        'applicable_objects': potential_objects,
+        'eligible_objects': len(checked_relations),
+        'checked_objects': len(checked_relations),
+        'skipped_objects': skipped_relations + extra_unchecked,
+        'candidate_count': len(findings),
+        'object_unit': 'review_flow_source_object',
+        'potential_operands': operand_potential,
+        'checked_operands': operand_checked,
+        'skipped_operands': operand_skipped,
+        'candidate_operands': len(findings),
+        'operand_unit': 'review_flow_count',
+    }
+    return screen, coverage_record
+
+
+def _coverage_html(coverage: dict[str, Any] | None) -> str:
+    if coverage is None:
+        return (
+            '<p>Granular table counts are available for source-mapped JATS input. '
+            'This source format does not provide a structured table model.</p>'
+        )
+    paper_tables = coverage['paper']['tables']
+    table_summary = (
+        f"ResearchWitness found {paper_tables['discovered']} structured tables: "
+        f"{paper_tables['structure_reliable']} with reliable grids and "
+        f"{paper_tables['structure_unsupported']} with unsupported grids."
+    )
+    rows: list[str] = []
+    for detector in coverage['detectors']:
+        object_counts = detector['object_counts']
+        if detector['scope'] == 'table':
+            counts = detector['status_counts']
+            checked = object_counts['checked']
+            potential = object_counts['potential']
+            description = (
+                f"{checked}/{potential} tables checked; "
+                f"{counts.get('ELIGIBLE', 0)} eligible, "
+                f"{counts.get('INCOMPLETE', 0)} incomplete, "
+                f"{counts.get('UNSUPPORTED', 0)} unsupported, "
+                f"{counts.get('NOT_APPLICABLE', 0)} not applicable."
+            )
+            operand = detector['operand_counts']
+            description += (
+                f" Operands: {operand['checked']}/{operand['potential']} "
+                f"{operand['unit'].replace('_', ' ')} checked."
+            )
+            table_items = []
+            for table in detector['tables'][:100]:
+                label = table['label'] or table['table_id'] or '(unlabelled table)'
+                reason = '; '.join(table['skip_reasons'])
+                suffix = f" — {reason}" if reason else ''
+                table_items.append(
+                    '<li>' + escape(label) + ': ' + escape(table['parser_status']) + ' / '
+                    + escape(table['status']) + escape(suffix) + '</li>'
+                )
+            extra = (
+                '<details><summary>Per-table status</summary><ul>' + ''.join(table_items) + '</ul></details>'
+                if table_items else ''
+            )
+        else:
+            description = f"{detector['status']}"
+            if object_counts['potential'] is not None:
+                description += f"; {object_counts['checked']}/{object_counts['potential']} objects checked"
+            if detector['reasons']:
+                description += '; ' + ', '.join(detector['reasons'])
+            extra = ''
+        rows.append(
+            '<li><strong>' + escape(detector['detector_id']) + '</strong>: '
+            + escape(description) + extra + '</li>'
+        )
+    return (
+        '<p>' + escape(table_summary) + '</p><ul>' + ''.join(rows) + '</ul>'
+        '<p>Counts describe only represented source objects and detector inputs. They do not establish exhaustive paper checking.</p>'
+    )
+
+
 def _html_report(report: dict[str, Any]) -> str:
     candidates = []
     for anomaly in report['candidate_anomalies']:
         assertions = []
         for anchor in anomaly['source_anchors']:
+            role = anchor.get('role') if isinstance(anchor, dict) else None
+            if isinstance(anchor, dict) and 'source_anchor' in anchor:
+                anchor = anchor['source_anchor']
             if 'element_path' in anchor:
                 location = anchor['source_file'] + ' · ' + anchor['element_path']
+                if role:
+                    location = role + ' · ' + location
                 assertions.append(
                     '<li><p><strong>' + escape(location) + '</strong>: <code>'
                     + escape(anchor['quote']) + '</code></p></li>'
@@ -1112,7 +1455,8 @@ def _html_report(report: dict[str, Any]) -> str:
     model_file = report['paper_structure']['document_model']
     model_summary = (
         f"Structured document model: {model_file['section_count']} sections, "
-        f"{model_file['paragraph_count']} narrative paragraphs, {model_file['table_count']} tables. "
+        f"{model_file['paragraph_count']} narrative paragraphs, {model_file['table_count']} tables, "
+        f"{model_file['figure_count']} figures. "
         f"Machine-readable structure: {escape(model_file['file'])}."
         if model_file else 'No canonical structured document artifact was created for this source format.'
     )
@@ -1133,9 +1477,11 @@ article{{border-top:1px solid #aaa;padding:1rem 0}}blockquote,code{{background:#
 <dt>Possible scope or denominator differences</dt><dd>{len(report['possible_scope_differences'])}</dd></dl>
 <h2>What this source could support</h2><p>{model_summary}</p>
 <p>Prose capability: <strong>{escape(report['source_capabilities']['prose'])}</strong> · Table capability: <strong>{escape(report['source_capabilities']['tables'])}</strong></p>
+<h2>Capability coverage</h2>{_coverage_html(report.get('coverage'))}
+{('<p><strong>Table checking incomplete.</strong> ' + escape(table_coverage_explanation)
+  + (' Details: <ul>' + incomplete_tables + '</ul>' if incomplete_tables else '') + '</p>')
+  if table_checking_incomplete else ''}
 <ul>{eligibility_items}</ul>
-{('<h3>Table checking incomplete</h3><p>' + escape(table_coverage_explanation) + '</p>'
-  + ('<ul>' + incomplete_tables + '</ul>' if incomplete_tables else '')) if table_checking_incomplete else ''}
 <h2>Review candidates</h2>{candidate_html}
 <h2>Flow questions left unresolved</h2>{'<ul>' + flow_items + '</ul>' if flow_items else '<p>None recorded.</p>'}
 <h2>Possible scope or denominator differences</h2>{''.join(scope_items) if scope_items else '<p>None recorded.</p>'}
@@ -1229,19 +1575,88 @@ def run_paper_audit(
             'checked_cells': 0, 'scan_complete': True, 'limitations': [],
         }
     )
+    if jats_document is not None:
+        ratio_screen = check_jats_cell_ratio_percentages(jats_document)
+        statistics_screen = check_jats_sd_se_n_tables(jats_document)
+        two_by_two_screen = check_jats_unadjusted_2x2_tables(jats_document)
+        source_flow_screen, source_flow_coverage = _mapped_sample_flow_screen(jats_document)
+        prisma_screen, prisma_coverage = _prisma_synthesis_screen(jats_document)
+        paper_coverage = build_paper_coverage(jats_document, [
+            structured_table_screen, ratio_screen, statistics_screen,
+            two_by_two_screen, source_flow_coverage, prisma_coverage,
+        ])
+    else:
+        ratio_screen = {
+            'detector_id': 'jats_cell_ratio_percentage_recomputation',
+            'operand_unit': 'n_over_N_percent_cell', 'findings': [], 'tables': [],
+            'potential_cells': 0, 'checked_cells': 0, 'skipped_cells': 0,
+            'scan_complete': False, 'limitations': ['SOURCE_FORMAT_NOT_JATS_XML'],
+        }
+        statistics_screen = {
+            'detector_id': 'jats_sd_se_n_recomputation',
+            'operand_unit': 'eligible_sd_se_n_row',
+            'rounding_policy': 'not_applicable because source format is unsupported',
+            'findings': [], 'tables': [],
+            'scan_complete': False, 'limitations': ['SOURCE_FORMAT_NOT_JATS_XML'],
+        }
+        two_by_two_screen = {
+            'detector_id': 'jats_unadjusted_2x2_odds_ratio',
+            'operand_unit': 'explicit_2x2_row', 'findings': [], 'tables': [],
+            'scan_complete': False, 'limitations': ['SOURCE_FORMAT_NOT_JATS_XML'],
+        }
+        source_flow_screen = {
+            'detector_id': 'jats_sample_flow_arithmetic', 'flows': [], 'findings': [],
+            'status': 'UNSUPPORTED', 'potential_objects': 0, 'applicable_objects': 0,
+            'eligible_objects': 0, 'checked_objects': 0, 'skipped_objects': 0,
+            'candidate_count': 0, 'scan_complete': False,
+            'limitations': ['SOURCE_FORMAT_NOT_JATS_XML'],
+        }
+        prisma_screen = {
+            'detector_id': 'prisma_synthesis_flow', 'status': 'UNSUPPORTED',
+            'objects': [], 'relations': [], 'findings': [], 'scan_complete': False,
+            'limitations': ['SOURCE_FORMAT_NOT_JATS_XML'],
+            'image_contents_read': False, 'ocr_performed': False,
+        }
+        paper_coverage = None
     source_id = text(identifier or ('local:' + path.name), 2000)
     source_version = text(version or 'unspecified', 100)
     table_candidates = table_screen['findings']
     flow_candidates = flow_screen['candidate_anomalies']
+    statistics_candidates = [
+        {
+            **finding,
+            'id': f'jats-sd-se-n-{index:04d}',
+            'status': 'CANDIDATE_ANOMALY',
+            'type': 'JATS_SD_SE_N_ARITHMETIC_MISMATCH',
+            'interpretation': (
+                f"For {finding['row_identity']}, SE={finding['reported_se']} while "
+                f"SD/sqrt(n) rounds to {finding['recomputed_se_at_display_precision']}."
+            ),
+            'required_review': (
+                'Confirm that n, SD, and SE describe the same unweighted summary quantity and that the '
+                'reported SE uses SD/sqrt(n). This arithmetic candidate does not establish which value is wrong.'
+            ),
+        }
+        for index, finding in enumerate(statistics_screen['findings'], start=1)
+    ]
     candidates = (
         discovery['candidate_anomalies'] + table_candidates + flow_candidates
-        + structured_table_screen['findings']
+        + structured_table_screen['findings'] + ratio_screen['findings']
+        + statistics_candidates + two_by_two_screen['findings']
+        + source_flow_screen['findings'] + prisma_screen['findings']
     )
     possible_scope_differences = (
         discovery['possible_scope_differences'] + table_screen.get('possible_scope_differences', [])
     )
     if jats_document is not None:
-        scan_complete = bool(jats_document.tables) and structured_table_screen['scan_complete']
+        scan_complete = all((
+            structured_table_screen['scan_complete'],
+            ratio_screen['scan_complete'],
+            statistics_screen['scan_complete'],
+            two_by_two_screen['scan_complete'],
+            source_flow_screen['scan_complete'],
+            prisma_screen['scan_complete'],
+        ))
     else:
         scan_complete = (
             discovery['scan_complete'] and flow_screen['scan_complete']
@@ -1264,6 +1679,14 @@ def run_paper_audit(
             checks_attempted.append(TablePercentageDiscoverer.name)
     if jats_document is not None and jats_document.tables:
         checks_attempted.append('jats_table_percentage_recomputation')
+    if jats_document is not None:
+        checks_attempted.extend([
+            'jats_cell_ratio_percentage_recomputation',
+            'jats_sd_se_n_recomputation',
+            'jats_sample_flow_arithmetic',
+            'prisma_synthesis_flow',
+            'jats_unadjusted_2x2_odds_ratio',
+        ])
 
     source_format = 'jats_xml' if suffix in ('.xml', '.nxml') else suffix.lstrip('.')
     source_caps = source_capabilities(source_format, extraction_status)
@@ -1345,21 +1768,86 @@ def run_paper_audit(
         'cross_section_numeric_identity', 'UNSUPPORTED', source_format,
         ['IDENTITY_ASSERTION_EXTRACTION_NOT_IMPLEMENTED'],
     ))
+    if jats_document is not None:
+        for table_result in ratio_screen['tables']:
+            detector_eligibility.append(eligibility(
+                'jats_cell_ratio_percentage_recomputation', table_result['status'], source_format,
+                table_result['skip_reasons'], table_result['table_id'], table_result['checked_objects'],
+            ))
+        if not ratio_screen['tables']:
+            detector_eligibility.append(eligibility(
+                'jats_cell_ratio_percentage_recomputation', 'NOT_APPLICABLE', source_format,
+                ['NO_JATS_TABLES_FOUND'],
+            ))
+        for table_result in statistics_screen['tables']:
+            detector_eligibility.append(eligibility(
+                'jats_sd_se_n_recomputation', table_result['status'], source_format,
+                [item['reason'] for item in table_result['skip_reasons']],
+                table_result['table_id'], table_result['checked_rows'],
+            ))
+        if not statistics_screen['tables']:
+            detector_eligibility.append(eligibility(
+                'jats_sd_se_n_recomputation', 'NOT_APPLICABLE', source_format,
+                ['NO_JATS_TABLES_FOUND'],
+            ))
+        checked_flow_operands = sum(
+            len(item['operands']) for item in source_flow_screen['flows']
+            if item['status'] in ('FLOW_BALANCED', 'FLOW_ARITHMETIC_CANDIDATE')
+        )
+        detector_eligibility.append(eligibility(
+            'jats_sample_flow_arithmetic', source_flow_screen['status'], source_format,
+            source_flow_screen['limitations'], checked_operands=checked_flow_operands,
+        ))
+        for table_result in two_by_two_screen['tables']:
+            detector_eligibility.append(eligibility(
+                'jats_unadjusted_2x2_odds_ratio', table_result['status'], source_format,
+                [item['reason'] for item in table_result['skip_reasons']],
+                table_result['table_id'], table_result['checked_objects'],
+            ))
+        if not two_by_two_screen['tables']:
+            detector_eligibility.append(eligibility(
+                'jats_unadjusted_2x2_odds_ratio', 'NOT_APPLICABLE', source_format,
+                ['NO_JATS_TABLES_FOUND'],
+            ))
+        detector_eligibility.append(eligibility(
+            'prisma_synthesis_flow', prisma_screen['status'], source_format,
+            prisma_screen['limitations'],
+            checked_operands=prisma_coverage['checked_operands'],
+        ))
+    else:
+        for detector_id in (
+            'jats_cell_ratio_percentage_recomputation',
+            'jats_sd_se_n_recomputation',
+            'jats_sample_flow_arithmetic',
+            'jats_unadjusted_2x2_odds_ratio',
+            'prisma_synthesis_flow',
+        ):
+            detector_eligibility.append(eligibility(
+                detector_id, 'UNSUPPORTED', source_format, ['SOURCE_FORMAT_NOT_JATS_XML'],
+            ))
+    detector_eligibility.append(eligibility(
+        'simple_rate_recomputation', 'UNSUPPORTED', source_format,
+        ['EXPLICIT_RATE_OPERAND_MAPPING_NOT_IMPLEMENTED'],
+    ))
     unsupported_checks = [
         'The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.',
-        'Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.',
-        'A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.',
-        'Sample-flow arithmetic is not performed on prose-shaped exclusions unless disjointness, exhaustiveness, and common scope are explicit.',
-        'Risk ratio and odds ratio contracts are declared, but no paper-result table mapper is currently implemented; other statistical checks remain unsupported.',
+        'Structured JATS count/percentage checks do not infer local denominators, row totals, column totals, or additive category semantics.',
+        'The same-cell n/N (%) check accepts only bounded explicit ratios and skips unknown footnotes, scoped cells, and weighted or overlapping contexts.',
+        'Source-mapped sample-flow arithmetic is limited to one paragraph with explicit disjoint/exhaustive or sequential relation cues and common scope.',
+        'PRISMA arithmetic checks only one explicitly labelled JATS record/duplicate/screened sequence; later review stages and figure contents remain unsupported.',
+        'The source-mapped 2x2 odds-ratio check requires a one-row JATS table with four explicit event cells, timepoint, and a crude exposed-versus-unexposed estimate; other effect measures remain unsupported.',
+        'The SD/SE/n screen is experimental and limited to simple unweighted JATS rows. CI methods, rate arithmetic, and cross-section identity extraction remain unsupported.',
         'PDF table arithmetic is unsupported because pypdf text extraction does not preserve a validated table grid.',
     ]
     if jats_document is not None:
         unsupported_checks.append(
-            'JATS prose count and flow checks are not run until each narrative assertion can be anchored to its original XML source element.'
+            'JATS narrative count-marker comparison remains unsupported; source-mapped sample-flow checking is separately bounded.'
         )
     unsupported_checks = list(dict.fromkeys(
         unsupported_checks + table_screen.get('limitations', []) + flow_screen.get('limitations', [])
-        + structured_table_screen.get('limitations', [])
+        + structured_table_screen.get('limitations', []) + ratio_screen.get('limitations', [])
+        + statistics_screen.get('limitations', []) + source_flow_screen.get('limitations', [])
+        + prisma_screen.get('limitations', [])
     ))[:16]
 
     document_artifact = None
@@ -1373,6 +1861,7 @@ def run_paper_audit(
             'section_count': len(jats_document.sections),
             'paragraph_count': len(jats_document.paragraphs),
             'table_count': len(jats_document.tables),
+            'figure_count': len(jats_document.figures),
             'numeric_assertion_count': len(jats_document.numeric_assertions),
         }
 
@@ -1412,6 +1901,7 @@ def run_paper_audit(
         'source_capabilities': source_caps,
         'detector_eligibility': detector_eligibility,
         'detector_contracts': contract_registry(),
+        'coverage': paper_coverage,
         'discovery': {
             'provider': 'deterministic_local_heuristic',
             'discoverer': discovery['discoverer'],
@@ -1425,6 +1915,11 @@ def run_paper_audit(
         'arithmetic_screens': {
             'table_percentages': table_screen,
             'structured_table_percentages': structured_table_screen,
+            'cell_ratio_percentages': ratio_screen,
+            'sd_se_n_statistics': statistics_screen,
+            'source_mapped_sample_flow': source_flow_screen,
+            'prisma_synthesis_flow': prisma_screen,
+            'jats_unadjusted_2x2_odds_ratio': two_by_two_screen,
             'sample_exclusion_flow': flow_screen,
         },
         'candidate_anomalies': candidates,
