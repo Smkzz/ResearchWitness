@@ -1,6 +1,7 @@
 """Generate the v1 interchange schema. Cross-file and arithmetic checks live in the core."""
 import json
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -373,6 +374,474 @@ def make_intake_schema():
     }
 
 
+def make_review_schema():
+    """Generate the broad, multi-area paper-review ledger schema."""
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from researchwitness.review import AREA_STATUSES, FINDING_STATUSES, REVIEW_AREAS
+
+    path = text(240)
+    hash_files = dict(arr(path, 0, 32), uniqueItems=True)
+    area = lambda: obj({
+        'status': enum(*sorted(AREA_STATUSES)),
+        'method': text(2000),
+        'notes': text(4000),
+        'evidence_files': hash_files,
+    })
+    areas = obj({name: area() for name in REVIEW_AREAS})
+    finding = obj({
+        'id': {'type': 'string', 'minLength': 1, 'maxLength': 100,
+               'pattern': '^[A-Za-z0-9_.-]+$'},
+        'area': enum(*REVIEW_AREAS),
+        'status': enum(*sorted(FINDING_STATUSES)),
+        'location': text(1000),
+        'statement': text(8000),
+        'quote': text(8000),
+        'rationale': text(4000),
+        'evidence_files': hash_files,
+        'quote_offset': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+        'verification_bundle': path,
+        'summary_check': path,
+    }, required=['id', 'area', 'status', 'location', 'statement', 'quote', 'rationale', 'evidence_files'])
+    finding['allOf'] = [
+        {
+            'if': {'properties': {'status': {'const': 'formalization_replay'}}, 'required': ['status']},
+            'then': {'required': ['verification_bundle'], 'not': {'required': ['summary_check']}},
+        },
+        {
+            'if': {'properties': {'status': {'const': 'tabular_summary_replay'}}, 'required': ['status']},
+            'then': {'required': ['summary_check'], 'not': {'required': ['verification_bundle']}},
+        },
+        {
+            'if': {
+                'properties': {'status': {'enum': ['candidate', 'unsupported', 'dismissed']}},
+                'required': ['status'],
+            },
+            'then': {'not': {'anyOf': [
+                {'required': ['verification_bundle']}, {'required': ['summary_check']},
+            ]}},
+        },
+    ]
+    review = obj({
+        'review_version': enum('0.1'),
+        'review_id': text(100),
+        'reviewed_on': {'type': 'string', 'format': 'date', 'minLength': 10, 'maxLength': 10},
+        'source': obj({
+            'identifier': text(2000),
+            'version': text(100),
+            'text_file': path,
+            'capture_status': enum('unverified', 'captured', 'synthetic'),
+        }),
+        'areas': areas,
+        'findings': arr(finding, 0, 256),
+    })
+    return {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': 'urn:researchwitness:paper-review:0.1',
+        'title': 'ResearchWitness broad paper-review ledger 0.1',
+        'description': (
+            'Structural schema for a multi-area research-paper review. Candidate observations are unverified; '
+            'the Python validator checks source quote anchors, local evidence files, and linked checker replays.'
+        ),
+        **review,
+    }
+
+
+def make_summary_check_schema():
+    """Generate the exact input schema for univariate tabular-summary checks."""
+    rational = {
+        'type': 'string',
+        'maxLength': 130,
+        'pattern': r'^-?(?:0|[1-9][0-9]{0,63})(?:/[1-9][0-9]{0,63})?$',
+    }
+    path = text(240)
+    source = obj({
+        'identifier': text(2000),
+        'version': text(100),
+        'text_file': path,
+        'capture_status': enum('unverified', 'captured', 'synthetic'),
+        'quote': text(8000),
+        'quote_offset': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+    }, required=['identifier', 'version', 'text_file', 'capture_status', 'quote'])
+    csv_file = obj({
+        'path': path,
+        'format': enum('csv', 'tsv'),
+        'header': {'const': True},
+        'column_name': text(200),
+        'missing_values': arr({'type': 'string', 'maxLength': 200}, 0, 32),
+        'missing_policy': enum('reject', 'drop'),
+    })
+    csv_file['properties']['missing_values']['uniqueItems'] = True
+    indexed_file = obj({
+        'path': path,
+        'format': enum('csv', 'tsv'),
+        'header': {'const': False},
+        'column_index': {'type': 'integer', 'minimum': 0, 'maximum': 255},
+        'missing_values': arr({'type': 'string', 'maxLength': 200}, 0, 32),
+        'missing_policy': enum('reject', 'drop'),
+    })
+    indexed_file['properties']['missing_values']['uniqueItems'] = True
+    file_input = {
+        'oneOf': [csv_file, indexed_file],
+    }
+    data = obj({
+        'column': text(200),
+        'data_source': text(2000),
+        'transformation': text(2000),
+        'values': arr(rational, 1, 4096),
+        'file': file_input,
+    }, required=['column', 'data_source', 'transformation'])
+    data['oneOf'] = [
+        {'required': ['values'], 'not': {'required': ['file']}},
+        {'required': ['file'], 'not': {'required': ['values']}},
+    ]
+    count_summary = obj({
+        'statistic': enum('count'),
+        'value': {'type': 'integer', 'minimum': 0, 'maximum': 4096},
+        'tolerance': rational,
+    })
+    numeric_summary = obj({
+        'statistic': enum('sum', 'mean', 'median', 'minimum', 'maximum',
+                          'sample_variance', 'population_variance'),
+        'value': rational,
+        'tolerance': rational,
+    })
+    report = {
+        'type': 'array',
+        'items': {'oneOf': [count_summary, numeric_summary]},
+        'minItems': 1,
+        'maxItems': 32,
+    }
+    report['uniqueItems'] = True
+    check = obj({
+        'summary_check_version': enum('0.1'),
+        'source': source,
+        'data': data,
+        'reported': report,
+    })
+    return {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': 'urn:researchwitness:tabular-summary-check:0.1',
+        'title': 'ResearchWitness exact tabular-summary check 0.1',
+        'description': (
+            'Exact univariate descriptive-statistic recomputation from supplied rational values or a bounded '
+            'local CSV/TSV column. File extraction selects one column and applies an explicit missing-value '
+            'policy; arbitrary filtering, grouping, and transformations are not performed.'
+        ),
+        **check,
+        '$defs': {'rational': rational},
+    }
+
+
+def make_paper_audit_schema():
+    """Generate the bounded screening report schema (not a paper-truth schema)."""
+    hash_value = {'type': 'string', 'pattern': '^[a-f0-9]{64}$'}
+    empty_text = {'type': 'string', 'maxLength': 2000}
+    small_int_string = {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'}
+    anchor = obj({
+        'text_file': enum('extracted-text.txt'),
+        'quote': text(75),
+        'start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+        'end_byte': {'type': 'integer', 'minimum': 1, 'maximum': 32 * 1024 * 1024},
+        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 1_000_000},
+        'context': {'type': 'string', 'maxLength': 2000},
+        'page_number': {'type': 'integer', 'minimum': 1, 'maximum': 500},
+        'page_offset_start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 512 * 1024},
+        'page_offset_end_byte': {'type': 'integer', 'minimum': 1, 'maximum': 512 * 1024},
+        'section': {'type': 'string', 'maxLength': 2000},
+    }, required=['text_file', 'quote', 'start_byte', 'end_byte', 'line_number', 'context'])
+    structured_anchor = obj({
+        'source_file': enum('source.xml', 'source.nxml'),
+        'source_sha256': hash_value,
+        'source_format': enum('jats_xml'),
+        'element_path': text(4000),
+        'quote': {'type': 'string', 'maxLength': 1000},
+        'start_byte': {'oneOf': [{'type': 'null'}, {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024}]},
+        'end_byte': {'oneOf': [{'type': 'null'}, {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024}]},
+    }, required=['source_file', 'source_sha256', 'source_format', 'element_path', 'quote', 'start_byte', 'end_byte'])
+    stage_cue = obj({'stage': enum(
+        'screened', 'eligible', 'enrolled', 'randomized', 'excluded', 'completed',
+        'analyzed', 'follow_up', 'available',
+    ), 'cue': text(200)})
+    assertion_scope = obj({
+        'region': enum('MARKDOWN_TABLE_CELL', 'PROSE_CONTEXT'),
+        'nearby_context': {'type': 'string', 'maxLength': 600},
+        'study_stage': {'oneOf': [{'type': 'null'}, text(40)]},
+        'stage_cues': arr(stage_cue, 0, 8),
+    })
+    assertion = obj({
+        'id': {'type': 'string', 'pattern': '^count-[0-9]{4}$'},
+        'kind': enum('explicit_count_marker'),
+        'marker': enum('n', 'N'),
+        'surface_value': {'type': 'string', 'pattern': '^[0-9]{1,9}$'},
+        'value_exact': small_int_string,
+        'anchor': anchor,
+        'scope': assertion_scope,
+    })
+    page = obj({
+        'page_number': {'type': 'integer', 'minimum': 1, 'maximum': 500},
+        'character_count': {'type': 'integer', 'minimum': 0, 'maximum': 512 * 1024},
+        'status': enum('TEXT_EXTRACTED', 'NO_EXTRACTABLE_TEXT'),
+        'text_start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+        'text_end_byte': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
+    })
+    section = obj({
+        'heading': empty_text,
+        'level': {'type': 'integer', 'minimum': 1, 'maximum': 6},
+        'start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 1_000_000},
+    })
+    count_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^conflicting-[nN]-values(?:-[0-9]{2})?$'},
+        'type': enum('CONFLICTING_EXPLICIT_COUNT_MARKERS'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'marker': enum('n', 'N'),
+        'values_exact': arr(small_int_string, 2, 512),
+        'assertion_ids': arr({'type': 'string', 'pattern': '^count-[0-9]{4}$'}, 2, 512),
+        'source_anchors': arr(anchor, 2, 512),
+        'scope_stage': arr(text(40), 0, 9),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    table_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^table-percentage-[0-9]{4}$'},
+        'type': enum('TABLE_PERCENTAGE_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'numerator_exact': small_int_string,
+        'denominator_exact': small_int_string,
+        'reported_percent': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
+        'recomputed_percent': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$'},
+        'rounding_tolerance_percentage_points': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]?)(?:\\.[0-9]{1,6})?$'},
+        'scope_label': empty_text,
+        'table': empty_text,
+        'source_anchors': arr(anchor, 3, 3),
+        'adversarial_review': obj({
+            'status': enum('ARITHMETIC_RECOMPUTED_WITH_SCOPE_OBJECTIONS'),
+            'objections_considered': arr(text(500), 1, 8),
+            'limitations': arr(text(500), 1, 8),
+        }),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    flow_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^exclusion-flow-[0-9]{4}$'},
+        'type': enum('EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'source_total_exact': small_int_string,
+        'excluded_values_exact': arr(small_int_string, 1, 64),
+        'reported_included_exact': small_int_string,
+        'expected_included_exact': {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,10})$'},
+        'difference_exact': {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,10})$'},
+        'source_anchors': arr(anchor, 3, 66),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    structured_table_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^structured-table-percentage-[0-9]{4}$'},
+        'type': enum('STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'table_caption': empty_text,
+        'numerator_exact': small_int_string,
+        'denominator_exact': small_int_string,
+        'reported_percent': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
+        'recomputed_percent': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,8})?$'},
+        'recomputed_at_display_precision': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$'},
+        'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 6},
+        'rounding_tolerance_percentage_points': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]?)(?:\\.[0-9]{1,7})?$'},
+        'row_identity': empty_text,
+        'effective_headers': arr(text(2000), 1, 32),
+        'source_anchors': arr(structured_anchor, 3, 3),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    candidate = {'oneOf': [count_anomaly, table_anomaly, flow_anomaly, structured_table_anomaly]}
+    scope_difference = obj({
+        'id': {'type': 'string', 'pattern': '^(?:scope-[0-9]{4}|table-scope-[0-9]{4})$'},
+        'type': enum(
+            'MULTIPLE_COUNT_SCOPES_IN_ONE_PASSAGE', 'DIFFERENT_EXPLICIT_STUDY_STAGES',
+            'POSSIBLE_ROW_SPECIFIC_DENOMINATOR',
+        ),
+        'status': enum('POSSIBLE_SAMPLE_FLOW_DIFFERENCE'),
+        'marker': enum('n', 'N'),
+        'values_exact': arr(small_int_string, 2, 512),
+        'stage_labels': arr(text(40), 2, 2),
+        'reported_percent': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
+        'numerator_exact': small_int_string,
+        'column_denominator_exact': small_int_string,
+        'compatible_alternate_denominators_exact': arr(small_int_string, 1, 16),
+        'scope_label': empty_text,
+        'table': empty_text,
+        'source_anchors': arr(anchor, 1, 512),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    }, required=['id', 'type', 'status', 'source_anchors', 'interpretation', 'required_review'])
+    report = obj({
+        'paper_audit_version': enum('0.2', '0.3'),
+        'decision': enum(
+            'CANDIDATES_FOUND', 'CANDIDATES_FOUND_IN_INCOMPLETE_SCAN',
+            'NO_CANDIDATES_IN_SUPPORTED_SCAN', 'SCAN_INCOMPLETE_NO_CANDIDATES',
+            'EXTRACTION_UNAVAILABLE_OR_EMPTY',
+        ),
+        'source': obj({
+            'identifier': text(2000),
+            'version': text(100),
+            'capture_status': enum('unverified'),
+            'source_file': enum('source.txt', 'source.md', 'source.markdown', 'source.pdf', 'source.xml', 'source.nxml'),
+            'sha256': hash_value,
+        }),
+        'extraction': obj({
+            'status': enum(
+                'TEXT_AVAILABLE', 'PARTIAL_TEXT', 'NO_EXTRACTABLE_TEXT',
+                'PARSER_UNAVAILABLE', 'MALFORMED_OR_UNSUPPORTED', 'LIMIT_OR_UNSUPPORTED',
+                'RESOURCE_LIMIT_OR_TIMEOUT', 'WORKER_FAILED', 'WORKER_PROTOCOL_ERROR',
+            ),
+            'extractor': text(200),
+            'original_format': enum('txt', 'md', 'markdown', 'pdf', 'jats_xml'),
+            'source_bytes': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+            'text_file': enum('extracted-text.txt'),
+            'text_sha256': hash_value,
+            'text_bytes': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
+            'page_count': {'oneOf': [{'type': 'null'}, {'type': 'integer', 'minimum': 0, 'maximum': 500}]},
+            'page_map': arr(page, 0, 500),
+            'warnings': arr(text(5000), 0, 16),
+            'ocr_performed': {'const': False},
+        }),
+        'paper_structure': obj({
+            'sections': arr(section, 0, 512),
+            'layout_status': enum('TEXT_OR_MARKDOWN_OFFSETS', 'PDF_PAGE_AND_EXTRACTED_TEXT_OFFSETS_ONLY',
+                                  'JATS_ELEMENT_PATHS_AND_TABLE_GRIDS', 'JATS_STRUCTURE_UNAVAILABLE'),
+            'document_model': {'oneOf': [{'type': 'null'}, obj({
+                'file': enum('paper-document.json'),
+                'sha256': hash_value,
+                'model_version': enum('1.0'),
+                'section_count': {'type': 'integer', 'minimum': 0, 'maximum': 512},
+                'paragraph_count': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+                'table_count': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+                'numeric_assertion_count': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+            })]},
+        }, required=['sections', 'layout_status']),
+        'source_capabilities': obj({
+            'prose': enum('PROSE_TEXT_RELIABLE', 'SOURCE_NATIVE_PROSE_AVAILABLE', 'TABLE_STRUCTURE_UNSUPPORTED',
+                          'EXTRACTION_DEGRADED', 'IMAGE_ONLY', 'EXTRACTION_FAILED'),
+            'tables': enum('TABLE_STRUCTURE_UNSUPPORTED', 'STRUCTURED_JATS_TABLES', 'MARKDOWN_TABLE_ADAPTER'),
+        }),
+        'detector_eligibility': arr(obj({
+            'detector_id': enum('explicit_count_marker_scan', 'table_percentage_recomputation',
+                                'markdown_table_percentage_recomputation', 'explicit_sample_flow_arithmetic',
+                                'explicit_exclusion_flow_locator', 'two_by_two_effect_size_recomputation',
+                                'cross_section_numeric_identity'),
+            'contract_version': enum('1.0', '1.1'),
+            'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+            'source_format': enum('txt', 'md', 'markdown', 'pdf', 'jats_xml'),
+            'reasons': arr(text(500), 0, 16),
+            'checked_operands': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+            'table_id': {'type': 'string', 'maxLength': 500},
+        }, required=['detector_id', 'contract_version', 'status', 'source_format', 'reasons', 'checked_operands']), 0, 1100),
+        'detector_contracts': arr(obj({
+            'detector_id': {'type': 'string', 'maxLength': 100},
+            'version': enum('1.0', '1.1'),
+            'implementation_status': {'type': 'string', 'maxLength': 60},
+            'purpose': {'type': 'string', 'maxLength': 100},
+            'required_source_structure': arr(text(500), 1, 8),
+            'required_operands': arr(text(500), 1, 16),
+            'required_context': arr(text(500), 1, 16),
+            'allowed_ambiguity': arr(text(500), 0, 8),
+            'rounding_policy': {'type': 'string', 'maxLength': 200},
+            'units': arr(text(100), 1, 8),
+            'exclusions': arr(text(500), 0, 16),
+            'positive_result_establishes': {'type': 'string', 'maxLength': 1000},
+            'positive_result_does_not_establish': {'type': 'string', 'maxLength': 1000},
+            'unsupported_or_incomplete_reasons': arr(text(200), 1, 16),
+        }, required=['detector_id', 'version', 'implementation_status', 'purpose', 'required_source_structure', 'required_operands',
+                     'required_context', 'allowed_ambiguity', 'rounding_policy', 'units', 'exclusions',
+                     'positive_result_establishes', 'positive_result_does_not_establish',
+                     'unsupported_or_incomplete_reasons']), 4, 8),
+        'discovery': obj({
+            'provider': enum('deterministic_local_heuristic'),
+            'discoverer': enum('explicit_count_marker_scan'),
+            'scan_complete': {'type': 'boolean'},
+            'assertions': arr(assertion, 0, 512),
+            'candidate_anomalies': arr(count_anomaly, 0, 2),
+            'possible_scope_differences': arr(scope_difference, 0, 128),
+            'table_count_assertions_not_cross_compared': {'type': 'integer', 'minimum': 0, 'maximum': 512},
+            'limitations': arr(text(1000), 1, 16),
+        }),
+        'arithmetic_screens': obj({
+            'table_percentages': obj({
+                'discoverer': enum('markdown_table_percentage_recomputation'),
+                'findings': arr(table_anomaly, 0, 256),
+                'possible_scope_differences': arr(scope_difference, 0, 128),
+                'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+                'cells_scanned': {'type': 'integer', 'minimum': 0, 'maximum': 100_001},
+                'supported': {'type': 'boolean'},
+                'scan_complete': {'type': 'boolean'},
+                'limitations': arr(text(1000), 0, 16),
+                'tables_seen': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+            }, required=['discoverer', 'findings', 'possible_scope_differences', 'checked_cells',
+                         'cells_scanned', 'supported', 'scan_complete', 'limitations']),
+            'sample_exclusion_flow': obj({
+                'discoverer': enum('explicit_exclusion_flow_arithmetic_screen'),
+                'candidate_anomalies': arr(flow_anomaly, 0, 64),
+                'ambiguous_relations': arr(obj({
+                    'id': {'type': 'string', 'pattern': '^ambiguous-flow-[0-9]{4}$'},
+                    'status': enum('FLOW_RELATION_AMBIGUOUS'),
+                    'source_total_exact': small_int_string,
+                    'excluded_values_exact': arr(small_int_string, 1, 64),
+                    'reported_included_exact': small_int_string,
+                    'source_anchors': arr(anchor, 3, 66),
+                    'interpretation': text(1000),
+                    'required_review': text(1000),
+                }), 0, 64),
+                'scan_complete': {'type': 'boolean'},
+                'limitations': arr(text(1000), 0, 16),
+            }, required=['discoverer', 'candidate_anomalies', 'scan_complete', 'limitations']),
+            'structured_table_percentages': obj({
+                'detector_id': enum('table_percentage_recomputation'),
+                'findings': arr(structured_table_anomaly, 0, 256),
+                'tables': arr(obj({
+                    'table_id': {'type': 'string', 'maxLength': 500},
+                    'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+                    'reasons': arr(text(200), 0, 16),
+                    'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+                    'candidate_count': {'type': 'integer', 'minimum': 0, 'maximum': 256},
+                }), 0, 1000),
+                'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+                'scan_complete': {'type': 'boolean'},
+                'limitations': arr(text(200), 0, 100),
+            }),
+        }, required=['table_percentages', 'sample_exclusion_flow']),
+        'candidate_anomalies': arr(candidate, 0, 322),
+        'possible_scope_differences': arr(scope_difference, 0, 256),
+        'checks_attempted': arr(enum(
+            'explicit_count_marker_scan', 'markdown_table_percentage_recomputation',
+            'explicit_exclusion_flow_arithmetic_screen',
+            'jats_table_percentage_recomputation',
+        ), 0, 3),
+        'verified_findings': arr({'type': 'object'}, 0, 0),
+        'unresolved_questions': arr(text(1000), 0, 322),
+        'unsupported_checks': arr(text(500), 1, 16),
+        'known_corrections': obj({'status': enum('NOT_CHECKED')}),
+        'paper_error_established': {'const': False},
+        'meaning': text(1000),
+    }, required=[
+        'paper_audit_version', 'decision', 'source', 'extraction', 'paper_structure', 'discovery',
+        'arithmetic_screens', 'candidate_anomalies', 'possible_scope_differences', 'checks_attempted',
+        'verified_findings', 'unresolved_questions', 'unsupported_checks', 'known_corrections',
+        'paper_error_established', 'meaning',
+    ])
+    return {
+        '$schema': 'https://json-schema.org/draft/2020-12/schema',
+        '$id': 'urn:researchwitness:paper-audit-report:0.3',
+        'title': 'ResearchWitness bounded paper-screening report 0.3',
+        'description': (
+            'Source-aware paper screening with machine-readable eligibility contracts. All flags remain candidates; '
+            'a negative result does not establish correctness.'
+        ),
+        **report,
+    }
+
+
 if __name__ == '__main__':
     out = ROOT / 'schemas'
     out.mkdir(exist_ok=True)
@@ -381,6 +850,9 @@ if __name__ == '__main__':
     for name, schema in (
         ('case.schema.json', make()),
         ('intake.schema.json', make_intake_schema()),
+        ('review.schema.json', make_review_schema()),
+        ('summary-check.schema.json', make_summary_check_schema()),
+        ('paper-audit.schema.json', make_paper_audit_schema()),
     ):
         rendered = json.dumps(schema, indent=2) + '\n'
         (out / name).write_text(rendered, encoding='utf-8')

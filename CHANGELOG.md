@@ -1,7 +1,23 @@
 # Changelog
 
+## 0.4.0.dev0 — paper-audit empirical development wave — unreleased
+
+- Expanded `paper-audit` with contextual `n`/`N` count screening, Markdown table count/percentage recomputation, and a bounded explicit exclusion-flow arithmetic screen. Every paper-level output remains a human-review candidate; no findings are promoted to paper errors.
+- Added source-section and local-context cues, possible study-stage and row-denominator notes, rounding tolerance, and richer anchored HTML/JSON reports.
+- Moved optional `pypdf` extraction into a separate worker with fixed arguments, no shell, wall/CPU/address-space limits where supported, and explicit parser/resource failure outcomes. This is process isolation, not a sandbox.
+- Added source-pinned development corpus tooling and a report-only evidence set. On four selected correction-backed positives the screens rediscovered three issues; four surfaced candidate items matched those corrections. No candidates were emitted on five selected negative controls. These are development-set results, not an independent or sealed evaluation.
+- Added Markdown/JATS renderer and exact-hash Europe PMC retrieval tooling. Full articles and PDFs are not committed; source/version hashes and short report anchors are preserved.
+- Added regression and malformed/oversized/encrypted/timeout PDF worker tests, schema v0.2, capability updates, and static review of the isolated worker call path.
+
+This candidate has no sealed holdout and does not support arbitrary-paper correctness claims or cross-disciplinary performance claims.
+
 ## 0.3.0.dev0 — verifier-wave integration candidate — unreleased
 
+- Added `paper-audit` for bounded UTF-8 text/Markdown and optional born-digital PDF extraction, preserving source bytes and reporting conflicting explicit `n=` / `N=` markers as human-review candidates only. No paper-level correctness or rediscovery claim is made.
+- Added a report JSON Schema, output and extraction limits, page/byte anchors, partial-scan outcomes, and installed-wheel command smoke checks.
+- Added a multi-area review ledger for broad paper audits; exact quote anchors and evidence-file hashes are checked, while unverified reviewer observations stay separate from deterministic checker replays.
+- Added an exact tabular-summary checker for bounded rational data columns and explicit rounding tolerances; it does not authenticate data provenance or source alignment.
+- Added bounded CSV/TSV column extraction for summary checks, recording source-file hashes, selected record numbers, and explicit missing-value handling. Linked review reports include the summary input and data-file hashes in the finding evidence map. Filtering and transformations are not executed.
 - Added bounded rational-expression, finite-graph coloring, finite-PMF probability/expectation, and modular linear-system verifiers.
 - Added per-family exact resource contracts and replayable synthetic examples to `capabilities --json`.
 - Added agent-intake JSON Schema, packaged schema access, synthetic `scaffold`, and read-only `validate-intake` CLI commands.

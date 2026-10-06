@@ -1,26 +1,67 @@
-# Validation — ResearchWitness 0.2.0 MVP
+# Validation — ResearchWitness MVP and development candidate
 
-**Date:** 2026-10-04
-
-This is the preserved qualification record for the `0.2.0` MVP. The unreleased `0.3.0.dev0` integration candidate has a separate, freshly generated record under [`validation/verifier-wave/`](../validation/verifier-wave/); do not apply this baseline's test count or wheel hash to that candidate.
+**Historical MVP qualification:** 2026-10-04 · **Paper-audit wave 1:** 2026-10-06
 
 This document separates software qualification from scientific coverage. Passing the engineering suite does not mean ResearchWitness can verify arbitrary research papers.
 
-## Engineering qualification
+## Current capability-wave status
 
-The release gate runs offline and checks:
+The current implementation and qualification are tracked separately in [`validation/paper-audit-capability-wave/`](../validation/paper-audit-capability-wave/). The canonical document model and direct JATS table parser are new relative to the historical wave-1 screen below. Current run results, development coverage/sensitivity denominators, wave-2 post-hoc behavior, and remaining wave-3 blockers belong in `QUALIFICATION.md`; numbers in the historical sections below must not be read as results for this branch.
 
-- unit, adversarial, malformed-input and differential tests;
-- generated-schema drift;
-- Python compilation;
-- trusted-core static scan for network/dynamic execution primitives;
-- 500 seeded synthetic conformance cases;
-- real historical MVP replay cases;
-- two deterministic wheel builds and byte equality;
-- clean virtual-environment installation without network/dependencies;
-- installed CLI smoke verification.
+The wave began from clean local commit `b66b4bfb7b9da3e7246f0b827315bf3287a09f28`. The exact state, prior gate results, and old synthetic CLI behavior are recorded in [`paper-audit-wave-1/development-start.json`](../validation/paper-audit-wave-1/development-start.json). The archived [`validation/verifier-wave/qualification.json`](../validation/verifier-wave/qualification.json) and the earlier [`development-start-2026-10-06.json`](../validation/development-start-2026-10-06.json) describe historical trees, not this candidate.
 
-Run:
+## Paper-audit development set
+
+The source-pinned, **development-only** set contains four positive cases with public corrections and five selected negative controls. The cases were inspected during detector work; correction details are visible in `cases.json`. This is an exploratory development result, not a blinded benchmark. No sealed holdout was run because there was no independent custodian and the working environment was shared.
+
+| Result | Development-set outcome |
+|---|---:|
+| Correction-backed issues rediscovered | 3/4 (75%) |
+| Candidate items surfaced | 4 |
+| Candidate items matching a documented correction | 4/4 (100% on this selected set) |
+| Selected negative-control papers with candidates | 0/5 |
+| False-positive candidates per selected negative paper | 0.00 |
+| Possible scope/denominator notes | 17; not scored as errors |
+| Positive cases unsupported by current screens | 1/4 (Spittal annualized-rate correction) |
+| Candidates promoted to verified paper errors | 0 |
+| Reports byte-identical across repeated runs | 9/9 |
+| Source-text extraction failures in this Markdown/JATS run | 0/9 |
+
+Detected cases:
+
+- **J-EINSTEIN**, DOI [10.1186/s12959-015-0035-3](https://doi.org/10.1186/s12959-015-0035-3): the correction [10.1186/s12959-016-0085-1](https://doi.org/10.1186/s12959-016-0085-1) changes `2/71` from 2.9% to 2.8%. The paper's separate `1/78 = 1.4%` result is retained under a different definition and denominator.
+- **Depressive symptoms and cardiovascular disease**, DOI [10.1001/jamanetworkopen.2019.16591](https://doi.org/10.1001/jamanetworkopen.2019.16591): the correction [10.1001/jamanetworkopen.2019.20603](https://doi.org/10.1001/jamanetworkopen.2019.20603) changes an exclusion from 1,841 to 484, reconciling the stated flow to 12,417 included participants.
+- **Vitiligo repigmentation**, DOI [10.1111/jocd.16714](https://doi.org/10.1111/jocd.16714): the correction [10.1111/jocd.70179](https://doi.org/10.1111/jocd.70179) changes two `23/30` table percentages to 76.7%.
+
+The **Spittal practitioner-notification rates** paper and its correction ([10.1186/s12916-016-0748-6](https://doi.org/10.1186/s12916-016-0748-6), [10.1186/s12916-018-1030-x](https://doi.org/10.1186/s12916-018-1030-x)) form the unsupported positive: the correction identifies an annualization error in adjusted rates that cannot be recomputed from the original paper alone.
+
+Negative controls are Mehta et al. ([10.1001/jamanetworkopen.2024.13515](https://doi.org/10.1001/jamanetworkopen.2024.13515)), Knitza et al. ([10.1186/s13075-022-02809-7](https://doi.org/10.1186/s13075-022-02809-7)), Brown et al. ([10.1038/s41598-021-86008-5](https://doi.org/10.1038/s41598-021-86008-5)), Egilsson et al. daily ([10.2196/45414](https://doi.org/10.2196/45414)), and Egilsson et al. weekly ([10.2196/21432](https://doi.org/10.2196/21432)). They exercise changing analysis populations, screening/randomization/paired-sample counts, repeated measures, and row-specific denominators. They were selected as controls, not certified as error-free.
+
+The original marker-only screen rediscovered none of the four correction-backed issues and emitted candidates on all five selected negative controls. The new scopes and arithmetic screens reduce those control flags and surface the three supported correction mechanisms. This does not establish similar precision or recall on other papers. The 17 possible scope notes have not been exhaustively adjudicated, and the negative controls cover a narrow clinical-study slice.
+
+The corpus manifest pins Europe PMC JATS URLs, dates, versions, SHA-256 hashes, corrections, identifiers, and license notices. Full papers and PDFs are not checked in. Retrieval verifies the exact hash before writing a temporary snapshot. See [`paper-audit-wave-1/`](../validation/paper-audit-wave-1/), including per-paper JSON reports and the scoring/evaluation tools.
+
+## Historical wave-1 screen scope and limits
+
+The wave-1 runner checked explicit `n`/`N` contexts, selected count/percentage cells in Markdown pipe tables, and one explicit exclusion-flow sentence. All outputs were review candidates. Its screen predated direct JATS table parsing and the explicit per-detector contract registry described in the current capability-wave qualification. A separate smaller denominator may be legitimate; exclusion categories may overlap; a clean scan covers only eligible patterns.
+
+The optional `pypdf` parser runs in a separate worker with a 20-second wall timeout, 15-second CPU limit, and 768 MiB address-space limit where supported. It is process isolation, not an OS sandbox, and performs no OCR. Synthetic tests cover valid multi-page, partial, encrypted, malformed, timeout, page-limit, and oversized-page-text inputs. Real corpus extraction used rendered JATS Markdown; PDF extraction accuracy on full papers remains unmeasured.
+
+The engineering baseline before the historical paper-audit wave was 348 passing tests, 500/500 synthetic conformance cases, and 3/3 historical MVP runs. These figures predate the capability wave.
+
+## Historical wave-1 engineering qualification
+
+The offline quality gate passed for `0.4.0.dev0` on Python 3.12.14:
+
+- **356 tests passed**.
+- **500/500** synthetic conformance cases and **3/3** historical MVP fixtures matched.
+- Trusted-core static checks, generated-schema and checksum checks, the frozen-screen review, and the checked-in paper-audit development-result consistency check passed.
+- Two independently built wheels were byte-identical. The tested wheel SHA-256 was `83181729e901c5dc924e03eee4d3f545549f2a3b33766cb825ee139eba263e02`.
+- A clean environment installed the wheel and passed CLI smoke checks for the agent, review, summary, and paper-audit commands.
+
+This qualifies the development tree against its current engineering gate. It does not qualify the product for general research-paper review or represent a release.
+
+Run the offline release gate:
 
 ```bash
 python tools/quality_gate.py
@@ -82,12 +123,4 @@ Tests enforce that:
 
 ## What is still unmeasured
 
-The MVP does not yet provide a credible estimate of:
-
-- autonomous discovery recall on unseen papers;
-- false-positive rate of agent-produced source interpretations;
-- false-contact rate in genuinely novel cases;
-- coverage across scientific disciplines;
-- researcher adoption or time saved.
-
-The next empirical milestone is a frozen, unseen historical-corrigenda discovery benchmark using external research agents while keeping the deterministic verifier unchanged during the run.
+This development set does not estimate discovery recall or candidate precision on unseen papers, coverage outside a small clinical-study sample, PDF extraction accuracy on real publisher layouts, false-contact rate, or researcher time saved. No candidate in this wave was promoted to a verified finding. The next empirical milestone is an independently custodied, sealed paper-audit evaluation with broader disciplines and extraction formats; see [`docs/ROADMAP.md`](ROADMAP.md).

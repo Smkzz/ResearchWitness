@@ -1,0 +1,44 @@
+{
+  "record_version": "1",
+  "title": "Wave-1 legacy Markdown adapter development replay",
+  "evaluation_use": "POSTHOC_DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "source_representation": "Exact cached wave-1 JATS captures rendered to Markdown with jats-markdown-v1, then checked by the legacy Markdown/text path.",
+  "separation_note": "These results are not combined with the direct source-native JATS replay. In particular, the old Markdown path could see a denominator layout that the current JATS contract classifies as unsupported.",
+  "metrics": {
+    "papers": 9,
+    "correction_issues": 4,
+    "target_mapped_correction_issues": 2,
+    "selected_control_papers": 5,
+    "candidate_items": 3,
+    "candidate_items_mapped_to_known_targets": 3,
+    "selected_controls_with_candidates": 0,
+    "reports_repeatable_json_and_html": 9,
+    "source_extraction_failures": 0,
+    "possible_scope_notes": 5,
+    "scope_note_adjudication": "NOT_SYSTEMATICALLY_SCORED"
+  },
+  "positive_cases": [
+    {
+      "case_id": "positive-j-einstein",
+      "outcome": "TARGET_MAPPED_CANDIDATE",
+      "candidate_items": 1
+    },
+    {
+      "case_id": "positive-vitiligo-percent",
+      "outcome": "TARGET_MAPPED_CANDIDATES",
+      "candidate_items": 2
+    },
+    {
+      "case_id": "positive-depressive-flow",
+      "outcome": "MISSED_BY_LEGACY_REPLAY",
+      "candidate_items": 0
+    },
+    {
+      "case_id": "positive-spittal",
+      "outcome": "UNSUPPORTED_EXPECTED",
+      "candidate_items": 0
+    }
+  ],
+  "control_result": "No candidates appeared on the five selected controls. They are not certified error-free controls, and this is not a false-positive rate.",
+  "limitation": "The positive labels were known development material. This replay is a regression comparison between source representations, not independent sensitivity or precision evidence."
+}

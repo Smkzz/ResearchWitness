@@ -1,0 +1,73 @@
+{
+  "record_version": 1,
+  "evaluation_wave": "paper-audit-wave-2",
+  "status": "FROZEN_BEFORE_SOURCE_SELECTION_AND_HOLDOUT_RUN",
+  "frozen_on": "2026-10-06",
+  "baseline": {
+    "repository": "https://github.com/Smkzz/ResearchWitness",
+    "branch": "codex/paper-audit-wave-1",
+    "commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+    "tree_sha": "a19c53c2c2e6c400ee8b0d7feb0d0261f0cf009f",
+    "remote_branch_commit_verified": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+    "worktree_clean_before_freeze": true
+  },
+  "product_version": "0.4.0.dev0",
+  "paper_audit_schema_version": "0.2",
+  "schema_hashes": {
+    "schemas/paper-audit.schema.json": "01b4a356835c2e77d6bd255daf6a1e309dd5d642a4e8e5dc7a02ca409b31bd28",
+    "researchwitness/schemas/paper-audit.schema.json": "01b4a356835c2e77d6bd255daf6a1e309dd5d642a4e8e5dc7a02ca409b31bd28"
+  },
+  "frozen_source_hashes": {
+    "researchwitness/paper_audit.py": "82286f5fdbfd63338a9df94eb537c9245860b8b610d656be2b7f47a910c64138",
+    "researchwitness/_pdf_worker.py": "d9ef80daae1f16ffd9ed052a2732d5362a6f76c9d79860415ff0a65386307775",
+    "researchwitness/__main__.py": "679bbd0be925ebad174ea53fd80b681594fc6faf82e1b12ba77473c6c141aaa8",
+    "researchwitness/strict.py": "e3d3c4424df0b8326f09209ebdc7e3eee6c598cc12819a2d20dedcae5db00690",
+    "researchwitness/capsule.py": "6cf2dfd889972014473be2e769653ad32195f814c9b338cf98a389ee9b106339",
+    "pyproject.toml": "7dc1fa7a5bfa8259b6e92f24818503cd33101677524f5305ebda3213068a0ed1",
+    "schemas/paper-audit.schema.json": "01b4a356835c2e77d6bd255daf6a1e309dd5d642a4e8e5dc7a02ca409b31bd28",
+    "researchwitness/schemas/paper-audit.schema.json": "01b4a356835c2e77d6bd255daf6a1e309dd5d642a4e8e5dc7a02ca409b31bd28"
+  },
+  "detector_configuration": {
+    "limits": {
+      "max_source_bytes": 33554432,
+      "max_pdf_pages": 500,
+      "max_extracted_text_bytes": 16777216,
+      "max_pdf_page_bytes": 524288,
+      "pdf_wall_seconds": 20,
+      "pdf_worker_memory_bytes_where_supported": 805306368,
+      "pdf_worker_cpu_seconds_where_supported": 15,
+      "pdf_worker_output_bytes": 24117248
+    },
+    "candidate_only_screen_families": [
+      "explicit_count_marker_conflict_screen",
+      "markdown_table_percentage_recomputation",
+      "explicit_exclusion_flow_arithmetic_screen"
+    ],
+    "verified_findings_promoted": false
+  },
+  "baseline_quality_gate": {
+    "python": "3.12.14",
+    "pytest": "356 passed",
+    "synthetic_conformance": "500/500",
+    "historical_verifier_cases": "3/3",
+    "reproducible_wheel_sha256": "83181729e901c5dc924e03eee4d3f545549f2a3b33766cb825ee139eba263e02",
+    "paper_audit_schema_title": "ResearchWitness bounded paper-screening report 0.2",
+    "quality_gate": "PASS"
+  },
+  "github_ci": {
+    "combined_statuses_for_baseline_commit": [],
+    "workflow_runs_returned_for_baseline_commit": [],
+    "workflow_trigger_policy": "CI and CodeQL push triggers target main only; pull_request runs on PRs; CI has workflow_dispatch; CodeQL has weekly schedule and workflow_dispatch.",
+    "interpretation": "No Actions check was reported for this non-PR development branch. No remote CI validation is claimed."
+  },
+  "evaluation_protocol": {
+    "separation": "BLINDED_WITHIN_WORKFLOW",
+    "limitation": "The repository, filesystem, and agent environment are shared; this is not an independently custodied or fully sealed holdout.",
+    "ground_truth_separate_from_detector_input": true,
+    "raw_outputs_locked_before_adjudication": true,
+    "predeclared_repeatability_runs_per_input": 2,
+    "command_template": "python -m researchwitness paper-audit <opaque source path> --identifier <opaque case id> --source-version <pinned source version> --output <new temporary output directory>",
+    "output_lock_policy": "Copy only report.json, report.html, and run/source metadata into wave results; discard copied source and extracted-text files; hash every persisted output before scoring.",
+    "no_detector_behavior_changes_before_lock": true
+  }
+}

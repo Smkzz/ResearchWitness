@@ -1,0 +1,30 @@
+{
+  "summary_check_version": "0.1",
+  "source": {
+    "identifier": "synthetic:review-ledger-example",
+    "version": "synthetic-v1",
+    "text_file": "paper.txt",
+    "capture_status": "synthetic",
+    "quote": "The three reported observations are 1, 2, and 3. Their arithmetic mean is 3."
+  },
+  "data": {
+    "column": "measurement",
+    "data_source": "Synthetic values from the sentence quoted in the synthetic paper text.",
+    "transformation": "No filtering or transformation; all three stated values are included.",
+    "file": {
+      "path": "observations.csv",
+      "format": "csv",
+      "header": true,
+      "column_name": "measurement",
+      "missing_values": [""],
+      "missing_policy": "reject"
+    }
+  },
+  "reported": [
+    {
+      "statistic": "mean",
+      "value": "3",
+      "tolerance": "0"
+    }
+  ]
+}

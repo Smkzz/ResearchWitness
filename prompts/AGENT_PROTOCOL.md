@@ -2,6 +2,8 @@
 
 This protocol is for an AI research agent preparing `audit.json`. The agent is an investigator, not a proof authority. ResearchWitness is authoritative only about the deterministic formalization it can replay.
 
+For a whole-paper or cross-domain review, use [`PAPER_REVIEW_PROTOCOL.md`](PAPER_REVIEW_PROTOCOL.md) and the `review-scaffold` / `validate-review` commands. The single-claim intake below remains for one narrow claim that fits a supported deterministic checker.
+
 ## 1. Pin the source
 
 Record a DOI/arXiv/publisher identifier and exact version. Preserve the source text bytes actually used by the agent. Do not silently repair missing symbols or switch versions.
@@ -26,6 +28,8 @@ Inspect the registry and its bundled examples:
 researchwitness capabilities --json
 researchwitness schema intake
 ```
+
+The `capabilities` output separates formal `checkers`, exact `empirical_checks`, and heuristic `paper_screens`. The current paper screen only proposes conflicting explicit `n=` / `N=` integers for review. Do not use that candidate list as a formalization result or infer that different values share a cohort or analysis scope.
 
 To start from a synthetic template, choose one listed `kind`:
 

@@ -1,0 +1,476 @@
+{
+  "corpus_version": "paper-audit-wave-1",
+  "retrieved_at": "2026-10-05",
+  "renderer": "jats-markdown-v1",
+  "roles": [
+    "development_positive",
+    "development_negative"
+  ],
+  "sealed_holdout": null,
+  "cases": [
+    {
+      "case_id": "positive-j-einstein",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC4339301",
+        "doi": "10.1186/s12959-015-0035-3",
+        "title": "Oral rivaroxaban for Japanese patients with symptomatic venous thromboembolism – the J-EINSTEIN DVT and PE program",
+        "authors": [
+          "Norikazu Yamada",
+          "Atsushi Hirayama",
+          "Hideaki Maeda",
+          "Satoru Sakagami",
+          "Hiroo Shikata",
+          "Martin H Prins",
+          "Anthonie WA Lensing",
+          "Masaharu Kato",
+          "Junichi Onuma",
+          "Yuki Miyamoto",
+          "Kazuma Iekushi",
+          "Mariko Kajikawa"
+        ],
+        "journal": "Thrombosis Journal",
+        "year": "2015",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4339301/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC4339301",
+        "sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+        "bytes": 79487,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC4339301.xml"
+      },
+      "correction": {
+        "pmcid": "PMC4877730",
+        "doi": "10.1186/s12959-016-0085-1",
+        "title": "Erratum to: ‘Oral rivaroxaban for Japanese patients with symptomatic venous thromboembolism – the J-EINSTEIN DVT and PE program’",
+        "authors": [
+          "Norikazu Yamada",
+          "Atsushi Hirayama",
+          "Hideaki Maeda",
+          "Satoru Sakagami",
+          "Hiroo Shikata",
+          "Martin H. Prins",
+          "Anthonie W. A. Lensing",
+          "Masaharu Kato",
+          "Junichi Onuma",
+          "Yuki Miyamoto",
+          "Kazuma Iekushi",
+          "Mariko Kajikawa"
+        ],
+        "journal": "Thrombosis Journal",
+        "year": "2016",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4877730/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC4877730",
+        "sha256": "57a9ddf0f2c601a30467748f7b30fb9271795b0a04b4507a9b65bc425afa6377",
+        "bytes": 18775,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC4877730.xml"
+      },
+      "expected": {
+        "issue": "Table 3 reports 2 cases among 71 as 2.9%; the correction says this should be 2.8%. The nearby 1/78 = 1.4% result is retained because it uses a different definition and denominator.",
+        "candidate_type": "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+        "target": {
+          "numerator_exact": "2",
+          "denominator_exact": "71",
+          "reported_percent": "2.9",
+          "corrected_percent": "2.8"
+        },
+        "location": "Table 3, DVT and PE patients, Rivaroxaban combined, Unchanged, n (%)",
+        "correction_pmcid": "PMC4877730"
+      }
+    },
+    {
+      "case_id": "positive-spittal",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC5134271",
+        "doi": "10.1186/s12916-016-0748-6",
+        "title": "Outcomes of notifications to health practitioner boards: a retrospective cohort study",
+        "authors": [
+          "Matthew J. Spittal",
+          "David M. Studdert",
+          "Ron Paterson",
+          "Marie M. Bismark"
+        ],
+        "journal": "BMC Medicine",
+        "year": "2016",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5134271/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC5134271",
+        "sha256": "c4a686c2fac31d7be83af4c17ed1de5e413e7faca18541f0503d247c5c03b149",
+        "bytes": 88263,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC5134271.xml"
+      },
+      "correction": {
+        "pmcid": "PMC5842619",
+        "doi": "10.1186/s12916-018-1030-x",
+        "title": "Correction to: Outcomes of notifications to health practitioner boards: a retrospective cohort study",
+        "authors": [
+          "Matthew J. Spittal",
+          "David M. Studdert",
+          "Ron Paterson",
+          "Marie M. Bismark"
+        ],
+        "journal": "BMC Medicine",
+        "year": "2018",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5842619/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC5842619",
+        "sha256": "1837b5ae4dbfdf50f59c3881869d2610e832ca31a02e5268cea9677f9e799c1a",
+        "bytes": 18387,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC5842619.xml"
+      },
+      "expected": {
+        "issue": "The correction says all Table 2 rates were displayed at half their corrected values due to an annualization error; doctor rate 14.5 is corrected to 29.0 per 1,000 practitioner-years.",
+        "candidate_type": null,
+        "target": {
+          "reported_rate": "14.5",
+          "corrected_rate": "29.0"
+        },
+        "location": "Table 2 and corrected Results text",
+        "correction_pmcid": "PMC5842619",
+        "assessment": "Unsupported by the current numeric screens; the original article does not provide enough information to independently recompute an adjusted annualized rate."
+      }
+    },
+    {
+      "case_id": "positive-depressive-flow",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC6902756",
+        "doi": "10.1001/jamanetworkopen.2019.16591",
+        "title": "Association of Depressive Symptoms With Incident Cardiovascular Diseases in Middle-Aged and Older Chinese Adults",
+        "authors": [
+          "Haibin Li",
+          "Deqiang Zheng",
+          "Zhiwei Li",
+          "Zhiyuan Wu",
+          "Wei Feng",
+          "Xue Cao",
+          "Jiaxin Wang",
+          "Qi Gao",
+          "Xia Li",
+          "Wei Wang",
+          "Brian J. Hall",
+          "Yu-Tao Xiang",
+          "Xiuhua Guo"
+        ],
+        "journal": "JAMA Network Open",
+        "year": "2019",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6902756/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC6902756",
+        "sha256": "e2ee9fa85dbfd8b4b5b0e9f85d1b81138ec2442fb62949b3e676f31636e3038f",
+        "bytes": 146746,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC6902756.xml"
+      },
+      "correction": {
+        "pmcid": "PMC6991292",
+        "doi": "10.1001/jamanetworkopen.2019.20603",
+        "title": "Errors in Results, Table 3, and Figure 2",
+        "authors": [],
+        "journal": "JAMA Network Open",
+        "year": "2020",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6991292/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC6991292",
+        "sha256": "d67d223297ce5c53d4ef8346fd53822783b0514ac0060d09a2996ea8f560530e",
+        "bytes": 5225,
+        "license": "CC BY; version unspecified in JATS snapshot",
+        "license_url": null,
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC6991292.xml"
+      },
+      "expected": {
+        "issue": "The Results section lists 17,708 at baseline, exclusions 1,841, 2,789, 1,878, and 140, then 12,417 included. The correction says 1,841 should be 484; with that change, the flow arithmetic matches 12,417.",
+        "candidate_type": "EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH",
+        "target": {
+          "starting_total": "17708",
+          "exclusions": [
+            "1841",
+            "2789",
+            "1878",
+            "140"
+          ],
+          "reported_included": "12417",
+          "corrected_first_exclusion": "484"
+        },
+        "location": "Results, opening participant-flow sentence",
+        "correction_pmcid": "PMC6991292"
+      }
+    },
+    {
+      "case_id": "positive-vitiligo-percent",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC11845954",
+        "doi": "10.1111/jocd.16714",
+        "title": "The Efficacy of Non‐Cultured Epidermal Cell Suspension and Excimer Lamps Combination Therapy in Vitiligo: Results of 18 Months Follow‐Up",
+        "authors": [
+          "Tam Hoang Van",
+          "Davinder Parsad",
+          "Thuong Nguyen Van",
+          "Phuong Hoang Thi",
+          "Son Nguyen Hong",
+          "Hien Do Thi Thu",
+          "Tan Nguyen Manh",
+          "Hien Le Thanh",
+          "Hien Tran Thi Thu",
+          "Doanh Le Huu"
+        ],
+        "journal": "Journal of Cosmetic Dermatology",
+        "year": "2024",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11845954/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC11845954",
+        "sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+        "bytes": 68656,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC11845954.xml"
+      },
+      "correction": {
+        "pmcid": "PMC12063958",
+        "doi": "10.1111/jocd.70179",
+        "title": "Correction to “The Efficacy of Non‐Cultured Epidermal Cell Suspension and Excimer Lamps Combination Therapy in Vitiligo: Results of 18 Months Follow‐Up”",
+        "authors": [],
+        "journal": "Journal of Cosmetic Dermatology",
+        "year": "2025",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC12063958/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC12063958",
+        "sha256": "cb73763e32597e0ebc3307fe723e8189b14e9a6da7165ca809a1ed475c6f8e6d",
+        "bytes": 5352,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC12063958.xml"
+      },
+      "expected": {
+        "issue": "Table 2 reports 23/30 as 73.3% for Group 1 and 70% for Group 2; the correction states both values should be 76.7%.",
+        "candidate_type": "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+        "target": {
+          "numerator_exact": "23",
+          "denominator_exact": "30",
+          "reported_percent": [
+            "73.3",
+            "70"
+          ],
+          "corrected_percent": "76.7"
+        },
+        "location": "Results, Table 2, at least 75% repigmentation row",
+        "correction_pmcid": "PMC12063958"
+      }
+    },
+    {
+      "case_id": "negative-mehta",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC11148689",
+        "doi": "10.1001/jamanetworkopen.2024.13515",
+        "title": "Remote Blood Pressure Monitoring With Social Support for Patients With Hypertension",
+        "authors": [
+          "Shivan J. Mehta",
+          "Kevin G. Volpp",
+          "Andrea B. Troxel",
+          "Joseph Teel",
+          "Catherine R. Reitz",
+          "Alison Purcell",
+          "Humphrey Shen",
+          "Kiernan McNelis",
+          "Christopher K. Snider",
+          "David A. Asch"
+        ],
+        "journal": "JAMA Network Open",
+        "year": "2024",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11148689/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC11148689",
+        "sha256": "30f8758cf988689376d8d7175ee1ee688408e386dd7d03db83b90dc91c570ab4",
+        "bytes": 106358,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC11148689.xml"
+      },
+      "correction_search": {
+        "checked_at": "2026-10-05",
+        "method": "Targeted Europe PMC/publisher correction and erratum search during curation; no associated correction surfaced. This does not prove that no correction exists."
+      },
+      "known_scope_traps": [
+        "251 randomized (101+100+50) differs from the 246-person analysis-arm counts (100+97+49); later outcomes use different analysis populations."
+      ]
+    },
+    {
+      "case_id": "negative-knitza",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC9130452",
+        "doi": "10.1186/s13075-022-02809-7",
+        "title": "Accuracy and tolerability of self-sampling of capillary blood for analysis of inflammation and autoantibodies in rheumatoid arthritis patients—results from a randomized controlled trial",
+        "authors": [
+          "Johannes Knitza",
+          "Koray Tascilar",
+          "Nicolas Vuillerme",
+          "Ekaterina Eimer",
+          "Paul Matusewicz",
+          "Giulia Corte",
+          "Louis Schuster",
+          "Timothée Aubourg",
+          "Gerlinde Bendzuck",
+          "Marianne Korinth",
+          "Corinna Elling-Audersch",
+          "Arnd Kleyer",
+          "Sebastian Boeltz",
+          "Axel J. Hueber",
+          "Gerhard Krönke",
+          "Georg Schett",
+          "David Simon"
+        ],
+        "journal": "Arthritis Research & Therapy",
+        "year": "2022",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9130452/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC9130452",
+        "sha256": "cc0abdc1786f485ed363b36310713936ccbb47b82489ade53f8b2b7af8bbbdf6",
+        "bytes": 86813,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC9130452.xml"
+      },
+      "correction_search": {
+        "checked_at": "2026-10-05",
+        "method": "Targeted Europe PMC/publisher correction and erratum search during curation; no associated correction surfaced. This does not prove that no correction exists."
+      },
+      "known_scope_traps": [
+        "67 screened, 50 randomized, 49 paired, and 22 CRP-available participants are distinct populations."
+      ]
+    },
+    {
+      "case_id": "negative-brown",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC8032656",
+        "doi": "10.1038/s41598-021-86008-5",
+        "title": "Self-sampling of capillary blood for SARS-CoV-2 serology",
+        "authors": [
+          "Lottie Brown",
+          "Rachel L Byrne",
+          "Alice Fraser",
+          "Sophie I Owen",
+          "Ana I Cubas-Atienzar",
+          "Christopher T Williams",
+          "Grant A Kay",
+          "Luis E Cuevas",
+          "Joseph R A Fitchett",
+          "Tom Fletcher",
+          "Gala Garrod",
+          "Konstantina Kontogianni",
+          "Sanjeev Krishna",
+          "Stefanie Menzies",
+          "Tim Planche",
+          "Chris Sainter",
+          "Henry M Staines",
+          "Lance Turtle",
+          "Emily R Adams"
+        ],
+        "journal": "Scientific Reports",
+        "year": "2021",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8032656/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC8032656",
+        "sha256": "f53ee4af3922a6301ad8dfada0ceeb2b3d14edcb9bc1d83fee43117fe02554a4",
+        "bytes": 50718,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC8032656.xml"
+      },
+      "correction_search": {
+        "checked_at": "2026-10-05",
+        "method": "Targeted Europe PMC/publisher correction and erratum search during curation; no associated correction surfaced. This does not prove that no correction exists."
+      },
+      "known_scope_traps": [
+        "39 participants and 209 paired samples are participant and repeated-measure counts."
+      ]
+    },
+    {
+      "case_id": "negative-egilsson-daily",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC10337294",
+        "doi": "10.2196/45414",
+        "title": "Usage and Daily Attrition of a Smartphone-Based Health Behavior Intervention: Randomized Controlled Trial",
+        "authors": [
+          "Lorraine Buis"
+        ],
+        "journal": "JMIR mHealth and uHealth",
+        "year": "2023",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10337294/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC10337294",
+        "sha256": "3ad153137e965d0addbc246068b671097d8929e45a617621ac74e3ffd040c0cd",
+        "bytes": 124217,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC10337294.xml"
+      },
+      "correction_search": {
+        "checked_at": "2026-10-05",
+        "method": "Targeted Europe PMC/publisher correction and erratum search during curation; no associated correction surfaced. This does not prove that no correction exists."
+      },
+      "known_scope_traps": [
+        "661 eligible, 451 consented, and 304 assigned participants are different study stages; arm-specific outcome denominators vary."
+      ]
+    },
+    {
+      "case_id": "negative-egilsson-weekly",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC7929738",
+        "doi": "10.2196/21432",
+        "title": "Usage and Weekly Attrition in a Smartphone-Based Health Behavior Intervention for Adolescents: Pilot Randomized Controlled Trial",
+        "authors": [
+          "Erlendur Egilsson",
+          "Ragnar Bjarnason",
+          "Urdur Njardvik"
+        ],
+        "journal": "JMIR Formative Research",
+        "year": "2021",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7929738/fullTextXML",
+        "article_url": "https://europepmc.org/articles/PMC7929738",
+        "sha256": "8769872b9ca4ff9ea07abe6afa1ea60ffdaed669321d6753671d60e11301eb70",
+        "bytes": 97388,
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "retrieved_at": "2026-10-05",
+        "snapshot_in_repository": false,
+        "snapshot_name": "PMC7929738.xml"
+      },
+      "correction_search": {
+        "checked_at": "2026-10-05",
+        "method": "Targeted Europe PMC/publisher correction and erratum search during curation; no associated correction surfaced. This does not prove that no correction exists."
+      },
+      "known_scope_traps": [
+        "41 participants split 21/20; baseline percentages use smaller item-response denominators, and weekly activity counts vary by timepoint."
+      ],
+      "related_to": "negative-egilsson-daily"
+    }
+  ]
+}

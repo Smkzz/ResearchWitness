@@ -1,0 +1,86 @@
+{
+  "review_version": "0.1",
+  "review_id": "synthetic-summary-check",
+  "reviewed_on": "2026-10-05",
+  "source": {
+    "identifier": "synthetic:review-ledger-example",
+    "version": "synthetic-v1",
+    "text_file": "paper.txt",
+    "capture_status": "synthetic"
+  },
+  "areas": {
+    "source_citations": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No citation review was performed in this example.",
+      "evidence_files": []
+    },
+    "internal_consistency": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No internal-consistency review was performed in this example.",
+      "evidence_files": []
+    },
+    "mathematics_logic": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No proof review was performed in this example.",
+      "evidence_files": []
+    },
+    "statistics_quantitative": {
+      "status": "findings_recorded",
+      "method": "Recompute the stated mean from the three supplied observations.",
+      "notes": "One arithmetic discrepancy is recorded as an unverified reviewer candidate.",
+      "evidence_files": ["data.txt"]
+    },
+    "data_integrity": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No data-provenance or integrity review was performed in this example.",
+      "evidence_files": []
+    },
+    "methods_design": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No experimental-design review was performed in this example.",
+      "evidence_files": []
+    },
+    "code_reproducibility": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No code or computational review was performed in this example.",
+      "evidence_files": []
+    },
+    "figures_tables": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No figure or table review was performed in this example.",
+      "evidence_files": []
+    },
+    "interpretation": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No interpretation or scope review was performed in this example.",
+      "evidence_files": []
+    },
+    "ethics_reporting": {
+      "status": "not_reviewed",
+      "method": "Not reviewed",
+      "notes": "No ethics or reporting review was performed in this example.",
+      "evidence_files": []
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "area": "statistics_quantitative",
+      "status": "tabular_summary_replay",
+      "location": "Results, first paragraph",
+      "statement": "The reported arithmetic mean does not match the three stated observations.",
+      "quote": "The three reported observations are 1, 2, and 3. Their arithmetic mean is 3.",
+      "rationale": "The supplied values produce a mean of 2 against the reported 3. The source-to-data link is synthetic, so this does not establish a paper error.",
+      "evidence_files": ["data.txt"],
+      "summary_check": "summary-check.json"
+    }
+  ]
+}

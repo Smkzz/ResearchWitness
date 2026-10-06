@@ -1,0 +1,38 @@
+{
+  "case_id": "positive-spittal",
+  "role": "development_positive",
+  "source": {
+    "pmcid": "PMC5134271",
+    "doi": "10.1186/s12916-016-0748-6",
+    "snapshot_sha256": "c4a686c2fac31d7be83af4c17ed1de5e413e7faca18541f0503d247c5c03b149",
+    "rendered_markdown_sha256": "947c0426b3a81a26dc033a9dd370965a27f4b271d51297f1730b83ea53bd4352",
+    "source_version": "PMC5134271 XML captured 2026-10-05; jats-markdown-v1"
+  },
+  "run": {
+    "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+    "extraction_status": "TEXT_AVAILABLE",
+    "checks_attempted": [
+      "explicit_count_marker_scan",
+      "explicit_exclusion_flow_arithmetic_screen",
+      "markdown_table_percentage_recomputation"
+    ],
+    "count_assertions": 2,
+    "candidate_count": 0,
+    "candidate_types": [],
+    "possible_scope_difference_count": 0,
+    "verified_finding_count": 0,
+    "unsupported_checks": [
+      "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+      "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+      "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+      "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+      "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+    ],
+    "runtime_seconds": 0.065,
+    "deterministic_report_json": true,
+    "deterministic_report_html": true
+  },
+  "expected_issue": "The correction says all Table 2 rates were displayed at half their corrected values due to an annualization error; doctor rate 14.5 is corrected to 29.0 per 1,000 practitioner-years.",
+  "outcome": "UNSUPPORTED_EXPECTED",
+  "matched_candidate_count": 0
+}

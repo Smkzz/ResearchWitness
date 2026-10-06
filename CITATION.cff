@@ -4,7 +4,7 @@ title: "ResearchWitness"
 type: software
 authors:
   - name: "ResearchWitness contributors"
-version: "0.3.0.dev0"
+version: "0.4.0.dev0"
 repository-code: "https://github.com/Smkzz/ResearchWitness"
 url: "https://github.com/Smkzz/ResearchWitness"
 license: Apache-2.0
