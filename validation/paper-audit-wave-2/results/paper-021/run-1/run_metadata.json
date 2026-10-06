@@ -1,0 +1,59 @@
+{
+  "metadata_version": 1,
+  "paper_id": "paper-021",
+  "run_id": "run-1",
+  "source": {
+    "source_kind": "jats_xml",
+    "source_sha256": "f76b95b91af11af65747e01f04f38af60259fa24d8b9a429e43587f7814acabf",
+    "staged_input_sha256": "c5f4b02619a26ce888eefcd764ab1413e270dbd02eb4956dae0b221e2ed131dc",
+    "source_version_token": "source-version-sha256:d2437526ab493075d68e7966fd58d163c69c7e1e4824418665258c05d7981ba5",
+    "renderer_version": "jats-markdown-v1",
+    "renderer_sha256": "4cc3e37323a8b7b86139a55d72a5c1adf6d0c0c54f624cbf4ee5baaa77870a13"
+  },
+  "frozen_baseline": {
+    "commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+    "tree_sha": "a19c53c2c2e6c400ee8b0d7feb0d0261f0cf009f",
+    "package_version": "0.4.0.dev0",
+    "paper_audit_schema_version": "0.2"
+  },
+  "execution_environment": {
+    "python_version": "3.12.14",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "pypdf_version": "6.10.0"
+  },
+  "runtime_seconds": 0.059164,
+  "decision": "CANDIDATES_FOUND",
+  "extraction_status": "TEXT_AVAILABLE",
+  "extraction_warnings": [],
+  "checks_attempted": [
+    "explicit_count_marker_scan",
+    "explicit_exclusion_flow_arithmetic_screen",
+    "markdown_table_percentage_recomputation"
+  ],
+  "unsupported_checks": [
+    "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+    "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+    "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+    "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+    "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+  ],
+  "candidate_count": 2,
+  "candidate_types": [
+    "CONFLICTING_EXPLICIT_COUNT_MARKERS",
+    "CONFLICTING_EXPLICIT_COUNT_MARKERS"
+  ],
+  "candidate_type_counts": {
+    "CONFLICTING_EXPLICIT_COUNT_MARKERS": 2
+  },
+  "file_sha256": {
+    "report.json": "66d4d5450293281f5169143f1b90121c84883bc302d59be535a47d327158e7b2",
+    "report.html": "06f550ed93f87e082eabe3da5ff0b31f49e6167537af39c1e766da99f11f43d8"
+  },
+  "repeatability": {
+    "report_json_identical": true,
+    "report_html_identical": true,
+    "decision_identical": true,
+    "candidate_types_identical": true,
+    "repeatable": true
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "metadata_version": 1,
+  "paper_id": "paper-004",
+  "run_id": "run-2",
+  "source": {
+    "source_kind": "jats_xml",
+    "source_sha256": "23cff00ff2edb855bcf0d29b240e393af653445d2c569c0bc865729df90dcf0f",
+    "staged_input_sha256": "7c102780f76639bfd541a8334d3d54a69d5b10ffa1d07c7748a57ad7b16c376a",
+    "source_version_token": "source-version-sha256:f327579ec8b058649413d2847798ff9dd15d9c0a46ad16c6a15cfc07748babe7",
+    "renderer_version": "jats-markdown-v1",
+    "renderer_sha256": "4cc3e37323a8b7b86139a55d72a5c1adf6d0c0c54f624cbf4ee5baaa77870a13"
+  },
+  "frozen_baseline": {
+    "commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+    "tree_sha": "a19c53c2c2e6c400ee8b0d7feb0d0261f0cf009f",
+    "package_version": "0.4.0.dev0",
+    "paper_audit_schema_version": "0.2"
+  },
+  "execution_environment": {
+    "python_version": "3.12.14",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "pypdf_version": "6.10.0"
+  },
+  "runtime_seconds": 0.057423,
+  "decision": "CANDIDATES_FOUND",
+  "extraction_status": "TEXT_AVAILABLE",
+  "extraction_warnings": [],
+  "checks_attempted": [
+    "explicit_count_marker_scan",
+    "explicit_exclusion_flow_arithmetic_screen",
+    "markdown_table_percentage_recomputation"
+  ],
+  "unsupported_checks": [
+    "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+    "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+    "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+    "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+    "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+  ],
+  "candidate_count": 7,
+  "candidate_types": [
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+  ],
+  "candidate_type_counts": {
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH": 7
+  },
+  "file_sha256": {
+    "report.json": "0b190998ca714e50c6e89cc996d03ca2bf857e29d65573327fd3212cc9650663",
+    "report.html": "77a1c68fce835a7620a6d4a520b6de8438c82e4678be7e7bf34d56d28c6a2ba5"
+  },
+  "repeatability": {
+    "report_json_identical": true,
+    "report_html_identical": true,
+    "decision_identical": true,
+    "candidate_types_identical": true,
+    "repeatable": true
+  }
+}
