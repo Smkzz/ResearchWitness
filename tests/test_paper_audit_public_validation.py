@@ -14,6 +14,7 @@ PUBLIC_JSON = (
     PACKET / 'DEVELOPMENT_REPLAY_SUMMARY.json',
     PACKET / 'HISTORICAL_DISCREPANCY_VALIDATION.json',
     ROOT / 'validation/paper-audit-real-evidence-wave/SOURCE_ADJUDICATION_AGGREGATE.json',
+    ROOT / 'validation/paper-audit-evidence-maturation/EVIDENCE_MATURATION_SUMMARY.json',
 )
 CASE_LEVEL_KEYS = {
     'bindings', 'cases', 'candidate_arithmetic', 'case_id', 'paper_id',

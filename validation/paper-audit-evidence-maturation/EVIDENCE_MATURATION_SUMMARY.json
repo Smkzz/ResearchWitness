@@ -1,0 +1,244 @@
+{
+  "record_version": "1",
+  "status": "AGGREGATE_ONLY_POST_HOC_EVIDENCE_MATURATION",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "detector_contract_version": "1.1",
+  "scope": {
+    "purpose": "Mature evidence for existing source-mapped count/percentage contracts.",
+    "wave_3_run": false,
+    "release_or_publication": false,
+    "broad_detector_expansion": false,
+    "individual_source_identifiers_hashes_and_case_records_included": false
+  },
+  "baseline": {
+    "pull_request": 8,
+    "state": "OPEN_DRAFT_UNMERGED_MERGEABLE",
+    "head_branch": "codex/paper-audit-source-adjudication-20261007",
+    "head_commit": "80f1ee0189a2618377239702046160d7d0208f34",
+    "tree": "c42732f17a2a7bb77d1d16d34a7f3ba1b5247610",
+    "ci": "PASS_AT_BASELINE",
+    "codeql": "PASS_AT_BASELINE"
+  },
+  "positive_evidence": {
+    "source_documents": 33,
+    "correction_issues_considered": 16,
+    "historical_runner_eligible_issues": {"numerator": 2, "denominator": 16},
+    "conservative_definitely_eligible_issues": {"numerator": 1, "denominator": 16},
+    "contract_ambiguous_issues_excluded_from_conservative_primary_count": 1,
+    "historical_runner_detected_eligible_issues": {"numerator": 2, "denominator": 2},
+    "conservative_detected_definitely_eligible_issues": {"numerator": 1, "denominator": 1},
+    "historical_runner_detected_target_cells": {"numerator": 4, "denominator": 4},
+    "conservative_detected_target_cells": {"numerator": 2, "denominator": 2},
+    "contract_ambiguity": "The second issue uses cumulative overlapping percentage thresholds. Contract v1.1 excludes overlapping categories, so its values are source-confirmed but excluded from the conservative eligible-positive count pending contract clarification.",
+    "selected_general_controls_without_candidates": {"numerator": 17, "denominator": 17},
+    "selected_general_controls_qualified_as_matched_negatives": 0
+  },
+  "candidate_adjudication": {
+    "candidate_items": 12,
+    "all_candidates_adjudicated": true,
+    "known_correction_target_items": 4,
+    "source_reproduced_internal_discrepancy_items_outside_correction_targets": 8,
+    "benign_scope_or_rounding_items": 0,
+    "parser_or_source_artifact_items": 0,
+    "unresolved_items": 0,
+    "strict_known_target_precision": {"numerator": 4, "denominator": 12, "rate": 0.3333},
+    "source_reproduced_arithmetic_discrepancy_precision": {"numerator": 12, "denominator": 12, "rate": 1.0},
+    "evaluation_limit": "Post-hoc development candidate items are clustered by source and do not estimate unseen-paper performance or scientific consequence. The source-internal discrepancies do not identify which operand is wrong."
+  },
+  "matched_negative_relations": {
+    "source_labelled_before_candidate_join": 99,
+    "arithmetic_correct_under_frozen_source_operands": 99,
+    "initial_source_documents": 15,
+    "initial_structured_relations": 89,
+    "initial_direct_cell_relations": 10,
+    "eligible_under_exact_v1_1_mechanics": 18,
+    "eligible_structured_relations": 12,
+    "eligible_direct_cell_relations": 6,
+    "represented_source_documents": 3,
+    "represented_tables": 3,
+    "candidate_matches_on_eligible_relations": 0,
+    "observed_relation_level_false_candidate_rate": {"numerator": 0, "denominator": 18},
+    "source_documents_with_candidate_on_eligible_relation": {"numerator": 0, "denominator": 3},
+    "excluded_by_first_failing_v1_1_gate": {
+      "table_structure_unsupported": 40,
+      "local_row_denominator": 20,
+      "conflicting_header_denominators": 8,
+      "percentage_unit_not_explicit": 6,
+      "spaced_thousands_header_denominator_fails_closed": 3,
+      "direct_cell_footnote_semantics_unresolved": 2,
+      "direct_cell_required_n_over_n_percent_syntax_missing": 2,
+      "total_excluded": 81
+    },
+    "independence_and_uncertainty": "Labels were source-adjudicated and frozen before candidate-output joining. Counts are relation-level; only three source documents are represented, so no general false-positive estimate or cluster-robust interval is claimed.",
+    "superseded_aggregate_interpretation": "The 99 arithmetic-correct source labels are not all v1.1 matched negatives. Only the 18 relations passing the frozen active-contract eligibility checks enter the primary denominator."
+  },
+  "coverage": {
+    "source_documents_with_some_incomplete_or_unsupported_coverage": {"numerator": 33, "denominator": 33},
+    "tables_discovered": 123,
+    "parser_structure_status": {"reliable": 62, "unsupported": 61},
+    "direct_jats_cell_ratio": {
+      "table_status_counts": {"eligible": 2, "incomplete": 8, "not_applicable": 113},
+      "potential_tables": 123,
+      "applicable_or_unknown_objects": 18,
+      "eligible_and_checked_objects": 2,
+      "skipped_objects": 8,
+      "potential_operands": 194,
+      "checked_operands": 76,
+      "arithmetic_matches": 67,
+      "mismatch_candidates": 9,
+      "skipped_operands": 118,
+      "table_reason_counts_by_status": {
+        "incomplete": {"FOOTNOTE_SCOPE_CUE": 1, "FOOTNOTE_SEMANTICS_UNRESOLVED": 7}
+      }
+    },
+    "structured_table_percentage": {
+      "table_status_counts": {"eligible": 1, "incomplete": 84, "not_applicable": 27, "unsupported": 11},
+      "potential_tables": 123,
+      "eligible_tables": 1,
+      "potential_operands": 1542,
+      "checked_operands": 63,
+      "arithmetic_matches": 60,
+      "mismatch_candidates": 3,
+      "skipped_operands": 1479,
+      "table_reason_counts_by_status": {
+        "incomplete": {
+          "An explicit thead header group is required for table arithmetic.": 5,
+          "CELL_OR_HEADER_FOOTNOTE_OR_LOCAL_SCOPE_CUE": 2,
+          "CONFLICTING_HEADER_DENOMINATORS": 2,
+          "Data-row spans are preserved but make row identity ambiguous for arithmetic.": 16,
+          "FOOTNOTED_OR_SCOPED_ROW_LABEL": 4,
+          "Header and body columns do not align after resolving declared spans.": 4,
+          "LOCAL_GROUP_DENOMINATOR_INDICATED": 1,
+          "LOCAL_ROW_DENOMINATOR": 10,
+          "NO_EXPLICIT_COLUMN_DENOMINATOR": 11,
+          "No explicit column header supplies a denominator for count/percentage recomputation.": 46,
+          "No non-empty structured header and body grid could be reconstructed.": 1,
+          "No structured table element was present inside the table wrapper.": 1,
+          "PERCENT_UNIT_NOT_EXPLICIT": 5,
+          "TABLE_STRUCTURE_UNSUPPORTED": 61,
+          "Table context contains weighting, adjustment, missingness, multiple-response, or overlap cues.": 7,
+          "The first-column header and body rows do not clearly preserve row labels.": 53
+        },
+        "not_applicable": {"FOOTNOTED_OR_SCOPED_ROW_LABEL": 3, "NO_COUNT_PERCENT_CELLS": 27},
+        "unsupported": {"WEIGHTED_ADJUSTED_MISSING_OR_OVERLAPPING_SCOPE": 11}
+      }
+    },
+    "sample_flow": {
+      "potential_and_applicable_objects": 1,
+      "checked_objects": 0,
+      "skipped_objects": 1,
+      "potential_operands": 6,
+      "checked_operands": 0,
+      "skipped_operands": 6,
+      "skip_reason_counts": {"FLOW_DISJOINTNESS_EXHAUSTIVENESS_OR_SEQUENCE_NOT_EXPLICIT": 1}
+    },
+    "prisma_synthesis_flow": {
+      "potential_and_applicable_objects": 23,
+      "checked_objects": 0,
+      "skipped_objects": 23,
+      "skip_reason_counts": {
+        "NO_PRISMA_OR_SYNTHESIS_FLOW_CUE": 20,
+        "PRISMA_FLOW_RELATION_NOT_IMPLEMENTED": 10,
+        "PRISMA_SCOPE_OR_STAGE_AMBIGUOUS": 1,
+        "UNSUPPORTED_IMAGE_FLOW": 11
+      },
+      "reason_occurrences_overlap": true
+    },
+    "unadjusted_2x2": {"tables_considered": 123, "not_applicable_tables": 123, "eligible_tables": 0},
+    "sd_se_n": {
+      "table_status_counts": {"incomplete": 2, "not_applicable": 114, "unsupported": 7},
+      "potential_operands": 227,
+      "checked_operands": 0,
+      "skipped_operands": 227,
+      "table_reason_counts_by_status": {
+        "incomplete": {"DUPLICATE_OPERAND_COLUMNS": 11, "MISSING_REQUIRED_OPERAND_COLUMN": 16},
+        "not_applicable": {"NO_RECOGNIZED_OPERAND_HEADER": 114},
+        "unsupported": {"TABLE_STRUCTURE_NOT_RELIABLE": 7}
+      }
+    },
+    "reason_count_units": "Percentage table reason counts are normalized reason occurrences per table result, grouped by table status. They can overlap and are not skipped operand counts. Exact relation-level skip-reason counts for the percentage contracts are not currently emitted."
+  },
+  "correction_search": {
+    "method": "Bounded metadata-led search with deterministic DOI-pair split before correction-body inspection; reserved lead content remained unopened.",
+    "allocated_pairs": 17,
+    "development_pairs": 16,
+    "reserved_pairs": 1,
+    "confirmed_eligible_development_corrections": 0,
+    "confirmed_unused_eligible_reserved_positives": 0,
+    "reserved_lead_eligibility": "UNKNOWN_METADATA_ONLY",
+    "development_full_text_or_notice_body_screened": 7,
+    "development_bibliographic_relation_mismatches": 1,
+    "development_not_yet_body_screened": 8,
+    "body_screened_eligible": 0,
+    "body_screened_ineligible": 7,
+    "ineligible_body_screen_reasons": {
+      "presentation_or_figure_formatting": 2,
+      "affiliation_or_funding_only": 2,
+      "unsupported_structured_numeric_relation": 2,
+      "dosing_instruction": 1
+    },
+    "quarantined_contaminated_search_results": {"unique_leads": 22, "result_surfaces": 25, "duplicate_surfaces": 3},
+    "per_family": {
+      "percentage_count": {"allocated": 4, "development": 4, "reserved": 0, "body_ineligible": 2, "not_yet_body_screened": 2},
+      "unadjusted_2x2_or_percentage_count": {"allocated": 1, "development": 1, "reserved": 0, "body_ineligible": 1, "not_yet_body_screened": 0},
+      "prisma_or_sample_flow": {"allocated": 3, "development": 3, "reserved": 0, "body_ineligible": 2, "not_yet_body_screened": 1},
+      "clinical_trial_sample_flow_or_count": {"allocated": 9, "development": 8, "reserved": 1, "body_ineligible": 2, "metadata_mismatch": 1, "not_yet_body_screened": 5},
+      "sd_se_n": {"allocated": 0, "development": 0, "reserved": 0, "eligible": 0}
+    },
+    "search_limit": "A bounded, non-exhaustive search. It found no eligible new correction and does not establish case prevalence."
+  },
+  "other_family_status": {
+    "sample_flow": "EVIDENCE_SPARSE",
+    "prisma_synthesis_flow": "EVIDENCE_SPARSE",
+    "unadjusted_2x2": "EVIDENCE_SPARSE",
+    "sd_se_n": "EXPERIMENTAL",
+    "simple_rates": "UNSUPPORTED",
+    "cross_section_numeric_identity": "HELPER_ONLY",
+    "explicit_count_marker": "ACTIVE_CANDIDATE_ONLY"
+  },
+  "source_reproduced_internal_discrepancies": {
+    "items": 8,
+    "publisher_rendering_confirmed": 8,
+    "jats_source_confirmed": 8,
+    "supplement_search_checked": 8,
+    "correction_search_checked": 8,
+    "later_version_search_checked": 8,
+    "candidate_classification_unresolved": 0,
+    "which_operand_or_scientific_consequence_established": false,
+    "misconduct_or_paper_level_wrongness_established": false
+  },
+  "qualification": {
+    "pinned_source_snapshot_hash_checks": {"passed": 37, "total": 37},
+    "development_replay_repeatability": {"json_and_html_reports": 33, "total": 33},
+    "quality_gate": "PASS",
+    "pytest_cases": {"passed": 495},
+    "synthetic_conformance": {"matched": 500, "total": 500},
+    "historical_verifier_fixtures": {"matched": 3, "total": 3},
+    "trusted_core_static_scan": "PASS",
+    "schemas_and_drift": "PASS",
+    "checksums": "PASS",
+    "compile": "PASS",
+    "reproducible_wheel_builds": "PASS",
+    "clean_wheel_install": "PASS",
+    "cli_smoke_checks": "PASS",
+    "runtime_dependencies": 0,
+    "new_pull_request_ci": "PASS",
+    "new_pull_request_codeql": "PASS",
+    "pull_request_number": 9,
+    "pull_request_url": "https://github.com/Smkzz/ResearchWitness/pull/9",
+    "pull_request_state": "OPEN_DRAFT_UNMERGED_MERGEABLE",
+    "head_branch": "codex/paper-audit-evidence-maturation",
+    "base_branch": "codex/paper-audit-source-adjudication-20261007"
+  },
+  "wave_3_decision": {
+    "status": "NOT_READY_FOR_WAVE_3",
+    "reasons": [
+      "Only 18 v1.1-eligible matched-negative relationships exist across 3 source documents, below the 50-100 relation and at-least-15-document target.",
+      "The active contract excludes the cumulative-overlap correction until its eligibility semantics are clarified.",
+      "No unused eligible positive is confirmed in the reserved pool; its single metadata-only lead has unknown eligibility.",
+      "Exact relation-level skip-reason telemetry is missing for percentage checks."
+    ],
+    "next_highest_value_action": "Expand the independently source-curated v1.1 matched-negative set across at least 15 source documents, while clarifying overlap eligibility and adding relation-level skip-reason telemetry.",
+    "focused_public_research_preview_justified": false
+  }
+}

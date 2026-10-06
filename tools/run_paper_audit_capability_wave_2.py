@@ -12,6 +12,7 @@ from collections import Counter
 import hashlib
 import json
 from pathlib import Path
+import re
 import tempfile
 from typing import Any
 
@@ -174,6 +175,11 @@ def _sum_counts(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
     return dict(sorted(result.items()))
 
 
+def _table_reason_key(value: Any) -> str:
+    """Normalize row-specific suffixes so aggregates describe reason classes."""
+    return re.sub(r' \(row \d+\)$', '', str(value))
+
+
 def _run_one(spec: dict[str, Any], source_root: Path,
              validator: Draft202012Validator) -> dict[str, Any]:
     source_path = source_root / spec['source_file']
@@ -252,6 +258,7 @@ def _aggregate_detector_coverage(rows: list[dict[str, Any]]) -> list[dict[str, A
         values = detectors[detector_id]
         status_counts = Counter(item.get('status', 'UNKNOWN') for item in values)
         reason_counts: Counter[str] = Counter()
+        table_reason_counts: dict[str, Counter[str]] = {}
         table_status_counts: Counter[str] = Counter()
         parser_status_counts: Counter[str] = Counter()
         table_records = 0
@@ -261,6 +268,10 @@ def _aggregate_detector_coverage(rows: list[dict[str, Any]]) -> list[dict[str, A
                 table_records += 1
                 if table.get('status'):
                     table_status_counts[table['status']] += 1
+                table_status = table.get('status', 'UNKNOWN')
+                table_reason_counts.setdefault(table_status, Counter()).update(
+                    _table_reason_key(reason) for reason in table.get('reason_codes', [])
+                )
                 if table.get('parser_status'):
                     parser_status_counts[table['parser_status']] += 1
         output.append({
@@ -273,6 +284,12 @@ def _aggregate_detector_coverage(rows: list[dict[str, Any]]) -> list[dict[str, A
             'per_table_status_counts': dict(sorted(table_status_counts.items())),
             'parser_status_counts': dict(sorted(parser_status_counts.items())),
             'skip_reason_counts': dict(sorted(reason_counts.items())),
+            'table_reason_counts_by_status': {
+                status: dict(sorted(counts.items()))
+                for status, counts in sorted(table_reason_counts.items())
+                if counts
+            },
+            'table_reason_count_unit': 'normalized reason strings per table result, grouped by table status',
         })
     return output
 
