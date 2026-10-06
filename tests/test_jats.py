@@ -250,6 +250,22 @@ def test_grouped_two_row_headers_keep_all_and_no_columns_aligned():
     assert screen['tables'][0]['status'] == 'ELIGIBLE'
 
 
+def test_spaced_thousands_denominator_is_not_partially_parsed_as_ten():
+    document = parse_jats(_source(
+        '<table-wrap id="spaced-thousands"><table><thead><tr><th>Outcome</th>'
+        '<th>All participants (n = 10 000)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>1 (0.01%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+    assert result['findings'] == []
+    assert result['tables'][0]['status'] == 'INCOMPLETE'
+    assert 'NO_EXPLICIT_COLUMN_DENOMINATOR' in result['tables'][0]['reasons']
+    assert document.numeric_assertions == ()
+
+
 def test_nonstandard_but_explicit_row_stub_header_preserves_row_identity(tmp_path):
     source = _source(
         '<table-wrap id="repigmentation"><table><thead><tr><th>Repigmentation</th>'

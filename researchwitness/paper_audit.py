@@ -56,11 +56,15 @@ UNAVAILABLE_EXTRACTION_STATUSES = (
 
 COUNT_MARKER = re.compile(
     rb'(?<![A-Za-z0-9_])(?P<marker>[nN])[ \t]{0,32}=[ \t]{0,32}'
-    rb'(?P<value>[0-9]{1,9})(?![0-9]|[,.][0-9]|/[0-9]|[eE][+-]?[0-9])'
+    rb'(?P<value>[0-9]{1,9})'
+    rb'(?![0-9]|[,.]\s*[0-9]|/[0-9]|[eE][+-]?[0-9]|\s+[0-9])'
 )
 MARKDOWN_HEADING = re.compile(rb'^ {0,3}(?P<marks>#{1,6})[ \t]+(?P<title>.*?)[ \t]*#*[ \t]*$')
 TABLE_ROW = re.compile(r'^\s*\|.*\|\s*$')
-TABLE_DENOMINATOR = re.compile(r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})(?![0-9])')
+TABLE_DENOMINATOR = re.compile(
+    r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})'
+    r'(?![0-9]|[,.]\s*[0-9]|\s+[0-9])'
+)
 TABLE_PERCENTAGE_FOOTNOTE_LABEL = re.compile(
     r'\bn\s*\(%\)\s*(?:[([]\s*)?[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]\s*[)\]]?\s*$', re.IGNORECASE,
 )

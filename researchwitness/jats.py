@@ -30,7 +30,10 @@ _COUNT_PERCENT = re.compile(
     r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*(?P<mark>%?)\s*\)\s*$'
 )
 _NUMBER = re.compile(r'(?<![A-Za-z0-9_])(?P<value>-?[0-9]+(?:\.[0-9]+)?)(?P<unit>\s*%)?(?![A-Za-z0-9_])')
-_DENOMINATOR = re.compile(r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})(?![0-9])')
+_DENOMINATOR = re.compile(
+    r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})'
+    r'(?![0-9]|[,.]\s*[0-9]|\s+[0-9])'
+)
 _FOOTNOTE_MARK = re.compile(r'[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]$', re.IGNORECASE)
 _UNSAFE_CUES = re.compile(
     r'\b(?:weighted|adjusted|multiple responses?|overlap(?:ping)?|missing data|available cases?|'

@@ -69,6 +69,27 @@ def test_same_values_and_other_numeric_forms_do_not_create_conflict(tmp_path):
     assert [item['value_exact'] for item in report['discovery']['assertions']] == ['20', '20']
 
 
+def test_spaced_thousands_counts_are_not_partially_read_as_distinct_values(tmp_path):
+    content = 'Group A n=10 000. Group B n=9 000.\n'.encode('utf-8')
+
+    _, report, _ = _run(tmp_path, content)
+
+    assert report['candidate_anomalies'] == []
+    assert report['discovery']['assertions'] == []
+
+
+def test_spaced_thousands_table_denominator_does_not_create_false_mismatch(tmp_path):
+    source_text = (
+        '| Outcome | All (n=10 000) |\n'
+        '| --- | ---: |\n'
+        '| Event, n (%) | 1 (0.01%) |\n'
+    )
+
+    _, report, _ = _run(tmp_path, source_text.encode('utf-8'), '.md')
+
+    assert report['arithmetic_screens']['table_percentages']['findings'] == []
+
+
 def test_long_utf8_line_context_keeps_valid_text_and_byte_anchors(tmp_path):
     line = 'é' * 1200 + ' n=20 ' + 'x' * 1000 + ' n=18\n'
     source_bytes = line.encode('utf-8')

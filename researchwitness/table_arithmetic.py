@@ -10,7 +10,10 @@ from .paper_document import PaperDocument, SourceAnchor, Table, TableCell
 COUNT_PERCENT = re.compile(
     r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*(?P<mark>%?)\s*\)\s*$'
 )
-DENOMINATOR = re.compile(r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})(?![0-9])')
+DENOMINATOR = re.compile(
+    r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})'
+    r'(?![0-9]|[,.]\s*[0-9]|\s+[0-9])'
+)
 UNSAFE_TABLE_CUE = re.compile(
     r'\b(?:weighted|adjusted|multiple responses?|overlap(?:ping)?|missing data|available cases?)\b',
     re.IGNORECASE,
