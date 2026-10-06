@@ -222,8 +222,13 @@
     "clean_wheel_install": "PASS",
     "cli_smoke_checks": "PASS",
     "runtime_dependencies": 0,
-    "new_pull_request_ci": "NOT_YET_RUN",
-    "new_pull_request_codeql": "NOT_YET_RUN"
+    "new_pull_request_ci": "PASS",
+    "new_pull_request_codeql": "PASS",
+    "pull_request_number": 9,
+    "pull_request_url": "https://github.com/Smkzz/ResearchWitness/pull/9",
+    "pull_request_state": "OPEN_DRAFT_UNMERGED_MERGEABLE",
+    "head_branch": "codex/paper-audit-evidence-maturation",
+    "base_branch": "codex/paper-audit-source-adjudication-20261007"
   },
   "wave_3_decision": {
     "status": "NOT_READY_FOR_WAVE_3",

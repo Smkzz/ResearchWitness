@@ -144,13 +144,11 @@ The local offline quality gate passed on Python 3.12.14:
 - Wheel SHA-256: `389d99647d3c01473406d0079dc84398569f9cd8f21e35c2d88d14476fec3606`.
 - Runtime dependencies: none.
 
-The final commit and GitHub check results are recorded after the stacked draft
-PR is created and its checks complete:
-
-- Final local commit and tree: pending.
-- Final remote head and stacked draft PR: pending.
-- Clean worktree: pending.
-- New PR CI and CodeQL: pending.
+Draft [PR #9](https://github.com/Smkzz/ResearchWitness/pull/9) is open,
+unmerged, and mergeable. It is stacked on the PR #8 head branch. Python 3.11,
+3.12, and 3.13 jobs, the release gate, CodeQL, and the Analyze Python job all
+passed at the initial PR head. The final local commit, final tree, and remote
+head are recorded in the task completion summary.
 
 ## Nine qualification questions
 
@@ -181,17 +179,12 @@ PR is created and its checks complete:
 
 ## Final repository and check record
 
-To be completed after local and GitHub qualification:
-
 - Baseline PR #8 head/tree: `80f1ee0189a2618377239702046160d7d0208f34` /
   `c42732f17a2a7bb77d1d16d34a7f3ba1b5247610`.
-- Final local commit: pending.
-- Final local tree: pending.
-- Final remote head: pending.
-- Branch and new draft PR: pending.
-- Worktree clean: pending.
-- CI: pending.
-- CodeQL: pending.
+- The work is on branch `codex/paper-audit-evidence-maturation` with a clean
+  worktree after the qualification commit.
+- Draft PR #9 is stacked on PR #8 and remains open, unmerged, and mergeable.
+- GitHub CI matrix, release gate, CodeQL, and Analyze Python: pass.
 - Pytest: 495 passed.
 - Synthetic conformance: 500/500.
 - Historical verifier fixtures: 3/3.
