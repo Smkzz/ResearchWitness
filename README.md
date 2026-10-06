@@ -5,15 +5,15 @@
 
 **Offline paper screening, evidence-linked reviews, and bounded deterministic claim verification.**
 
-ResearchWitness is an open-source Python workbench for limited automated screening and structured human review of research papers. Its current automatic paper scan looks only for conflicting explicit `n = integer` or `N = integer` statements. Reviewers can also record observations across ten review areas, preserve exact source quotes and supporting evidence, and replay a narrow formalized claim with an allowlisted deterministic verifier when a supported checker exists. The broad review ledger organizes observations; the verifier establishes only the exact bounded result it replays.
+ResearchWitness is an open-source Python workbench for limited automated screening and structured human review of research papers. `paper-audit` checks explicit sample-count contexts, selected Markdown table percentages, and one narrow sample-exclusion sentence pattern. Reviewers can also record observations across ten review areas, preserve exact source quotes and supporting evidence, and replay a narrow formalized claim with an allowlisted deterministic verifier when a supported checker exists. The broad review ledger organizes observations; the verifier establishes only the exact bounded result it replays.
 
 It is intentionally **not** an AI that declares whole papers wrong. A positive result means only that the supplied witness contradicts the supplied formalization.
 
-**Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
+**Development candidate:** `0.4.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
 
 ## Status
 
-This branch is an **unreleased development candidate**, not a public release. It builds on the verifier-wave integration, whose frozen 15-corrigendum screen remains unchanged. That mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. This is not a 15-paper discovery benchmark, and no sealed holdout has been evaluated. The archived qualification report predates the review and screening additions; the updated engineering gate is recorded in [`docs/VALIDATION.md`](docs/VALIDATION.md). Unsupported mathematics fails closed.
+This branch is an **unreleased development candidate**, not a public release. It builds on the verifier-wave integration, whose frozen 15-corrigendum screen remains unchanged. That mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. A new source-pinned paper-audit development set rediscovers 3/4 selected documented issues and produces no candidates on 5 selected negative controls. Those papers and corrections were visible during detector work, so this is an exploratory development result, not a sealed or generalization benchmark. The archived qualification report predates these updates; current validation and limits are in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
 Use it to verify **explicit formalization/witness pairs**, not to infer that an entire paper, author, or research program is wrong.
 
@@ -169,7 +169,7 @@ See [`prompts/AGENT_PROTOCOL.md`](prompts/AGENT_PROTOCOL.md) for the preparation
 
 ## Broad paper review
 
-The single-claim `audit` command is for claims that fit one of the deterministic checkers. The `paper-audit` command runs the narrow automatic text scan described below. For a wider review, `review-scaffold` creates a multi-area ledger for source/citation integrity, internal consistency, mathematics and logic, statistics, data integrity, methods, code reproducibility, figures/tables, interpretation, and ethics/reporting. Those ten areas organize human review; they are not ten automatic detectors.
+The single-claim `audit` command is for claims that fit one of the deterministic checkers. The `paper-audit` command runs the narrow automatic numeric screens described below. For a wider review, `review-scaffold` creates a multi-area ledger for source/citation integrity, internal consistency, mathematics and logic, statistics, data integrity, methods, code reproducibility, figures/tables, interpretation, and ethics/reporting. Those ten areas organize human review; they are not ten automatic detectors.
 
 ### Limited automatic paper screening
 
@@ -183,17 +183,19 @@ python -m researchwitness paper-audit paper.pdf \
   --output screening/paper
 ```
 
-The command preserves the original input, writes extracted text, and creates JSON and static HTML reports. The current scan only finds differing integers following the same case-sensitive `n=` or `N=` marker. Every result is a candidate for human review because values may describe different cohorts, subgroups, timepoints, or analyses. A clean result means only that the supported marker patterns were not found in the scanned text. The scan does not check tables, citations, equations, statistical calculations, methods, code, figures, or conclusions; it does not search for corrections or authenticate the source.
+The command preserves the original input, writes extracted text, and creates JSON and static HTML reports. It reports contextual differences between explicit `n=` / `N=` counts, recomputes count/percentage cells only when a Markdown pipe table has an explicit same-column denominator, and checks one explicit “Of the X participants … excluded … Finally, Y participants were included” pattern. All outputs remain review candidates: separate groups or stages can have different counts, table rows can use smaller missing-data denominators, and exclusions may overlap or omit a flow step. A clean result covers only these patterns. The screens do not check statistical tests, confidence intervals, citations, equations, units, methods, code, figures, conclusions, or corrections, and they do not authenticate the source.
 
-Text and Markdown are preserved byte-for-byte and must be UTF-8. PDF extraction uses optional `pypdf` (BSD-3-Clause), performs no OCR, and may be partial or unavailable. The report records page and extracted-text offsets, not precise PDF layout coordinates. Resource limits are 32 MiB per source, 500 PDF pages, 16 MiB total PDF extracted text, 512 KiB per extracted page, 1,000,000 scanned lines, 512 Markdown headings, 512 count markers, and 64 KiB per scanned line. Source identity, version, and authenticity remain unverified. See [`schemas/paper-audit.schema.json`](schemas/paper-audit.schema.json) for the report contract.
+Text and Markdown are preserved byte-for-byte and must be UTF-8. PDF extraction uses optional `pypdf` (BSD-3-Clause) in a separate worker, performs no OCR, and may be partial or unavailable. The worker has a 20-second wall timeout, a 15-second CPU limit, and a 768 MiB address-space limit where POSIX limits are supported; it is process isolation, not an OS sandbox. The report records page and extracted-text offsets, not precise PDF layout coordinates. Resource limits are 32 MiB per source, 500 PDF pages, 16 MiB total PDF extracted text, 512 KiB per extracted page, 1,000,000 scanned lines, 512 Markdown headings, 512 count markers, 100,000 Markdown table cells, and 64 KiB per scanned line. Source identity, version, and authenticity remain unverified. See [`schemas/paper-audit.schema.json`](schemas/paper-audit.schema.json) for the report contract.
 
-The [synthetic sample](examples/paper-audit/paper.md) reports `n = 20` at recruitment and `n = 18` after exclusions, which may both be correct. Run it to inspect the candidate report:
+The [synthetic sample](examples/paper-audit/paper.md) reports `n = 20` at recruitment and `n = 18` after exclusions. The updated screen describes these as a possible study-stage difference instead of an error candidate. Run it to inspect the report:
 
 ```bash
 python -m researchwitness paper-audit examples/paper-audit/paper.md \
   --identifier synthetic:paper-audit --source-version fixture-v1 \
   --output work/paper-audit
 ```
+
+The source-pinned development corpus, scoring definitions, per-paper JSON reports, and exact-hash retrieval/runner tools are in [`validation/paper-audit-wave-1/`](validation/paper-audit-wave-1/). The corpus contains four correction-backed positives and five selected negative controls; it has no sealed holdout and does not establish cross-field performance.
 
 Start from a UTF-8 text capture of the exact paper version:
 
@@ -224,7 +226,7 @@ python -m researchwitness validate-review examples/paper-review-ledger/review.js
 
 ## Deterministic verifier plugins
 
-The `0.3.0.dev0` integration candidate allowlists ten checker families. Each registry entry includes the schema version, a concise input contract, exact resource bounds, what a positive witness proves and excludes, and an inline replay example with its source-checkout bundle path:
+The `0.4.0.dev0` integration candidate allowlists ten checker families. Each registry entry includes the schema version, a concise input contract, exact resource bounds, what a positive witness proves and excludes, and an inline replay example with its source-checkout bundle path:
 
 1. **Scalar/radical comparison** — exact rationals plus certified square-root enclosures.
 2. **Polynomial upper-bound witness** — exact rational polynomial evaluation in a bounded domain.

@@ -1,7 +1,6 @@
 """Paper-screening tests assert narrow candidate behavior and its limits."""
 from __future__ import annotations
 
-import builtins
 import json
 from pathlib import Path
 
@@ -18,10 +17,11 @@ SCHEMA_VALIDATOR = Draft202012Validator(SCHEMA)
 
 
 def test_capability_registry_labels_paper_scan_as_candidate_discovery_only():
-    capability = capabilities()[0]
+    screens = capabilities()
 
-    assert capability['role'] == 'candidate_discovery_only'
-    assert 'same cohort or scope' in capability['does_not_prove']
+    assert len(screens) == 3
+    assert all(item['role'] == 'candidate_discovery_only' for item in screens)
+    assert 'same cohort or scope' in screens[0]['does_not_prove']
 
 
 def _run(tmp_path: Path, content: bytes, suffix: str = '.txt', **kwargs):
@@ -95,9 +95,27 @@ def test_markdown_section_is_attached_as_navigation_context_only(tmp_path):
         '.md',
     )
 
-    anomaly = report['candidate_anomalies'][0]
-    assert {anchor['section'] for anchor in anomaly['source_anchors']} == {'Methods', 'Results'}
+    candidate = report['candidate_anomalies'][0]
+    assert {anchor['section'] for anchor in candidate['source_anchors']} == {'Methods', 'Results'}
     assert report['paper_structure']['sections'][1]['level'] == 2
+
+
+def test_same_passage_counts_are_scope_notes_but_separate_distant_counts_are_candidates(tmp_path):
+    _, report, _ = _run(
+        tmp_path,
+        b'In all, n = 20 were enrolled and n = 18 were analyzed.\n',
+    )
+    assert report['candidate_anomalies'] == []
+    assert report['possible_scope_differences'][0]['type'] == 'MULTIPLE_COUNT_SCOPES_IN_ONE_PASSAGE'
+
+    distant_dir = tmp_path / 'distant'
+    distant_dir.mkdir()
+    _, distant, _ = _run(
+        distant_dir,
+        ('Group A n=20. ' + 'x' * 800 + ' Group B n=18.\n').encode(),
+        identifier='synthetic:distant-counts',
+    )
+    assert distant['candidate_anomalies'][0]['values_exact'] == ['18', '20']
 
 
 def test_untrusted_source_text_and_identifiers_are_escaped_in_html(tmp_path):
@@ -121,7 +139,9 @@ def test_overlong_line_is_reported_as_incomplete_instead_of_no_candidate(tmp_pat
     assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
     assert report['discovery']['scan_complete'] is False
     assert report['candidate_anomalies'] == []
-    assert report['checks_attempted'] == ['explicit_count_marker_scan']
+    assert report['checks_attempted'] == [
+        'explicit_count_marker_scan', 'explicit_exclusion_flow_arithmetic_screen',
+    ]
     assert any('line(s) longer' in item for item in report['discovery']['limitations'])
     html = (tmp_path / 'screening' / 'report.html').read_text(encoding='utf-8')
     assert 'coverage was incomplete' in html
@@ -192,20 +212,69 @@ def test_partial_pdf_extraction_never_returns_a_clean_scan(tmp_path):
 
 
 def test_missing_optional_pdf_parser_is_an_explicit_non_scan(monkeypatch, tmp_path):
-    real_import = builtins.__import__
+    import researchwitness.paper_audit as paper_audit
 
-    def no_pypdf(name, *args, **kwargs):
-        if name == 'pypdf' or name.startswith('pypdf.'):
-            raise ImportError('not installed')
-        return real_import(name, *args, **kwargs)
+    def unavailable_worker(*args, **kwargs):
+        return type('WorkerResult', (), {
+            'returncode': 0,
+            'stdout': json.dumps({
+                'status': 'PARSER_UNAVAILABLE',
+                'extractor': 'pypdf (optional paper extra)',
+                'page_records': [],
+                'warnings': ['Install researchwitness[paper] to extract PDF text. No OCR was attempted.'],
+                'text_base64': '',
+            }).encode(),
+        })()
 
-    monkeypatch.setattr(builtins, '__import__', no_pypdf)
+    monkeypatch.setattr(paper_audit.subprocess, 'run', unavailable_worker)
     _, report, _ = _run(tmp_path, b'%PDF-1.4\n%%EOF\n', '.pdf')
 
     assert report['extraction']['status'] == 'PARSER_UNAVAILABLE'
     assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
     assert report['discovery']['scan_complete'] is False
     assert report['discovery']['assertions'] == []
+
+
+def test_worker_timeout_is_a_bounded_non_scan(monkeypatch, tmp_path):
+    import subprocess
+    import researchwitness.paper_audit as paper_audit
+
+    def time_out(command, **kwargs):
+        raise subprocess.TimeoutExpired(command, kwargs['timeout'])
+
+    monkeypatch.setattr(paper_audit.subprocess, 'run', time_out)
+    _, report, _ = _run(tmp_path, b'%PDF-1.4\n%%EOF\n', '.pdf')
+
+    assert report['extraction']['status'] == 'RESOURCE_LIMIT_OR_TIMEOUT'
+    assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
+    assert report['candidate_anomalies'] == []
+    assert report['extraction']['warnings']
+
+
+def test_malformed_pdf_is_not_treated_as_paper_text(tmp_path):
+    _, report, _ = _run(tmp_path, b'%PDF-1.4\n%%EOF\n', '.pdf')
+
+    assert report['extraction']['status'] == 'MALFORMED_OR_UNSUPPORTED'
+    assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
+    assert report['candidate_anomalies'] == []
+
+
+def test_encrypted_pdf_fails_closed_without_running_detectors(tmp_path):
+    import io
+    import pypdf
+
+    reader = pypdf.PdfReader(io.BytesIO(_pdf_with_text(pypdf, ['Group A n=20'])))
+    writer = pypdf.PdfWriter()
+    writer.append_pages_from_reader(reader)
+    writer.encrypt('paper-password')
+    encrypted = io.BytesIO()
+    writer.write(encrypted)
+
+    _, report, _ = _run(tmp_path, encrypted.getvalue(), '.pdf')
+
+    assert report['extraction']['status'] == 'LIMIT_OR_UNSUPPORTED'
+    assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
+    assert report['candidate_anomalies'] == []
 
 
 def test_pdf_extraction_cap_is_degraded_to_a_clear_report(tmp_path, monkeypatch):
@@ -221,6 +290,89 @@ def test_pdf_extraction_cap_is_degraded_to_a_clear_report(tmp_path, monkeypatch)
     assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
     assert report['extraction']['text_bytes'] == 0
     assert report['candidate_anomalies'] == []
+
+
+def test_oversized_pdf_page_text_stops_before_numeric_screening(tmp_path):
+    import io
+    import pypdf
+    from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
+
+    writer = pypdf.PdfWriter()
+    page = writer.add_blank_page(width=612, height=792)
+    font = DictionaryObject({
+        NameObject('/Type'): NameObject('/Font'),
+        NameObject('/Subtype'): NameObject('/Type1'),
+        NameObject('/BaseFont'): NameObject('/Helvetica'),
+    })
+    page[NameObject('/Resources')] = DictionaryObject({
+        NameObject('/Font'): DictionaryObject({NameObject('/F1'): font}),
+    })
+    stream = DecodedStreamObject()
+    stream.set_data(('BT /F1 12 Tf 72 720 Td (' + 'A' * (4 * 1024 * 1024) + ' n=20) Tj ET').encode('ascii'))
+    page[NameObject('/Contents')] = writer._add_object(stream)
+    pdf = io.BytesIO()
+    writer.write(pdf)
+
+    _, report, _ = _run(tmp_path, pdf.getvalue(), '.pdf')
+
+    assert report['extraction']['status'] == 'LIMIT_OR_UNSUPPORTED'
+    assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
+    assert report['candidate_anomalies'] == []
+
+
+def test_table_percentages_recompute_with_rounding_and_exact_byte_anchors(tmp_path):
+    source_text = (
+        '# Table 1 Repigmentation\n\n'
+        '| Outcome | Group 1 (n=30) | Group 2 (n=30) |\n'
+        '| --- | ---: | ---: |\n'
+        '| At least 75%, n (%) | 23 (73.3) | 23 (70) |\n'
+    )
+    content = source_text.encode('utf-8')
+    _, report, _ = _run(tmp_path, content, '.md')
+
+    assert report['decision'] == 'CANDIDATES_FOUND'
+    findings = report['arithmetic_screens']['table_percentages']['findings']
+    assert [(item['reported_percent'], item['recomputed_percent']) for item in findings] == [
+        ('73.3', '76.666667'), ('70', '76.666667'),
+    ]
+    assert all(item['status'] == 'CANDIDATE_ANOMALY' for item in findings)
+    assert report['verified_findings'] == []
+    for finding in findings:
+        for anchor in finding['source_anchors']:
+            assert content[anchor['start_byte']:anchor['end_byte']].decode('utf-8') == anchor['quote']
+
+
+def test_repeated_smaller_denominators_are_scope_notes_not_error_candidates(tmp_path):
+    content = (
+        '# Table 1 Baseline\n'
+        '| Characteristic | Control (n=21) | Intervention (n=20) |\n'
+        '| --- | ---: | ---: |\n'
+        '| Screen time, n (%) | 13 (92) | 11 (85) |\n'
+        '| Vegetable use, n (%) | 12 (86) | 9 (69) |\n'
+    ).encode()
+    _, report, _ = _run(tmp_path, content, '.md')
+
+    assert report['candidate_anomalies'] == []
+    assert {item['compatible_alternate_denominators_exact'][0]
+            for item in report['possible_scope_differences']} == {'13', '14'}
+
+
+def test_explicit_exclusion_flow_mismatch_is_anchored_candidate(tmp_path):
+    content = (
+        'Of the 17,708 study participants, we excluded 1,841 under age 45, '
+        '2,789 with baseline disease, and 1,878 with incomplete data. '
+        'Finally, 12,417 participants were included.\n'
+    ).encode()
+    _, report, _ = _run(tmp_path, content)
+
+    flow = report['arithmetic_screens']['sample_exclusion_flow']['candidate_anomalies']
+    assert len(flow) == 1
+    assert flow[0]['expected_included_exact'] == '11200'
+    assert flow[0]['reported_included_exact'] == '12417'
+    assert flow[0]['difference_exact'] == '1217'
+    assert report['paper_error_established'] is False
+    for anchor in flow[0]['source_anchors']:
+        assert content[anchor['start_byte']:anchor['end_byte']].decode('utf-8') == anchor['quote']
 
 
 def test_source_size_and_invalid_text_fail_closed_without_output(tmp_path, monkeypatch):

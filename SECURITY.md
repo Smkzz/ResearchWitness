@@ -25,7 +25,7 @@ The core rejects or bounds:
 
 Artifact bytes are checked against their SHA-256 manifest entries. Proof-boundary checks use explicit exceptions rather than Python `assert`, including when Python is run with `-O`.
 
-The default runtime imports only its own modules and the Python standard library. The optional `paper` extra adds `pypdf` for PDF text extraction. ResearchWitness has no network client, arbitrary dynamic code loading, pickle deserialization, model call, email sender, browser integration, or publication client.
+The deterministic verifier imports only its own modules and the Python standard library. The optional `paper` extra adds `pypdf` for PDF text extraction. The untrusted paper-ingestion front end starts one fixed-argument PDF worker with `shell=False`, a wall timeout, bounded input and output, and CPU/address-space limits where supported. The worker has no network client or access to the user's original path, but it runs as the same OS user; this is process isolation, not a sandbox. ResearchWitness has no arbitrary dynamic code loading, pickle deserialization, model call, email sender, browser integration, or publication client.
 
 ## What hashes do and do not prove
 
@@ -46,7 +46,7 @@ A source quote is checked against supplied text bytes at the declared byte offse
 
 `capture_status: captured` is contextual metadata, not cryptographic authentication. The report therefore keeps `paper_error_established: false` even when the formalization-level counterexample is exact.
 
-`paper-audit` is an untrusted discovery layer outside the proof boundary. Its optional PDF parser runs in-process and is not an OS sandbox. The byte, page, and extracted-text limits do not constrain every parser-internal allocation or CPU operation. Do not use PDF extraction on hostile documents where process isolation is required; use a trusted local parser or isolate conversion externally, then provide a verified UTF-8 text capture.
+`paper-audit` is an untrusted discovery layer outside the proof boundary. Its optional PDF parser runs in a separate worker with a 20-second wall timeout, 15-second CPU limit and 768 MiB address-space limit where POSIX resource limits are supported. The worker receives a private temporary copy of the bounded source file. This is not an OS sandbox: it shares the caller's user permissions and kernel, and parser operations can still fail in ways the limits do not anticipate. Do not use it as a hostile-document sandbox. It performs no OCR, and parser failure or resource-limit outcomes do not run numeric detectors.
 
 ## Filesystem threat model
 
@@ -64,7 +64,7 @@ The supported deployment assumes a trusted local process and a bundle directory 
 
 ## Resource limits
 
-The parser and checkers contain explicit structural and arithmetic limits intended to keep malformed input bounded. These are engineering controls, not a formally proved denial-of-service defense or an OS-level CPU/RAM quota. This limitation especially applies to `pypdf` when processing complex PDFs.
+The parser and checkers contain explicit structural and arithmetic limits intended to keep malformed input bounded. These are engineering controls, not a formally proved denial-of-service defense. POSIX CPU and address-space limits are best-effort process quotas; other systems rely on the wall timeout and input/output bounds. This limitation especially applies to `pypdf` when processing complex PDFs.
 
 Do not add an unbounded CAS, SMT solver, optimizer, PDF parser, or arbitrary repository execution path to the trusted core without a separate threat model.
 

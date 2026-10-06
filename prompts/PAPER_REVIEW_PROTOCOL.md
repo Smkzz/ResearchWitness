@@ -8,7 +8,7 @@ This protocol prepares a structured review ledger. The reviewer may be a person 
 2. Use `review-scaffold` to copy the source bytes into a new review workspace. The scaffold marks source identity `unverified`; change it to `captured` only after checking the text against the stated source/version.
 3. Keep supplements, data excerpts, calculations, and other review evidence as local files. Do not silently edit the paper capture or normalize values without recording the transformation.
 
-For an initial machine-generated lead list, `paper-audit paper.pdf --output screening/paper` preserves the input and searches extracted text for conflicting explicit `n=` / `N=` integers. It may help locate passages, but does not establish that counts have the same scope. A clean scan is not evidence that other errors are absent. PDF text extraction is optional, performs no OCR, and may be partial; use `review-scaffold` on the verified text capture for the actual review record.
+For an initial machine-generated lead list, `paper-audit paper.pdf --output screening/paper` preserves the input and checks explicit `n=` / `N=` contexts, selected Markdown table percentages, and one bounded sample-exclusion sentence pattern. Results are review candidates: counts may refer to different stages or populations, table rows may have their own denominators, and exclusion categories may overlap. A clean scan is not evidence that other errors are absent. PDF text extraction is optional, runs in a separate resource-limited worker that is not an OS sandbox, performs no OCR, and may be partial; use `review-scaffold` on the verified text capture for the actual review record.
 
 ## Review every area
 

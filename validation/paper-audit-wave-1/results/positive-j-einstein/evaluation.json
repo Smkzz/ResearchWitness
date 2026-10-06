@@ -1,0 +1,41 @@
+{
+  "case_id": "positive-j-einstein",
+  "role": "development_positive",
+  "source": {
+    "pmcid": "PMC4339301",
+    "doi": "10.1186/s12959-015-0035-3",
+    "snapshot_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+    "rendered_markdown_sha256": "6c2d2e99befb652aba34417b3b5f16d92321f722b1e0c6f6c22d075380940415",
+    "source_version": "PMC4339301 XML captured 2026-10-05; jats-markdown-v1"
+  },
+  "run": {
+    "decision": "CANDIDATES_FOUND",
+    "extraction_status": "TEXT_AVAILABLE",
+    "checks_attempted": [
+      "explicit_count_marker_scan",
+      "explicit_exclusion_flow_arithmetic_screen",
+      "markdown_table_percentage_recomputation"
+    ],
+    "count_assertions": 27,
+    "candidate_count": 1,
+    "candidate_types": [
+      "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+    ],
+    "possible_scope_difference_count": 1,
+    "verified_finding_count": 0,
+    "unsupported_checks": [
+      "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+      "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+      "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+      "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+      "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+    ],
+    "runtime_seconds": 0.063,
+    "deterministic_report_json": true,
+    "deterministic_report_html": true
+  },
+  "expected_issue": "Table 3 reports 2 cases among 71 as 2.9%; the correction says this should be 2.8%. The nearby 1/78 = 1.4% result is retained because it uses a different definition and denominator.",
+  "expected_candidate_count": 1,
+  "outcome": "DETECTED",
+  "matched_candidate_count": 1
+}

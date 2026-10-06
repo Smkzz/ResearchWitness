@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "researchwitness"
-version = "0.3.0.dev0"
-description = "Offline research-paper screening, review ledgers, and deterministic claim verification"
+version = "0.4.0.dev0"
+description = "Offline numeric paper screening, evidence-linked reviews, and deterministic claim verification"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}

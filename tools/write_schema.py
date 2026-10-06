@@ -534,28 +534,40 @@ def make_summary_check_schema():
 
 
 def make_paper_audit_schema():
-    """Generate the bounded screening-report schema (not a paper-truth schema)."""
+    """Generate the bounded screening report schema (not a paper-truth schema)."""
     hash_value = {'type': 'string', 'pattern': '^[a-f0-9]{64}$'}
-    empty_or_text = {'type': 'string', 'maxLength': 2000}
+    empty_text = {'type': 'string', 'maxLength': 2000}
+    small_int_string = {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'}
     anchor = obj({
         'text_file': enum('extracted-text.txt'),
         'quote': text(75),
         'start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
         'end_byte': {'type': 'integer', 'minimum': 1, 'maximum': 32 * 1024 * 1024},
-        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 32 * 1024 * 1024},
+        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 1_000_000},
         'context': {'type': 'string', 'maxLength': 2000},
         'page_number': {'type': 'integer', 'minimum': 1, 'maximum': 500},
         'page_offset_start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 512 * 1024},
         'page_offset_end_byte': {'type': 'integer', 'minimum': 1, 'maximum': 512 * 1024},
         'section': {'type': 'string', 'maxLength': 2000},
     }, required=['text_file', 'quote', 'start_byte', 'end_byte', 'line_number', 'context'])
+    stage_cue = obj({'stage': enum(
+        'screened', 'eligible', 'enrolled', 'randomized', 'excluded', 'completed',
+        'analyzed', 'follow_up', 'available',
+    ), 'cue': text(200)})
+    assertion_scope = obj({
+        'region': enum('MARKDOWN_TABLE_CELL', 'PROSE_CONTEXT'),
+        'nearby_context': {'type': 'string', 'maxLength': 600},
+        'study_stage': {'oneOf': [{'type': 'null'}, text(40)]},
+        'stage_cues': arr(stage_cue, 0, 8),
+    })
     assertion = obj({
         'id': {'type': 'string', 'pattern': '^count-[0-9]{4}$'},
         'kind': enum('explicit_count_marker'),
         'marker': enum('n', 'N'),
         'surface_value': {'type': 'string', 'pattern': '^[0-9]{1,9}$'},
-        'value_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'},
+        'value_exact': small_int_string,
         'anchor': anchor,
+        'scope': assertion_scope,
     })
     page = obj({
         'page_number': {'type': 'integer', 'minimum': 1, 'maximum': 500},
@@ -565,24 +577,79 @@ def make_paper_audit_schema():
         'text_end_byte': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
     })
     section = obj({
-        'heading': empty_or_text,
+        'heading': empty_text,
         'level': {'type': 'integer', 'minimum': 1, 'maximum': 6},
         'start_byte': {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024},
-        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 32 * 1024 * 1024},
+        'line_number': {'type': 'integer', 'minimum': 1, 'maximum': 1_000_000},
     })
-    anomaly = obj({
-        'id': {'type': 'string', 'pattern': '^conflicting-[nN]-values$'},
+    count_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^conflicting-[nN]-values(?:-[0-9]{2})?$'},
         'type': enum('CONFLICTING_EXPLICIT_COUNT_MARKERS'),
         'status': enum('CANDIDATE_ANOMALY'),
         'marker': enum('n', 'N'),
-        'values_exact': arr({'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'}, 2, 512),
+        'values_exact': arr(small_int_string, 2, 512),
         'assertion_ids': arr({'type': 'string', 'pattern': '^count-[0-9]{4}$'}, 2, 512),
         'source_anchors': arr(anchor, 2, 512),
+        'scope_stage': arr(text(40), 0, 9),
         'interpretation': text(1000),
         'required_review': text(1000),
     })
+    table_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^table-percentage-[0-9]{4}$'},
+        'type': enum('TABLE_PERCENTAGE_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'numerator_exact': small_int_string,
+        'denominator_exact': small_int_string,
+        'reported_percent': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
+        'recomputed_percent': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$'},
+        'rounding_tolerance_percentage_points': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]?)(?:\\.[0-9]{1,6})?$'},
+        'scope_label': empty_text,
+        'table': empty_text,
+        'source_anchors': arr(anchor, 3, 3),
+        'adversarial_review': obj({
+            'status': enum('ARITHMETIC_RECOMPUTED_WITH_SCOPE_OBJECTIONS'),
+            'objections_considered': arr(text(500), 1, 8),
+            'limitations': arr(text(500), 1, 8),
+        }),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    flow_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^exclusion-flow-[0-9]{4}$'},
+        'type': enum('EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'source_total_exact': small_int_string,
+        'excluded_values_exact': arr(small_int_string, 1, 64),
+        'reported_included_exact': small_int_string,
+        'expected_included_exact': {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,10})$'},
+        'difference_exact': {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,10})$'},
+        'source_anchors': arr(anchor, 3, 66),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    candidate = {'oneOf': [count_anomaly, table_anomaly, flow_anomaly]}
+    scope_difference = obj({
+        'id': {'type': 'string', 'pattern': '^(?:scope-[0-9]{4}|table-scope-[0-9]{4})$'},
+        'type': enum(
+            'MULTIPLE_COUNT_SCOPES_IN_ONE_PASSAGE', 'DIFFERENT_EXPLICIT_STUDY_STAGES',
+            'POSSIBLE_ROW_SPECIFIC_DENOMINATOR',
+        ),
+        'status': enum('POSSIBLE_SAMPLE_FLOW_DIFFERENCE'),
+        'marker': enum('n', 'N'),
+        'values_exact': arr(small_int_string, 2, 512),
+        'stage_labels': arr(text(40), 2, 2),
+        'reported_percent': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
+        'numerator_exact': small_int_string,
+        'column_denominator_exact': small_int_string,
+        'compatible_alternate_denominators_exact': arr(small_int_string, 1, 16),
+        'scope_label': empty_text,
+        'table': empty_text,
+        'source_anchors': arr(anchor, 1, 512),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    }, required=['id', 'type', 'status', 'source_anchors', 'interpretation', 'required_review'])
     report = obj({
-        'paper_audit_version': enum('0.1'),
+        'paper_audit_version': enum('0.2'),
         'decision': enum(
             'CANDIDATES_FOUND', 'CANDIDATES_FOUND_IN_INCOMPLETE_SCAN',
             'NO_CANDIDATES_IN_SUPPORTED_SCAN', 'SCAN_INCOMPLETE_NO_CANDIDATES',
@@ -599,6 +666,7 @@ def make_paper_audit_schema():
             'status': enum(
                 'TEXT_AVAILABLE', 'PARTIAL_TEXT', 'NO_EXTRACTABLE_TEXT',
                 'PARSER_UNAVAILABLE', 'MALFORMED_OR_UNSUPPORTED', 'LIMIT_OR_UNSUPPORTED',
+                'RESOURCE_LIMIT_OR_TIMEOUT', 'WORKER_FAILED', 'WORKER_PROTOCOL_ERROR',
             ),
             'extractor': text(200),
             'original_format': enum('txt', 'md', 'markdown', 'pdf'),
@@ -620,12 +688,37 @@ def make_paper_audit_schema():
             'discoverer': enum('explicit_count_marker_scan'),
             'scan_complete': {'type': 'boolean'},
             'assertions': arr(assertion, 0, 512),
+            'candidate_anomalies': arr(count_anomaly, 0, 2),
+            'possible_scope_differences': arr(scope_difference, 0, 128),
+            'table_count_assertions_not_cross_compared': {'type': 'integer', 'minimum': 0, 'maximum': 512},
             'limitations': arr(text(1000), 1, 16),
         }),
-        'candidate_anomalies': arr(anomaly, 0, 256),
-        'checks_attempted': arr(enum('explicit_count_marker_scan'), 0, 1),
+        'arithmetic_screens': obj({
+            'table_percentages': obj({
+                'discoverer': enum('markdown_table_percentage_recomputation'),
+                'findings': arr(table_anomaly, 0, 256),
+                'possible_scope_differences': arr(scope_difference, 0, 128),
+                'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+                'cells_scanned': {'type': 'integer', 'minimum': 0, 'maximum': 100_001},
+                'supported': {'type': 'boolean'},
+                'scan_complete': {'type': 'boolean'},
+                'limitations': arr(text(1000), 0, 16),
+            }),
+            'sample_exclusion_flow': obj({
+                'discoverer': enum('explicit_exclusion_flow_arithmetic_screen'),
+                'candidate_anomalies': arr(flow_anomaly, 0, 64),
+                'scan_complete': {'type': 'boolean'},
+                'limitations': arr(text(1000), 0, 16),
+            }),
+        }),
+        'candidate_anomalies': arr(candidate, 0, 322),
+        'possible_scope_differences': arr(scope_difference, 0, 256),
+        'checks_attempted': arr(enum(
+            'explicit_count_marker_scan', 'markdown_table_percentage_recomputation',
+            'explicit_exclusion_flow_arithmetic_screen',
+        ), 0, 3),
         'verified_findings': arr({'type': 'object'}, 0, 0),
-        'unresolved_questions': arr(text(1000), 0, 256),
+        'unresolved_questions': arr(text(1000), 0, 322),
         'unsupported_checks': arr(text(500), 1, 16),
         'known_corrections': obj({'status': enum('NOT_CHECKED')}),
         'paper_error_established': {'const': False},
@@ -633,11 +726,11 @@ def make_paper_audit_schema():
     })
     return {
         '$schema': 'https://json-schema.org/draft/2020-12/schema',
-        '$id': 'urn:researchwitness:paper-audit-report:0.1',
-        'title': 'ResearchWitness bounded paper-screening report 0.1',
+        '$id': 'urn:researchwitness:paper-audit-report:0.2',
+        'title': 'ResearchWitness bounded paper-screening report 0.2',
         'description': (
-            'A bounded local scan for conflicting explicit n/N integer markers. Candidate anomalies are not '
-            'verified errors; a negative result covers only the supported extracted-text scan.'
+            'Bounded numeric screening for explicit repeated counts, selected Markdown table percentages, and one '
+            'explicit sample-exclusion pattern. All flags remain candidates; a negative result does not establish correctness.'
         ),
         **report,
     }

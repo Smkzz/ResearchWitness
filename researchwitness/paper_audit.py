@@ -6,30 +6,75 @@ report, not a deterministic proof that a research claim is false.
 from __future__ import annotations
 
 from bisect import bisect_right
+import base64
 from html import escape
-import io
 import json
+import os
 from pathlib import Path
 import re
+import subprocess
+import sys
+import tempfile
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Protocol
 
 from .strict import Bundle, Invalid, byte_hash, canonical, require, text
 
-PAPER_AUDIT_VERSION = '0.1'
+PAPER_AUDIT_VERSION = '0.2'
 MAX_SOURCE_BYTES = 32 * 1024 * 1024
 MAX_PDF_PAGES = 500
 MAX_EXTRACTED_TEXT_BYTES = 16 * 1024 * 1024
 MAX_PDF_PAGE_BYTES = 512 * 1024
+MAX_PDF_EXTRACTION_SECONDS = 20
+MAX_PDF_WORKER_MEMORY_BYTES = 768 * 1024 * 1024
+MAX_PDF_WORKER_CPU_SECONDS = 15
+MAX_PDF_WORKER_OUTPUT_BYTES = 23 * 1024 * 1024
 MAX_COUNT_ASSERTIONS = 512
+MAX_SCOPE_DIFFERENCES = 128
+MAX_ARITHMETIC_FINDINGS = 256
+MAX_FLOW_EXCLUSION_VALUES = 64
 MAX_SCAN_LINE_BYTES = 64 * 1024
 MAX_SCAN_LINES = 1_000_000
 MAX_MARKDOWN_SECTIONS = 512
+MAX_TABLE_CELLS_SCANNED = 100_000
+UNAVAILABLE_EXTRACTION_STATUSES = (
+    'PARSER_UNAVAILABLE', 'MALFORMED_OR_UNSUPPORTED', 'LIMIT_OR_UNSUPPORTED',
+    'NO_EXTRACTABLE_TEXT', 'RESOURCE_LIMIT_OR_TIMEOUT', 'WORKER_FAILED',
+    'WORKER_PROTOCOL_ERROR',
+)
 
 COUNT_MARKER = re.compile(
     rb'(?<![A-Za-z0-9_])(?P<marker>[nN])[ \t]{0,32}=[ \t]{0,32}'
     rb'(?P<value>[0-9]{1,9})(?![0-9]|[,.][0-9]|/[0-9]|[eE][+-]?[0-9])'
 )
 MARKDOWN_HEADING = re.compile(rb'^ {0,3}(?P<marks>#{1,6})[ \t]+(?P<title>.*?)[ \t]*#*[ \t]*$')
+TABLE_ROW = re.compile(r'^\s*\|.*\|\s*$')
+TABLE_DENOMINATOR = re.compile(r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})(?![0-9])')
+TABLE_COUNT_PERCENT = re.compile(
+    r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*(?P<mark>%?)\s*\)\s*$'
+)
+FLOW_NUMBER = r'(?P<{name}>[0-9](?:[0-9,\s\u00a0\u202f]*[0-9])?)'
+EXCLUSION_FLOW = re.compile(
+    r'\bOf\s+the\s+' + FLOW_NUMBER.format(name='total') +
+    r'\s+.{0,160}?\bparticipants?\b.{0,180}?\bwe\s+excluded\s+'
+    r'(?P<exclusions>[^.\n]{1,1200})\.\s*Finally[, ]+\s*' +
+    FLOW_NUMBER.format(name='included') +
+    r'\s+participants?\s+were\s+included\b',
+    re.IGNORECASE,
+)
+EXCLUSION_LIST_SPLIT = re.compile(r',\s+(?=(?:and\s+)?[0-9])')
+LEADING_FLOW_NUMBER = re.compile(r'^\s*(?:and\s+)?(?P<number>[0-9](?:[0-9,\s\u00a0\u202f]*[0-9])?)')
+STAGE_RULES = (
+    ('screened', re.compile(r'\bscreen(?:ed|ing)\b', re.IGNORECASE)),
+    ('eligible', re.compile(r'\beligib(?:le|ility)\b', re.IGNORECASE)),
+    ('enrolled', re.compile(r'\benroll(?:ed|ment)?\b|\brecruit(?:ed|ment)?\b', re.IGNORECASE)),
+    ('randomized', re.compile(r'\brandomi[sz](?:ed|ation)\b|\ballocated\b', re.IGNORECASE)),
+    ('excluded', re.compile(r'\bexclud(?:ed|ing|es)\b', re.IGNORECASE)),
+    ('completed', re.compile(r'\bcomplet(?:ed|ion)\b', re.IGNORECASE)),
+    ('analyzed', re.compile(r'\banaly[sz](?:ed|is|ation)\b|\bincluded for analysis\b', re.IGNORECASE)),
+    ('follow_up', re.compile(r'\bfollow[ -]?up\b|\bend of study\b', re.IGNORECASE)),
+    ('available', re.compile(r'\bavailable\b|\bpaired samples?\b', re.IGNORECASE)),
+)
 
 
 class CandidateDiscoverer(Protocol):
@@ -43,80 +88,61 @@ class CandidateDiscoverer(Protocol):
 
 
 def _extract_pdf(source_bytes: bytes) -> tuple[bytes, str, str, list[dict[str, Any]], list[str]]:
+    worker = Path(__file__).with_name('_pdf_worker.py').absolute()
     try:
-        import pypdf
-        from pypdf import PdfReader
-    except ImportError:
-        return b'', 'PARSER_UNAVAILABLE', 'pypdf (optional paper extra)', [], [
-            'Install researchwitness[paper] to extract PDF text. No OCR was attempted.'
-        ]
-
-    try:
-        reader = PdfReader(io.BytesIO(source_bytes), strict=True)
-        require(not reader.is_encrypted, 'Encrypted PDFs are not supported')
-        page_count = len(reader.pages)
-        require(1 <= page_count <= MAX_PDF_PAGES,
-                f'PDF must have 1 to {MAX_PDF_PAGES} pages')
-        page_texts: list[bytes] = []
-        page_records: list[dict[str, Any]] = []
-        total = 0
-        warnings: list[str] = []
-        for page_number, page in enumerate(reader.pages, start=1):
-            extracted = page.extract_text() or ''
-            require(type(extracted) is str, 'PDF parser returned non-text page content')
-            page_bytes = extracted.encode('utf-8')
-            require(len(page_bytes) <= MAX_PDF_PAGE_BYTES,
-                    f'PDF page {page_number} exceeds the extracted-text limit')
-            total += len(page_bytes)
-            require(total <= MAX_EXTRACTED_TEXT_BYTES,
-                    'PDF extracted-text size limit exceeded')
-            page_texts.append(page_bytes)
-            page_records.append({
-                'page_number': page_number,
-                'character_count': len(extracted),
-                'status': 'TEXT_EXTRACTED' if extracted.strip() else 'NO_EXTRACTABLE_TEXT',
-            })
-
-        separator = b'\n\f\n'
-        chunks: list[bytes] = []
-        offset = 0
-        for index, page_bytes in enumerate(page_texts):
-            record = page_records[index]
-            record['text_start_byte'] = offset
-            record['text_end_byte'] = offset + len(page_bytes)
-            chunks.append(page_bytes)
-            offset += len(page_bytes)
-            if index + 1 < len(page_texts):
-                chunks.append(separator)
-                offset += len(separator)
-        require(offset <= MAX_EXTRACTED_TEXT_BYTES,
-                'PDF extracted-text size limit exceeded')
-        output = b''.join(chunks)
-        empty_pages = [record['page_number'] for record in page_records
-                       if record['status'] == 'NO_EXTRACTABLE_TEXT']
-        if len(empty_pages) == page_count:
-            status = 'NO_EXTRACTABLE_TEXT'
-            warnings.append(
-                'No text was extracted. Pages may be image-only or use unsupported encodings; no OCR was attempted.'
+        with tempfile.TemporaryDirectory(prefix='researchwitness-pdf-') as temp_name:
+            temp_dir = Path(temp_name)
+            input_path = temp_dir / 'input.pdf'
+            input_path.write_bytes(source_bytes)
+            input_path.chmod(0o600)
+            command = [
+                sys.executable, '-I', str(worker), str(input_path), str(MAX_PDF_PAGES),
+                str(MAX_PDF_PAGE_BYTES), str(MAX_EXTRACTED_TEXT_BYTES),
+                str(MAX_PDF_WORKER_MEMORY_BYTES), str(MAX_PDF_WORKER_CPU_SECONDS),
+            ]
+            child = subprocess.run(
+                command,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                timeout=MAX_PDF_EXTRACTION_SECONDS,
+                check=False,
+                shell=False,
+                env={'PATH': os.defpath, 'PYTHONIOENCODING': 'utf-8'},
             )
-        elif empty_pages:
-            status = 'PARTIAL_TEXT'
-            warnings.append('No extractable text on physical PDF pages: ' + ', '.join(map(str, empty_pages)))
-        else:
-            status = 'TEXT_AVAILABLE'
-        return output, status, f'pypdf {pypdf.__version__}', page_records, warnings
-    except Invalid:
-        # A configured extraction bound or unsupported encrypted document is a
-        # reportable ingestion outcome. Preserve the original input, but do not
-        # run a detector over incomplete output.
-        return b'', 'LIMIT_OR_UNSUPPORTED', f'pypdf {pypdf.__version__}', [], [
-            'PDF extraction stopped at a configured limit or unsupported document feature. '
-            'The original PDF was preserved; extracted text is incomplete and no OCR was attempted.'
+    except subprocess.TimeoutExpired:
+        return b'', 'RESOURCE_LIMIT_OR_TIMEOUT', 'pypdf isolated worker', [], [
+            f'PDF extraction exceeded the {MAX_PDF_EXTRACTION_SECONDS}-second worker timeout. No detector was run.'
         ]
-    except Exception as exc:
-        # Parser diagnostics may include attacker-controlled document strings.
-        return b'', 'MALFORMED_OR_UNSUPPORTED', f'pypdf {pypdf.__version__}', [], [
-            'PDF extraction failed (' + type(exc).__name__ + '). No OCR or repair was attempted.'
+    except OSError as exc:
+        return b'', 'WORKER_FAILED', 'pypdf isolated worker', [], [
+            'The PDF extraction worker could not be started (' + type(exc).__name__ + '). No detector was run.'
+        ]
+
+    if child.returncode != 0:
+        return b'', 'RESOURCE_LIMIT_OR_TIMEOUT', 'pypdf isolated worker', [], [
+            'The PDF extraction worker stopped before completing, possibly at an operating-system resource limit. '
+            'No detector was run.'
+        ]
+    if len(child.stdout) > MAX_PDF_WORKER_OUTPUT_BYTES:
+        return b'', 'WORKER_PROTOCOL_ERROR', 'pypdf isolated worker', [], [
+            'The PDF extraction worker returned more data than the configured output limit. No detector was run.'
+        ]
+    try:
+        payload = json.loads(child.stdout.decode('utf-8'))
+        status = payload['status']
+        extractor = payload['extractor']
+        page_records = payload['page_records']
+        warnings = payload['warnings']
+        output = base64.b64decode(payload['text_base64'], validate=True)
+        require(type(status) is str and type(extractor) is str, 'Invalid PDF worker metadata')
+        require(type(page_records) is list and type(warnings) is list, 'Invalid PDF worker result shape')
+        require(len(output) <= MAX_EXTRACTED_TEXT_BYTES, 'PDF worker output exceeded the extracted-text limit')
+        require(len(page_records) <= MAX_PDF_PAGES, 'PDF worker page count exceeded the configured limit')
+        return output, status, extractor, page_records, warnings
+    except (UnicodeDecodeError, ValueError, KeyError, TypeError, Invalid):
+        return b'', 'WORKER_PROTOCOL_ERROR', 'pypdf isolated worker', [], [
+            'The PDF extraction worker returned an invalid bounded result. No detector was run.'
         ]
 
 
@@ -148,7 +174,7 @@ def _page_record(page_map: list[dict[str, Any]], offset: int) -> tuple[int | Non
 
 
 class ExplicitCountDiscoverer:
-    """Find conflicting explicit n=/N= integers; leave cohort identity unresolved."""
+    """Find explicit n/N assertions and conservatively screen compatible contexts."""
 
     name = 'explicit_count_marker_scan'
 
@@ -159,9 +185,9 @@ class ExplicitCountDiscoverer:
         sections: list[dict[str, Any]] = []
         overlong_lines = 0
         truncated = False
+        active_section: str | None = None
         line_start = 0
         line_number = 1
-        active_section: str | None = None
         while line_start < len(text_bytes):
             if line_number > MAX_SCAN_LINES:
                 truncated = True
@@ -222,6 +248,29 @@ class ExplicitCountDiscoverer:
                         anchor['page_offset_end_byte'] = page_offset + (token_end - token_start)
                     if active_section is not None:
                         anchor['section'] = active_section
+                    char_start = len(line[:match.start()].decode('utf-8'))
+                    char_end = char_start + len(match.group().decode('ascii'))
+                    is_table_row = markdown and TABLE_ROW.match(decoded_line)
+                    if is_table_row:
+                        left = decoded_line.rfind('|', 0, char_start) + 1
+                        right = decoded_line.find('|', char_end)
+                        if right < 0:
+                            right = len(decoded_line)
+                        cell_context = decoded_line[left:right].strip()
+                        scope_context = (decoded_line[:decoded_line.find('|')].strip() + ' | ' + cell_context).strip()
+                        region = 'MARKDOWN_TABLE_CELL'
+                    else:
+                        window_start = max(0, char_start - 180)
+                        window_end = min(len(decoded_line), char_end + 180)
+                        scope_context = decoded_line[window_start:window_end].strip()
+                        region = 'PROSE_CONTEXT'
+                    stage_cues = []
+                    for stage, rule in STAGE_RULES:
+                        stage_cues.extend(
+                            {'stage': stage, 'cue': cue.group(0)}
+                            for cue in rule.finditer(scope_context)
+                        )
+                    stage_values = sorted({cue['stage'] for cue in stage_cues})
                     assertions.append({
                         'id': f'count-{len(assertions) + 1:04d}',
                         'kind': 'explicit_count_marker',
@@ -229,6 +278,12 @@ class ExplicitCountDiscoverer:
                         'surface_value': match.group('value').decode('ascii'),
                         'value_exact': str(int(match.group('value'))),
                         'anchor': anchor,
+                        'scope': {
+                            'region': region,
+                            'nearby_context': scope_context[:600],
+                            'study_stage': stage_values[0] if len(stage_values) == 1 else None,
+                            'stage_cues': stage_cues[:8],
+                        },
                     })
             if truncated:
                 break
@@ -238,21 +293,103 @@ class ExplicitCountDiscoverer:
         groups: dict[str, list[dict[str, Any]]] = {'n': [], 'N': []}
         for assertion in assertions:
             groups[assertion['marker']].append(assertion)
-        anomalies = []
+        anomalies: list[dict[str, Any]] = []
+        scope_differences: list[dict[str, Any]] = []
+        table_assertions_not_compared = sum(
+            item['scope']['region'] == 'MARKDOWN_TABLE_CELL' for item in assertions
+        )
+        scope_truncated = False
         for marker, group in groups.items():
-            distinct = sorted({item['value_exact'] for item in group}, key=int)
+            prose = [item for item in group if item['scope']['region'] == 'PROSE_CONTEXT']
+            by_line: dict[int, list[dict[str, Any]]] = {}
+            for item in prose:
+                by_line.setdefault(item['anchor']['line_number'], []).append(item)
+            ambiguous_ids: set[str] = set()
+            for line_items in by_line.values():
+                ordered = sorted(line_items, key=lambda item: item['anchor']['start_byte'])
+                clusters: list[list[dict[str, Any]]] = []
+                for item in ordered:
+                    if (not clusters or item['anchor']['start_byte'] - clusters[-1][-1]['anchor']['start_byte']
+                            > 360):
+                        clusters.append([item])
+                    else:
+                        clusters[-1].append(item)
+                for cluster in clusters:
+                    distinct_line = sorted({item['value_exact'] for item in cluster}, key=int)
+                    if len(distinct_line) < 2:
+                        continue
+                    ambiguous_ids.update(item['id'] for item in cluster)
+                    if len(scope_differences) >= MAX_SCOPE_DIFFERENCES:
+                        scope_truncated = True
+                        continue
+                    scope_differences.append({
+                        'id': f'scope-{len(scope_differences) + 1:04d}',
+                        'type': 'MULTIPLE_COUNT_SCOPES_IN_ONE_PASSAGE',
+                        'status': 'POSSIBLE_SAMPLE_FLOW_DIFFERENCE',
+                        'marker': marker,
+                        'values_exact': distinct_line,
+                        'source_anchors': [item['anchor'] for item in cluster],
+                        'interpretation': (
+                            'One short passage contains different explicit counts. The local scan cannot determine whether '
+                            'the nearby labels describe different causes, groups, stages, or populations.'
+                        ),
+                        'required_review': (
+                            'Compare the population, group, stage, denominator, and outcome labels around each value '
+                            'before treating them as inconsistent.'
+                        ),
+                    })
+
+            remaining = [item for item in prose if item['id'] not in ambiguous_ids]
+            value_disagreement: list[tuple[dict[str, Any], dict[str, Any]]] = []
+            for index, first in enumerate(remaining):
+                for second in remaining[index + 1:]:
+                    if first['value_exact'] == second['value_exact']:
+                        continue
+                    first_stage = first['scope']['study_stage']
+                    second_stage = second['scope']['study_stage']
+                    if first_stage and second_stage and first_stage != second_stage:
+                        if len(scope_differences) >= MAX_SCOPE_DIFFERENCES:
+                            scope_truncated = True
+                            continue
+                        scope_differences.append({
+                            'id': f'scope-{len(scope_differences) + 1:04d}',
+                            'type': 'DIFFERENT_EXPLICIT_STUDY_STAGES',
+                            'status': 'POSSIBLE_SAMPLE_FLOW_DIFFERENCE',
+                            'marker': marker,
+                            'values_exact': [first['value_exact'], second['value_exact']],
+                            'source_anchors': [first['anchor'], second['anchor']],
+                            'stage_labels': [first_stage, second_stage],
+                            'interpretation': (
+                                'The two counts have different nearby stage cues. A change may reflect ordinary '
+                                'screening, exclusion, completion, or analysis flow.'
+                            ),
+                            'required_review': (
+                                'Check the paper flow diagram, analysis population, subgroup definitions, and '
+                                'supplement before deciding whether the count change is explained.'
+                            ),
+                        })
+                    else:
+                        value_disagreement.extend(((first, second),))
+            candidate_ids = {item['id'] for pair in value_disagreement for item in pair}
+            candidate_items = [item for item in remaining if item['id'] in candidate_ids]
+            distinct = sorted({item['value_exact'] for item in candidate_items}, key=int)
             if len(distinct) > 1:
+                anomaly_id = f'conflicting-{marker}-values'
+                if any(item['marker'] == marker for item in anomalies):
+                    anomaly_id += f'-{len(anomalies) + 1:02d}'
                 anomalies.append({
-                    'id': f'conflicting-{marker}-values',
+                    'id': anomaly_id,
                     'type': 'CONFLICTING_EXPLICIT_COUNT_MARKERS',
                     'status': 'CANDIDATE_ANOMALY',
                     'marker': marker,
                     'values_exact': distinct,
-                    'assertion_ids': [item['id'] for item in group],
-                    'source_anchors': [item['anchor'] for item in group],
+                    'assertion_ids': [item['id'] for item in candidate_items],
+                    'source_anchors': [item['anchor'] for item in candidate_items],
+                    'scope_stage': sorted({item['scope']['study_stage'] for item in candidate_items
+                                           if item['scope']['study_stage']}),
                     'interpretation': (
-                        'Different integers follow the same case-sensitive marker. This scan cannot tell whether '
-                        'they refer to the same population, subgroup, timepoint, analysis, or definition.'
+                        'Different integers follow the same case-sensitive marker in separate prose contexts. '
+                        'Nearby stage cues were not enough to establish that the values refer to different scopes.'
                     ),
                     'required_review': (
                         'Compare the surrounding passages, subgroup definitions, exclusions, timepoints, '
@@ -269,44 +406,478 @@ class ExplicitCountDiscoverer:
             limitations.append('A configured assertion or section limit was reached; scanning may be incomplete.')
         if line_number > MAX_SCAN_LINES:
             limitations.append(f'The {MAX_SCAN_LINES}-line scan limit was reached.')
+        if scope_truncated:
+            limitations.append('A configured scope-difference limit was reached; some count pairs were not classified.')
         limitations.extend([
-            'Only explicit n = integer and N = integer patterns were scanned.',
-            'Marker identity does not establish that assertions describe the same cohort or quantity.',
-            'No p-values, confidence intervals, tables, equations, citations, methods, or conclusions were checked.',
+            'Only explicit n = integer and N = integer patterns were scanned for repeated-count candidates.',
+            'Counts in separate Markdown table cells are retained with local context but are not compared globally.',
+            'Different values in one paragraph or with different explicit stage cues are described as possible scope differences.',
+            'A candidate still requires review of cohort, subgroup, denominator, timepoint, and paper version.',
         ])
         return {
             'discoverer': self.name,
             'assertions': assertions,
             'candidate_anomalies': anomalies,
+            'possible_scope_differences': scope_differences,
+            'table_count_assertions_not_cross_compared': table_assertions_not_compared,
             'sections': sections,
             'scan_complete': not truncated and overlong_lines == 0,
             'limitations': limitations,
         }
 
 
+def _markdown_cells(line: str) -> list[tuple[str, int, int]]:
+    separators = [match.start() for match in re.finditer(r'(?<!\\)\|', line)]
+    if len(separators) < 2:
+        return []
+    output = []
+    for left, right in zip(separators, separators[1:]):
+        raw_start, raw_end = left + 1, right
+        start = raw_start
+        end = raw_end
+        while start < end and line[start].isspace():
+            start += 1
+        while end > start and line[end - 1].isspace():
+            end -= 1
+        output.append((line[start:end].replace('\\|', '|'), start, end))
+    return output
+
+
+def _bounded_flow_number(raw: str) -> int | None:
+    if len(raw) > 75:
+        return None
+    digits = re.sub(r'[,\s\u00a0\u202f]', '', raw)
+    if not digits.isascii() or not digits.isdigit() or len(digits) > 9:
+        return None
+    return int(digits)
+
+
+class TablePercentageDiscoverer:
+    """Recompute only explicit count/percentage cells against same-column n/N headers."""
+
+    name = 'markdown_table_percentage_recomputation'
+
+    def discover(self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool) -> dict[str, Any]:
+        findings: list[dict[str, Any]] = []
+        scope_differences: list[dict[str, Any]] = []
+        checked = 0
+        limitations = []
+        if not markdown:
+            return {
+                'discoverer': self.name,
+                'findings': findings,
+                'possible_scope_differences': scope_differences,
+                'checked_cells': checked,
+                'cells_scanned': 0,
+                'supported': False,
+                'scan_complete': True,
+                'limitations': ['Structured table percentage checks run only on Markdown pipe tables.'],
+            }
+        line_start = 0
+        line_number = 1
+        section: str | None = None
+        table_active = False
+        caption = ''
+        column_labels: list[str] = []
+        denominators: dict[int, dict[str, Any]] = {}
+        truncated = False
+        cells_scanned = 0
+        while line_start < len(text_bytes):
+            newline = text_bytes.find(b'\n', line_start)
+            line_end = len(text_bytes) if newline < 0 else newline
+            raw = text_bytes[line_start:line_end]
+            if len(raw) > MAX_SCAN_LINE_BYTES:
+                truncated = True
+                break
+            decoded = raw.decode('utf-8')
+            if markdown:
+                heading = MARKDOWN_HEADING.match(raw)
+                if heading:
+                    section = heading.group('title').decode('utf-8').strip()[:2000]
+                    table_active = False
+                    caption = section if section.lower().startswith('table ') else ''
+                    column_labels = []
+                    denominators = {}
+            if TABLE_ROW.match(decoded):
+                table_active = True
+                cells = _markdown_cells(decoded)
+                cells_scanned += len(cells)
+                if cells_scanned > MAX_TABLE_CELLS_SCANNED:
+                    truncated = True
+                    break
+                if not re.fullmatch(r'[\s:|\-]+', decoded):
+                    current: dict[int, dict[str, Any]] = {}
+                    for column, (cell, cell_start, cell_end) in enumerate(cells):
+                        match = TABLE_DENOMINATOR.search(cell)
+                        if match and column > 0:
+                            number = int(match.group('value'))
+                            match_start = cell_start + match.start()
+                            match_end = cell_start + match.end()
+                            page_number, page_offset = _page_record(page_map, line_start + len(decoded[:match_start].encode('utf-8')))
+                            quote = decoded[match_start:match_end]
+                            anchor = {
+                                'text_file': 'extracted-text.txt', 'quote': quote,
+                                'start_byte': line_start + len(decoded[:match_start].encode('utf-8')),
+                                'end_byte': line_start + len(decoded[:match_end].encode('utf-8')),
+                                'line_number': line_number, 'context': decoded.strip()[:2000],
+                            }
+                            if section:
+                                anchor['section'] = section
+                            if page_number is not None:
+                                anchor.update({'page_number': page_number, 'page_offset_start_byte': page_offset,
+                                               'page_offset_end_byte': page_offset + anchor['end_byte'] - anchor['start_byte']})
+                            cell_label = TABLE_DENOMINATOR.sub('', cell).strip(' ()')
+                            header_label = column_labels[column] if column < len(column_labels) else ''
+                            row_group = cells[0][0].strip() if cells else ''
+                            labels = [label for label in (row_group, header_label or cell_label) if label]
+                            current[column] = {
+                                'value': number,
+                                'anchor': anchor,
+                                'group_label': ' / '.join(labels)[:200],
+                            }
+                    if current:
+                        denominators = current
+                    elif denominators:
+                        row_label = cells[0][0] if cells else ''
+                        for column, (cell, cell_start, _cell_end) in enumerate(cells[1:], start=1):
+                            parsed = TABLE_COUNT_PERCENT.fullmatch(cell)
+                            if parsed is None or column not in denominators:
+                                continue
+                            if not parsed.group('mark') and not re.search(r'\bn\s*\(%\)', row_label, re.IGNORECASE):
+                                continue
+                            count = int(parsed.group('count'))
+                            denominator = denominators[column]['value']
+                            reported = parsed.group('percent')
+                            percent = Decimal(reported)
+                            if denominator <= 0 or count > denominator or percent > 100:
+                                continue
+                            computed = Decimal(count) * Decimal(100) / Decimal(denominator)
+                            displayed_digits = len(reported.split('.', 1)[1]) if '.' in reported else 0
+                            tolerance = Decimal(5).scaleb(-(displayed_digits + 1))
+                            difference = abs(percent - computed)
+                            checked += 1
+                            if difference <= tolerance:
+                                continue
+                            alternate_tolerance = Decimal(1).scaleb(-displayed_digits)
+                            estimated_denominator = int(
+                                (Decimal(count) * Decimal(100) / percent).quantize(
+                                    Decimal('1'), rounding=ROUND_HALF_UP,
+                                )
+                            ) if percent > 0 else denominator
+                            alternate_denominators = [
+                                possible for possible in range(max(count, estimated_denominator - 1),
+                                                               min(denominator, estimated_denominator + 2))
+                                if possible < denominator
+                                and abs(percent - Decimal(count) * Decimal(100) / Decimal(possible))
+                                <= alternate_tolerance
+                            ]
+                            if len(findings) >= MAX_ARITHMETIC_FINDINGS:
+                                truncated = True
+                                continue
+                            cell_start_abs = line_start + len(decoded[:cell_start].encode('utf-8'))
+                            page_number, page_offset = _page_record(page_map, cell_start_abs)
+                            data_anchor = {
+                                'text_file': 'extracted-text.txt', 'quote': cell[:75],
+                                'start_byte': cell_start_abs,
+                                'end_byte': cell_start_abs + len(cell[:75].encode('utf-8')),
+                                'line_number': line_number, 'context': decoded.strip()[:2000],
+                            }
+                            row_context_start = cells[0][1]
+                            label_start = line_start + len(decoded[:row_context_start].encode('utf-8'))
+                            label_quote = row_label[:75]
+                            label_anchor = {
+                                'text_file': 'extracted-text.txt', 'quote': label_quote,
+                                'start_byte': label_start,
+                                'end_byte': label_start + len(label_quote.encode('utf-8')),
+                                'line_number': line_number, 'context': decoded.strip()[:2000],
+                            }
+                            for anchor in (data_anchor, label_anchor):
+                                if section:
+                                    anchor['section'] = section
+                            if page_number is not None:
+                                data_anchor.update({'page_number': page_number, 'page_offset_start_byte': page_offset,
+                                                    'page_offset_end_byte': page_offset + len(data_anchor['quote'].encode('utf-8'))})
+                            if section:
+                                denominators[column]['anchor']['section'] = section
+                            computed_str = format(computed, '.6f').rstrip('0').rstrip('.')
+                            findings.append({
+                                'id': f'table-percentage-{len(findings) + 1:04d}',
+                                'type': 'TABLE_PERCENTAGE_ARITHMETIC_MISMATCH',
+                                'status': 'CANDIDATE_ANOMALY',
+                                'numerator_exact': str(count),
+                                'denominator_exact': str(denominator),
+                                'reported_percent': reported,
+                                'recomputed_percent': computed_str,
+                                'rounding_tolerance_percentage_points': format(tolerance, 'f'),
+                                'scope_label': denominators[column]['group_label'],
+                                'table': caption,
+                                'source_anchors': [denominators[column]['anchor'], label_anchor, data_anchor],
+                                '_possible_alternate_denominators': [str(item) for item in alternate_denominators],
+                                'adversarial_review': {
+                                    'status': 'ARITHMETIC_RECOMPUTED_WITH_SCOPE_OBJECTIONS',
+                                    'objections_considered': [
+                                        'Rounding tolerance is one half of the last displayed percentage unit.',
+                                        'The numerator and reported percentage share one table cell.',
+                                        'The denominator comes from an explicit n/N header in the same table column.',
+                                        'Column order must be preserved by the supplied Markdown table; raw PDF layout is not inferred.',
+                                    ],
+                                    'limitations': [
+                                        'The mismatch applies only if the explicit column denominator is intended for this row; source authenticity and paper version were not authenticated.',
+                                        'A row-specific denominator, missing-data subset, or table-layout change could alter the interpretation.',
+                                    ],
+                                },
+                                'interpretation': (
+                                    f'The displayed {reported}% differs from {count}/{denominator} '
+                                    f'({computed_str}%) using the explicit column denominator.'
+                                ),
+                                'required_review': (
+                                    'Check table footnotes, row-specific denominators, missing-data rules, and the publisher '
+                                    'version before treating this arithmetic difference as an error.'
+                                ),
+                            })
+                    if not column_labels:
+                        column_labels = [TABLE_DENOMINATOR.sub('', cell).strip(' ()') for cell, _, _ in cells]
+                    else:
+                        for column, (cell, _, _) in enumerate(cells):
+                            if column >= len(column_labels):
+                                column_labels.append('')
+                            if TABLE_DENOMINATOR.search(cell):
+                                label = TABLE_DENOMINATOR.sub('', cell).strip(' ()')
+                                if label:
+                                    column_labels[column] = label
+            elif not decoded.strip():
+                if table_active:
+                    table_active = False
+                    caption = ''
+                    column_labels = []
+                    denominators = {}
+            elif not decoded.lstrip().startswith('#') and table_active:
+                table_active = False
+                caption = ''
+                column_labels = []
+                denominators = {}
+            if line_number > MAX_SCAN_LINES:
+                truncated = True
+                break
+            line_start = len(text_bytes) if newline < 0 else newline + 1
+            line_number += 1
+        supported_alternates: dict[tuple[str, str], int] = {}
+        for finding in findings:
+            alternatives = finding['_possible_alternate_denominators']
+            if len(alternatives) == 1:
+                key = (finding['scope_label'], alternatives[0])
+                supported_alternates[key] = supported_alternates.get(key, 0) + 1
+        retained_findings = []
+        for finding in findings:
+            alternatives = finding.pop('_possible_alternate_denominators')
+            supported = [
+                alternate for alternate in alternatives
+                if supported_alternates.get((finding['scope_label'], alternate), 0) >= 2
+            ]
+            alternate = supported[0] if len(supported) == 1 else None
+            if alternate is not None:
+                if len(scope_differences) >= MAX_SCOPE_DIFFERENCES:
+                    truncated = True
+                    retained_findings.append(finding)
+                    continue
+                scope_differences.append({
+                    'id': f'table-scope-{len(scope_differences) + 1:04d}',
+                    'type': 'POSSIBLE_ROW_SPECIFIC_DENOMINATOR',
+                    'status': 'POSSIBLE_SAMPLE_FLOW_DIFFERENCE',
+                    'reported_percent': finding['reported_percent'],
+                    'numerator_exact': finding['numerator_exact'],
+                    'column_denominator_exact': finding['denominator_exact'],
+                    'compatible_alternate_denominators_exact': [alternate],
+                    'scope_label': finding['scope_label'],
+                    'table': finding['table'],
+                    'source_anchors': finding['source_anchors'],
+                    'interpretation': (
+                        'Several percentages in this table column are compatible with one smaller row-specific '
+                        'denominator, suggesting missing values or a subset.'
+                    ),
+                    'required_review': (
+                        'Check item nonresponse and table footnotes to determine whether the smaller denominator is '
+                        'the reported population for these rows.'
+                    ),
+                })
+            else:
+                retained_findings.append(finding)
+        findings = retained_findings
+        if truncated:
+            limitations.append('A configured table scan or finding limit was reached; percentage checks may be incomplete.')
+        return {
+            'discoverer': self.name,
+            'findings': findings,
+            'possible_scope_differences': scope_differences,
+            'checked_cells': checked,
+            'cells_scanned': cells_scanned,
+            'supported': True,
+            'scan_complete': not truncated,
+            'limitations': limitations,
+        }
+
+
+class ExplicitExclusionFlowDiscoverer:
+    """Screen a single explicit 'of the X, excluded A/B/C; finally Y included' relation."""
+
+    name = 'explicit_exclusion_flow_arithmetic_screen'
+
+    def discover(self, text_bytes: bytes, page_map: list[dict[str, Any]]) -> dict[str, Any]:
+        candidates: list[dict[str, Any]] = []
+        line_start = 0
+        line_number = 1
+        line_limit = False
+        incomplete = False
+        while line_start < len(text_bytes):
+            newline = text_bytes.find(b'\n', line_start)
+            line_end = len(text_bytes) if newline < 0 else newline
+            raw = text_bytes[line_start:line_end]
+            if len(raw) <= MAX_SCAN_LINE_BYTES:
+                decoded = raw.decode('utf-8')
+                for match in EXCLUSION_FLOW.finditer(decoded):
+                    excluded_text = match.group('exclusions')
+                    parts = EXCLUSION_LIST_SPLIT.split(excluded_text)
+                    exclusion_values = []
+                    spans = []
+                    cursor = 0
+                    valid = 1 <= len(parts) <= MAX_FLOW_EXCLUSION_VALUES
+                    for part in parts:
+                        leading = LEADING_FLOW_NUMBER.match(part)
+                        if leading is None:
+                            valid = False
+                            break
+                        raw_number = leading.group('number')
+                        value = _bounded_flow_number(raw_number)
+                        if value is None:
+                            valid = False
+                            break
+                        part_start = excluded_text.find(part, cursor)
+                        cursor = part_start + len(part)
+                        leading_offset = len(part) - len(part.lstrip())
+                        number_start = match.start('exclusions') + part_start + leading_offset
+                        spans.append((number_start, number_start + len(raw_number)))
+                        exclusion_values.append(value)
+                    if not valid:
+                        continue
+                    total = _bounded_flow_number(match.group('total'))
+                    included = _bounded_flow_number(match.group('included'))
+                    if total is None or included is None:
+                        continue
+                    expected = total - sum(exclusion_values)
+                    if expected == included:
+                        continue
+                    if len(candidates) >= 64:
+                        line_limit = True
+                        break
+                    token_spans = [(match.start('total'), match.end('total'))]
+                    token_spans.extend(spans)
+                    token_spans.append((match.start('included'), match.end('included')))
+                    anchors = []
+                    for char_start, char_end in token_spans:
+                        start_byte = line_start + len(decoded[:char_start].encode('utf-8'))
+                        end_byte = line_start + len(decoded[:char_end].encode('utf-8'))
+                        page_number, page_offset = _page_record(page_map, start_byte)
+                        anchor = {
+                            'text_file': 'extracted-text.txt',
+                            'quote': decoded[char_start:char_end],
+                            'start_byte': start_byte,
+                            'end_byte': end_byte,
+                            'line_number': line_number,
+                            'context': decoded.strip()[:2000],
+                        }
+                        if page_number is not None:
+                            anchor.update({'page_number': page_number,
+                                           'page_offset_start_byte': page_offset,
+                                           'page_offset_end_byte': page_offset + end_byte - start_byte})
+                        anchors.append(anchor)
+                    candidates.append({
+                        'id': f'exclusion-flow-{len(candidates) + 1:04d}',
+                        'type': 'EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH',
+                        'status': 'CANDIDATE_ANOMALY',
+                        'source_total_exact': str(total),
+                        'excluded_values_exact': [str(value) for value in exclusion_values],
+                        'reported_included_exact': str(included),
+                        'expected_included_exact': str(expected),
+                        'difference_exact': str(included - expected),
+                        'source_anchors': anchors,
+                        'interpretation': (
+                            'The stated starting count minus the listed exclusions does not equal the stated included count.'
+                        ),
+                        'required_review': (
+                            'Check whether exclusion categories are mutually exclusive and exhaustive, whether the counts '
+                            'use the same cohort and timepoint, and whether the paper reports an additional flow step.'
+                        ),
+                    })
+            else:
+                incomplete = True
+            if line_limit or line_number >= MAX_SCAN_LINES:
+                line_limit = True
+                break
+            line_start = len(text_bytes) if newline < 0 else newline + 1
+            line_number += 1
+        return {
+            'discoverer': self.name,
+            'candidate_anomalies': candidates,
+            'scan_complete': not line_limit and not incomplete,
+            'limitations': (
+                (['A configured explicit-flow scan limit was reached; flow scanning may be incomplete.'] if line_limit else [])
+                + (['One or more lines exceeded the configured scan limit and were skipped.'] if incomplete else [])
+            ),
+        }
+
+
 def capabilities() -> list[dict[str, Any]]:
-    """Describe the supported paper-screening mechanism without implying proof coverage."""
-    return [{
-        'kind': 'explicit_count_marker_conflict_screen',
-        'role': 'candidate_discovery_only',
-        'formats': ['UTF-8 .txt', 'UTF-8 .md', 'UTF-8 .markdown', 'born-digital .pdf with optional pypdf'],
-        'patterns': ['n = integer', 'N = integer'],
-        'limits': (
-            '32 MiB source; PDF 500 pages, 16 MiB extracted text and 512 KiB/page; '
-            '512 count markers; 1,000,000 lines; 64 KiB per scanned line; 512 Markdown headings.'
-        ),
-        'output_schema': 'schemas/paper-audit.schema.json',
-        'example_input': 'examples/paper-audit/paper.md',
-        'example_command': (
-            'python -m researchwitness paper-audit examples/paper-audit/paper.md '
-            '--output work/paper-audit'
-        ),
-        'does_not_prove': (
-            'That conflicting values refer to the same cohort or scope, that any candidate is an error, '
-            'or that a no-candidate scan establishes paper correctness. Tables, citations, equations, '
-            'statistics, methods, code, figures, conclusions, and corrections are not checked.'
-        ),
-    }]
+    """List bounded paper checks and keep their interpretation limits explicit."""
+    common_formats = ['UTF-8 .txt', 'UTF-8 .md', 'UTF-8 .markdown', 'born-digital .pdf with optional pypdf']
+    return [
+        {
+            'kind': 'explicit_count_marker_conflict_screen',
+            'role': 'candidate_discovery_only',
+            'formats': common_formats,
+            'patterns': ['n = integer', 'N = integer'],
+            'limits': (
+                '32 MiB source; PDF 500 pages, 16 MiB extracted text and 512 KiB/page; '
+                'PDF worker 20-second wall timeout, 15-second CPU and 768 MiB address-space limits where supported; '
+                '512 count markers; 128 scope differences; 1,000,000 lines; 64 KiB per scanned line; 512 Markdown headings.'
+            ),
+            'output_schema': 'schemas/paper-audit.schema.json',
+            'example_input': 'examples/paper-audit/paper.md',
+            'example_command': 'python -m researchwitness paper-audit examples/paper-audit/paper.md --output work/paper-audit',
+            'does_not_prove': (
+                'That differing counts refer to the same cohort or scope, that a count candidate is an error, '
+                'or that a no-candidate scan establishes paper correctness. Markdown table count markers '
+                'are recorded but not compared globally.'
+            ),
+        },
+        {
+            'kind': 'markdown_table_percentage_recomputation',
+            'role': 'candidate_discovery_only',
+            'formats': ['UTF-8 .md', 'UTF-8 .markdown'],
+            'patterns': ['count (percentage) in one cell with an explicit n/N header in the same column'],
+            'limits': (
+                'Checks only pipe-table cells with an explicit same-column group denominator; rounding tolerance is '
+                'one half of the last displayed percentage unit; scans at most 100,000 Markdown table cells. Repeated '
+                'compatible smaller denominators are surfaced as scope differences, not arithmetic candidates.'
+            ),
+            'output_schema': 'schemas/paper-audit.schema.json',
+            'does_not_prove': (
+                'That the supplied table extraction preserves the publisher layout, that the denominator is the right '
+                'analysis population when the paper states otherwise, or that any broader research conclusion is wrong.'
+            ),
+        },
+        {
+            'kind': 'explicit_exclusion_flow_arithmetic_screen',
+            'role': 'candidate_discovery_only',
+            'formats': common_formats,
+            'patterns': ['Of the X participants, we excluded A, B, and C. Finally, Y participants were included.'],
+            'limits': (
+                'Screens at most 1,000,000 lines of at most 64 KiB each and at most 64 listed exclusions per match; '
+                'exclusion overlap/exhaustiveness remains unresolved.'
+            ),
+            'output_schema': 'schemas/paper-audit.schema.json',
+            'does_not_prove': 'That exclusion counts are mutually exclusive, exhaustive, or from the same analysis population.',
+        },
+    ]
 
 
 def _html_report(report: dict[str, Any]) -> str:
@@ -324,19 +895,65 @@ def _html_report(report: dict[str, Any]) -> str:
                 escape(anchor['quote']) + '</code></p><blockquote>' +
                 escape(anchor['context']) + '</blockquote></li>'
             )
+        if anomaly['type'] == 'CONFLICTING_EXPLICIT_COUNT_MARKERS':
+            title = f"Different {anomaly['marker']} counts appear in separate passages"
+            summary = 'Values found: ' + ', '.join(anomaly['values_exact']) + '.'
+        elif anomaly['type'] == 'TABLE_PERCENTAGE_ARITHMETIC_MISMATCH':
+            title = 'A table percentage does not match the displayed column denominator'
+            summary = (
+                f"The cell reports {anomaly['reported_percent']}%, while "
+                f"{anomaly['numerator_exact']}/{anomaly['denominator_exact']} is "
+                f"{anomaly['recomputed_percent']}% for {anomaly['scope_label'] or 'this column'}."
+            )
+        elif anomaly['type'] == 'EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH':
+            excluded = ' + '.join(anomaly['excluded_values_exact'])
+            summary = (
+                f"{anomaly['source_total_exact']} minus listed exclusions ({excluded}) is "
+                f"{anomaly['expected_included_exact']}, but the passage says "
+                f"{anomaly['reported_included_exact']} were included."
+            )
+            title = 'The listed sample exclusions do not add up to the included count'
+        else:
+            title = 'A numeric passage needs review'
+            summary = anomaly.get('interpretation', 'A supported screen found a numeric discrepancy candidate.')
         candidates.append(
-            '<article><h3>Different values follow the ' + escape(anomaly['marker']) + '= marker</h3>'
-            '<p>Values found: ' + escape(', '.join(anomaly['values_exact'])) +
-            '. This is a candidate for review; the passages may describe different groups or analyses.</p>'
+            '<article><h3>' + escape(title) + '</h3><p>' + escape(summary) +
+            ' This is a review candidate; the paper may give a different row denominator or an additional flow step.</p>'
             '<ul>' + ''.join(assertions) + '</ul><p>' + escape(anomaly['required_review']) + '</p></article>'
         )
     if candidates:
         candidate_html = ''.join(candidates)
     elif report['discovery']['scan_complete'] and report['extraction']['status'] == 'TEXT_AVAILABLE':
-        candidate_html = '<p>No conflict was found in the supported marker scan.</p>'
+        candidate_html = '<p>No candidate was found by the supported numeric screens.</p>'
     else:
         candidate_html = '<p>No candidate was identified, but extraction or scan coverage was incomplete.</p>'
-    limitations = ''.join('<li>' + escape(item) + '</li>' for item in report['discovery']['limitations'])
+    scope_items = []
+    for item in report['possible_scope_differences']:
+        anchor_items = []
+        for anchor in item['source_anchors']:
+            location = f"line {anchor['line_number']}"
+            if 'page_number' in anchor:
+                location = f"PDF page {anchor['page_number']}, {location}"
+            if 'section' in anchor:
+                location += ' · ' + anchor['section']
+            anchor_items.append(
+                '<li><strong>' + escape(location) + ':</strong> <code>' + escape(anchor['quote'])
+                + '</code> ' + escape(anchor['context']) + '</li>'
+            )
+        anchors = ''.join(anchor_items)
+        if item['type'] == 'POSSIBLE_ROW_SPECIFIC_DENOMINATOR':
+            description = (
+                'Several values in one column fit a smaller denominator, which may reflect missing responses. '
+                + item['interpretation']
+            )
+        else:
+            description = item.get('interpretation', 'Counts may refer to different populations or study stages.')
+        scope_items.append(
+            '<article><h3>Possible difference in population or denominator</h3><p>'
+            + escape(description) + '</p><ul>' + anchors + '</ul><p>'
+            + escape(item['required_review']) + '</p></article>'
+        )
+    limitations = ''.join('<li>' + escape(item) + '</li>' for item in report['unsupported_checks'])
     warnings = ''.join('<li>' + escape(item) + '</li>' for item in report['extraction']['warnings'])
     source = report['source']
     return f'''<!doctype html>
@@ -346,19 +963,21 @@ def _html_report(report: dict[str, Any]) -> str:
 article{{border-top:1px solid #aaa;padding:1rem 0}}blockquote,code{{background:#f2f4f6;padding:.3rem .5rem;overflow-wrap:anywhere}}
 .notice{{border-left:4px solid #b66;padding:.7rem 1rem;background:#fff8ea}}dt{{font-weight:700}}dd{{margin-bottom:.6rem}}</style></head><body>
 <h1>ResearchWitness paper screening report</h1>
-<p>This run searched extracted paper text for explicit <code>n = integer</code> and <code>N = integer</code> markers.</p>
-<p class="notice">A candidate anomaly is a lead for human review. Different values may describe different cohorts, subgroups, timepoints, or analyses. This report does not establish that the paper is wrong or correct.</p>
+<p>This run checked repeated explicit sample counts, selected Markdown table percentages, and one narrowly defined sample-exclusion sentence pattern.</p>
+<p class="notice">A review candidate is a lead for human review. Different values may describe different cohorts, denominators, timepoints, or analyses. This report does not establish that the paper is wrong or correct.</p>
 <dl><dt>Source</dt><dd>{escape(source['identifier'])} · version {escape(source['version'])} · capture status: unverified</dd>
 <dt>Extraction status</dt><dd>{escape(report['extraction']['status'])} · {escape(report['extraction']['extractor'])}</dd>
 <dt>Screening result</dt><dd>{escape(report['decision'])}</dd>
 <dt>Count assertions scanned</dt><dd>{len(report['discovery']['assertions'])}</dd>
-<dt>Candidate anomalies</dt><dd>{len(report['candidate_anomalies'])}</dd></dl>
-<h2>Candidate anomalies</h2>{candidate_html}
+<dt>Review candidates</dt><dd>{len(report['candidate_anomalies'])}</dd>
+<dt>Possible scope or denominator differences</dt><dd>{len(report['possible_scope_differences'])}</dd></dl>
+<h2>Review candidates</h2>{candidate_html}
+<h2>Possible scope or denominator differences</h2>{''.join(scope_items) if scope_items else '<p>None recorded.</p>'}
 <h2>Extraction warnings</h2>{'<ul>' + warnings + '</ul>' if warnings else '<p>None recorded.</p>'}
-<h2>Checks not run</h2><ul>{limitations}</ul>
+<h2>Checks not supported in this run</h2><ul>{limitations}</ul>
 <h2>Integrity and limits</h2><p>Source SHA-256: <code>{escape(source['sha256'])}</code><br>
 Extracted-text SHA-256: <code>{escape(report['extraction']['text_sha256'])}</code></p>
-<p>Source authenticity, PDF text accuracy, claim meaning, subgroup identity, corrections, and the paper's overall correctness were not verified.</p>
+<p>No candidate was promoted to a verified paper error. Source authenticity, claim meaning, subgroup identity, corrections, and the paper's overall correctness were not verified.</p>
 </body></html>'''
 
 
@@ -378,36 +997,67 @@ def run_paper_audit(
     except UnicodeDecodeError as exc:
         raise Invalid('Extracted paper text is not valid UTF-8') from exc
 
+    can_scan = extraction_status in ('TEXT_AVAILABLE', 'PARTIAL_TEXT')
     discoverer: CandidateDiscoverer = ExplicitCountDiscoverer()
-    discovery = discoverer.discover(extracted, page_map, suffix in ('.md', '.markdown'))
-    if extraction_status in (
-        'PARSER_UNAVAILABLE', 'MALFORMED_OR_UNSUPPORTED', 'LIMIT_OR_UNSUPPORTED', 'NO_EXTRACTABLE_TEXT'
-    ):
+    if can_scan:
+        discovery = discoverer.discover(extracted, page_map, suffix in ('.md', '.markdown'))
+        table_screen = TablePercentageDiscoverer().discover(
+            extracted, page_map, suffix in ('.md', '.markdown'),
+        )
+        flow_screen = ExplicitExclusionFlowDiscoverer().discover(extracted, page_map)
+    else:
         discovery = {
-            'discoverer': discoverer.name,
-            'assertions': [],
-            'candidate_anomalies': [],
-            'sections': [],
-            'scan_complete': False,
-            'limitations': discovery['limitations'],
+            'discoverer': discoverer.name, 'assertions': [], 'candidate_anomalies': [],
+            'possible_scope_differences': [], 'table_count_assertions_not_cross_compared': 0,
+            'sections': [], 'scan_complete': False,
+            'limitations': ['No supported text was available for numeric screening.'],
+        }
+        table_screen = {
+            'discoverer': TablePercentageDiscoverer.name, 'findings': [],
+            'possible_scope_differences': [], 'checked_cells': 0, 'cells_scanned': 0,
+            'supported': suffix in ('.md', '.markdown'), 'scan_complete': False,
+            'limitations': ['No supported text was available for table screening.'],
+        }
+        flow_screen = {
+            'discoverer': ExplicitExclusionFlowDiscoverer.name, 'candidate_anomalies': [],
+            'scan_complete': False, 'limitations': ['No supported text was available for flow screening.'],
         }
 
     source_name = 'source.pdf' if suffix == '.pdf' else 'source' + suffix
     source_id = text(identifier or ('local:' + path.name), 2000)
     source_version = text(version or 'unspecified', 100)
-    candidates = discovery['candidate_anomalies']
-    if extraction_status in (
-        'PARSER_UNAVAILABLE', 'MALFORMED_OR_UNSUPPORTED', 'LIMIT_OR_UNSUPPORTED', 'NO_EXTRACTABLE_TEXT'
-    ):
+    table_candidates = table_screen['findings']
+    flow_candidates = flow_screen['candidate_anomalies']
+    candidates = discovery['candidate_anomalies'] + table_candidates + flow_candidates
+    possible_scope_differences = (
+        discovery['possible_scope_differences'] + table_screen.get('possible_scope_differences', [])
+    )
+    scan_complete = (
+        discovery['scan_complete'] and flow_screen['scan_complete']
+        and (not table_screen['supported'] or table_screen['scan_complete'])
+    )
+    if extraction_status in UNAVAILABLE_EXTRACTION_STATUSES:
         decision = 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
-    elif candidates and discovery['scan_complete'] and extraction_status == 'TEXT_AVAILABLE':
+    elif candidates and scan_complete and extraction_status == 'TEXT_AVAILABLE':
         decision = 'CANDIDATES_FOUND'
     elif candidates:
         decision = 'CANDIDATES_FOUND_IN_INCOMPLETE_SCAN'
-    elif discovery['scan_complete'] and extraction_status == 'TEXT_AVAILABLE':
+    elif scan_complete and extraction_status == 'TEXT_AVAILABLE':
         decision = 'NO_CANDIDATES_IN_SUPPORTED_SCAN'
     else:
         decision = 'SCAN_INCOMPLETE_NO_CANDIDATES'
+    checks_attempted = []
+    if can_scan:
+        checks_attempted.extend([discoverer.name, ExplicitExclusionFlowDiscoverer.name])
+        if table_screen['supported']:
+            checks_attempted.append(TablePercentageDiscoverer.name)
+    unsupported_checks = [
+        'The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.',
+        'Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.',
+        'A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.',
+        'The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.',
+        'Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked.',
+    ]
 
     report = {
         'paper_audit_version': PAPER_AUDIT_VERSION,
@@ -440,24 +1090,29 @@ def run_paper_audit(
         'discovery': {
             'provider': 'deterministic_local_heuristic',
             'discoverer': discovery['discoverer'],
-            'scan_complete': discovery['scan_complete'],
+            'scan_complete': scan_complete,
             'assertions': discovery['assertions'],
+            'candidate_anomalies': discovery['candidate_anomalies'],
+            'possible_scope_differences': discovery['possible_scope_differences'],
+            'table_count_assertions_not_cross_compared': discovery['table_count_assertions_not_cross_compared'],
             'limitations': discovery['limitations'],
         },
+        'arithmetic_screens': {
+            'table_percentages': table_screen,
+            'sample_exclusion_flow': flow_screen,
+        },
         'candidate_anomalies': candidates,
-        'checks_attempted': [discoverer.name] if extraction_status in ('TEXT_AVAILABLE', 'PARTIAL_TEXT') else [],
+        'possible_scope_differences': possible_scope_differences,
+        'checks_attempted': checks_attempted,
         'verified_findings': [],
         'unresolved_questions': [item['required_review'] for item in candidates],
-        'unsupported_checks': [
-            'All claim semantics beyond explicit n/N count markers.',
-            'Arithmetic and percentage checks across tables and prose.',
-            'Statistical recomputation, citations, equations, units, methods, code, figures, and corrections.',
-        ],
+        'unsupported_checks': unsupported_checks,
         'known_corrections': {'status': 'NOT_CHECKED'},
         'paper_error_established': False,
         'meaning': (
-            'This is a bounded screening report. The count-marker scan proposes candidates only and may miss errors; '
-            'different n/N values can be correct when they refer to different scopes. No candidate proves a paper error.'
+            'This is a bounded screening report. Numeric candidates require human review and may reflect different '
+            'scopes, denominators, missing data, or extraction structure. No candidate establishes a paper error, '
+            'and no-candidate results do not establish paper correctness.'
         ),
     }
 
@@ -475,5 +1130,7 @@ def run_paper_audit(
         'source_copy': str(output / source_name),
         'extracted_text': str(output / 'extracted-text.txt'),
         'candidate_anomalies': len(candidates),
+        'possible_scope_differences': len(possible_scope_differences),
+        'checks_attempted': checks_attempted,
         'paper_error_established': False,
     }

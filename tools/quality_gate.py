@@ -38,14 +38,209 @@ def scan_core() -> None:
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 roots = {alias.name.split('.')[0] for alias in node.names}
-                if roots & BANNED_IMPORT_ROOTS:
-                    raise RuntimeError(f'banned import in trusted core: {path.name}: {roots & BANNED_IMPORT_ROOTS}')
+                banned = roots & BANNED_IMPORT_ROOTS
+                if path.name == 'paper_audit.py':
+                    banned -= {'subprocess'}
+                if banned:
+                    raise RuntimeError(f'banned import in trusted core: {path.name}: {banned}')
             elif isinstance(node, ast.ImportFrom) and node.module:
                 root = node.module.split('.')[0]
-                if root in BANNED_IMPORT_ROOTS:
+                if root in BANNED_IMPORT_ROOTS and not (path.name == 'paper_audit.py' and root == 'subprocess'):
                     raise RuntimeError(f'banned import in trusted core: {path.name}: {root}')
             elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in BANNED_CALLS:
-                    raise RuntimeError(f'banned dynamic call in trusted core: {path.name}: {node.func.id}')
+                raise RuntimeError(f'banned dynamic call in trusted core: {path.name}: {node.func.id}')
+
+    audit_path = CORE / 'paper_audit.py'
+    audit_tree = ast.parse(audit_path.read_text(encoding='utf-8'), filename=str(audit_path))
+    process_calls = [
+        node for node in ast.walk(audit_tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name)
+        and node.func.value.id == 'subprocess'
+    ]
+    if len(process_calls) != 1 or process_calls[0].func.attr != 'run':
+        raise RuntimeError('paper PDF extraction must use exactly one subprocess.run call')
+    process_call = process_calls[0]
+    keywords = {item.arg: item.value for item in process_call.keywords}
+    if (not isinstance(process_call.args[0], ast.Name) or process_call.args[0].id != 'command'
+            or not isinstance(keywords.get('shell'), ast.Constant) or keywords['shell'].value is not False
+            or not isinstance(keywords.get('check'), ast.Constant) or keywords['check'].value is not False
+            or not isinstance(keywords.get('timeout'), ast.Name)
+            or keywords['timeout'].id != 'MAX_PDF_EXTRACTION_SECONDS'):
+        raise RuntimeError('paper PDF worker process call is missing its fixed argv, shell, or timeout constraints')
+    worker_path = CORE / '_pdf_worker.py'
+    worker_tree = ast.parse(worker_path.read_text(encoding='utf-8'), filename=str(worker_path))
+    worker_imports = set()
+    for node in ast.walk(worker_tree):
+        if isinstance(node, ast.Import):
+            worker_imports.update(alias.name.split('.')[0] for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module:
+            worker_imports.add(node.module.split('.')[0])
+    if worker_imports & (BANNED_IMPORT_ROOTS - {'subprocess'}):
+        raise RuntimeError('PDF worker imports a prohibited network, dynamic-code, or deserialization module')
+    if 'subprocess' in worker_imports:
+        raise RuntimeError('PDF worker must not start another process')
+    worker_calls = [
+        node for node in ast.walk(worker_tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        and node.func.id in BANNED_CALLS
+    ]
+    if worker_calls:
+        raise RuntimeError('PDF worker contains a banned dynamic-code call')
+
+    main_function = next(
+        (node for node in worker_tree.body if isinstance(node, ast.FunctionDef) and node.name == 'main'),
+        None,
+    )
+    if main_function is None:
+        raise RuntimeError('PDF worker is missing its bounded main entry point')
+    limit_calls = [
+        node for node in ast.walk(main_function)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == '_limits'
+    ]
+    pypdf_imports = [
+        node for node in ast.walk(main_function)
+        if (isinstance(node, ast.Import) and any(alias.name == 'pypdf' for alias in node.names))
+        or (isinstance(node, ast.ImportFrom) and node.module == 'pypdf')
+    ]
+    if (len(limit_calls) != 1 or not pypdf_imports
+            or limit_calls[0].lineno >= min(node.lineno for node in pypdf_imports)):
+        raise RuntimeError('PDF resource limits must be applied before importing pypdf')
+    setrlimit_calls = [
+        node for node in ast.walk(worker_tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        and isinstance(node.func.value, ast.Name) and node.func.value.id == 'resource'
+        and node.func.attr == 'setrlimit'
+    ]
+    limited_constants = {
+        argument.attr
+        for call in setrlimit_calls for argument in call.args[:1]
+        if isinstance(argument, ast.Attribute) and isinstance(argument.value, ast.Name)
+        and argument.value.id == 'resource'
+    }
+    if not {'RLIMIT_CPU', 'RLIMIT_AS'} <= limited_constants:
+        raise RuntimeError('PDF worker must configure CPU and address-space resource limits')
+
+
+def check_paper_audit_development_results() -> None:
+    from jsonschema import Draft202012Validator
+    from tools.run_paper_audit_wave import _matches
+
+    validation = ROOT / 'validation/paper-audit-wave-1'
+    manifest = json.loads((validation / 'cases.json').read_text(encoding='utf-8'))
+    summary = json.loads((validation / 'results/summary.json').read_text(encoding='utf-8'))
+    schema = json.loads((ROOT / 'schemas/paper-audit.schema.json').read_text(encoding='utf-8'))
+    validator = Draft202012Validator(schema)
+    case_results = []
+    candidate_items = matched_items = unsupported = detected = 0
+    negative_papers = negative_items = negative_scope_notes = scope_notes = 0
+    extraction_errors = repeatable = arithmetic_candidates = 0
+
+    expected_ids = {case['case_id'] for case in manifest['cases']}
+    result_root = validation / 'results'
+    actual_ids = {path.name for path in result_root.iterdir() if path.is_dir()}
+    if actual_ids != expected_ids:
+        raise RuntimeError('paper-audit development result folders do not match the pinned manifest')
+    if summary.get('holdout', {}).get('status') != 'NOT_RUN':
+        raise RuntimeError('development corpus must not claim a sealed holdout')
+
+    for case in manifest['cases']:
+        case_id = case['case_id']
+        case_dir = result_root / case_id
+        report = json.loads((case_dir / 'report.json').read_text(encoding='utf-8'))
+        evaluation = json.loads((case_dir / 'evaluation.json').read_text(encoding='utf-8'))
+        errors = list(validator.iter_errors(report))
+        if errors:
+            raise RuntimeError(f'{case_id}: archived paper-audit report fails schema validation')
+        if (report['paper_error_established'] is not False or report['verified_findings']
+                or evaluation['run']['verified_finding_count'] != 0):
+            raise RuntimeError(f'{case_id}: archived candidate report crossed the verification boundary')
+        candidates = report['candidate_anomalies']
+        if (evaluation['case_id'] != case_id or evaluation['role'] != case['role']
+                or evaluation['run']['candidate_count'] != len(candidates)
+                or report['source']['sha256'] != evaluation['source']['rendered_markdown_sha256']):
+            raise RuntimeError(f'{case_id}: archived evaluation does not match its report or manifest')
+        if not evaluation['run']['deterministic_report_json'] or not evaluation['run']['deterministic_report_html']:
+            raise RuntimeError(f'{case_id}: archived run did not establish JSON and HTML repeatability')
+
+        candidate_items += len(candidates)
+        arithmetic_candidates += sum(
+            item['type'] in ('TABLE_PERCENTAGE_ARITHMETIC_MISMATCH',
+                             'EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH')
+            for item in candidates
+        )
+        scope_notes += len(report['possible_scope_differences'])
+        negative_scope_notes += int(case['role'] == 'development_negative'
+                                    and bool(report['possible_scope_differences']))
+        extraction_errors += int(report['extraction']['status'] != 'TEXT_AVAILABLE')
+        repeatable += 1
+
+        if case['role'] == 'development_positive':
+            expected = case['expected']
+            if expected['candidate_type'] is None:
+                unsupported += 1
+                if evaluation['outcome'] != 'UNSUPPORTED_EXPECTED' or candidates:
+                    raise RuntimeError(f'{case_id}: unsupported positive outcome does not match the manifest')
+            else:
+                matches = [item for item in candidates if _matches(item, expected)]
+                expected_count = (len(expected['target']['reported_percent'])
+                                  if isinstance(expected['target'].get('reported_percent'), list) else 1)
+                if len(matches) == expected_count:
+                    detected += 1
+                    outcome = 'DETECTED'
+                elif matches:
+                    outcome = 'PARTIALLY_DETECTED'
+                else:
+                    outcome = 'MISSED'
+                if evaluation['outcome'] != outcome:
+                    raise RuntimeError(f'{case_id}: archived positive evaluation no longer matches its report')
+                matched_items += len(matches)
+                if evaluation['matched_candidate_count'] != len(matches):
+                    raise RuntimeError(f'{case_id}: archived matched candidate count is inconsistent')
+            if expected['candidate_type'] is not None:
+                unmatched = len(candidates) - len(matches)
+                if unmatched < 0:
+                    raise RuntimeError(f'{case_id}: positive candidate matching is inconsistent')
+        else:
+            if evaluation['outcome'] != ('FALSE_POSITIVE' if candidates else 'NO_CANDIDATE'):
+                raise RuntimeError(f'{case_id}: negative-control evaluation does not match its report')
+            if candidates:
+                negative_papers += 1
+                negative_items += len(candidates)
+
+        case_results.append(evaluation)
+
+    positives = sum(item['role'] == 'development_positive' for item in case_results)
+    negatives = sum(item['role'] == 'development_negative' for item in case_results)
+    unmatched_items = candidate_items - matched_items
+    metrics = {
+        'positive_cases': positives,
+        'known_issue_rediscovery': detected,
+        'known_issue_rediscovery_rate': detected / positives if positives else None,
+        'unsupported_positive_cases': unsupported,
+        'unsupported_positive_rate': unsupported / positives if positives else None,
+        'supported_positive_cases': positives - unsupported,
+        'candidate_items_with_recomputed_arithmetic': arithmetic_candidates,
+        'reproducible_arithmetic_rate_for_candidate_items': arithmetic_candidates / candidate_items if candidate_items else None,
+        'candidate_items': candidate_items,
+        'matched_candidate_items': matched_items,
+        'unmatched_candidate_items': unmatched_items,
+        'candidate_precision_on_selected_development_set': matched_items / candidate_items if candidate_items else None,
+        'negative_controls': negatives,
+        'negative_control_papers_with_candidates': negative_papers,
+        'false_positive_rate_on_selected_negative_controls': negative_papers / negatives if negatives else None,
+        'false_positive_candidates_per_negative_paper': negative_items / negatives if negatives else None,
+        'possible_scope_difference_notes': scope_notes,
+        'negative_control_papers_with_scope_notes': negative_scope_notes,
+        'scope_note_adjudication': 'NOT_SYSTEMATICALLY_SCORED',
+        'real_source_extraction_errors': extraction_errors,
+        'verified_findings_promoted': 0,
+        'repeatable_papers': repeatable,
+        'repeatability_rate': repeatable / len(case_results) if case_results else None,
+    }
+    if summary.get('metrics') != metrics:
+        raise RuntimeError('paper-audit development summary metrics do not match archived per-case reports')
 
 
 def check_source_checksums() -> None:
@@ -105,6 +300,7 @@ def main() -> int:
                 raise RuntimeError(f'{directory.name}/{schema_name} drift')
     if json.loads((ROOT / 'researchwitness/capability_examples.json').read_text()) != build_capability_examples(ROOT / 'examples'):
         raise RuntimeError('packaged capability example drift')
+    check_paper_audit_development_results()
     stored_screen_review = json.loads((ROOT / 'validation/verifier-wave/screening-15-review.json').read_text())
     fresh_screen_review = review_frozen_screen()
     for key in ('case_count_by_category', 'cases', 'execution', 'sealed_holdout'):
@@ -157,6 +353,8 @@ def main() -> int:
                 raise RuntimeError('wheel missing paper-audit JSON Schema')
             if 'researchwitness/paper_audit.py' not in names:
                 raise RuntimeError('wheel missing paper-audit command module')
+            if 'researchwitness/_pdf_worker.py' not in names:
+                raise RuntimeError('wheel missing isolated PDF extraction worker')
 
         env = temp / 'venv'
         venv.EnvBuilder(with_pip=True, clear=True).create(env)
@@ -175,23 +373,25 @@ def main() -> int:
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)
         if len(capabilities['checkers']) != 10:
             raise RuntimeError('installed capability registry is incomplete')
-        if (len(capabilities['paper_screens']) != 1
-                or capabilities['paper_screens'][0]['role'] != 'candidate_discovery_only'):
+        if (len(capabilities['paper_screens']) != 3
+                or any(item['role'] != 'candidate_discovery_only'
+                       for item in capabilities['paper_screens'])):
             raise RuntimeError('installed paper-screen capability registry is incomplete')
         schema = json.loads(run(str(cli), 'schema', 'intake', cwd=temp).stdout)
         if schema['title'] != 'ResearchWitness agent intake 0.1':
             raise RuntimeError('installed intake schema command failed')
         paper_schema = json.loads(run(str(cli), 'schema', 'paper-audit', cwd=temp).stdout)
-        if paper_schema['title'] != 'ResearchWitness bounded paper-screening report 0.1':
+        if paper_schema['title'] != 'ResearchWitness bounded paper-screening report 0.2':
             raise RuntimeError('installed paper-audit schema command failed')
         paper_result = json.loads(run(
             str(cli), 'paper-audit', str(ROOT / 'examples/paper-audit/paper.md'),
             '--identifier', 'synthetic:paper-audit', '--source-version', 'fixture-v1',
             '--output', str(temp / 'paper-audit'), cwd=temp,
         ).stdout)
-        if (paper_result['decision'] != 'CANDIDATES_FOUND'
+        if (paper_result['decision'] != 'NO_CANDIDATES_IN_SUPPORTED_SCAN'
                 or paper_result['paper_error_established']
-                or paper_result['candidate_anomalies'] != 1):
+                or paper_result['candidate_anomalies'] != 0
+                or paper_result['possible_scope_differences'] < 1):
             raise RuntimeError('installed paper-audit smoke check failed')
         review_result = json.loads(run(
             str(cli), 'validate-review', str(ROOT / 'examples/paper-review-ledger/review.json'), cwd=temp,
@@ -228,6 +428,7 @@ def main() -> int:
             'review_schema_drift': 'PASS',
             'summary_schema_drift': 'PASS',
             'paper_audit_schema_drift': 'PASS',
+            'paper_audit_development_results': 'PASS',
             'capability_examples_drift': 'PASS',
             'frozen_screen_review': 'PASS',
             'compileall': 'PASS',

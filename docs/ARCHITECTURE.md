@@ -8,9 +8,9 @@ paper file (unverified capture)
     v
 paper_audit.py (untrusted ingestion + narrow heuristic)
     |- preserves original bytes + SHA-256
-    |- extracts UTF-8 text / optional born-digital PDF text
+    |- extracts UTF-8 text / optional isolated born-digital PDF text
     |- records page and byte anchors
-    |- proposes conflicting n/N integer markers for review
+    |- screens contextual n/N differences, selected table percentages, and one explicit sample-flow pattern
     v
 screening report (candidate only; no paper-level verdict)
     |
@@ -56,7 +56,9 @@ scoped verification report
 
 The trusted verification path is intentionally small: `strict.py`, `arithmetic.py`, `checkers.py`, `statistics.py`, and `capsule.py`. It has no network access, arbitrary code execution, optimizer, LLM client or paper-code runner. `statistics.py` recomputes bounded exact descriptive summaries from inline exact values or one column extracted from a local CSV/TSV file, and checks declared rounding tolerances. File extraction hashes the source bytes and records selected and missing data records; arbitrary analysis transformations are not applied.
 
-`paper_audit.py` is outside the proof boundary. It preserves a local source file and runs one deterministic heuristic over extracted text: conflicts between explicit lower-case `n` markers and, separately, upper-case `N` markers. It cannot infer that statements have the same population or scope. Optional `pypdf` extraction is performed locally, without OCR; the parser is not an OS sandbox, so only trusted local installations and inputs should be used where hostile-document isolation is required. Page/text limits constrain accepted output but cannot guarantee bounds on all parser-internal work. An incomplete or partial scan cannot return a clean-scan decision.
+`paper_audit.py` is outside the proof boundary. It preserves a local source file, adds local context around explicit lower-case `n` and upper-case `N` markers, recomputes selected count/percentage cells in Markdown pipe tables, and screens one explicit exclusion-flow sentence pattern. Its flags remain candidates. It cannot infer that statements share a population, that a table header is the denominator for every row, or that listed exclusions are disjoint and complete.
+
+Optional `pypdf` extraction runs in a separate worker process with a fixed argument vector, no shell, a wall timeout, a source/page/text cap, and POSIX CPU/address-space limits where supported. This provides process separation and resource controls, not an OS sandbox: the worker has the same user and filesystem permissions, and the limits are not a formally complete denial-of-service defense. Extraction performs no OCR. A partial or unavailable extraction cannot produce a clean-scan decision.
 
 `intake.py` is a convenience layer for agents. Its output is still an explicit bundle that can be inspected and replayed independently.
 

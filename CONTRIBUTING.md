@@ -13,7 +13,7 @@ A new checker must:
 5. reject malformed and unsupported inputs rather than guessing;
 6. include positive, negative, boundary, mutation and resource-limit tests;
 7. include at least one differential or independently formulated test where practical;
-8. avoid network access, subprocess execution and arbitrary source-code execution in the trusted core.
+8. avoid network access, subprocess execution and arbitrary source-code execution in the trusted verifier core. The untrusted paper-ingestion front end may use only the reviewed PDF worker pattern: fixed argument vector, no shell, bounded input/output, resource limits where supported, and a timeout.
 
 Do not add a checker whose positive output depends only on an LLM judgment or on an unchecked numerical solver objective.
 

@@ -1,0 +1,38 @@
+{
+  "record_version": "1",
+  "captured_on": "2026-10-06",
+  "purpose": "Exact repository and engineering baseline before paper-audit wave-1 detector changes.",
+  "repository": {
+    "branch": "work",
+    "head": "b66b4bfb7b9da3e7246f0b827315bf3287a09f28",
+    "subject": "Add bounded paper screening and review validation",
+    "worktree_clean": true,
+    "remote": "https://github.com/Smkzz/ResearchWitness.git"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "environment_path": "/tmp/rw-dev-venv"
+  },
+  "engineering_baseline": {
+    "pytest": {"passed": 348, "failed": 0},
+    "synthetic_conformance": {"matched": 500, "total": 500},
+    "historical_mvp_fixture_runs": {"matched": 3, "total": 3},
+    "quality_gate": "PASS",
+    "reproducible_wheel_sha256": "8a20100908d379581872a3acb15bc8e111f88e2d9b08d9a6e331a284b3045f47"
+  },
+  "paper_audit_baseline": {
+    "synthetic_input": "examples/paper-audit/paper.md",
+    "decision": "CANDIDATES_FOUND",
+    "candidate_anomalies": 1,
+    "values": ["18", "20"],
+    "interpretation": "Recruitment and post-exclusion counts have different study stages and may both be correct.",
+    "supported_checks": ["explicit_count_marker_scan"],
+    "real_paper_development_corpus": false
+  },
+  "github_baseline_commit_verified": false,
+  "limitations": [
+    "The engineering baseline is from the exact local commit and clean starting worktree.",
+    "No real-paper discovery precision or recall had been measured.",
+    "The GitHub copy of the starting SHA was not confirmed before development began."
+  ]
+}

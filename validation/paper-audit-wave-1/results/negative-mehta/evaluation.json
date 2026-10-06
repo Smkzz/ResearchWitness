@@ -1,0 +1,39 @@
+{
+  "case_id": "negative-mehta",
+  "role": "development_negative",
+  "source": {
+    "pmcid": "PMC11148689",
+    "doi": "10.1001/jamanetworkopen.2024.13515",
+    "snapshot_sha256": "30f8758cf988689376d8d7175ee1ee688408e386dd7d03db83b90dc91c570ab4",
+    "rendered_markdown_sha256": "864dc7b34e7a99d29dc90519a4160e47f8e7e02046c046061a455961d81356c6",
+    "source_version": "PMC11148689 XML captured 2026-10-05; jats-markdown-v1"
+  },
+  "run": {
+    "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+    "extraction_status": "TEXT_AVAILABLE",
+    "checks_attempted": [
+      "explicit_count_marker_scan",
+      "explicit_exclusion_flow_arithmetic_screen",
+      "markdown_table_percentage_recomputation"
+    ],
+    "count_assertions": 3,
+    "candidate_count": 0,
+    "candidate_types": [],
+    "possible_scope_difference_count": 0,
+    "verified_finding_count": 0,
+    "unsupported_checks": [
+      "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+      "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+      "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+      "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+      "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+    ],
+    "runtime_seconds": 0.064,
+    "deterministic_report_json": true,
+    "deterministic_report_html": true
+  },
+  "known_scope_traps": [
+    "251 randomized (101+100+50) differs from the 246-person analysis-arm counts (100+97+49); later outcomes use different analysis populations."
+  ],
+  "outcome": "NO_CANDIDATE"
+}
