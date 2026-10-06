@@ -56,7 +56,7 @@ REVIEW = {
     ),
     'backward-heat-2023': (
         'UNSUPPORTED',
-        'PDE solution operators, norms, integrals, asymptotics, and quantification over frequencies are not checked.',
+        'The official SIAM erratum supports the screen summary: its oscillatory example keeps the initial L1 norm fixed while an L2 heat-solution bound decays at fixed positive time, and it replaces the invalid L1 stability result with weaker H-2 results. This PDE argument is not checked by the product.',
     ),
     'monophonic-rank-2024': (
         'UNSUPPORTED',

@@ -1,6 +1,6 @@
 {
   "title": "ResearchWitness frozen 15-case representability review",
-  "reviewed_at_utc": "2026-10-04T23:34:37+00:00",
+  "reviewed_at_utc": "2026-10-06T21:50:31+00:00",
   "candidate_version": "0.3.0.dev0",
   "assessment_type": "CAPABILITY_REPRESENTABILITY_REVIEW_PLUS_AVAILABLE_FIXTURE_REPLAYS",
   "frozen_corpus": {
@@ -105,7 +105,7 @@
       "id": "backward-heat-2023",
       "baseline_label": "UNSUPPORTED",
       "review_category": "UNSUPPORTED",
-      "review_reason": "PDE solution operators, norms, integrals, asymptotics, and quantification over frequencies are not checked.",
+      "review_reason": "The official SIAM erratum supports the screen summary: its oscillatory example keeps the initial L1 norm fixed while an L2 heat-solution bound decays at fixed positive time, and it replaces the invalid L1 stability result with weaker H-2 results. This PDE argument is not checked by the product.",
       "executable_fixtures": [],
       "execution_status": "NO_COMMITTED_FIXTURE"
     },
