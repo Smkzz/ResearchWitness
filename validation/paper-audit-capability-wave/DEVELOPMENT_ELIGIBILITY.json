@@ -1,0 +1,246 @@
+{
+  "record_version": "1",
+  "title": "Pre-replay correction-target eligibility classification",
+  "created_date": "2026-10-06",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "classification_timing": "Eligibility was assigned against the current detector contracts and exact source/correction descriptions before the current-code corpus replay.",
+  "bindings": {
+    "wave1_manifest_sha256": "f626061019cafddb25164abe647fa127f3843ef8f1187bbbbf94398a8c19134d",
+    "wave2_source_manifest_sha256": "82348830bef8cf11523505b3922679e2cfbde9f7659266e043e55c2439ae963c",
+    "wave2_output_lock_sha256": "78752f228a87a324b1d1f9f3ce234ee2d86b7c2f4b6cec04906dbb0c38dc5788",
+    "wave2_ground_truth_sha256": "940398d3341998aba538a56dcbcd16ae6f8d49e45ea0d20e0695a09bd97a5de8"
+  },
+  "classification_counts": {
+    "correction_issues_total": 16,
+    "supported_by_current_contract": 1,
+    "unsupported_by_current_contract": 15
+  },
+  "limitations": [
+    "The source and correction records were visible during prior development and adjudication; this is not an independent or blinded evaluation.",
+    "Eligibility is a case-level mechanism classification. Each selected case may contain more than one corrected cell.",
+    "The classification does not establish scientific consequence, clinical importance, or effect on a paper conclusion.",
+    "The wave-2 correction corpus was originally judged post-lock; this reclassification is a later development assessment."
+  ],
+  "cases": [
+    {
+      "case_id": "positive-j-einstein",
+      "corpus": "wave1_correction_development",
+      "issue_class": "Table 3 reports 2 cases among 71 as 2.9%; the correction says this should be 2.8%. The nearby 1/78 = 1.4% result is retained because it uses a different definition and denominator.",
+      "source_format": "jats_xml",
+      "source_file": "PMC4339301.xml",
+      "source_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 1,
+      "basis": "The target denominator 71 appears in a body subgroup row; current JATS table contract only resolves explicit column-header denominators."
+    },
+    {
+      "case_id": "positive-spittal",
+      "corpus": "wave1_correction_development",
+      "issue_class": "The correction says all Table 2 rates were displayed at half their corrected values due to an annualization error; doctor rate 14.5 is corrected to 29.0 per 1,000 practitioner-years.",
+      "source_format": "jats_xml",
+      "source_file": "PMC5134271.xml",
+      "source_sha256": "c4a686c2fac31d7be83af4c17ed1de5e413e7faca18541f0503d247c5c03b149",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "two_by_two_effect_size_recomputation",
+      "target_cells": 1,
+      "basis": "The correction changes an adjusted annualized rate; numerator, person-time construction, and fitted adjustment are not independently recomputable from explicit operands."
+    },
+    {
+      "case_id": "positive-depressive-flow",
+      "corpus": "wave1_correction_development",
+      "issue_class": "The Results section lists 17,708 at baseline, exclusions 1,841, 2,789, 1,878, and 140, then 12,417 included. The correction says 1,841 should be 484; with that change, the flow arithmetic matches 12,417.",
+      "source_format": "jats_xml",
+      "source_file": "PMC6902756.xml",
+      "source_sha256": "e2ee9fa85dbfd8b4b5b0e9f85d1b81138ec2442fb62949b3e676f31636e3038f",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "explicit_sample_flow_arithmetic",
+      "target_cells": 1,
+      "basis": "The source has a prose-shaped flow, but no source-mapped flow graph establishes disjointness, exhaustiveness, and same-scope operands; the active locator only returns an unresolved question."
+    },
+    {
+      "case_id": "positive-vitiligo-percent",
+      "corpus": "wave1_correction_development",
+      "issue_class": "Table 2 reports 23/30 as 73.3% for Group 1 and 70% for Group 2; the correction states both values should be 76.7%.",
+      "source_format": "jats_xml",
+      "source_file": "PMC11845954.xml",
+      "source_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+      "eligibility": "SUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 2,
+      "target_cell_assertions": [
+        {
+          "table_id": "jocd16714-tbl-0002",
+          "row_identity": "≥ 75% repigmentation",
+          "numerator_exact": "23",
+          "denominator_exact": "30",
+          "reported_percent": "73.3"
+        },
+        {
+          "table_id": "jocd16714-tbl-0002",
+          "row_identity": "≥ 75% repigmentation",
+          "numerator_exact": "23",
+          "denominator_exact": "30",
+          "reported_percent": "70"
+        }
+      ],
+      "basis": "JATS Table 2 has two count/percentage cells with explicit per-group n=30 headers; the displayed precision and denominator scope are explicit, and no row footnote, missing-data, weighted, adjusted, or overlap cue modifies these operands."
+    },
+    {
+      "case_id": "issue-001",
+      "paper_id": "paper-001",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "table percentage transcription errors",
+      "source_format": "jats_xml",
+      "source_file": "paper-001.xml",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 2,
+      "basis": "The original values use numerator/denominator/percentage syntax (11/233 (1.8%)); that cell syntax is not in the active count (percentage) table contract."
+    },
+    {
+      "case_id": "issue-002",
+      "paper_id": "paper-004",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "table percentage transcription error with row-specific denominator",
+      "source_format": "jats_xml",
+      "source_file": "paper-004.xml",
+      "source_sha256": "23cff00ff2edb855bcf0d29b240e393af653445d2c569c0bc865729df90dcf0f",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 1,
+      "basis": "The corrected percentage depends on a footnote-specific local denominator; footnoted row scope is excluded."
+    },
+    {
+      "case_id": "issue-003",
+      "paper_id": "paper-006",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "table percentage transcription error",
+      "source_format": "jats_xml",
+      "source_file": "paper-006.xml",
+      "source_sha256": "dd9811080719430faaa86cce134d348d377fe668ca5ec510e217f7d673f66263",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 1,
+      "basis": "The Male row has a footnote stating sex data were unknown for 3 cases; row-label footnote scope is excluded by the current contract."
+    },
+    {
+      "case_id": "issue-004",
+      "paper_id": "paper-008",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "corrected textual toxicity percentages",
+      "source_format": "jats_xml",
+      "source_file": "paper-008.xml",
+      "source_sha256": "cbcec59d2218d6ad2d383b88dc673b84bf5fc6ad9f11e80cfbec6a0605eb9c1d",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "explicit_count_marker_scan",
+      "target_cells": 2,
+      "basis": "The correction changes narrative percentages without explicit numerator/denominator operands; a count-marker conflict cannot map the correction."
+    },
+    {
+      "case_id": "issue-005",
+      "paper_id": "paper-010",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "corrected subgroup percentages",
+      "source_format": "jats_xml",
+      "source_file": "paper-010.xml",
+      "source_sha256": "4d9feaa709e6d1c1e9a71608b1f1a69d15e85822beb387c93e8fdb4c6da679d2",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 3,
+      "basis": "The correction targets percent-only cells and a row-sum relation; row totals/percentage sums are not implemented."
+    },
+    {
+      "case_id": "issue-006",
+      "paper_id": "paper-012",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "corrected synthesis counts and percentages",
+      "source_format": "jats_xml",
+      "source_file": "paper-012.xml",
+      "source_sha256": "b134734b9e9334bd4deeb911ed0fc6236e9a6539d3424d310ed2dd59f31f12d5",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "explicit_sample_flow_arithmetic",
+      "target_cells": 3,
+      "basis": "The correction is a prose/table synthesis-count relationship; PRISMA/synthesis arithmetic and cross-section source mapping are not active."
+    },
+    {
+      "case_id": "issue-007",
+      "paper_id": "paper-014",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "corrected participant demographic and diagnosis counts",
+      "source_format": "jats_xml",
+      "source_file": "paper-014.xml",
+      "source_sha256": "72b6bcf35edf24ec8cf2038f72cb33ab106fb6f876becef64de195c6d6a19c8c",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "explicit_count_marker_scan",
+      "target_cells": 5,
+      "basis": "The correction targets count-only demographic rows and prose/table reconciliation, not a same-cell count/percentage relation."
+    },
+    {
+      "case_id": "issue-008",
+      "paper_id": "paper-016",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "follow-up-window and associated sample-flow/table corrections",
+      "source_format": "jats_xml",
+      "source_file": "paper-016.xml",
+      "source_sha256": "d9ede6f2fe89fc9839fc389295156f029c6c67da5f950c9b1f74212e85aa8a2b",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "explicit_sample_flow_arithmetic",
+      "target_cells": 4,
+      "basis": "The correction changes follow-up-window classification and timepoint-linked ratios; source-mapped flow and rate checks are not active."
+    },
+    {
+      "case_id": "issue-009",
+      "paper_id": "paper-018",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "table count digit omission",
+      "source_format": "jats_xml",
+      "source_file": "paper-018.xml",
+      "source_sha256": "54d68bf0108bf50d0028d886518f9286ee858676b6f2eb2f1b69e372ae05c50f",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 1,
+      "basis": "The correction is a count-only table digit omission with no explicit count/percentage arithmetic relation."
+    },
+    {
+      "case_id": "issue-010",
+      "paper_id": "paper-020",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "missing-data miscoding followed by corrected statistical reanalysis",
+      "source_format": "jats_xml",
+      "source_file": "paper-020.xml",
+      "source_sha256": "04eabe20acdf46771e15e6e6710ce2ec30dc4ed092662a1332568eae22b1776a",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "two_by_two_effect_size_recomputation",
+      "target_cells": 3,
+      "basis": "The correction changes missing-data recoding and adjusted multivariable estimates; a fitted-model recalculation is excluded."
+    },
+    {
+      "case_id": "issue-011",
+      "paper_id": "paper-022",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "participant demographic count correction",
+      "source_format": "jats_xml",
+      "source_file": "paper-022.xml",
+      "source_sha256": "025ebfc1f394545d351f286f1fd293a17cad15719c9941e8a347dfdef3aef0c4",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 2,
+      "basis": "The correction is count-only demographic categories; row/column-total checks are not implemented."
+    },
+    {
+      "case_id": "issue-012",
+      "paper_id": "paper-023",
+      "corpus": "wave2_correction_posthoc_development",
+      "issue_class": "correction of reported exposure rates, event rates, and percentages",
+      "source_format": "jats_xml",
+      "source_file": "paper-023.xml",
+      "source_sha256": "85a7608eadb6f29d780602222a7ec1b3da54ee31520e1564bddfa34815c2738b",
+      "eligibility": "UNSUPPORTED_BY_CURRENT_CONTRACT",
+      "contract_id": "table_percentage_recomputation",
+      "target_cells": 6,
+      "basis": "The correction includes exposure rates, event rates, rate differences, and percent values without one exact count/percentage cell meeting the active table contract."
+    }
+  ]
+}

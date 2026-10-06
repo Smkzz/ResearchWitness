@@ -1,0 +1,394 @@
+{
+  "corpus_version": "paper-audit-wave-1",
+  "paper_audit_version": "0.2",
+  "product_version": "0.4.0.dev0",
+  "corpus_role": "development_only; corrections and labels were visible during detector iteration",
+  "holdout": {
+    "status": "NOT_RUN",
+    "reason": "No independent custodian and shared development workspace; public correction details were used while tuning."
+  },
+  "metrics": {
+    "positive_cases": 4,
+    "known_issue_rediscovery": 3,
+    "known_issue_rediscovery_rate": 0.75,
+    "unsupported_positive_cases": 1,
+    "unsupported_positive_rate": 0.25,
+    "supported_positive_cases": 3,
+    "candidate_items_with_recomputed_arithmetic": 4,
+    "reproducible_arithmetic_rate_for_candidate_items": 1.0,
+    "candidate_items": 4,
+    "matched_candidate_items": 4,
+    "unmatched_candidate_items": 0,
+    "candidate_precision_on_selected_development_set": 1.0,
+    "negative_controls": 5,
+    "negative_control_papers_with_candidates": 0,
+    "false_positive_rate_on_selected_negative_controls": 0.0,
+    "false_positive_candidates_per_negative_paper": 0.0,
+    "possible_scope_difference_notes": 17,
+    "negative_control_papers_with_scope_notes": 4,
+    "scope_note_adjudication": "NOT_SYSTEMATICALLY_SCORED",
+    "real_source_extraction_errors": 0,
+    "verified_findings_promoted": 0,
+    "repeatable_papers": 9,
+    "repeatability_rate": 1.0
+  },
+  "cases": [
+    {
+      "case_id": "positive-j-einstein",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC4339301",
+        "doi": "10.1186/s12959-015-0035-3",
+        "snapshot_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+        "rendered_markdown_sha256": "6c2d2e99befb652aba34417b3b5f16d92321f722b1e0c6f6c22d075380940415",
+        "source_version": "PMC4339301 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "CANDIDATES_FOUND",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 27,
+        "candidate_count": 1,
+        "candidate_types": [
+          "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+        ],
+        "possible_scope_difference_count": 1,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.063,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "expected_issue": "Table 3 reports 2 cases among 71 as 2.9%; the correction says this should be 2.8%. The nearby 1/78 = 1.4% result is retained because it uses a different definition and denominator.",
+      "expected_candidate_count": 1,
+      "outcome": "DETECTED",
+      "matched_candidate_count": 1
+    },
+    {
+      "case_id": "positive-spittal",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC5134271",
+        "doi": "10.1186/s12916-016-0748-6",
+        "snapshot_sha256": "c4a686c2fac31d7be83af4c17ed1de5e413e7faca18541f0503d247c5c03b149",
+        "rendered_markdown_sha256": "947c0426b3a81a26dc033a9dd370965a27f4b271d51297f1730b83ea53bd4352",
+        "source_version": "PMC5134271 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 2,
+        "candidate_count": 0,
+        "candidate_types": [],
+        "possible_scope_difference_count": 0,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.065,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "expected_issue": "The correction says all Table 2 rates were displayed at half their corrected values due to an annualization error; doctor rate 14.5 is corrected to 29.0 per 1,000 practitioner-years.",
+      "outcome": "UNSUPPORTED_EXPECTED",
+      "matched_candidate_count": 0
+    },
+    {
+      "case_id": "positive-depressive-flow",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC6902756",
+        "doi": "10.1001/jamanetworkopen.2019.16591",
+        "snapshot_sha256": "e2ee9fa85dbfd8b4b5b0e9f85d1b81138ec2442fb62949b3e676f31636e3038f",
+        "rendered_markdown_sha256": "66f53a1df3c3844dba487b7c94646f51177208c663a2bf4d0836000b69622a1a",
+        "source_version": "PMC6902756 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "CANDIDATES_FOUND",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 3,
+        "candidate_count": 1,
+        "candidate_types": [
+          "EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH"
+        ],
+        "possible_scope_difference_count": 0,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.063,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "expected_issue": "The Results section lists 17,708 at baseline, exclusions 1,841, 2,789, 1,878, and 140, then 12,417 included. The correction says 1,841 should be 484; with that change, the flow arithmetic matches 12,417.",
+      "expected_candidate_count": 1,
+      "outcome": "DETECTED",
+      "matched_candidate_count": 1
+    },
+    {
+      "case_id": "positive-vitiligo-percent",
+      "role": "development_positive",
+      "source": {
+        "pmcid": "PMC11845954",
+        "doi": "10.1111/jocd.16714",
+        "snapshot_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+        "rendered_markdown_sha256": "56b8e50228abb0c0c980000ca47f2b2e8f7b5bace24348c22a4cefb8e4b539cd",
+        "source_version": "PMC11845954 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "CANDIDATES_FOUND",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 4,
+        "candidate_count": 2,
+        "candidate_types": [
+          "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+          "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+        ],
+        "possible_scope_difference_count": 0,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.079,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "expected_issue": "Table 2 reports 23/30 as 73.3% for Group 1 and 70% for Group 2; the correction states both values should be 76.7%.",
+      "expected_candidate_count": 2,
+      "outcome": "DETECTED",
+      "matched_candidate_count": 2
+    },
+    {
+      "case_id": "negative-mehta",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC11148689",
+        "doi": "10.1001/jamanetworkopen.2024.13515",
+        "snapshot_sha256": "30f8758cf988689376d8d7175ee1ee688408e386dd7d03db83b90dc91c570ab4",
+        "rendered_markdown_sha256": "864dc7b34e7a99d29dc90519a4160e47f8e7e02046c046061a455961d81356c6",
+        "source_version": "PMC11148689 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 3,
+        "candidate_count": 0,
+        "candidate_types": [],
+        "possible_scope_difference_count": 0,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.064,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "known_scope_traps": [
+        "251 randomized (101+100+50) differs from the 246-person analysis-arm counts (100+97+49); later outcomes use different analysis populations."
+      ],
+      "outcome": "NO_CANDIDATE"
+    },
+    {
+      "case_id": "negative-knitza",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC9130452",
+        "doi": "10.1186/s13075-022-02809-7",
+        "snapshot_sha256": "cc0abdc1786f485ed363b36310713936ccbb47b82489ade53f8b2b7af8bbbdf6",
+        "rendered_markdown_sha256": "6e46a63e68778cd510fa291b90b43e0d4c68a8038248bbe31720aaf28c9308a8",
+        "source_version": "PMC9130452 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 5,
+        "candidate_count": 0,
+        "candidate_types": [],
+        "possible_scope_difference_count": 1,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.058,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "known_scope_traps": [
+        "67 screened, 50 randomized, 49 paired, and 22 CRP-available participants are distinct populations."
+      ],
+      "outcome": "NO_CANDIDATE"
+    },
+    {
+      "case_id": "negative-brown",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC8032656",
+        "doi": "10.1038/s41598-021-86008-5",
+        "snapshot_sha256": "f53ee4af3922a6301ad8dfada0ceeb2b3d14edcb9bc1d83fee43117fe02554a4",
+        "rendered_markdown_sha256": "dd15c8bdcf48697c874035e034ccc87571e57eec803d72ffcb65cfdb4d8774c3",
+        "source_version": "PMC8032656 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 4,
+        "candidate_count": 0,
+        "candidate_types": [],
+        "possible_scope_difference_count": 1,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.061,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "known_scope_traps": [
+        "39 participants and 209 paired samples are participant and repeated-measure counts."
+      ],
+      "outcome": "NO_CANDIDATE"
+    },
+    {
+      "case_id": "negative-egilsson-daily",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC10337294",
+        "doi": "10.2196/45414",
+        "snapshot_sha256": "3ad153137e965d0addbc246068b671097d8929e45a617621ac74e3ffd040c0cd",
+        "rendered_markdown_sha256": "30ea5061114a3c91f49c125e80ac19e5bdfadcf675764ed86134833ec07429b1",
+        "source_version": "PMC10337294 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 6,
+        "candidate_count": 0,
+        "candidate_types": [],
+        "possible_scope_difference_count": 1,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.061,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "known_scope_traps": [
+        "661 eligible, 451 consented, and 304 assigned participants are different study stages; arm-specific outcome denominators vary."
+      ],
+      "outcome": "NO_CANDIDATE"
+    },
+    {
+      "case_id": "negative-egilsson-weekly",
+      "role": "development_negative",
+      "source": {
+        "pmcid": "PMC7929738",
+        "doi": "10.2196/21432",
+        "snapshot_sha256": "8769872b9ca4ff9ea07abe6afa1ea60ffdaed669321d6753671d60e11301eb70",
+        "rendered_markdown_sha256": "af0eb7c57014a7ab39a9d7686166e007cd88a620275e3168783a9cc6a671b443",
+        "source_version": "PMC7929738 XML captured 2026-10-05; jats-markdown-v1"
+      },
+      "run": {
+        "decision": "NO_CANDIDATES_IN_SUPPORTED_SCAN",
+        "extraction_status": "TEXT_AVAILABLE",
+        "checks_attempted": [
+          "explicit_count_marker_scan",
+          "explicit_exclusion_flow_arithmetic_screen",
+          "markdown_table_percentage_recomputation"
+        ],
+        "count_assertions": 4,
+        "candidate_count": 0,
+        "candidate_types": [],
+        "possible_scope_difference_count": 13,
+        "verified_finding_count": 0,
+        "unsupported_checks": [
+          "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+          "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+          "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+          "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+          "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+        ],
+        "runtime_seconds": 0.068,
+        "deterministic_report_json": true,
+        "deterministic_report_html": true
+      },
+      "known_scope_traps": [
+        "41 participants split 21/20; baseline percentages use smaller item-response denominators, and weekly activity counts vary by timepoint."
+      ],
+      "outcome": "NO_CANDIDATE"
+    }
+  ]
+}

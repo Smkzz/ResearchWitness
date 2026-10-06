@@ -1,0 +1,4 @@
+Synthetic evidence note
+
+Reported observations: 1, 2, 3
+Recomputed arithmetic mean: (1 + 2 + 3) / 3 = 2

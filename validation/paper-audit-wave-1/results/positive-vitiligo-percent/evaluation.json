@@ -1,0 +1,42 @@
+{
+  "case_id": "positive-vitiligo-percent",
+  "role": "development_positive",
+  "source": {
+    "pmcid": "PMC11845954",
+    "doi": "10.1111/jocd.16714",
+    "snapshot_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+    "rendered_markdown_sha256": "56b8e50228abb0c0c980000ca47f2b2e8f7b5bace24348c22a4cefb8e4b539cd",
+    "source_version": "PMC11845954 XML captured 2026-10-05; jats-markdown-v1"
+  },
+  "run": {
+    "decision": "CANDIDATES_FOUND",
+    "extraction_status": "TEXT_AVAILABLE",
+    "checks_attempted": [
+      "explicit_count_marker_scan",
+      "explicit_exclusion_flow_arithmetic_screen",
+      "markdown_table_percentage_recomputation"
+    ],
+    "count_assertions": 4,
+    "candidate_count": 2,
+    "candidate_types": [
+      "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+      "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+    ],
+    "possible_scope_difference_count": 0,
+    "verified_finding_count": 0,
+    "unsupported_checks": [
+      "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+      "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+      "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+      "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+      "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+    ],
+    "runtime_seconds": 0.079,
+    "deterministic_report_json": true,
+    "deterministic_report_html": true
+  },
+  "expected_issue": "Table 2 reports 23/30 as 73.3% for Group 1 and 70% for Group 2; the correction states both values should be 76.7%.",
+  "expected_candidate_count": 2,
+  "outcome": "DETECTED",
+  "matched_candidate_count": 2
+}

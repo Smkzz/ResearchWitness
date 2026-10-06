@@ -1,0 +1,76 @@
+{
+  "metadata_version": 1,
+  "paper_id": "paper-005",
+  "run_id": "run-2",
+  "source": {
+    "source_kind": "jats_xml",
+    "source_sha256": "4081c871df99da1eb20d6a2503251f85ef82bd54227b3bad99c263e65e583661",
+    "staged_input_sha256": "30125ab997578b8104ed0d2870397088191cff890ad025e9c8a033920466d818",
+    "source_version_token": "source-version-sha256:eae0338df5fd3975759e2ac63ecc3d0b8f342938e9b6600317ab0ec3f8bab12c",
+    "renderer_version": "jats-markdown-v1",
+    "renderer_sha256": "4cc3e37323a8b7b86139a55d72a5c1adf6d0c0c54f624cbf4ee5baaa77870a13"
+  },
+  "frozen_baseline": {
+    "commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+    "tree_sha": "a19c53c2c2e6c400ee8b0d7feb0d0261f0cf009f",
+    "package_version": "0.4.0.dev0",
+    "paper_audit_schema_version": "0.2"
+  },
+  "execution_environment": {
+    "python_version": "3.12.14",
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "pypdf_version": "6.10.0"
+  },
+  "runtime_seconds": 0.056605,
+  "decision": "CANDIDATES_FOUND",
+  "extraction_status": "TEXT_AVAILABLE",
+  "extraction_warnings": [],
+  "checks_attempted": [
+    "explicit_count_marker_scan",
+    "explicit_exclusion_flow_arithmetic_screen",
+    "markdown_table_percentage_recomputation"
+  ],
+  "unsupported_checks": [
+    "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+    "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+    "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+    "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+    "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+  ],
+  "candidate_count": 18,
+  "candidate_types": [
+    "CONFLICTING_EXPLICIT_COUNT_MARKERS",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+  ],
+  "candidate_type_counts": {
+    "CONFLICTING_EXPLICIT_COUNT_MARKERS": 1,
+    "TABLE_PERCENTAGE_ARITHMETIC_MISMATCH": 17
+  },
+  "file_sha256": {
+    "report.json": "17b479cd5f5162b6bad4763965831b1cc5ee9f763d08e23430f058003d47ee46",
+    "report.html": "1cd2f364f10c5348d037aa77c0ded052179a5d5d5a9098c2449f2bf43068fe49"
+  },
+  "repeatability": {
+    "report_json_identical": true,
+    "report_html_identical": true,
+    "decision_identical": true,
+    "candidate_types_identical": true,
+    "repeatable": true
+  }
+}

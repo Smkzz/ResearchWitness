@@ -1,0 +1,202 @@
+{
+  "record_version": 1,
+  "evaluation_wave": "paper-audit-wave-2",
+  "status": "PREDECLARED_BEFORE_PRIMARY_TWO_PASS_RUN",
+  "frozen_baseline_commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+  "frozen_baseline_tree_sha": "a19c53c2c2e6c400ee8b0d7feb0d0261f0cf009f",
+  "scoring_rules_version": "1.0",
+  "purpose": "Specify the post-lock scoring inputs, matching, denominators, and summaries before the primary two-pass wave-2 run; a separate six-source JATS-only feasibility pilot is disclosed below and excluded.",
+  "separation": {
+    "lock_contains_labels": false,
+    "ground_truth_and_adjudication_are_separate_inputs": true,
+    "scorer_reads_labels_only_after_all_locked_output_hashes_verify": true,
+    "all_report_metrics_use_run_id": "run-1",
+    "run_id_for_repeatability_comparison": ["run-1", "run-2"],
+    "aggregate_accuracy_is_not_calculated": true
+  },
+  "pre_lock_format_pilot_deviation": {
+    "status": "EXPLORATORY_DEVIATION_EXCLUDED_FROM_PRIMARY_METRICS",
+    "procedure": "Before the primary raw-output lock, a separate worker screened six opaque JATS captures once after rendering them to Markdown with the frozen renderer and CLI.",
+    "format_comparison": "No same-version PDF captures were available, so no JATS-versus-PDF comparison was performed.",
+    "same_source_hashes_as_primary_manifest": true,
+    "report_results_shared_before_primary_lock": false,
+    "included_in_primary_scoring": false,
+    "implication": "The six papers remain in the primary run but had prior report exposure to the format-evaluation worker; blinding is within-workflow, not independent."
+  },
+  "input_manifest_contract": {
+    "output_lock": {
+      "path": "A tracked, committed validation/paper-audit-wave-2/.../LOCK.json file whose committed bytes equal its working-tree bytes.",
+      "required_fields": {
+        "lock_version": 1,
+        "evaluation_wave": "paper-audit-wave-2",
+        "frozen_baseline_commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+        "frozen_baseline_tree_sha": "a19c53c2c2e6c400ee8b0d7feb0d0261f0cf009f",
+        "source_manifest_path": "repository-relative source-only JSON manifest path",
+        "source_manifest_sha256": "lowercase SHA-256 of exact committed manifest bytes",
+        "runner_path": "tools/run_paper_audit_wave_2_blind.py",
+        "runner_sha256": "lowercase SHA-256 of committed tools/run_paper_audit_wave_2_blind.py bytes",
+        "papers": [
+          {"paper_id": "opaque unique identifier; no role, label, source title, or outcome field"}
+        ],
+        "raw_outputs": [
+          {
+            "path": "repository-relative path to a persisted output; no absolute paths, dot segments, or symlinks",
+            "sha256": "lowercase 64-character SHA-256 of exact file bytes",
+            "kind": "report_json | report_html | run_metadata | source_metadata",
+            "paper_id": "required for report_json, report_html, and run_metadata; absent for source_metadata",
+            "run_id": "run-1 | run-2 for report_json, report_html, and run_metadata; absent for source_metadata"
+          }
+        ]
+      },
+      "exact_top_level_fields": [
+        "lock_version", "evaluation_wave", "status", "frozen_baseline_commit",
+        "frozen_baseline_tree_sha", "package_version", "paper_audit_schema_version",
+        "execution_environment", "renderer_version", "renderer_sha256", "source_manifest",
+        "source_manifest_path", "source_manifest_sha256", "runner", "runner_path",
+        "runner_sha256", "papers", "raw_outputs", "output_root", "raw_output_count",
+        "lock_policy"
+      ],
+      "requirements": [
+        "The lock and every listed raw output must be tracked, committed, and byte-identical to the current HEAD version.",
+        "The source manifest and wave-2 runner are committed and their exact bytes match source_manifest_sha256 and runner_sha256. Exactly one source_metadata record appears in raw_outputs, and it is that source manifest.",
+        "Every persisted report, HTML report, and run/source metadata file must have exactly one raw_outputs entry and its SHA-256 is verified before ground truth or adjudication is opened.",
+        "Each opaque paper_id has exactly one report_json and one report_html for each of run-1 and run-2.",
+        "The lock paper_id set must exactly equal both the committed source-only manifest and ground-truth paper_id sets.",
+        "The committed source-only manifest has only top-level renderer and papers fields. Each papers[] entry has only paper_id and source; source has exactly source_kind, snapshot_name, source_url, retrieved_at, sha256, source_version, and license. Its paper_id set matches the lock, and each run_metadata source.source_sha256 agrees with source.sha256.",
+        "Each (paper_id, run_id) has one run_metadata entry with exactly the frozen runner's top-level fields: metadata_version, paper_id, run_id, source, frozen_baseline, execution_environment, runtime_seconds, decision, extraction_status, extraction_warnings, checks_attempted, unsupported_checks, candidate_count, candidate_types, candidate_type_counts, file_sha256, and repeatability. source has exactly source_kind, source_sha256, staged_input_sha256, source_version_token, renderer_version, renderer_sha256; frozen_baseline has exactly commit, tree_sha, package_version, paper_audit_schema_version. source_kind and source_sha256 agree with the source-only manifest. The frozen baseline pins must equal the preregistered commit/tree; repeated-run source and baseline pins must agree; report hashes must equal their raw_outputs entries.",
+        "Each report has paper_audit_version=0.2 and report.source.identifier, report.source.version, and report.source.sha256 equal paper_id, source.source_version_token, and source.staged_input_sha256 from its matching run_metadata."
+      ]
+    },
+    "ground_truth": {
+      "required_fields": {
+        "schema_version": 1,
+        "evaluation_wave": "paper-audit-wave-2",
+        "papers": [
+          {"paper_id": "same opaque identifier as the output lock", "role": "positive | negative"}
+        ],
+        "positive_issues": [
+          {
+            "issue_id": "unique issue identifier",
+            "paper_id": "paper_id whose role is positive",
+            "supportability": "eligible | unsupported_by_frozen_screens",
+            "targets": [
+              {
+                "target_id": "globally unique expected candidate-item identifier",
+                "candidate_type": "exact value required in report candidate type",
+                "operands": {"candidate_report_field": "exact expected JSON value"},
+                "required_anchors": [
+                  {"quote": "case-sensitive source quote; whitespace runs alone are normalized", "section": "optional exact section", "page_number": "optional exact integer"}
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "requirements": [
+        "Every positive paper has at least one issue; negative papers have no positive_issues entry.",
+        "Eligible issues have one or more targets; unsupported_by_frozen_screens issues may have an empty targets array and always count as not rediscovered when targetless. Every declared target has one or more operands and required_anchors.",
+        "An issue is rediscovered only when every expected target item is assigned to a distinct adjudicated candidate item that matches its type, every declared operand, and every required anchor."
+      ]
+    },
+    "adjudication": {
+      "required_fields": {
+        "schema_version": 1,
+        "evaluation_wave": "paper-audit-wave-2",
+        "lock_sha256": "SHA-256 of the exact committed LOCK.json bytes; binds adjudication to the locked run",
+        "candidate_items": [
+          {
+            "paper_id": "opaque identifier",
+            "candidate_id": "id from the run-1 report candidate_anomalies item",
+            "disposition": "matches_known_issue | false_candidate | unresolved | legitimate_nonbenchmark_discrepancy",
+            "target_id": "required only for matches_known_issue; target from ground_truth"
+          }
+        ],
+        "scope_notes": [
+          {
+            "paper_id": "opaque identifier",
+            "scope_note_id": "id from the run-1 report possible_scope_differences item",
+            "classification": "useful | benign | misleading | false"
+          }
+        ]
+      },
+      "requirements": [
+        "Every run-1 candidate item and every run-1 scope note has exactly one adjudication row; missing, duplicate, or extra rows fail scoring.",
+        "A matches_known_issue decision must name a same-paper target and the candidate must match that target under the conservative matcher.",
+        "Candidates without a supported correction-target mapping may be adjudicated false_candidate, unresolved, or legitimate_nonbenchmark_discrepancy. Absence of a known correction is not itself evidence that a candidate is false.",
+        "Adjudication must name the exact output lock hash, so it cannot silently be reused for another locked run.",
+        "Only false_candidate is counted as reviewer-confirmed false. unresolved and legitimate_nonbenchmark_discrepancy remain in the precision denominator but are not false candidates."
+      ]
+    }
+  },
+  "matching": {
+    "candidate_to_target": [
+      "Candidate type must equal candidate_type exactly.",
+      "Each declared operand field must exist on the candidate and its JSON value must equal the expected value exactly; no numeric, case, or punctuation coercion is done.",
+      "Every required anchor must match a distinct candidate source_anchors entry. Quotes are case-sensitive and compared after collapsing runs of whitespace to one ASCII space and trimming. If a required anchor supplies section or page_number, that field must also equal exactly.",
+      "Candidate adjudication must explicitly assign a matching candidate to a target. Each target can be assigned to at most one candidate item."
+    ],
+    "issue_rediscovery": "An issue is rediscovered if and only if each target in that issue has one distinct candidate item adjudicated matches_known_issue and matching that target.",
+    "candidate_precision": "Numerator is run-1 candidate items adjudicated matches_known_issue and passing the target matcher. Denominator is all run-1 candidate items across all papers, including false_candidate, unresolved, and legitimate_nonbenchmark_discrepancy items; each item must be adjudicated."
+  },
+  "metrics": {
+    "positive_issue_rediscovery_all": {
+      "numerator": "positive issues completely rediscovered",
+      "denominator": "all positive issues, including unsupported_by_frozen_screens issues",
+      "confidence_interval": "Wilson score 95% binomial interval"
+    },
+    "positive_issue_rediscovery_eligible": {
+      "numerator": "eligible positive issues completely rediscovered",
+      "denominator": "positive issues with supportability=eligible",
+      "confidence_interval": "Wilson score 95% binomial interval"
+    },
+    "candidate_precision": {
+      "numerator": "adjudicated matches_known_issue candidate items with an exact target match",
+      "denominator": "all adjudicated run-1 candidate items",
+      "confidence_interval": "Wilson score 95% binomial interval"
+    },
+    "negative_papers_with_candidates": {
+      "numerator": "negative papers with one or more run-1 candidates",
+      "denominator": "all negative papers",
+      "confidence_interval": "Wilson score 95% binomial interval"
+    },
+    "false_candidates_per_negative_paper": {
+      "numerator": "run-1 negative-paper candidates adjudicated false_candidate by a reviewer",
+      "denominator": "all negative papers",
+      "confidence_interval": null
+    },
+    "candidate_adjudication": "Count matches_known_issue, false_candidate, unresolved, and legitimate_nonbenchmark_discrepancy separately. Report reviewer-confirmed false candidates per negative paper. Report unresolved count and fraction of all candidate items, plus unresolved negative-candidate count and fraction of negative-paper candidate items.",
+    "scope_notes": {
+      "count": "all run-1 possible_scope_differences items",
+      "notes_per_paper": "scope note count / all papers; a count rate, not a binomial proportion",
+      "papers_with_scope_notes": "papers with at least one scope note / all papers",
+      "classifications": "counts and proportions of all scope notes classified useful, benign, misleading, or false"
+    },
+    "unsupported_positive_issues": {
+      "count": "positive issues with supportability=unsupported_by_frozen_screens",
+      "rate": "unsupported positive issues / all positive issues"
+    },
+    "reported_unsupported_checks": "Count report unsupported_checks strings on run-1; summarize counts only, not text.",
+    "extraction": {
+      "status_counts": "Counts by exact extraction.status across one primary report per paper.",
+      "outcome_buckets": {
+        "success": ["TEXT_AVAILABLE"],
+        "degraded": ["PARTIAL_TEXT"],
+        "unsupported": ["NO_EXTRACTABLE_TEXT", "PARSER_UNAVAILABLE", "MALFORMED_OR_UNSUPPORTED", "LIMIT_OR_UNSUPPORTED"],
+        "failed": ["RESOURCE_LIMIT_OR_TIMEOUT", "WORKER_FAILED", "WORKER_PROTOCOL_ERROR"]
+      },
+      "scan_incomplete": "Report discovery.scan_complete=false separately; it may overlap an extraction outcome bucket."
+    },
+    "repeatability": "For each paper compare exact bytes for run-1 versus run-2 report.json and report.html; report JSON, HTML, and joint identical-paper counts and raw fractions.",
+    "verified_promotion_rate": {
+      "numerator": "run-1 verified_findings item count",
+      "denominator": "all run-1 candidate_anomalies items",
+      "confidence_interval": null
+    },
+    "confidence_interval_policy": "Report raw numerator and denominator for every fraction. Use Wilson 95% intervals only for the four named binomial metrics; if a denominator is zero, estimate and interval are null. Candidate-precision Wilson intervals use candidate items as Bernoulli units and may understate uncertainty when items cluster within papers; negative-paper candidate rate is calculated at paper level. No aggregate accuracy or arbitrary-paper correctness metric is produced."
+  },
+  "cli": {
+    "usage": "python tools/score_paper_audit_wave_2.py --lock validation/paper-audit-wave-2/results/LOCK.json --ground-truth /separate/custody/GROUND_TRUTH.json --adjudication /separate/custody/ADJUDICATION.json [--output scoring-summary.json]",
+    "output": "JSON summary to stdout unless --output names a destination file.",
+    "execution_gate": "Run only after LOCK.json is committed and the authorized evaluator confirms that commit."
+  }
+}

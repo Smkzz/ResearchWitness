@@ -1,0 +1,57 @@
+{
+  "record_version": "1",
+  "title": "Post-hoc review of the remaining paper-020 direct-JATS candidate",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "status": "UNRESOLVED",
+  "source": {
+    "paper_id": "paper-020",
+    "source_file": "paper-020.xml",
+    "source_sha256": "04eabe20acdf46771e15e6e6710ce2ec30dc4ed092662a1332568eae22b1776a",
+    "table_id": "ooz061-T1",
+    "caption": "Table 1. Patient characteristics by response categories (% are among cells, not across rows)"
+  },
+  "candidate": {
+    "type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH",
+    "row_identity": "Employed",
+    "numerator_exact": "262",
+    "denominator_exact": "1327",
+    "reported_percent": "27",
+    "recomputed_percent": "19.74378297",
+    "recomputed_at_display_precision": "20",
+    "difference_percentage_points_approx": "7.26",
+    "anchors": [
+      {
+        "role": "denominator_header",
+        "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/thead[1]/tr[2]/th[1]",
+        "quote": "Yes (n = 1327)"
+      },
+      {
+        "role": "row_identity",
+        "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[32]/td[1]",
+        "quote": "Employed"
+      },
+      {
+        "role": "reported_value",
+        "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[32]/td[3]",
+        "quote": "262 (27%)"
+      }
+    ]
+  },
+  "review": {
+    "arithmetic_reproduces_from_resolved_header": true,
+    "known_correction_relation": "The same article has a correction involving missing-data miscoding and statistical reanalysis, but this exact table cell has not been mapped to a correction target.",
+    "scope_evidence": [
+      "The table caption says percentages are among cells, not across rows.",
+      "The PCP group category block has displayed counts 489, 262, and 476 and percentages 37%, 27%, and 36%; the block counts sum to 1227, below the Yes-column header N=1327.",
+      "Those three percentages do not all reconcile under a common denominator of 1227, so the structural local-denominator guard does not suppress the Employed cell."
+    ],
+    "not_assessed": [
+      "Publisher PDF or supplementary-file fidelity",
+      "Whether the count or percentage is the transcribed value",
+      "Whether a correction or analysis dataset explains this cell",
+      "Scientific or clinical consequence",
+      "Effect on any paper conclusion"
+    ],
+    "disposition": "Keep as an unresolved arithmetic candidate; do not count it as true or false candidate precision and do not characterize the paper as wrong."
+  }
+}

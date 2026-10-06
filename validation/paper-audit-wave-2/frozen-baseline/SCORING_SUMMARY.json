@@ -1,0 +1,311 @@
+{
+  "evaluation_wave": "paper-audit-wave-2",
+  "frozen_baseline_commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+  "metrics": {
+    "candidate_adjudication": {
+      "disposition_counts": {
+        "false_candidate": {
+          "count": 61,
+          "fraction_of_candidate_items": {
+            "denominator": 88,
+            "estimate": 0.693181818,
+            "numerator": 61,
+            "raw_fraction": "61/88"
+          }
+        },
+        "legitimate_nonbenchmark_discrepancy": {
+          "count": 15,
+          "fraction_of_candidate_items": {
+            "denominator": 88,
+            "estimate": 0.170454545,
+            "numerator": 15,
+            "raw_fraction": "15/88"
+          }
+        },
+        "matches_known_issue": {
+          "count": 0,
+          "fraction_of_candidate_items": {
+            "denominator": 88,
+            "estimate": 0.0,
+            "numerator": 0,
+            "raw_fraction": "0/88"
+          }
+        },
+        "unresolved": {
+          "count": 12,
+          "fraction_of_candidate_items": {
+            "denominator": 88,
+            "estimate": 0.136363636,
+            "numerator": 12,
+            "raw_fraction": "12/88"
+          }
+        }
+      },
+      "negative_unresolved_candidates": {
+        "count": 0,
+        "fraction_of_negative_candidate_items": {
+          "denominator": 24,
+          "estimate": 0.0,
+          "numerator": 0,
+          "raw_fraction": "0/24"
+        }
+      },
+      "unresolved_candidates": {
+        "count": 12,
+        "fraction_of_candidate_items": {
+          "denominator": 88,
+          "estimate": 0.136363636,
+          "numerator": 12,
+          "raw_fraction": "12/88"
+        }
+      }
+    },
+    "candidate_precision_by_adjudicated_item": {
+      "denominator": 88,
+      "estimate": 0.0,
+      "numerator": 0,
+      "raw_fraction": "0/88",
+      "wilson_95_ci": {
+        "lower": 0.0,
+        "upper": 0.041827067
+      }
+    },
+    "confidence_interval_notes": {
+      "candidate_precision": "Wilson interval treats candidate items as Bernoulli units; within-paper clustering may make it too narrow.",
+      "negative_paper_candidate_rate": "Wilson interval uses papers as Bernoulli units."
+    },
+    "confirmed_false_candidates_per_negative_paper": {
+      "denominator": 12,
+      "estimate": 1.666666667,
+      "numerator": 20,
+      "raw_fraction": "20/12"
+    },
+    "extraction": {
+      "degraded_or_incomplete_papers": {
+        "denominator": 24,
+        "estimate": 0.0,
+        "numerator": 0,
+        "raw_fraction": "0/24"
+      },
+      "degraded_status_papers": {
+        "denominator": 24,
+        "estimate": 0.0,
+        "numerator": 0,
+        "raw_fraction": "0/24"
+      },
+      "failure_and_scan_incompleteness_may_overlap": true,
+      "failure_papers": {
+        "denominator": 24,
+        "estimate": 0.0,
+        "numerator": 0,
+        "raw_fraction": "0/24"
+      },
+      "outcome_buckets": {
+        "degraded": {
+          "count": 0,
+          "fraction_of_papers": {
+            "denominator": 24,
+            "estimate": 0.0,
+            "numerator": 0,
+            "raw_fraction": "0/24"
+          },
+          "statuses": [
+            "PARTIAL_TEXT"
+          ]
+        },
+        "failed": {
+          "count": 0,
+          "fraction_of_papers": {
+            "denominator": 24,
+            "estimate": 0.0,
+            "numerator": 0,
+            "raw_fraction": "0/24"
+          },
+          "statuses": [
+            "RESOURCE_LIMIT_OR_TIMEOUT",
+            "WORKER_FAILED",
+            "WORKER_PROTOCOL_ERROR"
+          ]
+        },
+        "success": {
+          "count": 24,
+          "fraction_of_papers": {
+            "denominator": 24,
+            "estimate": 1.0,
+            "numerator": 24,
+            "raw_fraction": "24/24"
+          },
+          "statuses": [
+            "TEXT_AVAILABLE"
+          ]
+        },
+        "unsupported": {
+          "count": 0,
+          "fraction_of_papers": {
+            "denominator": 24,
+            "estimate": 0.0,
+            "numerator": 0,
+            "raw_fraction": "0/24"
+          },
+          "statuses": [
+            "LIMIT_OR_UNSUPPORTED",
+            "MALFORMED_OR_UNSUPPORTED",
+            "NO_EXTRACTABLE_TEXT",
+            "PARSER_UNAVAILABLE"
+          ]
+        }
+      },
+      "scan_incomplete_papers": {
+        "denominator": 24,
+        "estimate": 0.0,
+        "numerator": 0,
+        "raw_fraction": "0/24"
+      },
+      "status_counts": {
+        "LIMIT_OR_UNSUPPORTED": 0,
+        "MALFORMED_OR_UNSUPPORTED": 0,
+        "NO_EXTRACTABLE_TEXT": 0,
+        "PARSER_UNAVAILABLE": 0,
+        "PARTIAL_TEXT": 0,
+        "RESOURCE_LIMIT_OR_TIMEOUT": 0,
+        "TEXT_AVAILABLE": 24,
+        "WORKER_FAILED": 0,
+        "WORKER_PROTOCOL_ERROR": 0
+      },
+      "warning_count": 0
+    },
+    "negative_papers_with_candidates": {
+      "denominator": 12,
+      "estimate": 0.416666667,
+      "numerator": 5,
+      "raw_fraction": "5/12",
+      "wilson_95_ci": {
+        "lower": 0.193260314,
+        "upper": 0.680488687
+      }
+    },
+    "positive_issue_rediscovery_all": {
+      "denominator": 12,
+      "estimate": 0.0,
+      "numerator": 0,
+      "raw_fraction": "0/12",
+      "wilson_95_ci": {
+        "lower": 0.0,
+        "upper": 0.242494007
+      }
+    },
+    "positive_issue_rediscovery_detector_eligible": {
+      "denominator": 0,
+      "estimate": null,
+      "numerator": 0,
+      "raw_fraction": "0/0",
+      "wilson_95_ci": null
+    },
+    "repeatability": {
+      "both_reports_identical": {
+        "denominator": 24,
+        "estimate": 1.0,
+        "numerator": 24,
+        "raw_fraction": "24/24"
+      },
+      "html_reports_identical": {
+        "denominator": 24,
+        "estimate": 1.0,
+        "numerator": 24,
+        "raw_fraction": "24/24"
+      },
+      "json_reports_identical": {
+        "denominator": 24,
+        "estimate": 1.0,
+        "numerator": 24,
+        "raw_fraction": "24/24"
+      }
+    },
+    "reported_unsupported_checks": {
+      "count": 120,
+      "papers_with_one_or_more": {
+        "denominator": 24,
+        "estimate": 1.0,
+        "numerator": 24,
+        "raw_fraction": "24/24"
+      }
+    },
+    "scope_notes": {
+      "classifications": {
+        "benign": {
+          "count": 18,
+          "fraction_of_scope_notes": {
+            "denominator": 42,
+            "estimate": 0.428571429,
+            "numerator": 18,
+            "raw_fraction": "18/42"
+          }
+        },
+        "false": {
+          "count": 0,
+          "fraction_of_scope_notes": {
+            "denominator": 42,
+            "estimate": 0.0,
+            "numerator": 0,
+            "raw_fraction": "0/42"
+          }
+        },
+        "misleading": {
+          "count": 0,
+          "fraction_of_scope_notes": {
+            "denominator": 42,
+            "estimate": 0.0,
+            "numerator": 0,
+            "raw_fraction": "0/42"
+          }
+        },
+        "useful": {
+          "count": 24,
+          "fraction_of_scope_notes": {
+            "denominator": 42,
+            "estimate": 0.571428571,
+            "numerator": 24,
+            "raw_fraction": "24/42"
+          }
+        }
+      },
+      "count": 42,
+      "notes_per_paper": {
+        "denominator": 24,
+        "estimate": 1.75,
+        "numerator": 42,
+        "raw_fraction": "42/24"
+      },
+      "papers_with_one_or_more": {
+        "denominator": 24,
+        "estimate": 0.541666667,
+        "numerator": 13,
+        "raw_fraction": "13/24"
+      }
+    },
+    "unsupported_positive_issues": {
+      "count": 12,
+      "fraction_of_positive_issues": {
+        "denominator": 12,
+        "estimate": 1.0,
+        "numerator": 12,
+        "raw_fraction": "12/12"
+      }
+    },
+    "verified_promotion_rate": {
+      "fraction_of_candidate_items": {
+        "denominator": 88,
+        "estimate": 0.0,
+        "numerator": 0,
+        "raw_fraction": "0/88"
+      },
+      "papers_with_promotions": 0,
+      "promoted_findings": 0
+    }
+  },
+  "output_lock_commit": "4659ddd2335595ab77f96949469318f8c50f021b",
+  "output_lock_sha256": "78752f228a87a324b1d1f9f3ce234ee2d86b7c2f4b6cec04906dbb0c38dc5788",
+  "primary_run_id": "run-1",
+  "schema_version": 1,
+  "scoring_rules_version": "1.0"
+}

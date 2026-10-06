@@ -10,11 +10,17 @@ SCHEMA = json.loads((ROOT / 'schemas/case.schema.json').read_text())
 VALIDATOR = Draft202012Validator(SCHEMA, format_checker=FormatChecker())
 INTAKE_SCHEMA = json.loads((ROOT / 'schemas/intake.schema.json').read_text())
 INTAKE_VALIDATOR = Draft202012Validator(INTAKE_SCHEMA, format_checker=FormatChecker())
+REVIEW_SCHEMA = json.loads((ROOT / 'schemas/review.schema.json').read_text())
+SUMMARY_SCHEMA = json.loads((ROOT / 'schemas/summary-check.schema.json').read_text())
+PAPER_AUDIT_SCHEMA = json.loads((ROOT / 'schemas/paper-audit.schema.json').read_text())
 
 
 def test_schema_is_valid():
     Draft202012Validator.check_schema(SCHEMA)
     Draft202012Validator.check_schema(INTAKE_SCHEMA)
+    Draft202012Validator.check_schema(REVIEW_SCHEMA)
+    Draft202012Validator.check_schema(SUMMARY_SCHEMA)
+    Draft202012Validator.check_schema(PAPER_AUDIT_SCHEMA)
 
 
 @pytest.mark.parametrize('name', [

@@ -1,0 +1,3 @@
+Synthetic example paper
+
+The three reported observations are 1, 2, and 3. Their arithmetic mean is 3.

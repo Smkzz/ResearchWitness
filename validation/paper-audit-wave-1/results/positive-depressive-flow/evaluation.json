@@ -1,0 +1,41 @@
+{
+  "case_id": "positive-depressive-flow",
+  "role": "development_positive",
+  "source": {
+    "pmcid": "PMC6902756",
+    "doi": "10.1001/jamanetworkopen.2019.16591",
+    "snapshot_sha256": "e2ee9fa85dbfd8b4b5b0e9f85d1b81138ec2442fb62949b3e676f31636e3038f",
+    "rendered_markdown_sha256": "66f53a1df3c3844dba487b7c94646f51177208c663a2bf4d0836000b69622a1a",
+    "source_version": "PMC6902756 XML captured 2026-10-05; jats-markdown-v1"
+  },
+  "run": {
+    "decision": "CANDIDATES_FOUND",
+    "extraction_status": "TEXT_AVAILABLE",
+    "checks_attempted": [
+      "explicit_count_marker_scan",
+      "explicit_exclusion_flow_arithmetic_screen",
+      "markdown_table_percentage_recomputation"
+    ],
+    "count_assertions": 3,
+    "candidate_count": 1,
+    "candidate_types": [
+      "EXPLICIT_EXCLUSION_FLOW_ARITHMETIC_MISMATCH"
+    ],
+    "possible_scope_difference_count": 0,
+    "verified_finding_count": 0,
+    "unsupported_checks": [
+      "The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.",
+      "Table checks cover only Markdown pipe-table count/percentage cells with an explicit same-column n/N header; row and column totals are not checked.",
+      "A possible smaller denominator may reflect missing data; the report does not infer or authenticate row-level denominators.",
+      "The sample-flow screen recognizes one bounded prose pattern and does not determine whether exclusions overlap or exhaust the cohort.",
+      "Statistical tests, confidence intervals, citations, equations, units, methods, code, figures, and known corrections are not checked."
+    ],
+    "runtime_seconds": 0.063,
+    "deterministic_report_json": true,
+    "deterministic_report_html": true
+  },
+  "expected_issue": "The Results section lists 17,708 at baseline, exclusions 1,841, 2,789, 1,878, and 140, then 12,417 included. The correction says 1,841 should be 484; with that change, the flow arithmetic matches 12,417.",
+  "expected_candidate_count": 1,
+  "outcome": "DETECTED",
+  "matched_candidate_count": 1
+}

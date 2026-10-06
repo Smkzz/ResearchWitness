@@ -3,75 +3,50 @@
 [![CI](https://github.com/Smkzz/ResearchWitness/actions/workflows/ci.yml/badge.svg)](https://github.com/Smkzz/ResearchWitness/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Smkzz/ResearchWitness/actions/workflows/codeql.yml/badge.svg)](https://github.com/Smkzz/ResearchWitness/actions/workflows/codeql.yml)
 
-**Open-source research verification for published scientific papers.**
+**ResearchWitness is being built to help check research papers for things that may not add up.** That long-term goal includes calculations, unsupported claims, internal contradictions, reproducibility problems, and other anomalies worth reviewing, with a reproducible record of what was checked and why.
 
-ResearchWitness is being built around a simple goal: **give it a research paper and have it independently check the work for things that may not add up.**
+The current software is an early step toward that goal. It checks only narrow, declared patterns and does not fact-check arbitrary papers or determine that a whole paper is correct or wrong.
 
-That can include incorrect calculations, claims that are not supported by the presented evidence, contradictions inside the paper, reproducibility problems, and other anomalies worth a closer look. When ResearchWitness finds something, the goal is not just to flag it, but to produce a reproducible trail showing what was checked and why it was flagged.
+**Offline paper screening, evidence-linked reviews, and bounded deterministic claim verification.**
 
-The current software is an early step toward that goal. Today, ResearchWitness can rigorously verify certain narrow, formalized claims after an investigator or research agent has extracted the claim and supplied a possible counterexample. It does **not yet** take an arbitrary paper and fact-check the whole thing automatically.
+ResearchWitness is an open-source Python workbench for limited automated screening and structured human review of research papers. `paper-audit` checks explicit prose count markers, count/percentage pairs in directly parsed JATS tables or guarded Markdown pipe tables, and locates one narrow sample-flow sentence shape for human review. It does not calculate sample-flow arithmetic from prose. Reviewers can also record observations across ten review areas, preserve exact source quotes and supporting evidence, and replay a narrow formalized claim with an allowlisted deterministic verifier when a supported checker exists. The broad review ledger organizes observations; the verifier establishes only the exact bounded result it replays.
 
-That is a current capability limit, not the product goal.
+It is intentionally **not** an AI that declares whole papers wrong. A positive result means only that the supplied witness contradicts the supplied formalization.
 
-**Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
+**Development candidate:** `0.4.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
 
 ## Status
 
-This branch is an **unreleased verifier-wave candidate**, not a public release. The current implementation is the verification core of the larger ResearchWitness idea; end-to-end paper ingestion, automatic claim discovery, and broad anomaly detection are still under development.
+This branch is an **unreleased development candidate**, not a public release. It builds on the verifier-wave integration, whose frozen 15-corrigendum screen remains unchanged. That mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. The post-hoc paper-audit development replay covers 16 correction-backed issues and 17 selected controls: one correction issue meets a current source-mapped contract, and table coverage is incomplete in all 33 replayed papers. These are not sealed-benchmark results. This branch adds source-aware JATS table structure, explicit detector eligibility contracts, stricter rounding and flow boundaries, and pure statistical/cross-section helpers that are not yet mapped to paper sources. Its final development qualification and limits are in [`validation/paper-audit-capability-wave/QUALIFICATION.md`](validation/paper-audit-capability-wave/QUALIFICATION.md).
 
-The frozen 15-corrigendum screen remains unchanged. Its post-wave mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. This is not yet a 15-paper discovery benchmark, and no sealed holdout has been evaluated. Unsupported mathematics fails closed.
-
-For now, use it to verify **explicit formalization/witness pairs**. A verified anomaly is evidence about a specific checked claim; it is not automatically a verdict on an entire paper, an author, or misconduct.
+Use it to verify **explicit formalization/witness pairs**, not to infer that an entire paper, author, or research program is wrong.
 
 See [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-## What we are building
-
-The intended product is easy to explain:
-
-```text
-research paper
-      |
-      v
-ResearchWitness
-  - reads the paper
-  - identifies important checkable claims
-  - looks for calculations, evidence or results that may not add up
-  - independently checks what it can
-  - separates verified findings from unresolved suspicions
-      |
-      v
-reproducible verification report
-```
-
-The aim is not to replace peer review or to label papers as simply "true" or "false". The aim is to make independent checking easier, faster, and reproducible.
-
-## Current MVP loop
-
-Today, the discovery step is still external to the deterministic core:
+## MVP product loop
 
 ```text
 paper / source text
        |
        v
-investigator / research agent
+research agent
   - extracts one atomic claim
-  - searches for a possible counterexample
-  - records assumptions and objections
+  - searches for a witness
+  - records assumptions/objections
        |
        v
-structured intake
+agent intake JSON
        |
        v
 ResearchWitness
-  - prepares an immutable evidence bundle
-  - routes the claim to a deterministic verifier
-  - replays the proposed witness exactly
+  - prepares immutable evidence bundle
+  - routes to deterministic verifier
+  - replays witness exactly
   - hashes source + evidence
   - preserves unresolved objections
        |
        +--> JSON evidence report
-       +--> deterministic ZIP
+       +--> private deterministic ZIP
        +--> static HTML report
        +--> contact readiness: READY_FOR_USER_REVIEW / NOT_READY
        +--> conservative author-inquiry draft (user review required)
@@ -81,11 +56,9 @@ ResearchWitness never sends mail, publishes accusations, infers misconduct, or a
 
 ## Why this split exists
 
-Finding a possible problem and proving that the problem is real are different jobs.
+LLMs and research agents are good at flexible tasks such as reading papers, reconstructing claims, proposing attacks, searching for counterexamples, and noticing inconsistencies. They are not proof certificates.
 
-Flexible research tools can read papers, reconstruct claims, search for counterexamples, and notice inconsistencies. ResearchWitness then treats those proposed findings as untrusted until a smaller deterministic checker can reproduce them.
-
-That separation is important because the useful output is not “a tool says this paper is wrong.” It is a specific, inspectable result such as:
+ResearchWitness therefore treats the agent as an **untrusted investigator** and the checker as a **small deterministic replay layer**. The useful output is not “the AI says this paper is wrong,” but something like:
 
 ```text
 FORMALIZATION_COUNTEREXAMPLE_VERIFIED
@@ -198,9 +171,66 @@ If the quote appears more than once, the agent must provide `quote_offset`. Rese
 
 See [`prompts/AGENT_PROTOCOL.md`](prompts/AGENT_PROTOCOL.md) for the preparation rules.
 
+## Broad paper review
+
+The single-claim `audit` command is for claims that fit one of the deterministic checkers. The `paper-audit` command runs the narrow automatic numeric screens described below. For a wider review, `review-scaffold` creates a multi-area ledger for source/citation integrity, internal consistency, mathematics and logic, statistics, data integrity, methods, code reproducibility, figures/tables, interpretation, and ethics/reporting. Those ten areas organize human review; they are not ten automatic detectors.
+
+### Limited automatic paper screening
+
+`paper-audit` accepts UTF-8 text, Markdown, JATS XML (`.xml` / `.nxml`), and born-digital PDFs with the optional `paper` extra:
+
+```bash
+python -m pip install '.[paper]'
+python -m researchwitness paper-audit paper.pdf \
+  --identifier doi:10.example/paper \
+  --source-version v1 \
+  --output screening/paper
+```
+
+The command preserves the original input and creates JSON and static HTML reports. For JATS, it writes an additional `paper-document.json` source model and reads table structure directly from XML; it retains section paths, table-wrap metadata, header rows, spans, footnotes, xrefs, cell identities, and source hashes. For JATS and Markdown, count/percentage arithmetic runs only when one explicit denominator is applicable to the same cell and no local, footnote, weighting, adjustment, missing-data, overlap, or table-structure ambiguity is detected. Markdown is a guarded legacy adapter, not the canonical representation. Prose sample-flow shapes are surfaced as unresolved questions only; no subtraction candidate is emitted. All arithmetic outputs remain review candidates. A clean result covers only eligible detector contracts. Row/column totals, source-mapped sample-flow arithmetic, PRISMA arithmetic, paper-result effect-size mapping, statistical tests, confidence intervals, citations, equations, units, methods, code, figures, conclusions, and corrections are not active checks, and the source itself is not authenticated.
+
+Text and Markdown are preserved byte-for-byte and must be UTF-8. JATS parsing never fetches external DTDs; it strips a simple external DTD reference and expands known named entities, while rejecting internal DTD/entity declarations and unknown entities. It applies explicit byte, element, nesting, text, table, row, column, span, and cell limits. PDF extraction uses optional `pypdf` (BSD-3-Clause) in a separate worker, performs no OCR, and may be partial or unavailable. PDF prose has a separate extraction status; PDF table structure is unsupported and no PDF table arithmetic runs. The worker has a 20-second wall timeout, a 15-second CPU limit, and a 768 MiB address-space limit where POSIX limits are supported; it is process isolation, not an OS sandbox. The report records page and extracted-text offsets, not precise PDF layout coordinates. Source identity, version, and authenticity remain unverified. See [`schemas/paper-audit.schema.json`](schemas/paper-audit.schema.json) for the report contract and the qualification report for exact current limits.
+
+The [synthetic sample](examples/paper-audit/paper.md) reports `n = 20` at recruitment and `n = 18` after exclusions. The updated screen describes these as a possible study-stage difference instead of an error candidate. Run it to inspect the report:
+
+```bash
+python -m researchwitness paper-audit examples/paper-audit/paper.md \
+  --identifier synthetic:paper-audit --source-version fixture-v1 \
+  --output work/paper-audit
+```
+
+The source-pinned development corpus, scoring definitions, per-paper JSON reports, and exact-hash retrieval/runner tools are in [`validation/paper-audit-wave-1/`](validation/paper-audit-wave-1/). The corpus contains four correction-backed positives and five selected negative controls; it has no sealed holdout and does not establish cross-field performance.
+
+Start from a UTF-8 text capture of the exact paper version:
+
+```bash
+python -m researchwitness review-scaffold \
+  --source-file paper.txt \
+  --identifier doi:10.example/paper \
+  --source-version v1 \
+  --output review/paper
+```
+
+The command copies the source bytes into `review/paper/paper.txt` and creates `review.json` with every review area marked `not_reviewed`. Record methods and limits per area, then add findings with an exact paper quote, location, rationale, and local evidence files. Candidate observations stay unverified. A finding may link to an existing checker bundle with `formalization_replay` or a summary input with `tabular_summary_replay`; validation reruns the linked check and records its precise result, while still setting `paper_error_established` to `false`.
+
+Validate the ledger and optionally render an offline report:
+
+```bash
+python -m researchwitness validate-review review/paper/review.json \
+  --html review/paper/report.html
+```
+
+The review JSON Schema is available at [`schemas/review.schema.json`](schemas/review.schema.json) and through `researchwitness schema review`. `validate-review` checks all ten areas, source quote anchors, local evidence paths and hashes, and any linked formalization or summary replay. For a summary replay, the report also records hashes for the linked summary input and any referenced CSV/TSV file in the finding's evidence map. `all_areas_accounted_for: true` means only that the ledger has no area left unreviewed or unsupported; it does not prove that all errors were found or that no error exists. See [`prompts/PAPER_REVIEW_PROTOCOL.md`](prompts/PAPER_REVIEW_PROTOCOL.md) for the cross-domain review procedure.
+
+The [synthetic arithmetic-discrepancy ledger](examples/paper-review-ledger/) replays a mean mismatch over supplied values and keeps source-to-data alignment unverified:
+
+```bash
+python -m researchwitness validate-review examples/paper-review-ledger/review.json
+```
+
 ## Deterministic verifier plugins
 
-The `0.3.0.dev0` integration candidate allowlists ten checker families. Each registry entry includes the schema version, a concise input contract, exact resource bounds, what a positive witness proves and excludes, and an inline replay example with its source-checkout bundle path:
+The `0.4.0.dev0` integration candidate allowlists ten checker families. Each registry entry includes the schema version, a concise input contract, exact resource bounds, what a positive witness proves and excludes, and an inline replay example with its source-checkout bundle path:
 
 1. **Scalar/radical comparison** — exact rationals plus certified square-root enclosures.
 2. **Polynomial upper-bound witness** — exact rational polynomial evaluation in a bounded domain.
@@ -236,6 +266,14 @@ python -m researchwitness capabilities --json
 ```
 
 returns the current machine-readable capability list. Synthetic examples exercise software behavior; they do not establish new historical-paper coverage.
+
+The capability output also lists an empirical summary check outside the proof-family registry and a separate `paper_screens` section for candidate-generation heuristics. Agents must not present a paper-screen candidate as a verifier result. `check-summary` recomputes count, sum, mean, median, minimum, maximum, and sample/population variance from one numeric column supplied as exact values or read from a local CSV/TSV file (up to 2 MiB and 4,096 records). File inputs select a unique header name or zero-based column index, declare missing-value markers and a reject/drop policy, and produce a source-file hash plus included/missing record numbers in 1-based logical record order. Integers, rational strings, and finite decimals are parsed exactly. The checker processes all rows in order; it does not apply arbitrary filtering, grouping, weighting, or transformations. Inputs also declare the data source and any claimed transformation, which is recorded but not executed. Use an explicit tolerance for rounding (for example, `1/20` for a value rounded to one decimal place). A mismatch is limited to the selected supplied column and reported number; the check cannot authenticate data provenance, establish that the values came from the cited paper, or confirm that the analysis used the same inclusion rules. The [`summary-check` JSON Schema](schemas/summary-check.schema.json) and `researchwitness schema summary-check` describe its input.
+
+```bash
+python -m researchwitness check-summary examples/paper-review-ledger/summary-check.json
+```
+
+The example review links this check as a `tabular_summary_replay`, so the multi-area report reruns the calculation and records its exact result.
 
 ## Real-paper validation
 
@@ -327,13 +365,9 @@ The verifier has no runtime dependencies outside Python's standard library.
 
 ## Current product boundary
 
-The current open-source core starts **after** a paper has been read and a specific claim has been selected for checking. It deliberately does not bundle a paid model provider or API, so the verification layer remains model-agnostic and reproducible.
+The MVP deliberately does **not** bundle an LLM provider or paid API. The intended user is a research agent/harness that can read literature and produce the structured intake. This keeps the OSS core model-agnostic and usable with subscription-based agent workflows.
 
-This is an implementation boundary, not the intended final product boundary.
-
-The direction for ResearchWitness is to move progressively closer to the full workflow: ingest a public research paper, identify claims worth checking, search for anomalies, verify supported findings with reproducible methods, and return a clear report that distinguishes confirmed problems from unresolved questions.
-
-The next steps are broader verifier coverage, stronger paper ingestion and claim extraction, anomaly discovery, and a frozen benchmark on unseen historical corrections. See the public [`roadmap`](docs/ROADMAP.md).
+The next product step is broader verifier coverage and a frozen discovery benchmark on unseen historical corrections—not a larger marketing surface. See the public [`roadmap`](docs/ROADMAP.md).
 
 ## License
 

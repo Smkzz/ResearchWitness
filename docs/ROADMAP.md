@@ -1,46 +1,42 @@
 # Roadmap
 
-ResearchWitness is deliberately growing verifier breadth before growing marketing or automation surface.
+ResearchWitness is growing narrow, reproducible checks before expanding marketing or automation.
 
-## Current local branch — 0.3.0.dev0 integration candidate (unreleased)
+## Current development — paper-audit capability wave (unreleased)
 
-- Agent-prepared structured intake.
-- Deterministic evidence capsules and replay.
-- Ten bounded verifier families: scalar/radical, polynomial, rational-expression, binary UC, finite-field residue, quadratic/quartic residue rule, finite-map fixed point, finite-graph coloring, finite-PMF bounds, and modular linear-system certificates.
-- Machine-readable capability contracts, one replayable synthetic bundle per family, agent-intake JSON Schema, scaffold, and read-only intake validation.
-- Offline HTML / JSON reporting and deterministic evidence export.
-- Historical corrected-paper replay cases.
-- Conservative contact-readiness output; no external actions.
-- No unseen historical-corrigenda holdout has been run; this candidate is not release-qualified.
+- Agent-prepared structured intake and a ten-area human-review ledger.
+- Ten bounded deterministic verifier families for explicitly formalized claims.
+- `paper-audit` has a canonical source-aware `PaperDocument` model and directly parses JATS table grids, preserving header hierarchy, spans, footnotes, xrefs, captions, and source anchors. A guarded Markdown adapter remains available. PDF prose extraction is separate; PDF table arithmetic is unsupported.
+- Each reported detector has a machine-readable eligibility contract. Exact source-mapped checks currently include explicit count-marker discovery and count/percentage recomputation on eligible JATS or Markdown table cells. The prose flow locator emits unresolved questions only. Sample-flow arithmetic, PRISMA arithmetic, 2x2 effect-size calculations, and cross-section comparison are not connected to paper-source extraction.
+- Operand-level flow, 2x2, and strict identity helpers exist for development, with resource and scope limits; they do not count as active paper detectors.
+- Optional PDF text extraction in a separate resource-limited worker. The worker is not a sandbox and performs no OCR.
+- A post-hoc direct-JATS development replay of 33 papers (16 correction-backed issues, 17 selected controls): strict pre-replay eligibility supports 1/16 issues; sensitivity is 1/1 among eligible issues, matching 2/2 target cells. Wave 2 contributes 0/12 eligible issues. The replay emitted one separate unresolved candidate and has incomplete table coverage in 33/33 papers. Selected controls had 0/17 candidate-bearing papers, but they are not certified error-free or matched hard negatives, so this is not a false-positive rate.
+- A separate legacy JATS-to-Markdown replay found three target-mapped items across two correction issues and missed one flow correction; it is a representation comparison and is not combined with direct JATS results.
+- No sealed holdout, independent evaluation custodian, or cross-disciplinary performance estimate. The candidate is not ready for a wave-3 freeze or public release. See the detailed [capability-wave qualification](../validation/paper-audit-capability-wave/QUALIFICATION.md).
 
-## Next validation gate
+## Next implementation and qualification gate
 
-Freeze the verifier code and establish whether the added families improve historical coverage. Keep the 15-case screen immutable and report mechanism-level representability separately from end-to-end rediscovery. Build an independent public-source development corpus and sealed holdout before using discovery recall or false-positive rates as release claims.
+Continue by improving source-mapped eligibility coverage and developing matched hard negatives for the JATS percentage contract. Classify every correction against frozen detector contracts before evaluating detections. Report coverage separately from performance among eligible positives. The 15 wave-2 off-target items remain an independent development adjudication track and cannot be counted as unseen findings.
 
-The remaining gate work is:
+Only after source-to-result mapping for a detector is stable should an independent custodian build a sealed set for it. Include matched negatives with known denominator, stage, subgroup, repeated-measure, weighting, rounding, and missing-data traps. Publish the split protocol and exact source/version hashes before execution. Do not expose correction labels to the detection process.
 
-1. recover or build source-pinned runnable artifacts for the 13 frozen-screen entries without committed fixtures;
-2. create independent development and sealed holdout sets with source/version records and negative controls;
-3. measure useful discovery coverage, unsupported rate, false formalization counterexamples, scope errors, and repeatability;
-4. decide whether the modular verifier wave merits a 0.3.0 research preview.
+After an invalidating bug, document the failed run and create a new evaluation wave instead of silently replacing its results. Report overall correction coverage separately from eligible-positive sensitivity, plus candidate precision, false candidates per paper, unresolved candidates, unsupported cases, incomplete table coverage, extraction failures, source-format strata, and repeatability.
 
-Do not tag or publish `0.3.0` until the exact public commit passes the engineering and scientific gates.
+## Further detector work
 
-## Next empirical milestone
+Use source-grounded development cases to decide whether to add:
 
-Run a frozen **unseen historical-corrigenda discovery benchmark** with independent research agents. The deterministic verifier must remain unchanged during an evaluation wave. Report unsupported cases and source-interpretation failures rather than silently excluding them.
+1. Markdown table row and column totals, with explicit aggregation rules;
+2. extraction-to-contract mapping for bounded flow and synthesis/PRISMA counts;
+3. a source-mapped 2x2 results adapter with explicit reference-group, timepoint, and adjustment semantics;
+4. cross-section numeric assertion extraction with full population/outcome/timepoint identities;
+5. confidence-interval, standard-error, or test-statistic checks only where inputs and test assumptions are fully stated;
+6. better table extraction for publisher PDFs only if reconstruction quality qualifies independently.
 
-Metrics of interest include:
+Every new detector needs exact source anchors, explicit uncertainty and denominator handling, positive and negative controls, boundary tests, and a reproducible evidence artifact. Keep candidates separate from verified arithmetic or formalization results. Statistical or interpretive checks must return insufficient evidence when assumptions are absent.
 
-- known-error rediscovery;
-- false formalization counterexamples;
-- scope/interpretation errors;
-- unsupported-case rate;
-- reproducibility of evidence capsules;
-- cost and agent effort per defensible case.
+## Release boundary
 
-## Later
+Do not describe ResearchWitness as a general paper fact-checker. Do not infer fraud or misconduct, score researchers, publish accusations, or contact authors. No result from `paper-audit` authorizes external action. The existing frozen 15-corrigendum verifier screen remains a separate mechanism-coverage artifact, not a discovery benchmark.
 
-Potential adapters include paper retrieval, code-vs-paper consistency, and proof-assistant/certificate integrations. They should remain outside or below the trust boundary unless their outputs are independently machine-checkable.
-
-Automatic public accusations, researcher scoring, misconduct inference, and automatic author contact are not roadmap goals.
+Consider a public research preview only after the exact public commit passes the engineering gate and an independent holdout demonstrates useful discovery without an unacceptable false-positive rate. No release or publication is part of this development wave.

@@ -1,0 +1,17 @@
+{
+  "adjudication_custody": "separate post-lock file in /tmp; only its SHA-256 is recorded here",
+  "adjudication_sha256": "f8381d8083a65279232fdcdba776963cc59e928947ededda1aa5b83ce6fe1c3c",
+  "baseline_commit": "3042b3d62b8f20cc646b0c121dff376bfdd201cb",
+  "freeze_marker_commit": "38ab157",
+  "ground_truth_custody": "separate file in /tmp; only its SHA-256 is recorded here",
+  "ground_truth_sha256": "940398d3341998aba538a56dcbcd16ae6f8d49e45ea0d20e0695a09bd97a5de8",
+  "preregistration_commit": "10d7603",
+  "raw_output_lock_commit": "4659ddd2335595ab77f96949469318f8c50f021b",
+  "raw_output_lock_sha256": "78752f228a87a324b1d1f9f3ce234ee2d86b7c2f4b6cec04906dbb0c38dc5788",
+  "schema_version": 1,
+  "scorer_sha256": "b0d7cd636f89fc54f3a16492c80b84b508e8f16af4dd43e3c368fede98625712",
+  "scoring_rules_sha256": "b619a2d4e43c0c44794626bf59f48936ed1be1b1eaa591b13c3337caf2ae2af0",
+  "scoring_summary_sha256": "c5a111e04b7bf9c7968bfb1037fdac738d783e6907d5dec7986d72243079ff41",
+  "source_format_comparison_sha256": "cabc5fd0ca6a290ff8591cc780b2db28794f2c49064666a122c344d9aea7379e",
+  "source_manifest_sha256": "82348830bef8cf11523505b3922679e2cfbde9f7659266e043e55c2439ae963c"
+}

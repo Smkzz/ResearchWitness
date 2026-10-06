@@ -393,7 +393,7 @@ def test_export_refuses_overwrite(bundle):
 def test_version_command():
     out = subprocess.run([sys.executable, '-m', 'researchwitness', '--version'], capture_output=True, text=True)
     assert out.returncode == 0
-    assert out.stdout.strip() == 'researchwitness 0.3.0.dev0'
+    assert out.stdout.strip() == 'researchwitness 0.4.0.dev0'
 
 
 def test_invalid_calendar_date_rejected(bundle):
