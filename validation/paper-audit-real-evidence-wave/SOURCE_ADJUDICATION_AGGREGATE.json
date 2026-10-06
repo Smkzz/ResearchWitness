@@ -1,0 +1,121 @@
+{
+  "record_version": "1",
+  "status": "AGGREGATE_ONLY_REAL_EVIDENCE_FOLLOWUP",
+  "evaluation_use": "POST_HOC_DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "artifact_scope": "Aggregate results only. Individual source identifiers, hashes, per-paper reports, and candidate records are kept in a local dossier and omitted here.",
+  "detector_contract_version": "1.1",
+  "source_native_replay": {
+    "source_documents": 33,
+    "correction_issues_considered": 16,
+    "eligible_correction_issues": 2,
+    "unsupported_correction_issues": 14,
+    "eligible_issue_detection": {
+      "numerator": 2,
+      "denominator": 2
+    },
+    "overall_correction_mechanism_coverage": {
+      "numerator": 2,
+      "denominator": 16
+    },
+    "matched_correction_target_cells": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "eligible_issues_by_detector": {
+      "jats_cell_ratio_percentage_recomputation": 1,
+      "table_percentage_recomputation": 1
+    },
+    "candidate_items": 12,
+    "candidate_type_counts": {
+      "JATS_CELL_RATIO_PERCENTAGE_MISMATCH": 9,
+      "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH": 3
+    },
+    "candidate_dispositions_after_source_review": {
+      "MATCHED_KNOWN_CORRECTION": 4,
+      "VERIFIED_INTERNAL_DISCREPANCY": 2,
+      "UNRESOLVED": 6
+    },
+    "candidate_precision": null,
+    "extraction_failures": 0,
+    "reports_with_incomplete_table_or_detector_coverage": 33,
+    "repeatable_json_and_html_reports": 33,
+    "repeatability_denominator": 33
+  },
+  "selected_real_controls": {
+    "source_native_controls": 17,
+    "controls_with_candidates": 0,
+    "candidate_items_on_controls": 0,
+    "qualified_matched_hard_negative_controls": 0,
+    "false_candidate_rate": null,
+    "limitations": [
+      "The selected controls are not certified error-free.",
+      "No eligible matched real-negative denominator was established for the active percentage contracts.",
+      "Zero candidates among these controls is not a real-world false-positive estimate."
+    ]
+  },
+  "historical_candidate_followup": {
+    "locked_items": 15,
+    "archived_source_reproductions": 14,
+    "prior_correction_pointers_without_exact_mechanism_match": 1,
+    "publisher_pdf_confirmed_source_discrepancies": 4,
+    "publisher_pdf_count_conflict_with_scope_unresolved": 1,
+    "replacement_table_values_unchanged_and_mapping_unresolved": 6,
+    "items_without_publisher_visual_confirmation": 3,
+    "current_disposition_counts": {
+      "VERIFIED_INTERNAL_DISCREPANCY": 4,
+      "KNOWN_CORRECTION": 1,
+      "UNRESOLVED": 10
+    },
+    "external_resolution_counts": {
+      "UNRESOLVED": 15
+    },
+    "limitations": [
+      "A source-level internal discrepancy is not a finding that a paper is wrong.",
+      "All 15 items remain unresolved as to supplements, full correction history, later versions, and scientific consequence.",
+      "No author was contacted and no public accusation is made."
+    ]
+  },
+  "cross_family_review": {
+    "sample_flow": {
+      "correction_records_screened": 6,
+      "eligible_positive_records": 0,
+      "qualified_matched_negative_records": 0,
+      "source_native_applicable_objects_skipped_for_unclear_flow_relations": 1
+    },
+    "prisma_synthesis_flow": {
+      "correction_records_screened": 5,
+      "eligible_positive_records": 0,
+      "qualified_matched_negative_records": 0,
+      "potential_flow_objects_skipped_or_not_applicable": 23
+    },
+    "unadjusted_2x2_odds_ratio": {
+      "correction_leads_reviewed": 4,
+      "eligible_positive_records": 0,
+      "qualified_matched_negative_records": 0,
+      "promising_lead_outside_contract_due_to_cross_table_join": 1
+    },
+    "sd_se_n": {
+      "correction_records_screened": 6,
+      "eligible_positive_records": 0,
+      "qualified_matched_negative_records": 0
+    },
+    "limitations": [
+      "Cases were screened against current contracts before considering any detector output.",
+      "No contract was broadened to admit a case that failed its scope requirements.",
+      "Leads and controls without complete source adjudication are not counted as positives or matched negatives."
+    ]
+  },
+  "synthetic_regression": {
+    "hard_negative_scenarios": 66,
+    "candidate_outputs": 0,
+    "independent_papers": 0,
+    "real_world_precision_estimate": null
+  },
+  "wave3_readiness": {
+    "ready_detector_families": 0,
+    "unused_confirmed_eligible_positive_records": 0,
+    "external_case_availability": "UNKNOWN",
+    "wave3_run": false,
+    "decision": "NOT_READY_TO_FREEZE"
+  }
+}

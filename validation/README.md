@@ -3,6 +3,7 @@
 - `screening-15.json` — frozen 15-corrigendum coverage screen created before the MVP verifier expansion.
 - `mvp_real/` — executable end-to-end MVP replay cases for the elliptic-curve and modular fixed-point corrigenda.
 - `verifier-wave/screening-15-review.json` — post-wave mechanism-level representability review plus the three committed historical fixture replays.
+- `verifier-wave/SOURCE_FOLLOWUP.md` — primary-source follow-up for the backward-heat item in the separate frozen screen.
 - `verifier-wave/performance.json` — representative bounded checker timings; not a discovery benchmark.
 - `development-start-2026-10-06.json` — the baseline captured at the start of the review-ledger/statistics/paper-screening continuation. The original worktree was already dirty, so its results do not describe the committed baseline alone.
 - `../tests/test_paper_audit.py` — synthetic software controls for the narrow count-marker scan and optional PDF extraction; these are not a source-pinned paper corpus.

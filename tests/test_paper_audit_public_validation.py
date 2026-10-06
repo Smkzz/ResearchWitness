@@ -1,4 +1,4 @@
-"""Guard the published wave-2 packet against case-level source disclosure."""
+"""Guard public validation packets against case-level source disclosure."""
 from __future__ import annotations
 
 import json
@@ -13,6 +13,7 @@ PUBLIC_JSON = (
     PACKET / 'DEVELOPMENT_ELIGIBILITY_AGGREGATE.json',
     PACKET / 'DEVELOPMENT_REPLAY_SUMMARY.json',
     PACKET / 'HISTORICAL_DISCREPANCY_VALIDATION.json',
+    ROOT / 'validation/paper-audit-real-evidence-wave/SOURCE_ADJUDICATION_AGGREGATE.json',
 )
 CASE_LEVEL_KEYS = {
     'bindings', 'cases', 'candidate_arithmetic', 'case_id', 'paper_id',
@@ -30,7 +31,7 @@ def _keys(value):
             yield from _keys(child)
 
 
-def test_public_wave2_validation_artifacts_contain_aggregate_data_only():
+def test_public_validation_artifacts_contain_aggregate_data_only():
     for path in PUBLIC_JSON:
         raw = path.read_text(encoding='utf-8')
         parsed = json.loads(raw)
@@ -48,4 +49,5 @@ def test_package_checksum_manifest_omits_case_level_source_corpora():
     assert 'validation/paper-audit-wave-1/' not in raw
     assert 'validation/paper-audit-wave-2/' not in raw
     assert 'validation/paper-audit-capability-wave/' not in raw
+    assert 'validation/paper-audit-real-evidence-wave/SOURCE_ADJUDICATION_AGGREGATE.json' in raw
     assert not re.search(r'validation/[^\n]*/paper-\d+/', raw)

@@ -7,12 +7,11 @@ ResearchWitness is growing narrow, reproducible checks before expanding marketin
 - Agent-prepared structured intake and a ten-area human-review ledger.
 - Ten bounded deterministic verifier families for explicitly formalized claims.
 - `paper-audit` has a canonical source-aware `PaperDocument` model and directly parses JATS table grids, preserving header hierarchy, spans, footnotes, xrefs, captions, and source anchors. A guarded Markdown adapter remains available. PDF prose extraction is separate; PDF table arithmetic is unsupported.
-- Each reported detector has a machine-readable eligibility contract. Exact source-mapped checks currently include explicit count-marker discovery and count/percentage recomputation on eligible JATS or Markdown table cells. The prose flow locator emits unresolved questions only. Sample-flow arithmetic, PRISMA arithmetic, 2x2 effect-size calculations, and cross-section comparison are not connected to paper-source extraction.
-- Operand-level flow, 2x2, and strict identity helpers exist for development, with resource and scope limits; they do not count as active paper detectors.
+- Each reported detector has a machine-readable eligibility contract. Source-mapped JATS checks include explicit count-marker discovery, count/percentage recomputation, a narrow single-paragraph sample-flow relation, labelled synthesis/PRISMA arithmetic, a strict unadjusted same-row 2×2 odds ratio, and an experimental same-row SD/SE/n identity. Markdown supports guarded table checks. Cross-section numeric identity remains helper-only; PDF table arithmetic and OCR are unsupported.
 - Optional PDF text extraction in a separate resource-limited worker. The worker is not a sandbox and performs no OCR.
-- A post-hoc direct-JATS development replay of 33 papers (16 correction-backed issues, 17 selected controls): strict pre-replay eligibility supports 1/16 issues; sensitivity is 1/1 among eligible issues, matching 2/2 target cells. Wave 2 contributes 0/12 eligible issues. The replay emitted one separate unresolved candidate and has incomplete table coverage in 33/33 papers. Selected controls had 0/17 candidate-bearing papers, but they are not certified error-free or matched hard negatives, so this is not a false-positive rate.
+- A post-hoc source-native development replay of 33 papers (16 correction-backed issues, 17 selected controls): contract v1.1 eligibility is 2/16 issues; both eligible issues were detected, matching 4/4 target cells. The replay runner reports 8 unmatched candidates; separate source review confirms two internal discrepancies and leaves six unresolved. All 33 reports have some incomplete table or detector coverage. Selected controls had 0/17 candidate-bearing papers, but none is a qualified matched hard negative, so this is not a false-positive rate.
 - A separate legacy JATS-to-Markdown replay found three target-mapped items across two correction issues and missed one flow correction; it is a representation comparison and is not combined with direct JATS results.
-- No sealed holdout, independent evaluation custodian, or cross-disciplinary performance estimate. The candidate is not ready for a wave-3 freeze or public release. See the detailed [capability-wave qualification](../validation/paper-audit-capability-wave/QUALIFICATION.md).
+- No sealed holdout, independent evaluation custodian, or cross-disciplinary performance estimate. No detector family is ready for a Wave 3 freeze or public release. See the [real-evidence qualification](../validation/paper-audit-real-evidence-wave/QUALIFICATION.md) and the earlier [capability-wave qualification](../validation/paper-audit-capability-wave/QUALIFICATION.md).
 
 ## Next implementation and qualification gate
 
@@ -27,8 +26,8 @@ After an invalidating bug, document the failed run and create a new evaluation w
 Use source-grounded development cases to decide whether to add:
 
 1. Markdown table row and column totals, with explicit aggregation rules;
-2. extraction-to-contract mapping for bounded flow and synthesis/PRISMA counts;
-3. a source-mapped 2x2 results adapter with explicit reference-group, timepoint, and adjustment semantics;
+2. broader extraction and matched-control coverage for bounded sample-flow and synthesis/PRISMA contracts;
+3. broader eligible-source coverage for the strict 2×2 contract, preserving explicit reference-group, timepoint, and adjustment semantics;
 4. cross-section numeric assertion extraction with full population/outcome/timepoint identities;
 5. confidence-interval, standard-error, or test-statistic checks only where inputs and test assumptions are fully stated;
 6. better table extraction for publisher PDFs only if reconstruction quality qualifies independently.

@@ -14,6 +14,8 @@ The independent manual red-team report is [`../../docs/ADVERSARIAL_REVIEW_2026-1
 
 [`screening-15-review.json`](screening-15-review.json) preserves the input hash and lists all 15 mechanisms. It reports two fully representable, two mechanism-only, one partial, and ten unsupported. This is a capability-fit review, not a 15-case end-to-end discovery run: only two unique screen entries have runnable source fixtures, producing three historical fixture runs. The older K3 network-reliability and QTT-Tucker statements have no runnable fixture or test in this tree and are not fresh reproductions.
 
+[`SOURCE_FOLLOWUP.md`](SOURCE_FOLLOWUP.md) records a primary-source check of the backward-heat corrigendum. The frozen screen remains unchanged; the source check confirms its short counterexample description while the PDE detector remains unsupported.
+
 No independently curated development corpus or sealed holdout was available. Discovery recall, false-positive rate on new papers, and author-contact false-positive rate remain unmeasured. The candidate is therefore not ready for a public 0.3.0 release.
 
 ## Bounded performance
