@@ -13,3 +13,19 @@ GitHub reported no combined commit statuses and no workflow runs for the baselin
 ## Pre-lock format pilot deviation
 
 Before the primary raw-output lock, a separate format-evaluation worker ran the unchanged frozen CLI once on six opaque JATS captures rendered to Markdown. This was an exploratory renderer/extraction pilot, not a comparison between source formats. No same-version PDF captures were available, so a JATS-versus-PDF comparison could not be made. The pilot output is kept outside the repository under `/tmp`, is excluded from all primary metrics, and was not shared with the custodian or the primary evaluator before lock. All six pilot capture hashes match the final 24-source manifest. Those six papers remain in the primary run, so their reports had prior exposure to that worker; this evaluation is therefore blinded within the workflow, not independently concealed.
+
+## Locked wave-2 result
+
+The unchanged detector's 24-paper, two-pass run is locked at commit
+`4659ddd2335595ab77f96949469318f8c50f021b`. Its exact scoring inputs and
+aggregate metrics are in `EVIDENCE_HASHES.json` and `SCORING_SUMMARY.json`.
+The custodian serialized structured supportability labels and target arrays
+after lock; there was no pre-run artifact or hash. Treat positive issue
+eligibility and sensitivity as exploratory. See `POST_LOCK_FAILURE_ANALYSIS.md`
+for the adjudicated results and failure classes.
+
+After the lock, the format evaluator compared five legally accessible,
+same-record publisher PDFs with their JATS-derived Markdown sources. Results
+are in `SOURCE_FORMAT_SUMMARY.json` and excluded from primary metrics. The
+candidate differences mix PDF extraction with the frozen detector's
+Markdown-only table coverage, so they do not isolate parser effects.
