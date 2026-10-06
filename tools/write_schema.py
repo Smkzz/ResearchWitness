@@ -537,6 +537,7 @@ def make_paper_audit_schema():
     """Generate the bounded screening report schema (not a paper-truth schema)."""
     hash_value = {'type': 'string', 'pattern': '^[a-f0-9]{64}$'}
     empty_text = {'type': 'string', 'maxLength': 2000}
+    nullable_text = {'oneOf': [text(500), {'type': 'null'}]}
     small_int_string = {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'}
     anchor = obj({
         'text_file': enum('extracted-text.txt'),
@@ -655,7 +656,380 @@ def make_paper_audit_schema():
         'interpretation': text(1000),
         'required_review': text(1000),
     })
-    candidate = {'oneOf': [count_anomaly, table_anomaly, flow_anomaly, structured_table_anomaly]}
+    cell_ratio_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^jats-cell-ratio-percentage-[0-9]{4}$'},
+        'type': enum('JATS_CELL_RATIO_PERCENTAGE_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'table_key': hash_value,
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'table_label': empty_text,
+        'table_caption': empty_text,
+        'row_identity': empty_text,
+        'numerator_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'},
+        'denominator_exact': {'type': 'string', 'pattern': '^[1-9][0-9]{0,8}$'},
+        'reported_percent': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$'},
+        'recomputed_percent': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,8})?$'},
+        'recomputed_at_display_precision': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$'},
+        'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 6},
+        'source_anchors': arr(structured_anchor, 1, 1),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    sd_se_n_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^jats-sd-se-n-[0-9]{4}$'},
+        'type': enum('JATS_SD_SE_N_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'row_index': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'row_identity': empty_text,
+        'n_exact': {'type': 'string', 'pattern': '^[1-9][0-9]{0,9}$'},
+        'sd_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'reported_se': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'recomputed_se_at_display_precision': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 8},
+        'difference_at_display_precision': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'source_anchors': arr(obj({
+            'role': enum('n', 'sd', 'se'),
+            'source_anchor': structured_anchor,
+        }), 3, 3),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    jats_flow_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^jats-sample-flow-[0-9]{4}$'},
+        'type': enum('JATS_SAMPLE_FLOW_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'source_total_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'},
+        'excluded_values_exact': arr({'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'}, 2, 32),
+        'reported_included_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'},
+        'expected_included_exact': {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,13})$'},
+        'difference_exact': {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,13})$'},
+        'source_anchors': arr(structured_anchor, 4, 35),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    prisma_count = {'oneOf': [
+        {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'},
+        {'type': 'null'},
+    ]}
+    prisma_signed_count = {'oneOf': [
+        {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,12})$'},
+        {'type': 'null'},
+    ]}
+    prisma_source_anchor = obj({
+        'role': enum('records_identified', 'duplicates_removed', 'records_screened', 'transition', 'relation'),
+        'source_anchor': structured_anchor,
+    })
+    prisma_relation = obj({
+        'status': enum('PRISMA_FLOW_BALANCED', 'PRISMA_FLOW_ARITHMETIC_CANDIDATE', 'UNSUPPORTED'),
+        'reason': nullable_text,
+        'unit': {'const': 'records'},
+        'records_identified_exact': prisma_count,
+        'duplicates_removed_exact': prisma_count,
+        'records_screened_exact': prisma_count,
+        'expected_screened_exact': prisma_count,
+        'difference_exact': prisma_signed_count,
+        'source_anchors': arr(prisma_source_anchor, 1, 4),
+    })
+    prisma_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^jats-prisma-flow-[0-9]{4}$'},
+        'type': enum('JATS_PRISMA_FLOW_ARITHMETIC_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'records_identified_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'},
+        'duplicates_removed_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'},
+        'reported_screened_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'},
+        'expected_screened_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,12})$'},
+        'difference_exact': {'type': 'string', 'pattern': '^-?(?:0|[1-9][0-9]{0,12})$'},
+        'source_anchors': arr(structured_anchor, 4, 4),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    two_by_two_count = {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})$'}
+    two_by_two_rational = {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,19})$'}
+    two_by_two_number = {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'}
+    two_by_two_check = obj({
+        'status': enum('CONSISTENT_WITH_ROUNDING', 'ARITHMETIC_CANDIDATE'),
+        'reason': nullable_text,
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'row_index': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'row_identity': empty_text,
+        'timepoint': {'type': 'string', 'maxLength': 500},
+        'measure': {'const': 'odds_ratio'},
+        'exposed_events_exact': two_by_two_count,
+        'exposed_non_events_exact': two_by_two_count,
+        'unexposed_events_exact': two_by_two_count,
+        'unexposed_non_events_exact': two_by_two_count,
+        'reported_odds_ratio': two_by_two_number,
+        'exact_numerator': two_by_two_rational,
+        'exact_denominator': two_by_two_rational,
+        'recomputed_at_display_precision': two_by_two_number,
+        'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 8},
+        'source_anchors': arr(structured_anchor, 5, 5),
+    })
+    two_by_two_table = obj({
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'potential_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'applicable_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'eligible_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'checked_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'skipped_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'candidate_count': {'type': 'integer', 'minimum': 0, 'maximum': 256},
+        'checks': arr(two_by_two_check, 0, 1),
+        'skip_reasons': arr(obj({
+            'reason': text(200),
+            'row_index': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        }, required=['reason']), 0, 16),
+        'scan_complete': {'type': 'boolean'},
+    })
+    two_by_two_anomaly = obj({
+        'id': {'type': 'string', 'pattern': '^jats-unadjusted-2x2-or-[0-9]{4}$'},
+        'type': enum('JATS_UNADJUSTED_2X2_ODDS_RATIO_MISMATCH'),
+        'status': enum('CANDIDATE_ANOMALY'),
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'row_identity': empty_text,
+        'timepoint': {'type': 'string', 'maxLength': 500},
+        'exposed_events_exact': two_by_two_count,
+        'exposed_non_events_exact': two_by_two_count,
+        'unexposed_events_exact': two_by_two_count,
+        'unexposed_non_events_exact': two_by_two_count,
+        'reported_odds_ratio': two_by_two_number,
+        'exact_numerator': two_by_two_rational,
+        'exact_denominator': two_by_two_rational,
+        'recomputed_at_display_precision': two_by_two_number,
+        'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 8},
+        'source_anchors': arr(structured_anchor, 5, 5),
+        'interpretation': text(1000),
+        'required_review': text(1000),
+    })
+    candidate = {'oneOf': [
+        count_anomaly, table_anomaly, flow_anomaly, structured_table_anomaly,
+        cell_ratio_anomaly, sd_se_n_anomaly, jats_flow_anomaly, prisma_anomaly,
+        two_by_two_anomaly,
+    ]}
+    nullable_count = {'oneOf': [
+        {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+        {'type': 'null'},
+    ]}
+    object_counts = obj({
+        'unit': text(100),
+        'potential': nullable_count,
+        'applicable': nullable_count,
+        'applicability_unknown': nullable_count,
+        'eligible': nullable_count,
+        'checked': nullable_count,
+        'skipped': nullable_count,
+        'candidates': nullable_count,
+    }, required=['unit', 'potential', 'applicable', 'eligible', 'checked', 'skipped', 'candidates'])
+    operand_counts = obj({
+        'unit': text(100),
+        'potential': nullable_count,
+        'applicable': nullable_count,
+        'eligible': nullable_count,
+        'checked': nullable_count,
+        'skipped': nullable_count,
+        'candidates': nullable_count,
+        'candidate_count_known': {'type': 'boolean'},
+    }, required=['unit', 'potential', 'eligible', 'checked', 'skipped', 'candidates'])
+    coverage_table = obj({
+        'table_ref': obj({'source_sha256': hash_value, 'element_path': text(4096)}),
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'label': empty_text,
+        'caption': empty_text,
+        'display_text_truncated': {'type': 'boolean'},
+        'parser_status': enum('STRUCTURE_RELIABLE', 'TABLE_STRUCTURE_UNSUPPORTED'),
+        'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'applicability': enum('APPLICABLE', 'UNKNOWN', 'UNSUPPORTED', 'NOT_APPLICABLE'),
+        'reasons': arr(text(200), 0, 16),
+        'reasons_truncated': {'type': 'boolean'},
+        'skip_reasons': arr(text(200), 0, 16),
+        'counts': obj({'objects': object_counts, 'operands': operand_counts}),
+    })
+    coverage_detector = obj({
+        'detector_id': {'type': 'string', 'minLength': 1, 'maxLength': 100},
+        'scope': enum('table', 'paper'),
+        'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'status_counts': {
+            'type': 'object', 'maxProperties': 4, 'additionalProperties': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+        },
+        'object_counts': object_counts,
+        'operand_counts': operand_counts,
+        'reasons': arr(text(200), 0, 16),
+        'reasons_truncated': {'type': 'boolean'},
+        'unmatched_result_count': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+        'tables': arr(coverage_table, 0, 1000),
+    }, required=['detector_id', 'scope', 'status', 'object_counts', 'operand_counts', 'tables'])
+    paper_coverage = obj({
+        'coverage_version': enum('1'),
+        'source_sha256': hash_value,
+        'scope_note': text(2000),
+        'paper': obj({
+            'tables': obj({
+                'discovered': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+                'parsed': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+                'structure_reliable': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+                'structure_unsupported': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+                'parser_status_counts': {
+                    'type': 'object', 'maxProperties': 2,
+                    'additionalProperties': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+                },
+            }),
+            'detectors_reported': {'type': 'integer', 'minimum': 0, 'maximum': 32},
+        }),
+        'detectors': arr(coverage_detector, 0, 32),
+    })
+    cell_ratio_table = obj({
+        'table_key': hash_value,
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'label': empty_text,
+        'caption': empty_text,
+        'source_anchor': structured_anchor,
+        'parser_status': enum('STRUCTURE_RELIABLE', 'TABLE_STRUCTURE_UNSUPPORTED'),
+        'potential_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'applicable_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'eligible_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'checked_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'skipped_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'candidate_count': {'type': 'integer', 'minimum': 0, 'maximum': 256},
+        'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'skip_reasons': arr(text(100), 0, 16),
+    })
+    cell_ratio_screen = obj({
+        'detector_id': enum('jats_cell_ratio_percentage_recomputation'),
+        'operand_unit': enum('n_over_N_percent_cell'),
+        'findings': arr(cell_ratio_anomaly, 0, 256),
+        'tables': arr(cell_ratio_table, 0, 1000),
+        'potential_cells': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'skipped_cells': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'scan_complete': {'type': 'boolean'},
+        'limitations': arr(text(200), 0, 100),
+    })
+    summary_stat_source_anchor = obj({'role': enum('n', 'sd', 'se'), 'source_anchor': structured_anchor})
+    summary_stat_check = obj({
+        'status': enum('CONSISTENT_WITH_ROUNDING', 'ARITHMETIC_CANDIDATE'),
+        'type': {'oneOf': [enum('JATS_SD_SE_N_ARITHMETIC_MISMATCH'), {'type': 'null'}]},
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'row_index': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'row_identity': empty_text,
+        'n_exact': {'type': 'string', 'pattern': '^[1-9][0-9]{0,9}$'},
+        'sd_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'reported_se': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'recomputed_se_at_display_precision': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 8},
+        'difference_at_display_precision': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$'},
+        'source_anchors': arr(summary_stat_source_anchor, 3, 3),
+    })
+    summary_stat_table = obj({
+        'table_id': {'type': 'string', 'maxLength': 500},
+        'applicability': enum('APPLICABLE', 'NOT_APPLICABLE'),
+        'eligibility': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'potential_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'checked_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'skipped_objects': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'checked_rows': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        'checks': arr(summary_stat_check, 0, 10_000),
+        'candidate_count': {'type': 'integer', 'minimum': 0, 'maximum': 256},
+        'candidates': arr(summary_stat_check, 0, 256),
+        'skip_reasons': arr(obj({
+            'reason': text(200),
+            'row_index': {'type': 'integer', 'minimum': 0, 'maximum': 10_000},
+        }, required=['reason']), 0, 10_000),
+        'scan_complete': {'type': 'boolean'},
+    })
+    summary_stat_screen = obj({
+        'detector_id': enum('jats_sd_se_n_recomputation'),
+        'operand_unit': enum('eligible_sd_se_n_row'),
+        'rounding_policy': {'type': 'string', 'maxLength': 200},
+        'findings': arr(summary_stat_check, 0, 256),
+        'tables': arr(summary_stat_table, 0, 1000),
+        'scan_complete': {'type': 'boolean'},
+        'limitations': arr(text(200), 0, 100),
+    })
+    nullable_bool = {'oneOf': [{'type': 'boolean'}, {'type': 'null'}]}
+    flow_scope = obj({'population': text(500), 'group': text(500), 'timepoint': text(500)})
+    flow_operand = obj({
+        'identifier': text(100),
+        'role': enum('total', 'exclusion', 'included'),
+        'count': {'type': 'integer', 'minimum': 0, 'maximum': 1_000_000_000_000},
+        'unit': text(100), 'population': text(500), 'group': text(500), 'timepoint': text(500),
+        'source_anchor': structured_anchor,
+    })
+    flow_population = obj({
+        'identifier': text(100), 'label': text(500), 'count_unit': text(100),
+        'group': text(500), 'timepoint': text(500), 'source_anchor': structured_anchor,
+    })
+    flow_stage = obj({
+        'identifier': text(100), 'label': text(100),
+        'count': {'type': 'integer', 'minimum': 0, 'maximum': 1_000_000_000_000},
+        'count_unit': text(100), 'scope': flow_scope, 'source_anchor': structured_anchor,
+    })
+    flow_transition = obj({
+        'source_stage': text(100), 'target_stage': text(100), 'operation': nullable_text,
+        'explicit': {'type': 'boolean'}, 'disjoint': nullable_bool, 'exhaustive': nullable_bool,
+        'scope': flow_scope, 'source_anchor': structured_anchor,
+    })
+    flow_exclusion = obj({
+        'identifier': text(100),
+        'count': {'type': 'integer', 'minimum': 0, 'maximum': 1_000_000_000_000},
+        'count_unit': text(100), 'population': text(500), 'reason': text(1000),
+        'group': text(500), 'timepoint': text(500), 'count_anchor': structured_anchor,
+        'reason_anchor': structured_anchor,
+    })
+    flow_arithmetic_relation = obj({
+        'total_operand': text(100), 'exclusion_operands': arr(text(100), 0, 32),
+        'included_operand': text(100), 'operator': nullable_text,
+        'explicit': {'type': 'boolean'}, 'disjoint': nullable_bool, 'exhaustive': nullable_bool,
+        'sequential': {'type': 'boolean'}, 'source_anchor': structured_anchor,
+        'operand_anchors': arr(structured_anchor, 0, 34),
+    })
+    nullable_flow_entity = lambda entity: {'oneOf': [entity, {'type': 'null'}]}
+    source_flow = obj({
+        'id': {'type': 'string', 'pattern': '^source-flow-[0-9]{4}$'},
+        'status': enum('FLOW_BALANCED', 'FLOW_ARITHMETIC_CANDIDATE', 'FLOW_RELATION_AMBIGUOUS', 'UNSUPPORTED'),
+        'reason': nullable_text,
+        'source_anchor': structured_anchor,
+        'operands': arr(flow_operand, 0, 66),
+        'population': nullable_flow_entity(flow_population),
+        'stages': arr(flow_stage, 0, 66),
+        'transitions': arr(flow_transition, 0, 66),
+        'exclusions': arr(flow_exclusion, 0, 32),
+        'arithmetic_relation': nullable_flow_entity(flow_arithmetic_relation),
+        'arithmetic_status': enum('FLOW_BALANCED', 'FLOW_ARITHMETIC_CANDIDATE', 'FLOW_RELATION_AMBIGUOUS', 'UNSUPPORTED'),
+    })
+    source_flow_screen = obj({
+        'detector_id': enum('jats_sample_flow_arithmetic'),
+        'flows': arr(source_flow, 0, 256),
+        'findings': arr(jats_flow_anomaly, 0, 256),
+        'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'potential_objects': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+        'applicable_objects': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+        'eligible_objects': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+        'checked_objects': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+        'skipped_objects': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+        'candidate_count': {'type': 'integer', 'minimum': 0, 'maximum': 256},
+        'scan_complete': {'type': 'boolean'},
+        'limitations': arr(text(200), 0, 100),
+    })
+    prisma_object = {'oneOf': [
+        obj({'kind': enum('figure'), 'label': empty_text, 'caption': empty_text,
+             'graphic_present': {'type': 'boolean'}, 'source_anchor': structured_anchor}),
+        obj({'kind': enum('table'), 'label': empty_text, 'caption': empty_text,
+             'source_anchor': structured_anchor}),
+        obj({'kind': enum('prose'), 'text': text(4000), 'source_anchor': structured_anchor}),
+    ]}
+    prisma_screen = obj({
+        'detector_id': enum('prisma_synthesis_flow'),
+        'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
+        'objects': arr(prisma_object, 0, 256),
+        'relations': arr(prisma_relation, 0, 256),
+        'findings': arr(prisma_anomaly, 0, 256),
+        'scan_complete': {'type': 'boolean'},
+        'limitations': arr(text(200), 0, 16),
+        'image_contents_read': {'const': False},
+        'ocr_performed': {'const': False},
+    })
     scope_difference = obj({
         'id': {'type': 'string', 'pattern': '^(?:scope-[0-9]{4}|table-scope-[0-9]{4})$'},
         'type': enum(
@@ -677,7 +1051,7 @@ def make_paper_audit_schema():
         'required_review': text(1000),
     }, required=['id', 'type', 'status', 'source_anchors', 'interpretation', 'required_review'])
     report = obj({
-        'paper_audit_version': enum('0.2', '0.3'),
+        'paper_audit_version': enum('0.2', '0.3', '0.4'),
         'decision': enum(
             'CANDIDATES_FOUND', 'CANDIDATES_FOUND_IN_INCOMPLETE_SCAN',
             'NO_CANDIDATES_IN_SUPPORTED_SCAN', 'SCAN_INCOMPLETE_NO_CANDIDATES',
@@ -714,30 +1088,36 @@ def make_paper_audit_schema():
             'document_model': {'oneOf': [{'type': 'null'}, obj({
                 'file': enum('paper-document.json'),
                 'sha256': hash_value,
-                'model_version': enum('1.0'),
+                'model_version': enum('1.0', '1.1'),
                 'section_count': {'type': 'integer', 'minimum': 0, 'maximum': 512},
                 'paragraph_count': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
                 'table_count': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+                'figure_count': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
                 'numeric_assertion_count': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
-            })]},
+            }, required=['file', 'sha256', 'model_version', 'section_count', 'paragraph_count',
+                         'table_count', 'numeric_assertion_count'])]},
         }, required=['sections', 'layout_status']),
         'source_capabilities': obj({
             'prose': enum('PROSE_TEXT_RELIABLE', 'SOURCE_NATIVE_PROSE_AVAILABLE', 'TABLE_STRUCTURE_UNSUPPORTED',
                           'EXTRACTION_DEGRADED', 'IMAGE_ONLY', 'EXTRACTION_FAILED'),
             'tables': enum('TABLE_STRUCTURE_UNSUPPORTED', 'STRUCTURED_JATS_TABLES', 'MARKDOWN_TABLE_ADAPTER'),
         }),
+        'coverage': {'oneOf': [{'type': 'null'}, paper_coverage]},
         'detector_eligibility': arr(obj({
             'detector_id': enum('explicit_count_marker_scan', 'table_percentage_recomputation',
                                 'markdown_table_percentage_recomputation', 'explicit_sample_flow_arithmetic',
                                 'explicit_exclusion_flow_locator', 'two_by_two_effect_size_recomputation',
-                                'cross_section_numeric_identity'),
+                                'cross_section_numeric_identity', 'jats_cell_ratio_percentage_recomputation',
+                                'jats_sample_flow_arithmetic', 'jats_sd_se_n_recomputation',
+                                'prisma_synthesis_flow', 'jats_unadjusted_2x2_odds_ratio',
+                                'simple_rate_recomputation'),
             'contract_version': enum('1.0', '1.1'),
             'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
             'source_format': enum('txt', 'md', 'markdown', 'pdf', 'jats_xml'),
             'reasons': arr(text(500), 0, 16),
             'checked_operands': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
             'table_id': {'type': 'string', 'maxLength': 500},
-        }, required=['detector_id', 'contract_version', 'status', 'source_format', 'reasons', 'checked_operands']), 0, 1100),
+        }, required=['detector_id', 'contract_version', 'status', 'source_format', 'reasons', 'checked_operands']), 0, 4000),
         'detector_contracts': arr(obj({
             'detector_id': {'type': 'string', 'maxLength': 100},
             'version': enum('1.0', '1.1'),
@@ -753,10 +1133,17 @@ def make_paper_audit_schema():
             'positive_result_establishes': {'type': 'string', 'maxLength': 1000},
             'positive_result_does_not_establish': {'type': 'string', 'maxLength': 1000},
             'unsupported_or_incomplete_reasons': arr(text(200), 1, 16),
+            'supported_source_formats': arr(text(100), 0, 8),
+            'required_document_objects': arr(text(500), 0, 16),
+            'scope_requirements': arr(text(500), 0, 16),
+            'unit_requirements': arr(text(100), 0, 8),
+            'statistical_assumptions': arr(text(500), 0, 16),
+            'ambiguity_conditions': arr(text(500), 0, 8),
+            'outputs': arr(text(200), 0, 16),
         }, required=['detector_id', 'version', 'implementation_status', 'purpose', 'required_source_structure', 'required_operands',
                      'required_context', 'allowed_ambiguity', 'rounding_policy', 'units', 'exclusions',
                      'positive_result_establishes', 'positive_result_does_not_establish',
-                     'unsupported_or_incomplete_reasons']), 4, 8),
+                     'unsupported_or_incomplete_reasons']), 4, 16),
         'discovery': obj({
             'provider': enum('deterministic_local_heuristic'),
             'discoverer': enum('explicit_count_marker_scan'),
@@ -810,16 +1197,31 @@ def make_paper_audit_schema():
                 'scan_complete': {'type': 'boolean'},
                 'limitations': arr(text(200), 0, 100),
             }),
+            'cell_ratio_percentages': cell_ratio_screen,
+            'sd_se_n_statistics': summary_stat_screen,
+            'source_mapped_sample_flow': source_flow_screen,
+            'prisma_synthesis_flow': prisma_screen,
+            'jats_unadjusted_2x2_odds_ratio': obj({
+                'detector_id': enum('jats_unadjusted_2x2_odds_ratio'),
+                'operand_unit': enum('explicit_2x2_row'),
+                'findings': arr(two_by_two_anomaly, 0, 256),
+                'tables': arr(two_by_two_table, 0, 1000),
+                'scan_complete': {'type': 'boolean'},
+                'limitations': arr(text(200), 0, 100),
+            }),
         }, required=['table_percentages', 'sample_exclusion_flow']),
-        'candidate_anomalies': arr(candidate, 0, 322),
+        'candidate_anomalies': arr(candidate, 0, 1200),
         'possible_scope_differences': arr(scope_difference, 0, 256),
         'checks_attempted': arr(enum(
             'explicit_count_marker_scan', 'markdown_table_percentage_recomputation',
             'explicit_exclusion_flow_arithmetic_screen',
             'jats_table_percentage_recomputation',
-        ), 0, 3),
+            'jats_cell_ratio_percentage_recomputation', 'jats_sd_se_n_recomputation',
+            'jats_sample_flow_arithmetic', 'prisma_synthesis_flow',
+            'jats_unadjusted_2x2_odds_ratio',
+        ), 0, 9),
         'verified_findings': arr({'type': 'object'}, 0, 0),
-        'unresolved_questions': arr(text(1000), 0, 322),
+        'unresolved_questions': arr(text(1000), 0, 1200),
         'unsupported_checks': arr(text(500), 1, 16),
         'known_corrections': obj({'status': enum('NOT_CHECKED')}),
         'paper_error_established': {'const': False},
@@ -830,10 +1232,30 @@ def make_paper_audit_schema():
         'verified_findings', 'unresolved_questions', 'unsupported_checks', 'known_corrections',
         'paper_error_established', 'meaning',
     ])
+    report['allOf'] = [{
+        'if': {
+            'properties': {'paper_audit_version': {'const': '0.4'}},
+            'required': ['paper_audit_version'],
+        },
+        'then': {
+            'required': ['coverage'],
+            'properties': {
+                'arithmetic_screens': {'required': [
+                    'cell_ratio_percentages', 'sd_se_n_statistics',
+                    'source_mapped_sample_flow', 'prisma_synthesis_flow',
+                    'jats_unadjusted_2x2_odds_ratio',
+                ]},
+                'detector_contracts': {'items': {'required': [
+                    'supported_source_formats', 'required_document_objects', 'scope_requirements',
+                    'unit_requirements', 'statistical_assumptions', 'ambiguity_conditions', 'outputs',
+                ]}},
+            },
+        },
+    }]
     return {
         '$schema': 'https://json-schema.org/draft/2020-12/schema',
-        '$id': 'urn:researchwitness:paper-audit-report:0.3',
-        'title': 'ResearchWitness bounded paper-screening report 0.3',
+        '$id': 'urn:researchwitness:paper-audit-report:0.4',
+        'title': 'ResearchWitness bounded paper-screening report 0.4',
         'description': (
             'Source-aware paper screening with machine-readable eligibility contracts. All flags remain candidates; '
             'a negative result does not establish correctness.'

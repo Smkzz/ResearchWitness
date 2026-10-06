@@ -1,0 +1,397 @@
+{
+  "record_version": "1",
+  "status": "AGGREGATE_ONLY_POST_HOC_SOURCE_NATIVE_JATS_DEVELOPMENT_REPLAY",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "artifact_scope": "Aggregate detector and corpus metrics only. Individual source identifiers, source hashes, per-paper outputs, and candidate records are omitted.",
+  "detector_contract_version": "1.1",
+  "metrics": {
+    "source_documents": 33,
+    "correction_issues_considered": 16,
+    "eligible_correction_issues": 2,
+    "unsupported_correction_issues": 14,
+    "overall_correction_mechanism_coverage": {
+      "numerator": 2,
+      "denominator": 16
+    },
+    "conditional_sensitivity_by_eligible_issue": {
+      "numerator": 2,
+      "denominator": 2
+    },
+    "matched_target_cells": {
+      "numerator": 4,
+      "denominator": 4
+    },
+    "eligible_issues_by_detector": {
+      "jats_cell_ratio_percentage_recomputation": 1,
+      "table_percentage_recomputation": 1
+    },
+    "selected_negative_controls": 17,
+    "candidate_bearing_selected_controls": 0,
+    "candidate_items_on_selected_controls": 0,
+    "all_candidate_items": 12,
+    "candidate_type_counts": {
+      "JATS_CELL_RATIO_PERCENTAGE_MISMATCH": 9,
+      "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH": 3
+    },
+    "unmatched_candidate_items_not_adjudicated": 8,
+    "adjudicated_candidate_precision": null,
+    "reports_with_incomplete_table_or_detector_coverage": 33,
+    "extraction_failures": 0,
+    "repeatable_json_and_html_reports": 33,
+    "repeatability_denominator": 33
+  },
+  "historical_metrics_warning": "No hard-negative false-candidate rate is estimated from the selected controls. They are not certified error-free, and unmatched candidates remain unadjudicated.",
+  "synthetic_regression_evidence": {
+    "record_version": "1",
+    "status": "SYNTHETIC_AND_UNIT_REGRESSION_EVIDENCE",
+    "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+    "positive_candidate_fixture_counts": {
+      "table_percentage_recomputation": 1,
+      "jats_cell_ratio_percentage_recomputation": 1,
+      "jats_sample_flow_arithmetic": 1,
+      "prisma_synthesis_flow": 1,
+      "jats_unadjusted_2x2_odds_ratio": 1,
+      "jats_sd_se_n_recomputation_experimental": 1
+    },
+    "hard_negative_scenarios": [
+      {
+        "detector_id": "table_percentage_recomputation",
+        "scenarios": 10,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_jats.py",
+        "coverage": "local and smaller subgroup denominators, rate units, footnoted denominators and labels, weighted/adjusted/multiple-response/missingness cues, ragged rows"
+      },
+      {
+        "detector_id": "markdown_table_percentage_recomputation",
+        "scenarios": 6,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_audit.py",
+        "coverage": "missing stub and ragged rows, local denominators, footnoted headers and cells, repeated smaller-denominator scope notes"
+      },
+      {
+        "detector_id": "jats_cell_ratio_percentage_recomputation",
+        "scenarios": 11,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_ratio.py",
+        "coverage": "invalid numeric domains, multiple-response/available-case/changing-denominator and unknown footnotes, unsafe row or table cues, referenced cells"
+      },
+      {
+        "detector_id": "jats_sample_flow_arithmetic",
+        "scenarios": 6,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_flow_source.py",
+        "coverage": "unproven or overlapping exclusions, unit and group mismatch, historical ambiguous flow, non-JATS input"
+      },
+      {
+        "detector_id": "prisma_synthesis_flow",
+        "scenarios": 7,
+        "false_candidate_outputs": 0,
+        "test_files": [
+          "tests/test_paper_prisma_flow.py",
+          "tests/test_jats.py"
+        ],
+        "coverage": "multiple database and later-stage scope, unlabelled/non-review counts, malformed and oversized operands, image-only flow with no OCR"
+      },
+      {
+        "detector_id": "jats_unadjusted_2x2_odds_ratio",
+        "scenarios": 9,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_two_by_two_source.py",
+        "coverage": "adjusted/missing/reversed OR direction, zero cells, missing timepoint, weighted context, CI text, noninteger counts, multiple outcome rows"
+      },
+      {
+        "detector_id": "jats_sd_se_n_recomputation",
+        "scenarios": 17,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_statistics_source.py",
+        "coverage": "SEM ambiguity, weighted/adjusted/repeated/transformed values, footnotes and cross-references, missing or duplicate columns, unit/time scope, oversized numbers, unreliable grid, non-JATS input"
+      }
+    ],
+    "totals": {
+      "positive_candidate_fixtures": 6,
+      "hard_negative_scenarios": 66,
+      "false_candidate_outputs_on_hard_negative_scenarios": 0
+    },
+    "limitations": [
+      "Counts are explicit synthetic/unit input scenarios in regression tests, not independent papers or estimates of real-world false-positive rates.",
+      "The SD/SE/n screen is experimental and has no correction-backed positive in the source corpus.",
+      "Rate recomputation and source-mapped cross-section identity are not implemented detectors and are not included as active-family regression counts."
+    ]
+  },
+  "contracts": [
+    {
+      "detector_id": "explicit_count_marker_scan",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "table_percentage_recomputation",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 1
+    },
+    {
+      "detector_id": "markdown_table_percentage_recomputation",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "explicit_sample_flow_arithmetic",
+      "implementation_status": "IMPLEMENTED_HELPER",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "explicit_exclusion_flow_locator",
+      "implementation_status": "EXPERIMENTAL",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "two_by_two_effect_size_recomputation",
+      "implementation_status": "IMPLEMENTED_HELPER",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "cross_section_numeric_identity",
+      "implementation_status": "IMPLEMENTED_HELPER",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 1
+    },
+    {
+      "detector_id": "jats_sample_flow_arithmetic",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "jats_sd_se_n_recomputation",
+      "implementation_status": "EXPERIMENTAL",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "prisma_synthesis_flow",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "jats_unadjusted_2x2_odds_ratio",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "simple_rate_recomputation",
+      "implementation_status": "UNSUPPORTED",
+      "eligible_correction_issues": 0
+    }
+  ],
+  "per_detector_coverage": [
+    {
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "INCOMPLETE": 2,
+        "NOT_APPLICABLE": 31
+      },
+      "object_counts": {
+        "applicability_unknown": 8,
+        "applicable": 10,
+        "candidates": 2,
+        "checked": 2,
+        "eligible": 2,
+        "potential": 123,
+        "skipped": 8
+      },
+      "operand_counts": {
+        "applicable": 194,
+        "candidates": 9,
+        "checked": 76,
+        "eligible": 76,
+        "potential": 194,
+        "skipped": 118
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "ELIGIBLE": 2,
+        "INCOMPLETE": 8,
+        "NOT_APPLICABLE": 113
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {}
+    },
+    {
+      "detector_id": "jats_sample_flow_arithmetic",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "INCOMPLETE": 1,
+        "NOT_APPLICABLE": 32
+      },
+      "object_counts": {
+        "applicable": 1,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 1,
+        "skipped": 1
+      },
+      "operand_counts": {
+        "checked": 0,
+        "potential": 6,
+        "skipped": 6
+      },
+      "per_table_records": 0,
+      "per_table_status_counts": {},
+      "parser_status_counts": {},
+      "skip_reason_counts": {
+        "FLOW_DISJOINTNESS_EXHAUSTIVENESS_OR_SEQUENCE_NOT_EXPLICIT": 1
+      }
+    },
+    {
+      "detector_id": "jats_sd_se_n_recomputation",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "INCOMPLETE": 2,
+        "NOT_APPLICABLE": 25,
+        "UNSUPPORTED": 6
+      },
+      "object_counts": {
+        "applicability_unknown": 9,
+        "applicable": 9,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 123,
+        "skipped": 9
+      },
+      "operand_counts": {
+        "applicable": 227,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 227,
+        "skipped": 227
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "INCOMPLETE": 2,
+        "NOT_APPLICABLE": 114,
+        "UNSUPPORTED": 7
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {}
+    },
+    {
+      "detector_id": "jats_unadjusted_2x2_odds_ratio",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "NOT_APPLICABLE": 33
+      },
+      "object_counts": {
+        "applicability_unknown": 0,
+        "applicable": 0,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 123,
+        "skipped": 0
+      },
+      "operand_counts": {
+        "applicable": 0,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 0,
+        "skipped": 0
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "NOT_APPLICABLE": 123
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {}
+    },
+    {
+      "detector_id": "prisma_synthesis_flow",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "NOT_APPLICABLE": 20,
+        "UNSUPPORTED": 13
+      },
+      "object_counts": {
+        "applicable": 23,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 23,
+        "skipped": 23
+      },
+      "operand_counts": {
+        "candidates": 0,
+        "checked": 0,
+        "potential": 0,
+        "skipped": 0
+      },
+      "per_table_records": 0,
+      "per_table_status_counts": {},
+      "parser_status_counts": {},
+      "skip_reason_counts": {
+        "NO_PRISMA_OR_SYNTHESIS_FLOW_CUE": 20,
+        "PRISMA_FLOW_RELATION_NOT_IMPLEMENTED": 10,
+        "PRISMA_SCOPE_OR_STAGE_AMBIGUOUS": 1,
+        "UNSUPPORTED_IMAGE_FLOW": 11
+      }
+    },
+    {
+      "detector_id": "table_percentage_recomputation",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "INCOMPLETE": 31,
+        "UNSUPPORTED": 2
+      },
+      "object_counts": {
+        "applicability_unknown": 95,
+        "applicable": 96,
+        "candidates": 2,
+        "checked": 3,
+        "eligible": 1,
+        "potential": 123,
+        "skipped": 95
+      },
+      "operand_counts": {
+        "applicable": 1542,
+        "candidates": 3,
+        "checked": 63,
+        "eligible": 63,
+        "potential": 1542,
+        "skipped": 1479
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "ELIGIBLE": 1,
+        "INCOMPLETE": 84,
+        "NOT_APPLICABLE": 27,
+        "UNSUPPORTED": 11
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {}
+    }
+  ],
+  "limitations": [
+    "The direct JATS replay and eligibility classification are post-hoc development work; neither is blinded.",
+    "Individual source bindings and per-document reports are deliberately omitted from this public summary.",
+    "All candidate findings remain unverified; paper_error_established is false for every report.",
+    "Publisher PDFs, supplements, later versions, and scientific consequences were not independently adjudicated here."
+  ]
+}

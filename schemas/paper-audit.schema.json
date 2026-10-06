@@ -1,14 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:researchwitness:paper-audit-report:0.3",
-  "title": "ResearchWitness bounded paper-screening report 0.3",
+  "$id": "urn:researchwitness:paper-audit-report:0.4",
+  "title": "ResearchWitness bounded paper-screening report 0.4",
   "description": "Source-aware paper screening with machine-readable eligibility contracts. All flags remain candidates; a negative result does not establish correctness.",
   "type": "object",
   "properties": {
     "paper_audit_version": {
       "enum": [
         "0.2",
-        "0.3"
+        "0.3",
+        "0.4"
       ]
     },
     "decision": {
@@ -262,7 +263,8 @@
                 },
                 "model_version": {
                   "enum": [
-                    "1.0"
+                    "1.0",
+                    "1.1"
                   ]
                 },
                 "section_count": {
@@ -276,6 +278,11 @@
                   "maximum": 100000
                 },
                 "table_count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000
+                },
+                "figure_count": {
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 1000
@@ -333,6 +340,672 @@
       ],
       "additionalProperties": false
     },
+    "coverage": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "coverage_version": {
+              "enum": [
+                "1"
+              ]
+            },
+            "source_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "scope_note": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "paper": {
+              "type": "object",
+              "properties": {
+                "tables": {
+                  "type": "object",
+                  "properties": {
+                    "discovered": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "parsed": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "structure_reliable": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "structure_unsupported": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    },
+                    "parser_status_counts": {
+                      "type": "object",
+                      "maxProperties": 2,
+                      "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 1000
+                      }
+                    }
+                  },
+                  "required": [
+                    "discovered",
+                    "parsed",
+                    "structure_reliable",
+                    "structure_unsupported",
+                    "parser_status_counts"
+                  ],
+                  "additionalProperties": false
+                },
+                "detectors_reported": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 32
+                }
+              },
+              "required": [
+                "tables",
+                "detectors_reported"
+              ],
+              "additionalProperties": false
+            },
+            "detectors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "detector_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "scope": {
+                    "enum": [
+                      "table",
+                      "paper"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ELIGIBLE",
+                      "UNSUPPORTED",
+                      "INCOMPLETE",
+                      "NOT_APPLICABLE"
+                    ]
+                  },
+                  "status_counts": {
+                    "type": "object",
+                    "maxProperties": 4,
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1000
+                    }
+                  },
+                  "object_counts": {
+                    "type": "object",
+                    "properties": {
+                      "unit": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "potential": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "applicable": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "applicability_unknown": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "eligible": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "checked": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "skipped": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "candidates": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "unit",
+                      "potential",
+                      "applicable",
+                      "eligible",
+                      "checked",
+                      "skipped",
+                      "candidates"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "operand_counts": {
+                    "type": "object",
+                    "properties": {
+                      "unit": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "potential": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "applicable": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "eligible": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "checked": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "skipped": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "candidates": {
+                        "oneOf": [
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "candidate_count_known": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "unit",
+                      "potential",
+                      "eligible",
+                      "checked",
+                      "skipped",
+                      "candidates"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "reasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "minItems": 0,
+                    "maxItems": 16
+                  },
+                  "reasons_truncated": {
+                    "type": "boolean"
+                  },
+                  "unmatched_result_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000
+                  },
+                  "tables": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "table_ref": {
+                          "type": "object",
+                          "properties": {
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4096
+                            }
+                          },
+                          "required": [
+                            "source_sha256",
+                            "element_path"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "table_id": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "label": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "caption": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "display_text_truncated": {
+                          "type": "boolean"
+                        },
+                        "parser_status": {
+                          "enum": [
+                            "STRUCTURE_RELIABLE",
+                            "TABLE_STRUCTURE_UNSUPPORTED"
+                          ]
+                        },
+                        "status": {
+                          "enum": [
+                            "ELIGIBLE",
+                            "UNSUPPORTED",
+                            "INCOMPLETE",
+                            "NOT_APPLICABLE"
+                          ]
+                        },
+                        "applicability": {
+                          "enum": [
+                            "APPLICABLE",
+                            "UNKNOWN",
+                            "UNSUPPORTED",
+                            "NOT_APPLICABLE"
+                          ]
+                        },
+                        "reasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "minItems": 0,
+                          "maxItems": 16
+                        },
+                        "reasons_truncated": {
+                          "type": "boolean"
+                        },
+                        "skip_reasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 200
+                          },
+                          "minItems": 0,
+                          "maxItems": 16
+                        },
+                        "counts": {
+                          "type": "object",
+                          "properties": {
+                            "objects": {
+                              "type": "object",
+                              "properties": {
+                                "unit": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "potential": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "applicable": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "applicability_unknown": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "eligible": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "checked": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "skipped": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "candidates": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "unit",
+                                "potential",
+                                "applicable",
+                                "eligible",
+                                "checked",
+                                "skipped",
+                                "candidates"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "operands": {
+                              "type": "object",
+                              "properties": {
+                                "unit": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 100
+                                },
+                                "potential": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "applicable": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "eligible": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "checked": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "skipped": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "candidates": {
+                                  "oneOf": [
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 100000
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "candidate_count_known": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "unit",
+                                "potential",
+                                "eligible",
+                                "checked",
+                                "skipped",
+                                "candidates"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "objects",
+                            "operands"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "table_ref",
+                        "table_id",
+                        "label",
+                        "caption",
+                        "display_text_truncated",
+                        "parser_status",
+                        "status",
+                        "applicability",
+                        "reasons",
+                        "reasons_truncated",
+                        "skip_reasons",
+                        "counts"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 1000
+                  }
+                },
+                "required": [
+                  "detector_id",
+                  "scope",
+                  "status",
+                  "object_counts",
+                  "operand_counts",
+                  "tables"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 32
+            }
+          },
+          "required": [
+            "coverage_version",
+            "source_sha256",
+            "scope_note",
+            "paper",
+            "detectors"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
     "detector_eligibility": {
       "type": "array",
       "items": {
@@ -346,7 +1019,13 @@
               "explicit_sample_flow_arithmetic",
               "explicit_exclusion_flow_locator",
               "two_by_two_effect_size_recomputation",
-              "cross_section_numeric_identity"
+              "cross_section_numeric_identity",
+              "jats_cell_ratio_percentage_recomputation",
+              "jats_sample_flow_arithmetic",
+              "jats_sd_se_n_recomputation",
+              "prisma_synthesis_flow",
+              "jats_unadjusted_2x2_odds_ratio",
+              "simple_rate_recomputation"
             ]
           },
           "contract_version": {
@@ -403,7 +1082,7 @@
         "additionalProperties": false
       },
       "minItems": 0,
-      "maxItems": 1100
+      "maxItems": 4000
     },
     "detector_contracts": {
       "type": "array",
@@ -509,6 +1188,76 @@
             },
             "minItems": 1,
             "maxItems": 16
+          },
+          "supported_source_formats": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "minItems": 0,
+            "maxItems": 8
+          },
+          "required_document_objects": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "minItems": 0,
+            "maxItems": 16
+          },
+          "scope_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "minItems": 0,
+            "maxItems": 16
+          },
+          "unit_requirements": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "minItems": 0,
+            "maxItems": 8
+          },
+          "statistical_assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "minItems": 0,
+            "maxItems": 16
+          },
+          "ambiguity_conditions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "minItems": 0,
+            "maxItems": 8
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "minItems": 0,
+            "maxItems": 16
           }
         },
         "required": [
@@ -530,7 +1279,7 @@
         "additionalProperties": false
       },
       "minItems": 4,
-      "maxItems": 8
+      "maxItems": 16
     },
     "discovery": {
       "type": "object",
@@ -2018,6 +2767,3397 @@
             "limitations"
           ],
           "additionalProperties": false
+        },
+        "cell_ratio_percentages": {
+          "type": "object",
+          "properties": {
+            "detector_id": {
+              "enum": [
+                "jats_cell_ratio_percentage_recomputation"
+              ]
+            },
+            "operand_unit": {
+              "enum": [
+                "n_over_N_percent_cell"
+              ]
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^jats-cell-ratio-percentage-[0-9]{4}$"
+                  },
+                  "type": {
+                    "enum": [
+                      "JATS_CELL_RATIO_PERCENTAGE_MISMATCH"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "CANDIDATE_ANOMALY"
+                    ]
+                  },
+                  "table_key": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "table_id": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "table_label": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "table_caption": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "row_identity": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "numerator_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                  },
+                  "denominator_exact": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]{0,8}$"
+                  },
+                  "reported_percent": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$"
+                  },
+                  "recomputed_percent": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,8})?$"
+                  },
+                  "recomputed_at_display_precision": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$"
+                  },
+                  "display_precision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                  },
+                  "source_anchors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "source_file": {
+                          "enum": [
+                            "source.xml",
+                            "source.nxml"
+                          ]
+                        },
+                        "source_sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "source_format": {
+                          "enum": [
+                            "jats_xml"
+                          ]
+                        },
+                        "element_path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4000
+                        },
+                        "quote": {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        "start_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        },
+                        "end_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_file",
+                        "source_sha256",
+                        "source_format",
+                        "element_path",
+                        "quote",
+                        "start_byte",
+                        "end_byte"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1,
+                    "maxItems": 1
+                  },
+                  "interpretation": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "required_review": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "status",
+                  "table_key",
+                  "table_id",
+                  "table_label",
+                  "table_caption",
+                  "row_identity",
+                  "numerator_exact",
+                  "denominator_exact",
+                  "reported_percent",
+                  "recomputed_percent",
+                  "recomputed_at_display_precision",
+                  "display_precision",
+                  "source_anchors",
+                  "interpretation",
+                  "required_review"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "tables": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "table_key": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "table_id": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "label": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "caption": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "source_anchor": {
+                    "type": "object",
+                    "properties": {
+                      "source_file": {
+                        "enum": [
+                          "source.xml",
+                          "source.nxml"
+                        ]
+                      },
+                      "source_sha256": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "source_format": {
+                        "enum": [
+                          "jats_xml"
+                        ]
+                      },
+                      "element_path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      },
+                      "quote": {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      "start_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      },
+                      "end_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "source_file",
+                      "source_sha256",
+                      "source_format",
+                      "element_path",
+                      "quote",
+                      "start_byte",
+                      "end_byte"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "parser_status": {
+                    "enum": [
+                      "STRUCTURE_RELIABLE",
+                      "TABLE_STRUCTURE_UNSUPPORTED"
+                    ]
+                  },
+                  "potential_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50001
+                  },
+                  "applicable_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50001
+                  },
+                  "eligible_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50001
+                  },
+                  "checked_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50001
+                  },
+                  "skipped_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50001
+                  },
+                  "candidate_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 256
+                  },
+                  "status": {
+                    "enum": [
+                      "ELIGIBLE",
+                      "UNSUPPORTED",
+                      "INCOMPLETE",
+                      "NOT_APPLICABLE"
+                    ]
+                  },
+                  "skip_reasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "minItems": 0,
+                    "maxItems": 16
+                  }
+                },
+                "required": [
+                  "table_key",
+                  "table_id",
+                  "label",
+                  "caption",
+                  "source_anchor",
+                  "parser_status",
+                  "potential_objects",
+                  "applicable_objects",
+                  "eligible_objects",
+                  "checked_objects",
+                  "skipped_objects",
+                  "candidate_count",
+                  "status",
+                  "skip_reasons"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 1000
+            },
+            "potential_cells": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50001
+            },
+            "checked_cells": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "skipped_cells": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50001
+            },
+            "scan_complete": {
+              "type": "boolean"
+            },
+            "limitations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "detector_id",
+            "operand_unit",
+            "findings",
+            "tables",
+            "potential_cells",
+            "checked_cells",
+            "skipped_cells",
+            "scan_complete",
+            "limitations"
+          ],
+          "additionalProperties": false
+        },
+        "sd_se_n_statistics": {
+          "type": "object",
+          "properties": {
+            "detector_id": {
+              "enum": [
+                "jats_sd_se_n_recomputation"
+              ]
+            },
+            "operand_unit": {
+              "enum": [
+                "eligible_sd_se_n_row"
+              ]
+            },
+            "rounding_policy": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "CONSISTENT_WITH_ROUNDING",
+                      "ARITHMETIC_CANDIDATE"
+                    ]
+                  },
+                  "type": {
+                    "oneOf": [
+                      {
+                        "enum": [
+                          "JATS_SD_SE_N_ARITHMETIC_MISMATCH"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "table_id": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "row_index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "row_identity": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "n_exact": {
+                    "type": "string",
+                    "pattern": "^[1-9][0-9]{0,9}$"
+                  },
+                  "sd_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                  },
+                  "reported_se": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                  },
+                  "recomputed_se_at_display_precision": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                  },
+                  "display_precision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 8
+                  },
+                  "difference_at_display_precision": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                  },
+                  "source_anchors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "enum": [
+                            "n",
+                            "sd",
+                            "se"
+                          ]
+                        },
+                        "source_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "role",
+                        "source_anchor"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "status",
+                  "type",
+                  "table_id",
+                  "row_index",
+                  "row_identity",
+                  "n_exact",
+                  "sd_exact",
+                  "reported_se",
+                  "recomputed_se_at_display_precision",
+                  "display_precision",
+                  "difference_at_display_precision",
+                  "source_anchors"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "tables": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "table_id": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "applicability": {
+                    "enum": [
+                      "APPLICABLE",
+                      "NOT_APPLICABLE"
+                    ]
+                  },
+                  "eligibility": {
+                    "enum": [
+                      "ELIGIBLE",
+                      "UNSUPPORTED",
+                      "INCOMPLETE",
+                      "NOT_APPLICABLE"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "ELIGIBLE",
+                      "UNSUPPORTED",
+                      "INCOMPLETE",
+                      "NOT_APPLICABLE"
+                    ]
+                  },
+                  "potential_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "checked_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "skipped_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "checked_rows": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "checks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "CONSISTENT_WITH_ROUNDING",
+                            "ARITHMETIC_CANDIDATE"
+                          ]
+                        },
+                        "type": {
+                          "oneOf": [
+                            {
+                              "enum": [
+                                "JATS_SD_SE_N_ARITHMETIC_MISMATCH"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "table_id": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "row_index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        },
+                        "row_identity": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "n_exact": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]{0,9}$"
+                        },
+                        "sd_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "reported_se": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "recomputed_se_at_display_precision": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "display_precision": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 8
+                        },
+                        "difference_at_display_precision": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "source_anchors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "enum": [
+                                  "n",
+                                  "sd",
+                                  "se"
+                                ]
+                              },
+                              "source_anchor": {
+                                "type": "object",
+                                "properties": {
+                                  "source_file": {
+                                    "enum": [
+                                      "source.xml",
+                                      "source.nxml"
+                                    ]
+                                  },
+                                  "source_sha256": {
+                                    "type": "string",
+                                    "pattern": "^[a-f0-9]{64}$"
+                                  },
+                                  "source_format": {
+                                    "enum": [
+                                      "jats_xml"
+                                    ]
+                                  },
+                                  "element_path": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 4000
+                                  },
+                                  "quote": {
+                                    "type": "string",
+                                    "maxLength": 1000
+                                  },
+                                  "start_byte": {
+                                    "oneOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 33554432
+                                      }
+                                    ]
+                                  },
+                                  "end_byte": {
+                                    "oneOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 33554432
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "source_file",
+                                  "source_sha256",
+                                  "source_format",
+                                  "element_path",
+                                  "quote",
+                                  "start_byte",
+                                  "end_byte"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "role",
+                              "source_anchor"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 3,
+                          "maxItems": 3
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "type",
+                        "table_id",
+                        "row_index",
+                        "row_identity",
+                        "n_exact",
+                        "sd_exact",
+                        "reported_se",
+                        "recomputed_se_at_display_precision",
+                        "display_precision",
+                        "difference_at_display_precision",
+                        "source_anchors"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 10000
+                  },
+                  "candidate_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 256
+                  },
+                  "candidates": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "CONSISTENT_WITH_ROUNDING",
+                            "ARITHMETIC_CANDIDATE"
+                          ]
+                        },
+                        "type": {
+                          "oneOf": [
+                            {
+                              "enum": [
+                                "JATS_SD_SE_N_ARITHMETIC_MISMATCH"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "table_id": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "row_index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        },
+                        "row_identity": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "n_exact": {
+                          "type": "string",
+                          "pattern": "^[1-9][0-9]{0,9}$"
+                        },
+                        "sd_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "reported_se": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "recomputed_se_at_display_precision": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "display_precision": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 8
+                        },
+                        "difference_at_display_precision": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "source_anchors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "role": {
+                                "enum": [
+                                  "n",
+                                  "sd",
+                                  "se"
+                                ]
+                              },
+                              "source_anchor": {
+                                "type": "object",
+                                "properties": {
+                                  "source_file": {
+                                    "enum": [
+                                      "source.xml",
+                                      "source.nxml"
+                                    ]
+                                  },
+                                  "source_sha256": {
+                                    "type": "string",
+                                    "pattern": "^[a-f0-9]{64}$"
+                                  },
+                                  "source_format": {
+                                    "enum": [
+                                      "jats_xml"
+                                    ]
+                                  },
+                                  "element_path": {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 4000
+                                  },
+                                  "quote": {
+                                    "type": "string",
+                                    "maxLength": 1000
+                                  },
+                                  "start_byte": {
+                                    "oneOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 33554432
+                                      }
+                                    ]
+                                  },
+                                  "end_byte": {
+                                    "oneOf": [
+                                      {
+                                        "type": "null"
+                                      },
+                                      {
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "maximum": 33554432
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "source_file",
+                                  "source_sha256",
+                                  "source_format",
+                                  "element_path",
+                                  "quote",
+                                  "start_byte",
+                                  "end_byte"
+                                ],
+                                "additionalProperties": false
+                              }
+                            },
+                            "required": [
+                              "role",
+                              "source_anchor"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 3,
+                          "maxItems": 3
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "type",
+                        "table_id",
+                        "row_index",
+                        "row_identity",
+                        "n_exact",
+                        "sd_exact",
+                        "reported_se",
+                        "recomputed_se_at_display_precision",
+                        "display_precision",
+                        "difference_at_display_precision",
+                        "source_anchors"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 256
+                  },
+                  "skip_reasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "row_index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        }
+                      },
+                      "required": [
+                        "reason"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 10000
+                  },
+                  "scan_complete": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "table_id",
+                  "applicability",
+                  "eligibility",
+                  "status",
+                  "potential_objects",
+                  "checked_objects",
+                  "skipped_objects",
+                  "checked_rows",
+                  "checks",
+                  "candidate_count",
+                  "candidates",
+                  "skip_reasons",
+                  "scan_complete"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 1000
+            },
+            "scan_complete": {
+              "type": "boolean"
+            },
+            "limitations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "detector_id",
+            "operand_unit",
+            "rounding_policy",
+            "findings",
+            "tables",
+            "scan_complete",
+            "limitations"
+          ],
+          "additionalProperties": false
+        },
+        "source_mapped_sample_flow": {
+          "type": "object",
+          "properties": {
+            "detector_id": {
+              "enum": [
+                "jats_sample_flow_arithmetic"
+              ]
+            },
+            "flows": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^source-flow-[0-9]{4}$"
+                  },
+                  "status": {
+                    "enum": [
+                      "FLOW_BALANCED",
+                      "FLOW_ARITHMETIC_CANDIDATE",
+                      "FLOW_RELATION_AMBIGUOUS",
+                      "UNSUPPORTED"
+                    ]
+                  },
+                  "reason": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "source_anchor": {
+                    "type": "object",
+                    "properties": {
+                      "source_file": {
+                        "enum": [
+                          "source.xml",
+                          "source.nxml"
+                        ]
+                      },
+                      "source_sha256": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "source_format": {
+                        "enum": [
+                          "jats_xml"
+                        ]
+                      },
+                      "element_path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      },
+                      "quote": {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      "start_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      },
+                      "end_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "source_file",
+                      "source_sha256",
+                      "source_format",
+                      "element_path",
+                      "quote",
+                      "start_byte",
+                      "end_byte"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "operands": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "identifier": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "role": {
+                          "enum": [
+                            "total",
+                            "exclusion",
+                            "included"
+                          ]
+                        },
+                        "count": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1000000000000
+                        },
+                        "unit": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "population": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "group": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "timepoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "source_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "identifier",
+                        "role",
+                        "count",
+                        "unit",
+                        "population",
+                        "group",
+                        "timepoint",
+                        "source_anchor"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 66
+                  },
+                  "population": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "identifier": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          },
+                          "count_unit": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "group": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          },
+                          "timepoint": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 500
+                          },
+                          "source_anchor": {
+                            "type": "object",
+                            "properties": {
+                              "source_file": {
+                                "enum": [
+                                  "source.xml",
+                                  "source.nxml"
+                                ]
+                              },
+                              "source_sha256": {
+                                "type": "string",
+                                "pattern": "^[a-f0-9]{64}$"
+                              },
+                              "source_format": {
+                                "enum": [
+                                  "jats_xml"
+                                ]
+                              },
+                              "element_path": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 4000
+                              },
+                              "quote": {
+                                "type": "string",
+                                "maxLength": 1000
+                              },
+                              "start_byte": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 33554432
+                                  }
+                                ]
+                              },
+                              "end_byte": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 33554432
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "source_file",
+                              "source_sha256",
+                              "source_format",
+                              "element_path",
+                              "quote",
+                              "start_byte",
+                              "end_byte"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "identifier",
+                          "label",
+                          "count_unit",
+                          "group",
+                          "timepoint",
+                          "source_anchor"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "stages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "identifier": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "label": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "count": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1000000000000
+                        },
+                        "count_unit": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "scope": {
+                          "type": "object",
+                          "properties": {
+                            "population": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            },
+                            "group": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            },
+                            "timepoint": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            }
+                          },
+                          "required": [
+                            "population",
+                            "group",
+                            "timepoint"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "source_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "identifier",
+                        "label",
+                        "count",
+                        "count_unit",
+                        "scope",
+                        "source_anchor"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 66
+                  },
+                  "transitions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "source_stage": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "target_stage": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "operation": {
+                          "oneOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "explicit": {
+                          "type": "boolean"
+                        },
+                        "disjoint": {
+                          "oneOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "exhaustive": {
+                          "oneOf": [
+                            {
+                              "type": "boolean"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "scope": {
+                          "type": "object",
+                          "properties": {
+                            "population": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            },
+                            "group": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            },
+                            "timepoint": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            }
+                          },
+                          "required": [
+                            "population",
+                            "group",
+                            "timepoint"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "source_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "source_stage",
+                        "target_stage",
+                        "operation",
+                        "explicit",
+                        "disjoint",
+                        "exhaustive",
+                        "scope",
+                        "source_anchor"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 66
+                  },
+                  "exclusions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "identifier": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "count": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 1000000000000
+                        },
+                        "count_unit": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "population": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 1000
+                        },
+                        "group": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "timepoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 500
+                        },
+                        "count_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "reason_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "identifier",
+                        "count",
+                        "count_unit",
+                        "population",
+                        "reason",
+                        "group",
+                        "timepoint",
+                        "count_anchor",
+                        "reason_anchor"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 32
+                  },
+                  "arithmetic_relation": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "total_operand": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "exclusion_operands": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            "minItems": 0,
+                            "maxItems": 32
+                          },
+                          "included_operand": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          },
+                          "operator": {
+                            "oneOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 500
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "explicit": {
+                            "type": "boolean"
+                          },
+                          "disjoint": {
+                            "oneOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "exhaustive": {
+                            "oneOf": [
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "sequential": {
+                            "type": "boolean"
+                          },
+                          "source_anchor": {
+                            "type": "object",
+                            "properties": {
+                              "source_file": {
+                                "enum": [
+                                  "source.xml",
+                                  "source.nxml"
+                                ]
+                              },
+                              "source_sha256": {
+                                "type": "string",
+                                "pattern": "^[a-f0-9]{64}$"
+                              },
+                              "source_format": {
+                                "enum": [
+                                  "jats_xml"
+                                ]
+                              },
+                              "element_path": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 4000
+                              },
+                              "quote": {
+                                "type": "string",
+                                "maxLength": 1000
+                              },
+                              "start_byte": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 33554432
+                                  }
+                                ]
+                              },
+                              "end_byte": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 33554432
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "source_file",
+                              "source_sha256",
+                              "source_format",
+                              "element_path",
+                              "quote",
+                              "start_byte",
+                              "end_byte"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "operand_anchors": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "source_file": {
+                                  "enum": [
+                                    "source.xml",
+                                    "source.nxml"
+                                  ]
+                                },
+                                "source_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "source_format": {
+                                  "enum": [
+                                    "jats_xml"
+                                  ]
+                                },
+                                "element_path": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 4000
+                                },
+                                "quote": {
+                                  "type": "string",
+                                  "maxLength": 1000
+                                },
+                                "start_byte": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 33554432
+                                    }
+                                  ]
+                                },
+                                "end_byte": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 33554432
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "source_file",
+                                "source_sha256",
+                                "source_format",
+                                "element_path",
+                                "quote",
+                                "start_byte",
+                                "end_byte"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "minItems": 0,
+                            "maxItems": 34
+                          }
+                        },
+                        "required": [
+                          "total_operand",
+                          "exclusion_operands",
+                          "included_operand",
+                          "operator",
+                          "explicit",
+                          "disjoint",
+                          "exhaustive",
+                          "sequential",
+                          "source_anchor",
+                          "operand_anchors"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "arithmetic_status": {
+                    "enum": [
+                      "FLOW_BALANCED",
+                      "FLOW_ARITHMETIC_CANDIDATE",
+                      "FLOW_RELATION_AMBIGUOUS",
+                      "UNSUPPORTED"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "status",
+                  "reason",
+                  "source_anchor",
+                  "operands",
+                  "population",
+                  "stages",
+                  "transitions",
+                  "exclusions",
+                  "arithmetic_relation",
+                  "arithmetic_status"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^jats-sample-flow-[0-9]{4}$"
+                  },
+                  "type": {
+                    "enum": [
+                      "JATS_SAMPLE_FLOW_ARITHMETIC_MISMATCH"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "CANDIDATE_ANOMALY"
+                    ]
+                  },
+                  "source_total_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                  },
+                  "excluded_values_exact": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                    },
+                    "minItems": 2,
+                    "maxItems": 32
+                  },
+                  "reported_included_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                  },
+                  "expected_included_exact": {
+                    "type": "string",
+                    "pattern": "^-?(?:0|[1-9][0-9]{0,13})$"
+                  },
+                  "difference_exact": {
+                    "type": "string",
+                    "pattern": "^-?(?:0|[1-9][0-9]{0,13})$"
+                  },
+                  "source_anchors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "source_file": {
+                          "enum": [
+                            "source.xml",
+                            "source.nxml"
+                          ]
+                        },
+                        "source_sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "source_format": {
+                          "enum": [
+                            "jats_xml"
+                          ]
+                        },
+                        "element_path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4000
+                        },
+                        "quote": {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        "start_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        },
+                        "end_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_file",
+                        "source_sha256",
+                        "source_format",
+                        "element_path",
+                        "quote",
+                        "start_byte",
+                        "end_byte"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 4,
+                    "maxItems": 35
+                  },
+                  "interpretation": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "required_review": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "status",
+                  "source_total_exact",
+                  "excluded_values_exact",
+                  "reported_included_exact",
+                  "expected_included_exact",
+                  "difference_exact",
+                  "source_anchors",
+                  "interpretation",
+                  "required_review"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "status": {
+              "enum": [
+                "ELIGIBLE",
+                "UNSUPPORTED",
+                "INCOMPLETE",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "potential_objects": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "applicable_objects": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "eligible_objects": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "checked_objects": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "skipped_objects": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "candidate_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 256
+            },
+            "scan_complete": {
+              "type": "boolean"
+            },
+            "limitations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "detector_id",
+            "flows",
+            "findings",
+            "status",
+            "potential_objects",
+            "applicable_objects",
+            "eligible_objects",
+            "checked_objects",
+            "skipped_objects",
+            "candidate_count",
+            "scan_complete",
+            "limitations"
+          ],
+          "additionalProperties": false
+        },
+        "prisma_synthesis_flow": {
+          "type": "object",
+          "properties": {
+            "detector_id": {
+              "enum": [
+                "prisma_synthesis_flow"
+              ]
+            },
+            "status": {
+              "enum": [
+                "ELIGIBLE",
+                "UNSUPPORTED",
+                "INCOMPLETE",
+                "NOT_APPLICABLE"
+              ]
+            },
+            "objects": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "figure"
+                        ]
+                      },
+                      "label": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "caption": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "graphic_present": {
+                        "type": "boolean"
+                      },
+                      "source_anchor": {
+                        "type": "object",
+                        "properties": {
+                          "source_file": {
+                            "enum": [
+                              "source.xml",
+                              "source.nxml"
+                            ]
+                          },
+                          "source_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "source_format": {
+                            "enum": [
+                              "jats_xml"
+                            ]
+                          },
+                          "element_path": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4000
+                          },
+                          "quote": {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          "start_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          },
+                          "end_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "source_file",
+                          "source_sha256",
+                          "source_format",
+                          "element_path",
+                          "quote",
+                          "start_byte",
+                          "end_byte"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "label",
+                      "caption",
+                      "graphic_present",
+                      "source_anchor"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "table"
+                        ]
+                      },
+                      "label": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "caption": {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      "source_anchor": {
+                        "type": "object",
+                        "properties": {
+                          "source_file": {
+                            "enum": [
+                              "source.xml",
+                              "source.nxml"
+                            ]
+                          },
+                          "source_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "source_format": {
+                            "enum": [
+                              "jats_xml"
+                            ]
+                          },
+                          "element_path": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4000
+                          },
+                          "quote": {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          "start_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          },
+                          "end_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "source_file",
+                          "source_sha256",
+                          "source_format",
+                          "element_path",
+                          "quote",
+                          "start_byte",
+                          "end_byte"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "label",
+                      "caption",
+                      "source_anchor"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "enum": [
+                          "prose"
+                        ]
+                      },
+                      "text": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      },
+                      "source_anchor": {
+                        "type": "object",
+                        "properties": {
+                          "source_file": {
+                            "enum": [
+                              "source.xml",
+                              "source.nxml"
+                            ]
+                          },
+                          "source_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "source_format": {
+                            "enum": [
+                              "jats_xml"
+                            ]
+                          },
+                          "element_path": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4000
+                          },
+                          "quote": {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          "start_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          },
+                          "end_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "source_file",
+                          "source_sha256",
+                          "source_format",
+                          "element_path",
+                          "quote",
+                          "start_byte",
+                          "end_byte"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "text",
+                      "source_anchor"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "relations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "enum": [
+                      "PRISMA_FLOW_BALANCED",
+                      "PRISMA_FLOW_ARITHMETIC_CANDIDATE",
+                      "UNSUPPORTED"
+                    ]
+                  },
+                  "reason": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 500
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "unit": {
+                    "const": "records"
+                  },
+                  "records_identified_exact": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "duplicates_removed_exact": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "records_screened_exact": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "expected_screened_exact": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "difference_exact": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^-?(?:0|[1-9][0-9]{0,12})$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "source_anchors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "enum": [
+                            "records_identified",
+                            "duplicates_removed",
+                            "records_screened",
+                            "transition",
+                            "relation"
+                          ]
+                        },
+                        "source_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "role",
+                        "source_anchor"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1,
+                    "maxItems": 4
+                  }
+                },
+                "required": [
+                  "status",
+                  "reason",
+                  "unit",
+                  "records_identified_exact",
+                  "duplicates_removed_exact",
+                  "records_screened_exact",
+                  "expected_screened_exact",
+                  "difference_exact",
+                  "source_anchors"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^jats-prisma-flow-[0-9]{4}$"
+                  },
+                  "type": {
+                    "enum": [
+                      "JATS_PRISMA_FLOW_ARITHMETIC_MISMATCH"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "CANDIDATE_ANOMALY"
+                    ]
+                  },
+                  "records_identified_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                  },
+                  "duplicates_removed_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                  },
+                  "reported_screened_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                  },
+                  "expected_screened_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                  },
+                  "difference_exact": {
+                    "type": "string",
+                    "pattern": "^-?(?:0|[1-9][0-9]{0,12})$"
+                  },
+                  "source_anchors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "source_file": {
+                          "enum": [
+                            "source.xml",
+                            "source.nxml"
+                          ]
+                        },
+                        "source_sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "source_format": {
+                          "enum": [
+                            "jats_xml"
+                          ]
+                        },
+                        "element_path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4000
+                        },
+                        "quote": {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        "start_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        },
+                        "end_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_file",
+                        "source_sha256",
+                        "source_format",
+                        "element_path",
+                        "quote",
+                        "start_byte",
+                        "end_byte"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 4,
+                    "maxItems": 4
+                  },
+                  "interpretation": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "required_review": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "status",
+                  "records_identified_exact",
+                  "duplicates_removed_exact",
+                  "reported_screened_exact",
+                  "expected_screened_exact",
+                  "difference_exact",
+                  "source_anchors",
+                  "interpretation",
+                  "required_review"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "scan_complete": {
+              "type": "boolean"
+            },
+            "limitations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 16
+            },
+            "image_contents_read": {
+              "const": false
+            },
+            "ocr_performed": {
+              "const": false
+            }
+          },
+          "required": [
+            "detector_id",
+            "status",
+            "objects",
+            "relations",
+            "findings",
+            "scan_complete",
+            "limitations",
+            "image_contents_read",
+            "ocr_performed"
+          ],
+          "additionalProperties": false
+        },
+        "jats_unadjusted_2x2_odds_ratio": {
+          "type": "object",
+          "properties": {
+            "detector_id": {
+              "enum": [
+                "jats_unadjusted_2x2_odds_ratio"
+              ]
+            },
+            "operand_unit": {
+              "enum": [
+                "explicit_2x2_row"
+              ]
+            },
+            "findings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^jats-unadjusted-2x2-or-[0-9]{4}$"
+                  },
+                  "type": {
+                    "enum": [
+                      "JATS_UNADJUSTED_2X2_ODDS_RATIO_MISMATCH"
+                    ]
+                  },
+                  "status": {
+                    "enum": [
+                      "CANDIDATE_ANOMALY"
+                    ]
+                  },
+                  "table_id": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "row_identity": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "timepoint": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "exposed_events_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                  },
+                  "exposed_non_events_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                  },
+                  "unexposed_events_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                  },
+                  "unexposed_non_events_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                  },
+                  "reported_odds_ratio": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                  },
+                  "exact_numerator": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,19})$"
+                  },
+                  "exact_denominator": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,19})$"
+                  },
+                  "recomputed_at_display_precision": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                  },
+                  "display_precision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 8
+                  },
+                  "source_anchors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "source_file": {
+                          "enum": [
+                            "source.xml",
+                            "source.nxml"
+                          ]
+                        },
+                        "source_sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "source_format": {
+                          "enum": [
+                            "jats_xml"
+                          ]
+                        },
+                        "element_path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4000
+                        },
+                        "quote": {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        "start_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        },
+                        "end_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_file",
+                        "source_sha256",
+                        "source_format",
+                        "element_path",
+                        "quote",
+                        "start_byte",
+                        "end_byte"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 5,
+                    "maxItems": 5
+                  },
+                  "interpretation": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  },
+                  "required_review": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "id",
+                  "type",
+                  "status",
+                  "table_id",
+                  "row_identity",
+                  "timepoint",
+                  "exposed_events_exact",
+                  "exposed_non_events_exact",
+                  "unexposed_events_exact",
+                  "unexposed_non_events_exact",
+                  "reported_odds_ratio",
+                  "exact_numerator",
+                  "exact_denominator",
+                  "recomputed_at_display_precision",
+                  "display_precision",
+                  "source_anchors",
+                  "interpretation",
+                  "required_review"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "tables": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "table_id": {
+                    "type": "string",
+                    "maxLength": 500
+                  },
+                  "status": {
+                    "enum": [
+                      "ELIGIBLE",
+                      "UNSUPPORTED",
+                      "INCOMPLETE",
+                      "NOT_APPLICABLE"
+                    ]
+                  },
+                  "potential_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "applicable_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "eligible_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "checked_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "skipped_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000
+                  },
+                  "candidate_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 256
+                  },
+                  "checks": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "CONSISTENT_WITH_ROUNDING",
+                            "ARITHMETIC_CANDIDATE"
+                          ]
+                        },
+                        "reason": {
+                          "oneOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 500
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "table_id": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "row_index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        },
+                        "row_identity": {
+                          "type": "string",
+                          "maxLength": 2000
+                        },
+                        "timepoint": {
+                          "type": "string",
+                          "maxLength": 500
+                        },
+                        "measure": {
+                          "const": "odds_ratio"
+                        },
+                        "exposed_events_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                        },
+                        "exposed_non_events_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                        },
+                        "unexposed_events_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                        },
+                        "unexposed_non_events_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+                        },
+                        "reported_odds_ratio": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "exact_numerator": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,19})$"
+                        },
+                        "exact_denominator": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,19})$"
+                        },
+                        "recomputed_at_display_precision": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+                        },
+                        "display_precision": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 8
+                        },
+                        "source_anchors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "source_file": {
+                                "enum": [
+                                  "source.xml",
+                                  "source.nxml"
+                                ]
+                              },
+                              "source_sha256": {
+                                "type": "string",
+                                "pattern": "^[a-f0-9]{64}$"
+                              },
+                              "source_format": {
+                                "enum": [
+                                  "jats_xml"
+                                ]
+                              },
+                              "element_path": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 4000
+                              },
+                              "quote": {
+                                "type": "string",
+                                "maxLength": 1000
+                              },
+                              "start_byte": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 33554432
+                                  }
+                                ]
+                              },
+                              "end_byte": {
+                                "oneOf": [
+                                  {
+                                    "type": "null"
+                                  },
+                                  {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 33554432
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "source_file",
+                              "source_sha256",
+                              "source_format",
+                              "element_path",
+                              "quote",
+                              "start_byte",
+                              "end_byte"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "minItems": 5,
+                          "maxItems": 5
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "reason",
+                        "table_id",
+                        "row_index",
+                        "row_identity",
+                        "timepoint",
+                        "measure",
+                        "exposed_events_exact",
+                        "exposed_non_events_exact",
+                        "unexposed_events_exact",
+                        "unexposed_non_events_exact",
+                        "reported_odds_ratio",
+                        "exact_numerator",
+                        "exact_denominator",
+                        "recomputed_at_display_precision",
+                        "display_precision",
+                        "source_anchors"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 1
+                  },
+                  "skip_reasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "reason": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 200
+                        },
+                        "row_index": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 10000
+                        }
+                      },
+                      "required": [
+                        "reason"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "minItems": 0,
+                    "maxItems": 16
+                  },
+                  "scan_complete": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "table_id",
+                  "status",
+                  "potential_objects",
+                  "applicable_objects",
+                  "eligible_objects",
+                  "checked_objects",
+                  "skipped_objects",
+                  "candidate_count",
+                  "checks",
+                  "skip_reasons",
+                  "scan_complete"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 0,
+              "maxItems": 1000
+            },
+            "scan_complete": {
+              "type": "boolean"
+            },
+            "limitations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "minItems": 0,
+              "maxItems": 100
+            }
+          },
+          "required": [
+            "detector_id",
+            "operand_unit",
+            "findings",
+            "tables",
+            "scan_complete",
+            "limitations"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -2652,11 +6792,777 @@
               "required_review"
             ],
             "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^jats-cell-ratio-percentage-[0-9]{4}$"
+              },
+              "type": {
+                "enum": [
+                  "JATS_CELL_RATIO_PERCENTAGE_MISMATCH"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "CANDIDATE_ANOMALY"
+                ]
+              },
+              "table_key": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "table_id": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "table_label": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "table_caption": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "row_identity": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "numerator_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+              },
+              "denominator_exact": {
+                "type": "string",
+                "pattern": "^[1-9][0-9]{0,8}$"
+              },
+              "reported_percent": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$"
+              },
+              "recomputed_percent": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,8})?$"
+              },
+              "recomputed_at_display_precision": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$"
+              },
+              "display_precision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6
+              },
+              "source_anchors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_file": {
+                      "enum": [
+                        "source.xml",
+                        "source.nxml"
+                      ]
+                    },
+                    "source_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "source_format": {
+                      "enum": [
+                        "jats_xml"
+                      ]
+                    },
+                    "element_path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    },
+                    "quote": {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    "start_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    },
+                    "end_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "source_file",
+                    "source_sha256",
+                    "source_format",
+                    "element_path",
+                    "quote",
+                    "start_byte",
+                    "end_byte"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1,
+                "maxItems": 1
+              },
+              "interpretation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "required_review": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "status",
+              "table_key",
+              "table_id",
+              "table_label",
+              "table_caption",
+              "row_identity",
+              "numerator_exact",
+              "denominator_exact",
+              "reported_percent",
+              "recomputed_percent",
+              "recomputed_at_display_precision",
+              "display_precision",
+              "source_anchors",
+              "interpretation",
+              "required_review"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^jats-sd-se-n-[0-9]{4}$"
+              },
+              "type": {
+                "enum": [
+                  "JATS_SD_SE_N_ARITHMETIC_MISMATCH"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "CANDIDATE_ANOMALY"
+                ]
+              },
+              "table_id": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "row_index": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "row_identity": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "n_exact": {
+                "type": "string",
+                "pattern": "^[1-9][0-9]{0,9}$"
+              },
+              "sd_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+              },
+              "reported_se": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+              },
+              "recomputed_se_at_display_precision": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+              },
+              "display_precision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "difference_at_display_precision": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+              },
+              "source_anchors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "enum": [
+                        "n",
+                        "sd",
+                        "se"
+                      ]
+                    },
+                    "source_anchor": {
+                      "type": "object",
+                      "properties": {
+                        "source_file": {
+                          "enum": [
+                            "source.xml",
+                            "source.nxml"
+                          ]
+                        },
+                        "source_sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "source_format": {
+                          "enum": [
+                            "jats_xml"
+                          ]
+                        },
+                        "element_path": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4000
+                        },
+                        "quote": {
+                          "type": "string",
+                          "maxLength": 1000
+                        },
+                        "start_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        },
+                        "end_byte": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 33554432
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "source_file",
+                        "source_sha256",
+                        "source_format",
+                        "element_path",
+                        "quote",
+                        "start_byte",
+                        "end_byte"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "role",
+                    "source_anchor"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 3,
+                "maxItems": 3
+              },
+              "interpretation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "required_review": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "status",
+              "table_id",
+              "row_index",
+              "row_identity",
+              "n_exact",
+              "sd_exact",
+              "reported_se",
+              "recomputed_se_at_display_precision",
+              "display_precision",
+              "difference_at_display_precision",
+              "source_anchors",
+              "interpretation",
+              "required_review"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^jats-sample-flow-[0-9]{4}$"
+              },
+              "type": {
+                "enum": [
+                  "JATS_SAMPLE_FLOW_ARITHMETIC_MISMATCH"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "CANDIDATE_ANOMALY"
+                ]
+              },
+              "source_total_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+              },
+              "excluded_values_exact": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+                },
+                "minItems": 2,
+                "maxItems": 32
+              },
+              "reported_included_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+              },
+              "expected_included_exact": {
+                "type": "string",
+                "pattern": "^-?(?:0|[1-9][0-9]{0,13})$"
+              },
+              "difference_exact": {
+                "type": "string",
+                "pattern": "^-?(?:0|[1-9][0-9]{0,13})$"
+              },
+              "source_anchors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_file": {
+                      "enum": [
+                        "source.xml",
+                        "source.nxml"
+                      ]
+                    },
+                    "source_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "source_format": {
+                      "enum": [
+                        "jats_xml"
+                      ]
+                    },
+                    "element_path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    },
+                    "quote": {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    "start_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    },
+                    "end_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "source_file",
+                    "source_sha256",
+                    "source_format",
+                    "element_path",
+                    "quote",
+                    "start_byte",
+                    "end_byte"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 4,
+                "maxItems": 35
+              },
+              "interpretation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "required_review": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "status",
+              "source_total_exact",
+              "excluded_values_exact",
+              "reported_included_exact",
+              "expected_included_exact",
+              "difference_exact",
+              "source_anchors",
+              "interpretation",
+              "required_review"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^jats-prisma-flow-[0-9]{4}$"
+              },
+              "type": {
+                "enum": [
+                  "JATS_PRISMA_FLOW_ARITHMETIC_MISMATCH"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "CANDIDATE_ANOMALY"
+                ]
+              },
+              "records_identified_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+              },
+              "duplicates_removed_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+              },
+              "reported_screened_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+              },
+              "expected_screened_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,12})$"
+              },
+              "difference_exact": {
+                "type": "string",
+                "pattern": "^-?(?:0|[1-9][0-9]{0,12})$"
+              },
+              "source_anchors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_file": {
+                      "enum": [
+                        "source.xml",
+                        "source.nxml"
+                      ]
+                    },
+                    "source_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "source_format": {
+                      "enum": [
+                        "jats_xml"
+                      ]
+                    },
+                    "element_path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    },
+                    "quote": {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    "start_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    },
+                    "end_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "source_file",
+                    "source_sha256",
+                    "source_format",
+                    "element_path",
+                    "quote",
+                    "start_byte",
+                    "end_byte"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 4,
+                "maxItems": 4
+              },
+              "interpretation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "required_review": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "status",
+              "records_identified_exact",
+              "duplicates_removed_exact",
+              "reported_screened_exact",
+              "expected_screened_exact",
+              "difference_exact",
+              "source_anchors",
+              "interpretation",
+              "required_review"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^jats-unadjusted-2x2-or-[0-9]{4}$"
+              },
+              "type": {
+                "enum": [
+                  "JATS_UNADJUSTED_2X2_ODDS_RATIO_MISMATCH"
+                ]
+              },
+              "status": {
+                "enum": [
+                  "CANDIDATE_ANOMALY"
+                ]
+              },
+              "table_id": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "row_identity": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "timepoint": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "exposed_events_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+              },
+              "exposed_non_events_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+              },
+              "unexposed_events_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+              },
+              "unexposed_non_events_exact": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})$"
+              },
+              "reported_odds_ratio": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+              },
+              "exact_numerator": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,19})$"
+              },
+              "exact_denominator": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,19})$"
+              },
+              "recomputed_at_display_precision": {
+                "type": "string",
+                "pattern": "^(?:0|[1-9][0-9]{0,9})(?:\\.[0-9]{1,8})?$"
+              },
+              "display_precision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "source_anchors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_file": {
+                      "enum": [
+                        "source.xml",
+                        "source.nxml"
+                      ]
+                    },
+                    "source_sha256": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "source_format": {
+                      "enum": [
+                        "jats_xml"
+                      ]
+                    },
+                    "element_path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    },
+                    "quote": {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    "start_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    },
+                    "end_byte": {
+                      "oneOf": [
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 33554432
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "source_file",
+                    "source_sha256",
+                    "source_format",
+                    "element_path",
+                    "quote",
+                    "start_byte",
+                    "end_byte"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 5,
+                "maxItems": 5
+              },
+              "interpretation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              },
+              "required_review": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "status",
+              "table_id",
+              "row_identity",
+              "timepoint",
+              "exposed_events_exact",
+              "exposed_non_events_exact",
+              "unexposed_events_exact",
+              "unexposed_non_events_exact",
+              "reported_odds_ratio",
+              "exact_numerator",
+              "exact_denominator",
+              "recomputed_at_display_precision",
+              "display_precision",
+              "source_anchors",
+              "interpretation",
+              "required_review"
+            ],
+            "additionalProperties": false
           }
         ]
       },
       "minItems": 0,
-      "maxItems": 322
+      "maxItems": 1200
     },
     "possible_scope_differences": {
       "type": "array",
@@ -2831,11 +7737,16 @@
           "explicit_count_marker_scan",
           "markdown_table_percentage_recomputation",
           "explicit_exclusion_flow_arithmetic_screen",
-          "jats_table_percentage_recomputation"
+          "jats_table_percentage_recomputation",
+          "jats_cell_ratio_percentage_recomputation",
+          "jats_sd_se_n_recomputation",
+          "jats_sample_flow_arithmetic",
+          "prisma_synthesis_flow",
+          "jats_unadjusted_2x2_odds_ratio"
         ]
       },
       "minItems": 0,
-      "maxItems": 3
+      "maxItems": 9
     },
     "verified_findings": {
       "type": "array",
@@ -2853,7 +7764,7 @@
         "maxLength": 1000
       },
       "minItems": 0,
-      "maxItems": 322
+      "maxItems": 1200
     },
     "unsupported_checks": {
       "type": "array",
@@ -2906,5 +7817,48 @@
     "paper_error_established",
     "meaning"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "paper_audit_version": {
+            "const": "0.4"
+          }
+        },
+        "required": [
+          "paper_audit_version"
+        ]
+      },
+      "then": {
+        "required": [
+          "coverage"
+        ],
+        "properties": {
+          "arithmetic_screens": {
+            "required": [
+              "cell_ratio_percentages",
+              "sd_se_n_statistics",
+              "source_mapped_sample_flow",
+              "prisma_synthesis_flow",
+              "jats_unadjusted_2x2_odds_ratio"
+            ]
+          },
+          "detector_contracts": {
+            "items": {
+              "required": [
+                "supported_source_formats",
+                "required_document_objects",
+                "scope_requirements",
+                "unit_requirements",
+                "statistical_assumptions",
+                "ambiguity_conditions",
+                "outputs"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
 }

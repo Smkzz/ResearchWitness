@@ -10,7 +10,7 @@ from typing import Iterable
 import re
 
 from .paper_document import (
-    CellSpan, NumericAssertion, NumericValue, PaperDocument, Paragraph, Section,
+    CellSpan, Figure, NumericAssertion, NumericValue, PaperDocument, Paragraph, Section,
     SourceAnchor, Table, TableCell, TableColumn, TableFootnote, TableRow,
 )
 from .strict import Invalid
@@ -23,6 +23,7 @@ MAX_TABLE_COLUMNS = 256
 MAX_TABLE_ROWS = 10_000
 MAX_JATS_TABLES = 1_000
 MAX_JATS_TABLE_CELLS = 50_000
+MAX_JATS_FIGURES = 1_000
 MAX_SPAN = 256
 
 _COUNT_PERCENT = re.compile(
@@ -565,8 +566,11 @@ def parse_jats(source: bytes, source_file: str = 'source.xml') -> PaperDocument:
     paragraphs: list[Paragraph] = []
 
     table_nodes = [node for node in _descendants(root, {'table-wrap'})]
+    figure_nodes = [node for node in _descendants(root, {'fig'})]
     if len(table_nodes) > MAX_JATS_TABLES:
         raise Invalid('JATS source exceeded the configured table limit')
+    if len(figure_nodes) > MAX_JATS_FIGURES:
+        raise Invalid('JATS source exceeded the configured figure limit')
     table_cell_count = sum(
         1 for wrap in table_nodes for node in _descendants(wrap)
         if node.name in ('td', 'th', 'entry')
@@ -587,6 +591,22 @@ def parse_jats(source: bytes, source_file: str = 'source.xml') -> PaperDocument:
         all_tables.append(table)
         assertions.extend(table_assertions)
         table_by_path[wrap.element_path] = table
+
+    figures: list[Figure] = []
+    for figure_node in figure_nodes:
+        label_node = next((node for node in figure_node.children if node.name == 'label'), None)
+        caption_node = next((node for node in figure_node.children if node.name == 'caption'), None)
+        label = _node_text(label_node)
+        caption = _node_text(caption_node)
+        graphic_present = any(
+            node.name in ('graphic', 'inline-graphic', 'media')
+            for node in _descendants(figure_node)
+        )
+        anchor_quote = (caption or label or _node_text(figure_node))[:1000]
+        figures.append(Figure(
+            label, caption, graphic_present,
+            _anchor(figure_node, source_file, digest, anchor_quote),
+        ))
 
     def paragraph_nodes(section_node: _Node) -> list[_Node]:
         found: list[_Node] = []
@@ -666,7 +686,7 @@ def parse_jats(source: bytes, source_file: str = 'source.xml') -> PaperDocument:
     if len(paragraphs) > 100_000:
         raise Invalid('JATS source exceeded the configured paragraph limit')
     return PaperDocument(
-        model_version='1.0',
+        model_version='1.1',
         source_file=source_file,
         source_sha256=digest,
         source_format='jats_xml',
@@ -676,4 +696,5 @@ def parse_jats(source: bytes, source_file: str = 'source.xml') -> PaperDocument:
         tables=tuple(all_tables),
         numeric_assertions=tuple(assertions),
         extraction_warnings=tuple(warnings),
+        figures=tuple(figures),
     )

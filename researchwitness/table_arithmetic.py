@@ -19,6 +19,7 @@ ROW_LOCAL_DENOMINATOR = re.compile(
     r'\bn\s*=\s*[0-9]+|\bn\s*\(%\)\s*(?:[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰])?',
     re.IGNORECASE,
 )
+MAX_TABLE_PERCENTAGE_FINDINGS = 256
 
 
 def _as_dict(anchor: SourceAnchor) -> dict[str, Any]:
@@ -239,6 +240,10 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                 checked_cells += 1
                 if reported == rounded:
                     continue
+                if len(findings) >= MAX_TABLE_PERCENTAGE_FINDINGS:
+                    reasons.append('STRUCTURED_TABLE_CANDIDATE_LIMIT')
+                    incomplete = True
+                    continue
                 label_cell = next((item for item in row.cells if item.column_start == 0), None)
                 source_anchors = [_as_dict(denominator_cell.source_anchor)]
                 if label_cell is not None:
@@ -282,6 +287,7 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
             'FOOTNOTED_OR_SCOPED_ROW_LABEL', 'LOCAL_GROUP_DENOMINATOR_INDICATED',
             'PERCENT_UNIT_NOT_EXPLICIT', 'INVALID_REPORTED_PERCENTAGE',
             'OPERANDS_OUTSIDE_PROPORTION_DOMAIN',
+            'STRUCTURED_TABLE_CANDIDATE_LIMIT',
         }
         if not found_count_pair:
             result_status = 'NOT_APPLICABLE'

@@ -244,7 +244,7 @@ def check_paper_audit_development_results() -> None:
 
 
 def check_source_checksums() -> None:
-    from tools.make_release import included_files
+    from tools.make_release import checksum_files
 
     manifest = ROOT / 'CHECKSUMS.sha256'
     recorded = {}
@@ -253,8 +253,7 @@ def check_source_checksums() -> None:
         if relative in recorded:
             raise RuntimeError(f'duplicate source checksum entry: {relative}')
         recorded[relative] = expected
-    files = {path.relative_to(ROOT).as_posix(): path
-             for path in included_files(include_checksums=False)}
+    files = {path.relative_to(ROOT).as_posix(): path for path in checksum_files()}
     if set(recorded) != set(files):
         raise RuntimeError('source checksum manifest does not match release-file selection')
     for relative, path in files.items():
@@ -384,7 +383,7 @@ def main() -> int:
         if schema['title'] != 'ResearchWitness agent intake 0.1':
             raise RuntimeError('installed intake schema command failed')
         paper_schema = json.loads(run(str(cli), 'schema', 'paper-audit', cwd=temp).stdout)
-        if paper_schema['title'] != 'ResearchWitness bounded paper-screening report 0.3':
+        if paper_schema['title'] != 'ResearchWitness bounded paper-screening report 0.4':
             raise RuntimeError('installed paper-audit schema command failed')
         paper_result = json.loads(run(
             str(cli), 'paper-audit', str(ROOT / 'examples/paper-audit/paper.md'),

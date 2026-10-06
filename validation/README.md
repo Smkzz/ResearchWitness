@@ -6,6 +6,10 @@
 - `verifier-wave/performance.json` — representative bounded checker timings; not a discovery benchmark.
 - `development-start-2026-10-06.json` — the baseline captured at the start of the review-ledger/statistics/paper-screening continuation. The original worktree was already dirty, so its results do not describe the committed baseline alone.
 - `../tests/test_paper_audit.py` — synthetic software controls for the narrow count-marker scan and optional PDF extraction; these are not a source-pinned paper corpus.
+- `paper-audit-capability-wave-2/` — wave 2 baseline, aggregate-only post-hoc eligibility and replay metrics, detector regression evidence, and aggregate validation of earlier off-target candidates. Public artifacts omit individual source identifiers, hashes, arithmetic, and candidate records. Replaying against source material requires private local inputs; no source XML or full replay reports are included here.
+- `../docs/PAPER_AUDIT_CAPABILITIES.md` — concise source-format boundaries and active, experimental, helper-only, and unsupported detector families.
+
+The package checksum manifest omits the case-level source-corpus directories so it does not duplicate their per-paper paths and hashes. The wave-2 aggregate artifacts remain covered by the checksum manifest; source replay uses the pinned manifests and local source inputs.
 
 The historical screen is intentionally kept frozen so verifier coverage can be compared without changing the corpus after implementation.
 

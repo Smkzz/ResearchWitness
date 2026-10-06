@@ -92,6 +92,16 @@ class TableFootnote:
 
 
 @dataclass(frozen=True, slots=True)
+class Figure:
+    """A source-mapped JATS figure caption; embedded image content is not decoded."""
+
+    label: str
+    caption: str
+    graphic_present: bool
+    source_anchor: SourceAnchor
+
+
+@dataclass(frozen=True, slots=True)
 class Table:
     label: str
     caption: str
@@ -147,6 +157,7 @@ class PaperDocument:
     tables: tuple[Table, ...]
     numeric_assertions: tuple[NumericAssertion, ...]
     extraction_warnings: tuple[str, ...]
+    figures: tuple[Figure, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the immutable model using JSON-compatible values."""
