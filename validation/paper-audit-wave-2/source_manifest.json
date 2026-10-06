@@ -1,0 +1,293 @@
+{
+  "renderer": "jats-markdown-v1",
+  "papers": [
+    {
+      "paper_id": "paper-001",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-001.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5159991/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC5159991; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62"
+      }
+    },
+    {
+      "paper_id": "paper-002",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-002.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9368673/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC9368673; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "7da8e83261a6c6686a3b489eaf55b42018fa778eb37819de90fcb5123e4dd0db"
+      }
+    },
+    {
+      "paper_id": "paper-003",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-003.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10951853/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC10951853; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "f4dfc91903e00d50a72f972c03507b2ba8096e2bca08f2df2d1a109a72c437f8"
+      }
+    },
+    {
+      "paper_id": "paper-004",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-004.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7000506/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC7000506; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "23cff00ff2edb855bcf0d29b240e393af653445d2c569c0bc865729df90dcf0f"
+      }
+    },
+    {
+      "paper_id": "paper-005",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-005.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8192898/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC8192898; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "4081c871df99da1eb20d6a2503251f85ef82bd54227b3bad99c263e65e583661"
+      }
+    },
+    {
+      "paper_id": "paper-006",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-006.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7788467/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC7788467; original article record as present on 2026-10-06",
+        "license": "cc by; open-access article statement in source XML",
+        "sha256": "dd9811080719430faaa86cce134d348d377fe668ca5ec510e217f7d673f66263"
+      }
+    },
+    {
+      "paper_id": "paper-007",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-007.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5549998/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC5549998; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "32be06bc79f9d2144cb12044baf55367d468d9a8d54f3d86d69087f7fc6bc269"
+      }
+    },
+    {
+      "paper_id": "paper-008",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-008.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9632307/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC9632307; original article record as present on 2026-10-06",
+        "license": "cc by-nc 4.0; https://creativecommons.org/licenses/by-nc/4.0/",
+        "sha256": "cbcec59d2218d6ad2d383b88dc673b84bf5fc6ad9f11e80cfbec6a0605eb9c1d"
+      }
+    },
+    {
+      "paper_id": "paper-009",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-009.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10043391/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC10043391; original article record as present on 2026-10-06",
+        "license": "cc by; open-access article statement in source XML",
+        "sha256": "2e5e9b06cbe6795418dd01e266372535354d1702637e28d2e3c5eab482530995"
+      }
+    },
+    {
+      "paper_id": "paper-010",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-010.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5739437/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC5739437; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "4d9feaa709e6d1c1e9a71608b1f1a69d15e85822beb387c93e8fdb4c6da679d2"
+      }
+    },
+    {
+      "paper_id": "paper-011",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-011.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11137408/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC11137408; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "f754ed8def6a75508e37d0d1f68adaee704c425db53c4994560bd8a8bfbea9f9"
+      }
+    },
+    {
+      "paper_id": "paper-012",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-012.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4414531/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC4414531; original article record as present on 2026-10-06",
+        "license": "cc by; open-access article statement in source XML",
+        "sha256": "b134734b9e9334bd4deeb911ed0fc6236e9a6539d3424d310ed2dd59f31f12d5"
+      }
+    },
+    {
+      "paper_id": "paper-013",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-013.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4395366/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC4395366; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "23d876eb6ac33f8e4219efdac5eb6c3388a074e5d0d61e0bf6c2c2e2dd6db973"
+      }
+    },
+    {
+      "paper_id": "paper-014",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-014.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC3844491/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC3844491; original article record as present on 2026-10-06",
+        "license": "cc by 2.0; https://creativecommons.org/licenses/by/2.0/",
+        "sha256": "72b6bcf35edf24ec8cf2038f72cb33ab106fb6f876becef64de195c6d6a19c8c"
+      }
+    },
+    {
+      "paper_id": "paper-015",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-015.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7247139/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC7247139; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "101441e755204573efaca64d2179dbef7ae2b3fb44f4ed70720f7f6ef6163e6d"
+      }
+    },
+    {
+      "paper_id": "paper-016",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-016.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4838709/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC4838709; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "d9ede6f2fe89fc9839fc389295156f029c6c67da5f950c9b1f74212e85aa8a2b"
+      }
+    },
+    {
+      "paper_id": "paper-017",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-017.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11573134/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC11573134; original article record as present on 2026-10-06",
+        "license": "cc by; open-access article statement in source XML",
+        "sha256": "82a2723110909e88c1c42af5d9b99ebf5b8040c7a7c6503fd796ceaa356ba0e5"
+      }
+    },
+    {
+      "paper_id": "paper-018",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-018.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4823439/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC4823439; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "54d68bf0108bf50d0028d886518f9286ee858676b6f2eb2f1b69e372ae05c50f"
+      }
+    },
+    {
+      "paper_id": "paper-019",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-019.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11495070/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC11495070; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "78c980ce9cd0282287c8f9cc04c5d7d0b0ca63d226fe4929ad239f621f058d2c"
+      }
+    },
+    {
+      "paper_id": "paper-020",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-020.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6970447/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC current original-record snapshot dated 2026-10-06",
+        "license": "CC BY-NC 4.0; https://creativecommons.org/licenses/by-nc/4.0/",
+        "sha256": "04eabe20acdf46771e15e6e6710ce2ec30dc4ed092662a1332568eae22b1776a"
+      }
+    },
+    {
+      "paper_id": "paper-021",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-021.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11639119/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC11639119; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "f76b95b91af11af65747e01f04f38af60259fa24d8b9a429e43587f7814acabf"
+      }
+    },
+    {
+      "paper_id": "paper-022",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-022.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9365681/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC9365681; original article record as present on 2026-10-06",
+        "license": "PMC Open Access Subset; article notice permits unrestricted research re-use and secondary analysis (not a CC license)",
+        "sha256": "025ebfc1f394545d351f286f1fd293a17cad15719c9941e8a347dfdef3aef0c4"
+      }
+    },
+    {
+      "paper_id": "paper-023",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-023.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC12358233/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC12358233; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "85a7608eadb6f29d780602222a7ec1b3da54ee31520e1564bddfa34815c2738b"
+      }
+    },
+    {
+      "paper_id": "paper-024",
+      "source": {
+        "source_kind": "jats_xml",
+        "snapshot_name": "paper-024.xml",
+        "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10941381/fullTextXML",
+        "retrieved_at": "2026-10-06",
+        "source_version": "Europe PMC fullTextXML JATS snapshot for PMC10941381; original article record as present on 2026-10-06",
+        "license": "cc by 4.0; https://creativecommons.org/licenses/by/4.0/",
+        "sha256": "d78d6cf49b7564112f8d10812f1793e7be3eaeccd097fd6e4d20cb652ffd5578"
+      }
+    }
+  ]
+}
