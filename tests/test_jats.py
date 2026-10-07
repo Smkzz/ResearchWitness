@@ -70,6 +70,9 @@ def test_jats_tables_use_source_linked_model_and_exact_percentage_contract(tmp_p
     assert finding['rounding_tolerance_percentage_points'] == '0.05'
     assert len(finding['source_anchors']) == 3
     assert all(anchor['source_sha256'] == report['source']['sha256'] for anchor in finding['source_anchors'])
+    relation = report['arithmetic_screens']['structured_table_percentages']['relations'][0]
+    assert relation['denominator_source_anchor']['quote'] == 'All (N=20)'
+    assert '/thead[1]/tr[1]/th[2]' in relation['denominator_source_anchor']['element_path']
     assert '/table-wrap[1]/table[1]/tbody[1]/tr[1]/td[1]' in finding['source_anchors'][-1]['element_path']
     assert report['paper_error_established'] is False
     html = (output / 'report.html').read_text(encoding='utf-8')
@@ -96,7 +99,61 @@ def test_direct_cell_ratio_is_reported_with_exact_jats_anchor(tmp_path):
     assert candidate['source_anchors'][0]['element_path'].endswith('/tbody[1]/tr[1]/td[1]')
     ratio_coverage = next(item for item in report['coverage']['detectors']
                           if item['detector_id'] == 'jats_cell_ratio_percentage_recomputation')
+    relation = report['arithmetic_screens']['cell_ratio_percentages']['relations'][0]
+    assert relation['denominator_source_anchor'] == relation['source_anchor']
     assert ratio_coverage['tables'][0]['counts']['operands']['checked'] == 1
+
+
+def test_percentage_coverage_schema_requires_consistent_telemetry_state(tmp_path):
+    _, report, _ = _run_jats(tmp_path, _simple_table())
+    validator = Draft202012Validator(SCHEMA)
+    percentage_ids = {
+        'table_percentage_recomputation',
+        'jats_cell_ratio_percentage_recomputation',
+    }
+
+    def row_for(value):
+        return next(
+            item for item in value['coverage']['detectors']
+            if item['detector_id'] == 'jats_cell_ratio_percentage_recomputation'
+        )
+
+    missing = json.loads(json.dumps(report))
+    row_for(missing).pop('percentage_relation_telemetry_complete')
+    assert list(validator.iter_errors(missing))
+
+    complete_without_summary = json.loads(json.dumps(report))
+    row = row_for(complete_without_summary)
+    row['percentage_relation_telemetry_complete'] = True
+    row['percentage_relation_telemetry'] = None
+    assert list(validator.iter_errors(complete_without_summary))
+
+    incomplete_with_summary = json.loads(json.dumps(report))
+    row = row_for(incomplete_with_summary)
+    row['percentage_relation_telemetry_complete'] = False
+    assert list(validator.iter_errors(incomplete_with_summary))
+
+    incomplete_without_summary = json.loads(json.dumps(report))
+    row = row_for(incomplete_without_summary)
+    row['percentage_relation_telemetry_complete'] = False
+    row['percentage_relation_telemetry'] = None
+    row['status'] = 'INCOMPLETE'
+    assert not list(validator.iter_errors(incomplete_without_summary))
+
+    incomplete_telemetry_eligible_status = json.loads(json.dumps(report))
+    row = row_for(incomplete_telemetry_eligible_status)
+    row['percentage_relation_telemetry_complete'] = False
+    row['percentage_relation_telemetry'] = None
+    assert list(validator.iter_errors(incomplete_telemetry_eligible_status))
+
+    unrelated = json.loads(json.dumps(report))
+    row = next(
+        item for item in unrelated['coverage']['detectors']
+        if item['detector_id'] not in percentage_ids
+    )
+    row['percentage_relation_telemetry_complete'] = False
+    row['percentage_relation_telemetry'] = None
+    assert list(validator.iter_errors(unrelated))
 
 
 def test_source_mapped_flow_candidate_reaches_report_and_coverage(tmp_path):
@@ -202,6 +259,9 @@ def test_structured_percentage_candidate_limit_is_bounded_and_incomplete():
     assert report['scan_complete'] is False
     assert report['tables'][0]['status'] == 'INCOMPLETE'
     assert 'STRUCTURED_TABLE_CANDIDATE_LIMIT' in report['tables'][0]['reasons']
+    assert report['candidate_findings_omitted'] == 1
+    assert report['tables'][0]['checked_mismatches'] == 257
+    assert report['tables'][0]['skipped_relations'] == 0
 
 
 def test_figure_caption_is_source_mapped_without_reading_graphic_content():
@@ -261,8 +321,8 @@ def test_spaced_thousands_denominator_is_not_partially_parsed_as_ten():
 
     result = check_structured_table_percentages(document)
     assert result['findings'] == []
-    assert result['tables'][0]['status'] == 'INCOMPLETE'
-    assert 'NO_EXPLICIT_COLUMN_DENOMINATOR' in result['tables'][0]['reasons']
+    assert result['tables'][0]['status'] == 'UNSUPPORTED'
+    assert 'GROUPED_INTEGER_FORMAT_UNSUPPORTED' in result['tables'][0]['reasons']
     assert document.numeric_assertions == ()
 
 
@@ -311,6 +371,180 @@ def test_local_row_denominator_is_not_replaced_by_the_column_denominator():
     assert result['findings'] == []
     assert result['tables'][0]['status'] == 'INCOMPLETE'
     assert 'LOCAL_ROW_DENOMINATOR' in result['tables'][0]['reasons']
+    assert result['relations'][0]['primary_skip_reason'] == 'LOCAL_ROW_DENOMINATOR'
+
+
+def test_generic_n_percent_row_marker_uses_explicit_denominators_for_each_column():
+    document = parse_jats(_source(
+        '<table-wrap id="generic-n-percent-row"><caption><title>Outcomes</title></caption>'
+        '<table><thead><tr><th>Outcome</th>'
+        '<th>Rivaroxaban combined / DVT and PE patients (N=71)</th>'
+        '<th>DVT-only patients (N=43)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Unchanged, n (%)</th><td>2 (2.8%)</td><td>1 (2.3%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['tables'][0]['status'] == 'ELIGIBLE'
+    assert result['tables'][0]['checked_cells'] == 2
+    assert [item['denominator_exact'] for item in result['relations']] == ['71', '43']
+    assert all(item['status'] == 'ELIGIBLE_CHECKED_MATCH' for item in result['relations'])
+
+
+def test_generic_n_percent_row_marker_supplies_unit_for_percentless_values():
+    document = parse_jats(_source(
+        '<table-wrap id="generic-n-percent-row-no-mark"><caption><title>Outcomes</title></caption>'
+        '<table><thead><tr><th>Outcome</th>'
+        '<th>Rivaroxaban combined / DVT and PE patients (N=71)</th>'
+        '<th>DVT-only patients (N=43)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Unchanged, n (%)</th><td>2 (2.9)</td><td>1 (2.3)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert result['tables'][0]['status'] == 'ELIGIBLE'
+    assert result['tables'][0]['checked_cells'] == 2
+    assert [item['denominator_exact'] for item in result['relations']] == ['71', '43']
+    assert [item['status'] for item in result['relations']] == [
+        'ELIGIBLE_CHECKED_MISMATCH', 'ELIGIBLE_CHECKED_MATCH',
+    ]
+    assert result['relations'][0]['reported_percent'] == '2.9'
+    assert result['findings'][0]['recomputed_at_display_precision'] == '2.8'
+
+
+def test_body_subgroup_denominator_overrides_broader_column_header():
+    document = parse_jats(_source(
+        '<table-wrap id="body-subgroup-denominators"><table><thead><tr><th>Outcome</th>'
+        '<th>Combined treatment (N=43)</th><th>Comparator (N=12)</th></tr></thead><tbody>'
+        '<tr><th scope="row">PE patients</th><td>N = 28</td><td>N = 7</td></tr>'
+        '<tr><th scope="row">Unchanged, n (%)</th><td>2 (7.1)</td><td>1 (14.3)</td></tr>'
+        '<tr><th scope="row">DVT and PE patients</th><td>N = 71</td><td>N = 19</td></tr>'
+        '<tr><th scope="row">Unchanged, n (%)</th><td>2 (2.9)</td><td>1 (5.3)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['tables'][0]['status'] == 'ELIGIBLE'
+    assert [item['denominator_exact'] for item in result['relations']] == ['28', '7', '71', '19']
+    assert [item['status'] for item in result['relations']] == [
+        'ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MATCH',
+        'ELIGIBLE_CHECKED_MISMATCH', 'ELIGIBLE_CHECKED_MATCH',
+    ]
+    assert result['findings'][0]['recomputed_at_display_precision'] == '2.8'
+    assert result['relations'][0]['denominator_source_anchor']['quote'] == 'N = 28'
+    assert result['relations'][2]['denominator_source_anchor']['quote'] == 'N = 71'
+    assert 'tbody[1]/tr[3]/td[1]' in result['relations'][2]['denominator_source_anchor']['element_path']
+    assert 'tbody[1]/tr[3]/td[1]' in result['findings'][0]['source_anchors'][0]['element_path']
+    assert 'explicit JATS denominator applicable to this table section' in result['findings'][0]['interpretation']
+
+
+def test_body_subgroup_with_missing_column_denominator_does_not_fall_back_to_header():
+    document = parse_jats(_source(
+        '<table-wrap id="body-subgroup-missing-denominator"><table><thead><tr><th>Outcome</th>'
+        '<th>Combined treatment (N=43)</th><th>Comparator (N=12)</th></tr></thead><tbody>'
+        '<tr><th scope="row">PE patients</th><td>N = 28</td><td>—</td></tr>'
+        '<tr><th scope="row">Unchanged, n (%)</th><td>2 (7.1)</td><td>1 (8.3)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['relations'][0]['denominator_exact'] == '28'
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MATCH'
+    assert result['relations'][1]['status'] == 'INCOMPLETE'
+    assert result['relations'][1]['primary_skip_reason'] == 'DENOMINATOR_NOT_EXPLICIT'
+    assert result['findings'] == []
+
+
+def test_footnoted_body_subgroup_denominator_stays_incomplete():
+    document = parse_jats(_source(
+        '<table-wrap id="body-subgroup-footnoted-denominator"><table><thead><tr><th>Outcome</th>'
+        '<th>Combined treatment (N=43)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Available-case patients</th><td>N = 28'
+        '<xref ref-type="table-fn" rid="fn1">a</xref></td></tr>'
+        '<tr><th scope="row">Unchanged, n (%)</th><td>2 (7.1)</td></tr>'
+        '</tbody></table><table-wrap-foot><fn id="fn1"><label>a</label>'
+        '<p>Values are based on available cases.</p></fn></table-wrap-foot></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['relations'][0]['status'] == 'INCOMPLETE'
+    assert result['relations'][0]['primary_skip_reason'] == 'FOOTNOTE_SCOPE_UNRESOLVED'
+
+
+def test_grouped_body_subgroup_denominator_stays_unsupported():
+    document = parse_jats(_source(
+        '<table-wrap id="body-subgroup-grouped-denominator"><table><thead><tr><th>Outcome</th>'
+        '<th>Combined treatment (N=43)</th></tr></thead><tbody>'
+        '<tr><th scope="row">All patients</th><td>N = 1,000</td></tr>'
+        '<tr><th scope="row">Unchanged, n (%)</th><td>20 (2.0)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['relations'][0]['status'] == 'UNSUPPORTED'
+    assert result['relations'][0]['primary_skip_reason'] == 'GROUPED_INTEGER_FORMAT_UNSUPPORTED'
+
+
+def test_n_percent_unit_marker_does_not_override_explicit_local_denominator():
+    document = parse_jats(_source(
+        '<table-wrap id="local-n-percent-row"><table><thead><tr><th>Outcome</th>'
+        '<th>Combined patients (N=71)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Unchanged, n (%) (n=10)</th><td>2 (2.8)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['relations'][0]['status'] == 'INCOMPLETE'
+    assert result['relations'][0]['primary_skip_reason'] == 'LOCAL_ROW_DENOMINATOR'
+
+
+def test_n_percent_unit_marker_does_not_override_row_footnote_scope():
+    document = parse_jats(_source(
+        '<table-wrap id="footnoted-n-percent-row"><table><thead><tr><th>Outcome</th>'
+        '<th>Combined patients (N=71)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Unchanged, n (%)<xref ref-type="table-fn" rid="fn1">a</xref></th>'
+        '<td>2 (2.8)</td></tr></tbody></table><table-wrap-foot>'
+        '<fn id="fn1"><label>a</label><p>Available cases only.</p></fn>'
+        '</table-wrap-foot></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['relations'][0]['status'] == 'INCOMPLETE'
+    assert result['relations'][0]['primary_skip_reason'] == 'FOOTNOTE_SCOPE_UNRESOLVED'
+
+
+def test_generic_n_percent_marker_does_not_override_conflicting_column_headers():
+    document = parse_jats(_source(
+        '<table-wrap id="conflicting-header-n-percent"><table><thead>'
+        '<tr><th>Outcome</th><th>All patients (N=71)</th></tr>'
+        '<tr><th></th><th>DVT and PE subgroup (N=43)</th></tr>'
+        '</thead><tbody><tr><th scope="row">Unchanged, n (%)</th><td>2 (2.8)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['tables'][0]['status'] == 'INCOMPLETE'
+    assert result['relations'][0]['primary_skip_reason'] == 'CONFLICTING_HEADER_DENOMINATORS'
 
 
 def test_explicit_category_block_with_smaller_complete_case_denominator_is_incomplete():
@@ -328,7 +562,34 @@ def test_explicit_category_block_with_smaller_complete_case_denominator_is_incom
     result = check_structured_table_percentages(document)
     assert result['findings'] == []
     assert result['tables'][0]['status'] == 'INCOMPLETE'
-    assert 'LOCAL_GROUP_DENOMINATOR_INDICATED' in result['tables'][0]['reasons']
+    assert 'LOCAL_ROW_DENOMINATOR' in result['tables'][0]['reasons']
+
+
+@pytest.mark.parametrize(('value', 'reason'), [
+    ('1,000 (5%)', 'GROUPED_INTEGER_FORMAT_UNSUPPORTED'),
+    ('10 (50,0%)', 'DECIMAL_SEPARATOR_UNSUPPORTED'),
+    ('1.5 (7.5%)', 'MALFORMED_NUMERIC_TOKEN'),
+])
+def test_structured_numeric_shape_errors_are_counted_in_relation_telemetry(value, reason):
+    document = parse_jats(_source(
+        '<table-wrap id="numeric-shape"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=20)</th></tr></thead><tbody>'
+        f'<tr><th scope="row">Event</th><td>{value}</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert len(result['relations']) == 1
+    assert result['relations'][0]['status'] == 'UNSUPPORTED'
+    assert reason in result['relations'][0]['secondary_skip_reasons'] + [
+        result['relations'][0]['primary_skip_reason'],
+    ]
+    assert result['relation_telemetry']['primary_skip_reason_counts'] == {
+        result['relations'][0]['primary_skip_reason']: 1,
+    }
+    assert result['relation_telemetry']['accounting_invariant'] is True
 
 
 def test_rates_per_person_time_remain_outside_count_percentage_contract(tmp_path):
@@ -371,7 +632,7 @@ def test_footnoted_row_label_scope_suppresses_global_denominator(tmp_path):
     assert report['candidate_anomalies'] == []
     result = report['arithmetic_screens']['structured_table_percentages']['tables'][0]
     assert result['status'] == 'INCOMPLETE'
-    assert 'FOOTNOTED_OR_SCOPED_ROW_LABEL' in result['reasons']
+    assert 'FOOTNOTE_SCOPE_UNRESOLVED' in result['reasons']
 
 
 @pytest.mark.parametrize('cue', ['weighted estimate', 'adjusted percentage', 'multiple responses allowed', 'missing data excluded'])
@@ -380,7 +641,64 @@ def test_weighted_adjusted_overlap_and_missingness_cues_suppress_candidates(tmp_
     _, report, _ = _run_jats(tmp_path, source)
     assert report['candidate_anomalies'] == []
     table_result = next(item for item in report['arithmetic_screens']['structured_table_percentages']['tables'])
-    assert table_result['status'] == 'UNSUPPORTED'
+    assert table_result['status'] in ('UNSUPPORTED', 'INCOMPLETE')
+
+
+def test_cell_local_ratios_remain_eligible_for_explicit_overlapping_thresholds():
+    document = parse_jats(_source(
+        '<table-wrap id="thresholds"><caption><title>Overlapping thresholds; multiple responses allowed</title></caption>'
+        '<table><thead><tr><th>Outcome</th><th>Participants (N=20)</th></tr></thead><tbody>'
+        '<tr><th scope="row">At least 75%</th><td>15 (75%)</td></tr>'
+        '<tr><th scope="row">At least 50%</th><td>10 (50%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['relation_telemetry']['checked_matches'] == 2
+    assert result['relation_telemetry']['checked_mismatches'] == 0
+    assert {item['relation_type'] for item in result['relations']} == {
+        'CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE',
+    }
+    assert all(item['status'] == 'ELIGIBLE_CHECKED_MATCH' for item in result['relations'])
+    assert result['relation_telemetry']['accounting_invariant'] is True
+
+
+def test_overlapping_threshold_rows_do_not_infer_a_shared_local_denominator():
+    document = parse_jats(_source(
+        '<table-wrap id="overlapping-scope"><caption>'
+        '<title>Overlapping thresholds; multiple responses allowed</title></caption>'
+        '<table><thead><tr><th>Outcome</th><th>Participants (N=20)</th></tr></thead><tbody>'
+        '<tr><th scope="row">At least 75%</th><td>7 (70%)</td></tr>'
+        '<tr><th scope="row">At least 50%</th><td>3 (30%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert len(result['findings']) == 2
+    assert all(item['denominator_exact'] == '20' for item in result['findings'])
+    assert all(item['status'] == 'ELIGIBLE_CHECKED_MISMATCH' for item in result['relations'])
+
+
+def test_multiple_response_with_unclear_percentage_base_is_skipped_per_relation():
+    document = parse_jats(_source(
+        '<table-wrap id="responses"><caption><title>Multiple responses allowed</title></caption>'
+        '<table><thead><tr><th>Response</th><th>Count (N=20)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Option A</th><td>13 (65%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+    from researchwitness.table_arithmetic import check_structured_table_percentages
+
+    result = check_structured_table_percentages(document)
+
+    assert result['findings'] == []
+    assert result['relations'][0]['status'] == 'INCOMPLETE'
+    assert result['relations'][0]['primary_skip_reason'] == 'MULTIPLE_RESPONSE'
+    assert result['relation_telemetry']['primary_skip_reason_counts'] == {'MULTIPLE_RESPONSE': 1}
 
 
 @pytest.mark.parametrize(('denominator', 'reported', 'row_count'), [(3, '33.3%', 3), (7, '14.3%', 7)])
@@ -412,6 +730,7 @@ def test_ragged_jats_table_reports_incomplete_coverage_and_skips_all_cells(tmp_p
     assert table['structure_status'] == 'TABLE_STRUCTURE_UNSUPPORTED'
     assert any('ragged' in reason for reason in table['limitations'])
     assert report['arithmetic_screens']['structured_table_percentages']['tables'][0]['status'] == 'INCOMPLETE'
+    assert report['arithmetic_screens']['structured_table_percentages']['tables'][0]['relations'][0]['status'] == 'UNSUPPORTED'
     assert 'Table checking incomplete' in (tmp_path / 'screening' / 'report.html').read_text()
 
 
@@ -456,6 +775,57 @@ def test_contract_registry_covers_every_reported_detector():
     assert 'PDF table layout' in registry[
         'table_percentage_recomputation'
     ]['exclusions']
+    assert registry['table_percentage_recomputation']['version'] == '1.2'
+    assert registry['jats_cell_ratio_percentage_recomputation']['version'] == '1.2'
+    assert registry['table_percentage_recomputation']['relationship_types'] == {
+        'checked': ['CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE'],
+        'out_of_scope': ['CATEGORY_TOTAL', 'CATEGORY_PARTITION', 'PERCENTAGE_COMPLEMENT', 'PERCENTAGE_SUM'],
+    }
+
+
+def test_percentage_relation_schema_rejects_contradictory_skip_states(tmp_path):
+    source = _source(
+        '<table-wrap id="numeric-shape"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants</th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>1,000 (5%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    )
+    _, report, _ = _run_jats(tmp_path, source)
+
+    relation = report['arithmetic_screens']['structured_table_percentages']['relations'][0]
+    assert relation['status'] == 'UNSUPPORTED'
+    assert relation['secondary_skip_reasons']
+
+    bad_secondary = json.loads(json.dumps(report))
+    bad_secondary['arithmetic_screens']['structured_table_percentages']['relations'][0][
+        'secondary_skip_reasons'
+    ][0] = 'NOT_A_CANONICAL_REASON'
+    assert list(Draft202012Validator(SCHEMA).iter_errors(bad_secondary))
+
+    bad_not_applicable = json.loads(json.dumps(report))
+    bad_relation = bad_not_applicable['arithmetic_screens']['structured_table_percentages']['relations'][0]
+    bad_relation['status'] = 'NOT_APPLICABLE'
+    bad_relation['primary_skip_reason'] = 'GROUPED_INTEGER_FORMAT_UNSUPPORTED'
+    assert list(Draft202012Validator(SCHEMA).iter_errors(bad_not_applicable))
+
+
+@pytest.mark.parametrize(('value', 'expected'), [
+    ('1 (3.13%)', '3.13'),
+    ('1 (3.12%)', '3.13'),
+])
+def test_percentage_half_up_tie_boundary_is_deterministic(tmp_path, value, expected):
+    source = _source(
+        '<table-wrap id="rounding-tie"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=32)</th></tr></thead><tbody>'
+        f'<tr><th scope="row">Event</th><td>{value}</td></tr>'
+        '</tbody></table></table-wrap>'
+    )
+    _, report, _ = _run_jats(tmp_path, source)
+    relation = report['arithmetic_screens']['structured_table_percentages']['relations'][0]
+    assert relation['recomputed_at_display_precision'] == expected
+    assert relation['status'] == (
+        'ELIGIBLE_CHECKED_MATCH' if value.endswith('3.13%)') else 'ELIGIBLE_CHECKED_MISMATCH'
+    )
 
 
 def test_jats_rejects_dtd_entity_and_malformed_inputs():

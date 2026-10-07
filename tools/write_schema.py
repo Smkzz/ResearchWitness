@@ -641,6 +641,7 @@ def make_paper_audit_schema():
         'id': {'type': 'string', 'pattern': '^structured-table-percentage-[0-9]{4}$'},
         'type': enum('STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH'),
         'status': enum('CANDIDATE_ANOMALY'),
+        'relation_id': hash_value,
         'table_id': {'type': 'string', 'maxLength': 500},
         'table_caption': empty_text,
         'numerator_exact': small_int_string,
@@ -660,6 +661,7 @@ def make_paper_audit_schema():
         'id': {'type': 'string', 'pattern': '^jats-cell-ratio-percentage-[0-9]{4}$'},
         'type': enum('JATS_CELL_RATIO_PERCENTAGE_MISMATCH'),
         'status': enum('CANDIDATE_ANOMALY'),
+        'relation_id': hash_value,
         'table_key': hash_value,
         'table_id': {'type': 'string', 'maxLength': 500},
         'table_label': empty_text,
@@ -831,6 +833,134 @@ def make_paper_audit_schema():
         'candidates': nullable_count,
         'candidate_count_known': {'type': 'boolean'},
     }, required=['unit', 'potential', 'eligible', 'checked', 'skipped', 'candidates'])
+    percentage_status_counts = obj({
+        'NOT_APPLICABLE': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'ELIGIBLE_CHECKED_MATCH': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'ELIGIBLE_CHECKED_MISMATCH': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'INCOMPLETE': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'UNSUPPORTED': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+    })
+    percentage_reason_counts = {
+        'type': 'object', 'maxProperties': 32,
+        'propertyNames': {'pattern': '^[A-Z][A-Z0-9_]{1,79}$'},
+        'additionalProperties': {'type': 'integer', 'minimum': 1, 'maximum': 50_000},
+    }
+    percentage_reason_code = enum(
+        'TABLE_STRUCTURE_UNSUPPORTED', 'SOURCE_SCOPE_AMBIGUOUS', 'CONFLICTING_HEADER_DENOMINATORS',
+        'LOCAL_ROW_DENOMINATOR', 'FOOTNOTE_SCOPE_UNRESOLVED', 'WEIGHTED_RESULT', 'ADJUSTED_RESULT',
+        'MISSINGNESS_CHANGES_DENOMINATOR', 'MULTIPLE_RESPONSE', 'CATEGORY_OVERLAP_RELEVANT_TO_RELATION',
+        'DENOMINATOR_NOT_EXPLICIT', 'PERCENT_UNIT_NOT_EXPLICIT', 'GROUPED_INTEGER_FORMAT_UNSUPPORTED',
+        'DECIMAL_SEPARATOR_UNSUPPORTED', 'MALFORMED_NUMERIC_TOKEN', 'OPERANDS_OUTSIDE_PROPORTION_DOMAIN',
+        'CANDIDATE_LIMIT',
+    )
+    percentage_relation = obj({
+        'relation_id': hash_value,
+        'relation_type': enum('CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE', 'DIRECT_N_OVER_N_PERCENTAGE'),
+        'detector_id': enum('table_percentage_recomputation', 'jats_cell_ratio_percentage_recomputation'),
+        'contract_version': enum('1.2'),
+        'table_key': hash_value,
+        'status': enum('NOT_APPLICABLE', 'ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH', 'INCOMPLETE', 'UNSUPPORTED'),
+        'primary_skip_reason': {'oneOf': [percentage_reason_code, {'type': 'null'}]},
+        'secondary_skip_reasons': {
+            'type': 'array', 'items': percentage_reason_code, 'minItems': 0, 'maxItems': 16,
+            'uniqueItems': True,
+        },
+        'source_anchor': structured_anchor,
+        'denominator_source_anchor': {'oneOf': [structured_anchor, {'type': 'null'}]},
+        'numerator_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'},
+        'denominator_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'},
+        'reported_percent': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
+        'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 6},
+        'recomputed_at_display_precision': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
+        'finding_emitted': {'type': 'boolean'},
+        'row_identity': empty_text,
+    }, required=[
+        'relation_id', 'relation_type', 'detector_id', 'contract_version', 'table_key', 'status', 'primary_skip_reason',
+        'secondary_skip_reasons', 'source_anchor', 'denominator_source_anchor',
+    ])
+    percentage_relation['allOf'] = [
+        {
+            'if': {
+                'properties': {'detector_id': {'const': 'table_percentage_recomputation'}},
+                'required': ['detector_id'],
+            },
+            'then': {'properties': {'relation_type': {'const': 'CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE'}}},
+        },
+        {
+            'if': {
+                'properties': {'detector_id': {'const': 'jats_cell_ratio_percentage_recomputation'}},
+                'required': ['detector_id'],
+            },
+            'then': {'properties': {'relation_type': {'const': 'DIRECT_N_OVER_N_PERCENTAGE'}}},
+        },
+        {
+            'if': {
+                'properties': {'status': {'enum': ['INCOMPLETE', 'UNSUPPORTED']}},
+                'required': ['status'],
+            },
+            'then': {
+                'properties': {'primary_skip_reason': percentage_reason_code},
+                'not': {'required': [
+                    'numerator_exact', 'denominator_exact', 'reported_percent', 'display_precision',
+                    'recomputed_at_display_precision', 'finding_emitted',
+                ]},
+            },
+        },
+        {
+            'if': {
+                'properties': {'status': {'enum': ['ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH']}},
+                'required': ['status'],
+            },
+            'then': {
+                'required': [
+                    'numerator_exact', 'denominator_exact', 'reported_percent', 'display_precision',
+                    'recomputed_at_display_precision', 'finding_emitted',
+                ],
+                'properties': {
+                    'primary_skip_reason': {'type': 'null'},
+                    'secondary_skip_reasons': {'maxItems': 0},
+                },
+            },
+        },
+        {
+            'if': {
+                'properties': {'status': {'const': 'ELIGIBLE_CHECKED_MATCH'}},
+                'required': ['status'],
+            },
+            'then': {'properties': {'finding_emitted': {'const': False}}},
+        },
+        {
+            'if': {
+                'properties': {'status': {'const': 'NOT_APPLICABLE'}},
+                'required': ['status'],
+            },
+            'then': {
+                'properties': {
+                    'primary_skip_reason': {'type': 'null'},
+                    'secondary_skip_reasons': {'maxItems': 0},
+                },
+                'not': {'required': [
+                    'numerator_exact', 'denominator_exact', 'reported_percent', 'display_precision',
+                    'recomputed_at_display_precision', 'finding_emitted',
+                ]},
+            },
+        },
+    ]
+    percentage_relation_telemetry = obj({
+        'potential_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'applicable_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'eligible_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'checked_matches': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'checked_mismatches': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'checked_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'incomplete_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'unsupported_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'skipped_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'status_counts': percentage_status_counts,
+        'primary_skip_reason_counts': percentage_reason_counts,
+        'secondary_skip_reason_counts_overlapping': percentage_reason_counts,
+        'accounting_invariant': {'const': True},
+    })
     coverage_table = obj({
         'table_ref': obj({'source_sha256': hash_value, 'element_path': text(4096)}),
         'table_id': {'type': 'string', 'maxLength': 500},
@@ -840,9 +970,10 @@ def make_paper_audit_schema():
         'parser_status': enum('STRUCTURE_RELIABLE', 'TABLE_STRUCTURE_UNSUPPORTED'),
         'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
         'applicability': enum('APPLICABLE', 'UNKNOWN', 'UNSUPPORTED', 'NOT_APPLICABLE'),
-        'reasons': arr(text(200), 0, 16),
+        'reasons': arr(text(200), 0, 32),
         'reasons_truncated': {'type': 'boolean'},
-        'skip_reasons': arr(text(200), 0, 16),
+        'skip_reasons': arr(text(200), 0, 32),
+        'candidate_findings_omitted': nullable_count,
         'counts': obj({'objects': object_counts, 'operands': operand_counts}),
     })
     coverage_detector = obj({
@@ -857,8 +988,50 @@ def make_paper_audit_schema():
         'reasons': arr(text(200), 0, 16),
         'reasons_truncated': {'type': 'boolean'},
         'unmatched_result_count': {'type': 'integer', 'minimum': 0, 'maximum': 1000},
+        'percentage_relation_telemetry': {'oneOf': [percentage_relation_telemetry, {'type': 'null'}]},
+        'percentage_relation_telemetry_complete': {'type': 'boolean'},
         'tables': arr(coverage_table, 0, 1000),
     }, required=['detector_id', 'scope', 'status', 'object_counts', 'operand_counts', 'tables'])
+    coverage_detector['allOf'] = [{
+        'if': {
+            'properties': {
+                'detector_id': enum(
+                    'table_percentage_recomputation', 'jats_cell_ratio_percentage_recomputation',
+                ),
+            },
+            'required': ['detector_id'],
+        },
+        'then': {
+            'required': ['percentage_relation_telemetry', 'percentage_relation_telemetry_complete'],
+            'oneOf': [
+                {
+                    'properties': {
+                        'percentage_relation_telemetry': percentage_relation_telemetry,
+                        'percentage_relation_telemetry_complete': {'const': True},
+                    },
+                    'required': ['percentage_relation_telemetry', 'percentage_relation_telemetry_complete'],
+                },
+                {
+                    'properties': {
+                        'percentage_relation_telemetry': {'type': 'null'},
+                        'percentage_relation_telemetry_complete': {'const': False},
+                        'status': {'const': 'INCOMPLETE'},
+                    },
+                    'required': [
+                        'percentage_relation_telemetry', 'percentage_relation_telemetry_complete', 'status',
+                    ],
+                },
+            ],
+        },
+        'else': {
+            'not': {
+                'anyOf': [
+                    {'required': ['percentage_relation_telemetry']},
+                    {'required': ['percentage_relation_telemetry_complete']},
+                ],
+            },
+        },
+    }]
     paper_coverage = obj({
         'coverage_version': enum('1'),
         'source_sha256': hash_value,
@@ -891,8 +1064,20 @@ def make_paper_audit_schema():
         'checked_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
         'skipped_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
         'candidate_count': {'type': 'integer', 'minimum': 0, 'maximum': 256},
+        'potential_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'applicable_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'eligible_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'checked_matches': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'checked_mismatches': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'incomplete_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'unsupported_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'skipped_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+        'primary_skip_reason_counts': percentage_reason_counts,
+        'relations': arr(percentage_relation, 0, 50_000),
         'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
-        'skip_reasons': arr(text(100), 0, 16),
+        'reasons': arr(text(200), 0, 32),
+        'skip_reasons': arr(text(100), 0, 32),
+        'candidate_findings_omitted': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
     })
     cell_ratio_screen = obj({
         'detector_id': enum('jats_cell_ratio_percentage_recomputation'),
@@ -902,6 +1087,9 @@ def make_paper_audit_schema():
         'potential_cells': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
         'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
         'skipped_cells': {'type': 'integer', 'minimum': 0, 'maximum': 50_001},
+        'relations': arr(percentage_relation, 0, 50_000),
+        'relation_telemetry': percentage_relation_telemetry,
+        'candidate_findings_omitted': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
         'scan_complete': {'type': 'boolean'},
         'limitations': arr(text(200), 0, 100),
     })
@@ -1111,7 +1299,7 @@ def make_paper_audit_schema():
                                 'jats_sample_flow_arithmetic', 'jats_sd_se_n_recomputation',
                                 'prisma_synthesis_flow', 'jats_unadjusted_2x2_odds_ratio',
                                 'simple_rate_recomputation'),
-            'contract_version': enum('1.0', '1.1'),
+            'contract_version': enum('1.0', '1.1', '1.2'),
             'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
             'source_format': enum('txt', 'md', 'markdown', 'pdf', 'jats_xml'),
             'reasons': arr(text(500), 0, 16),
@@ -1120,7 +1308,7 @@ def make_paper_audit_schema():
         }, required=['detector_id', 'contract_version', 'status', 'source_format', 'reasons', 'checked_operands']), 0, 4000),
         'detector_contracts': arr(obj({
             'detector_id': {'type': 'string', 'maxLength': 100},
-            'version': enum('1.0', '1.1'),
+            'version': enum('1.0', '1.1', '1.2'),
             'implementation_status': {'type': 'string', 'maxLength': 60},
             'purpose': {'type': 'string', 'maxLength': 100},
             'required_source_structure': arr(text(500), 1, 8),
@@ -1133,6 +1321,10 @@ def make_paper_audit_schema():
             'positive_result_establishes': {'type': 'string', 'maxLength': 1000},
             'positive_result_does_not_establish': {'type': 'string', 'maxLength': 1000},
             'unsupported_or_incomplete_reasons': arr(text(200), 1, 16),
+            'relationship_types': obj({
+                'checked': arr(text(100), 1, 4),
+                'out_of_scope': arr(text(100), 1, 8),
+            }),
             'supported_source_formats': arr(text(100), 0, 8),
             'required_document_objects': arr(text(500), 0, 16),
             'scope_requirements': arr(text(500), 0, 16),
@@ -1189,15 +1381,32 @@ def make_paper_audit_schema():
                 'tables': arr(obj({
                     'table_id': {'type': 'string', 'maxLength': 500},
                     'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
-                    'reasons': arr(text(200), 0, 16),
+                    'reasons': arr(text(200), 0, 32),
+                    'candidate_findings_omitted': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
                     'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
                     'candidate_count': {'type': 'integer', 'minimum': 0, 'maximum': 256},
+                    'potential_objects': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'potential_cells': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'potential_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'applicable_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'eligible_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'checked_matches': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'checked_mismatches': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'incomplete_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'unsupported_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'skipped_relations': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
+                    'primary_skip_reason_counts': percentage_reason_counts,
+                    'relations': arr(percentage_relation, 0, 50_000),
                 }), 0, 1000),
                 'checked_cells': {'type': 'integer', 'minimum': 0, 'maximum': 100_000},
+                'relations': arr(percentage_relation, 0, 50_000),
+                'relation_telemetry': percentage_relation_telemetry,
+                'candidate_findings_omitted': {'type': 'integer', 'minimum': 0, 'maximum': 50_000},
                 'scan_complete': {'type': 'boolean'},
                 'limitations': arr(text(200), 0, 100),
             }),
             'cell_ratio_percentages': cell_ratio_screen,
+            'percentage_relation_telemetry': percentage_relation_telemetry,
             'sd_se_n_statistics': summary_stat_screen,
             'source_mapped_sample_flow': source_flow_screen,
             'prisma_synthesis_flow': prisma_screen,

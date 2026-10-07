@@ -1,0 +1,188 @@
+{
+  "artifact_type": "PERCENTAGE_V1_2_SOURCE_FIRST_POSITIVE_ELIGIBILITY",
+  "record_version": "1",
+  "status": "POST_HOC_DEVELOPMENT_SOURCE_FIRST_NOT_BLIND",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "percentage_contract_version": "1.2",
+  "protocol": {
+    "path": "validation/paper-audit-percentage-qualification/QUALIFICATION_PROTOCOL.md",
+    "sha256": "56bebcb20662a99e4a1b0c44c7b20563dedb38ef69ac6a8e6028acff2d14f979"
+  },
+  "input_bindings": {
+    "prior_development_eligibility_sha256": "e4985d0464dae7a7f4d70dea2c12cacf6ace66cfacd77ee1a4a7188beeb54f1e",
+    "wave1_manifest_sha256": "f626061019cafddb25164abe647fa127f3843ef8f1187bbbbf94398a8c19134d",
+    "wave2_source_manifest_sha256": "82348830bef8cf11523505b3922679e2cfbde9f7659266e043e55c2439ae963c",
+    "wave2_output_lock_sha256": "78752f228a87a324b1d1f9f3ce234ee2d86b7c2f4b6cec04906dbb0c38dc5788",
+    "private_source_first_review_sha256": "f24e9766b40f78407b494203bf14fe093c3ad4bc8efe1ed3b5e65f60df9f66e1",
+    "preexisting_development_re_adjudication_sha256": "3efab176a3b98c0b612dabe39a2d0529c492dfa8bfb6e6e406a9847809c3919c"
+  },
+  "review_summary": {
+    "development_issues_source_reviewed": 3,
+    "eligible_issues": 3,
+    "target_relations": 5,
+    "target_relations_eligible_checked_mismatch": 5,
+    "reserved_records_classified": 0,
+    "missed_by_v1_2_replay_target_relations": 0,
+    "missed_target_reason_counts": {}
+  },
+  "adjudication_limits": [
+    "This is post-hoc DEVELOPMENT evidence and does not estimate unseen sensitivity or precision.",
+    "For issue-001, the explicit cell denominator is 233 while the ACC column header gives 267; the original source does not explain that provenance.",
+    "For positive-vitiligo-percent, the publisher PDF was not captured in the pinned development evidence; the original JATS and correction mapping are hash-pinned.",
+    "The preallocated J-EINSTEIN case remains DEVELOPMENT under its immutable earlier allocation. Its exact target relation is source-qualified and emitted as a v1.2 mismatch after generic body-subgroup denominator support was added."
+  ],
+  "issues": [
+    {
+      "case_id": "positive-j-einstein",
+      "corpus": "wave1_correction_development",
+      "contract_id": "table_percentage_recomputation",
+      "eligibility": "ELIGIBLE_CHECKED_MISMATCH",
+      "source_file": "PMC4339301.xml",
+      "source_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+      "original_source": {
+        "doi": "10.1186/s12959-015-0035-3",
+        "version": "2015 original JATS, before the 2016 correction",
+        "jats_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+        "publisher_url": "https://europepmc.org/articles/PMC4339301",
+        "publisher_pdf_sha256": null,
+        "publisher_pdf_byte_capture": "NOT_CAPTURED_IN_PINNED_DEVELOPMENT_EVIDENCE"
+      },
+      "correction_source": {
+        "doi": "10.1186/s12959-016-0085-1",
+        "publisher_url": "https://europepmc.org/articles/PMC4877730",
+        "jats_sha256": "57a9ddf0f2c601a30467748f7b30fb9271795b0a04b4507a9b65bc425afa6377",
+        "mapping_status": "AVAILABLE_HASH_PINNED_EXACT_MAPPING"
+      },
+      "target_relation_count": 1,
+      "target_relations": [
+        {
+          "table_id": "Tab3",
+          "source_cell_xpath": "/article/body/sec[3]/sec[4]/table-wrap[2]/table/tbody/tr[17]/td[4]",
+          "relationship_type": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+          "numerator": "2",
+          "denominator": "71",
+          "reported_percent": "2.9",
+          "display_precision_digits": 1,
+          "recomputed_at_original_precision": "2.8",
+          "recomputed_unrounded_decimal_approx": "2.816901408451",
+          "corrected_percent": "2.8",
+          "corrected_display_precision_digits": 1,
+          "correction_mapping_status": "EXACT_RELATION",
+          "eligibility_status": "ELIGIBLE_CHECKED_MISMATCH"
+        }
+      ],
+      "source_qualification_note": "The exact Table 3 cell has explicit count n=2, denominator 71 and displayed percentage 2.9%; the correction maps this table cell to 2.8%.",
+      "detector_observation": "The v1.2 replay emitted the exact target candidate and relation telemetry marks it ELIGIBLE_CHECKED_MISMATCH."
+    },
+    {
+      "case_id": "issue-001",
+      "corpus": "wave2_correction_posthoc_development",
+      "contract_id": "jats_cell_ratio_percentage_recomputation",
+      "eligibility": "ELIGIBLE_CHECKED_MISMATCH",
+      "source_file": "paper-001.xml",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "original_source": {
+        "doi": "10.1186/s13054-016-1577-x",
+        "version": "2016 original, before 2017 erratum",
+        "jats_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "publisher_pdf_sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+        "publisher_pdf_byte_capture": null
+      },
+      "correction_source": {
+        "doi": "10.1186/s13054-017-1627-z",
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z",
+        "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+        "mapping_status": "AVAILABLE_HASH_PINNED_EXACT_MAPPING"
+      },
+      "target_relation_count": 2,
+      "target_relations": [
+        {
+          "table_id": "Tab2",
+          "source_cell_xpath": "/*[local-name()='article']/*[local-name()='body']/*[local-name()='sec'][3]/*[local-name()='table-wrap'][2][@id='Tab2']/*[local-name()='table']/*[local-name()='tbody']/*[local-name()='tr'][3]/*[local-name()='td'][3]",
+          "relationship_type": "DIRECT_N_OVER_N_PERCENTAGE",
+          "numerator": "11",
+          "denominator": "233",
+          "reported_percent": "1.8",
+          "display_precision_digits": 1,
+          "recomputed_at_original_precision": "4.7",
+          "recomputed_unrounded_decimal_approx": "4.721030042918",
+          "corrected_percent": "4.7",
+          "corrected_display_precision_digits": 1,
+          "correction_mapping_status": "EXACT_RELATION",
+          "eligibility_status": "ELIGIBLE_CHECKED_MISMATCH"
+        },
+        {
+          "table_id": "Tab2",
+          "source_cell_xpath": "/*[local-name()='article']/*[local-name()='body']/*[local-name()='sec'][3]/*[local-name()='table-wrap'][2][@id='Tab2']/*[local-name()='table']/*[local-name()='tbody']/*[local-name()='tr'][4]/*[local-name()='td'][3]",
+          "relationship_type": "DIRECT_N_OVER_N_PERCENTAGE",
+          "numerator": "12",
+          "denominator": "233",
+          "reported_percent": "2.0",
+          "display_precision_digits": 1,
+          "recomputed_at_original_precision": "5.2",
+          "recomputed_unrounded_decimal_approx": "5.150214592275",
+          "corrected_percent": "5.2",
+          "corrected_display_precision_digits": 1,
+          "correction_mapping_status": "EXACT_RELATION",
+          "eligibility_status": "ELIGIBLE_CHECKED_MISMATCH"
+        }
+      ]
+    },
+    {
+      "case_id": "positive-vitiligo-percent",
+      "corpus": "wave1_correction_development",
+      "contract_id": "table_percentage_recomputation",
+      "eligibility": "ELIGIBLE_CHECKED_MISMATCH",
+      "source_file": "PMC11845954.xml",
+      "source_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+      "original_source": {
+        "doi": "10.1111/jocd.16714",
+        "version": "2024 original, before 2025 correction",
+        "jats_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+        "publisher_url": "https://onlinelibrary.wiley.com/doi/10.1111/jocd.16714",
+        "publisher_pdf_sha256": null,
+        "publisher_pdf_byte_capture": "NOT_AVAILABLE_IN_THE_PINNED_DEVELOPMENT_EVIDENCE"
+      },
+      "correction_source": {
+        "doi": "10.1111/jocd.70179",
+        "publisher_url": "https://onlinelibrary.wiley.com/doi/10.1111/jocd.70179",
+        "jats_sha256": "cb73763e32597e0ebc3307fe723e8189b14e9a6da7165ca809a1ed475c6f8e6d",
+        "mapping_status": "AVAILABLE_HASH_PINNED_EXACT_MAPPING"
+      },
+      "target_relation_count": 2,
+      "target_relations": [
+        {
+          "table_id": "jocd16714-tbl-0002",
+          "source_cell_xpath": "/*[local-name()='article']/*[local-name()='body']/*[local-name()='sec'][3]/*[local-name()='table-wrap'][2][@id='jocd16714-tbl-0002']/*[local-name()='table']/*[local-name()='tbody']/*[local-name()='tr'][3]/*[local-name()='td'][2]",
+          "relationship_type": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+          "numerator": "23",
+          "denominator": "30",
+          "reported_percent": "73.3",
+          "display_precision_digits": 1,
+          "recomputed_at_original_precision": "76.7",
+          "recomputed_unrounded_decimal_approx": "76.666666666667",
+          "corrected_percent": "76.7",
+          "corrected_display_precision_digits": 1,
+          "correction_mapping_status": "EXACT_RELATION",
+          "eligibility_status": "ELIGIBLE_CHECKED_MISMATCH"
+        },
+        {
+          "table_id": "jocd16714-tbl-0002",
+          "source_cell_xpath": "/*[local-name()='article']/*[local-name()='body']/*[local-name()='sec'][3]/*[local-name()='table-wrap'][2][@id='jocd16714-tbl-0002']/*[local-name()='table']/*[local-name()='tbody']/*[local-name()='tr'][3]/*[local-name()='td'][3]",
+          "relationship_type": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+          "numerator": "23",
+          "denominator": "30",
+          "reported_percent": "70",
+          "display_precision_digits": 0,
+          "recomputed_at_original_precision": "77",
+          "recomputed_unrounded_decimal_approx": "76.666666666667",
+          "corrected_percent": "76.7",
+          "corrected_display_precision_digits": 1,
+          "correction_mapping_status": "EXACT_RELATION",
+          "eligibility_status": "ELIGIBLE_CHECKED_MISMATCH"
+        }
+      ]
+    }
+  ]
+}

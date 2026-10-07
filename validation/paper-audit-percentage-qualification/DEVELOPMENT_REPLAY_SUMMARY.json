@@ -1,0 +1,614 @@
+{
+  "record_version": "1",
+  "status": "AGGREGATE_ONLY_POST_HOC_SOURCE_NATIVE_JATS_V1_2_DEVELOPMENT_REPLAY",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "artifact_scope": "Aggregate detector and corpus metrics only. Individual source identifiers, source hashes, per-paper outputs, and candidate records are omitted.",
+  "general_contract_version": "1.1",
+  "percentage_contract_version": "1.2",
+  "metrics": {
+    "source_documents": 33,
+    "correction_issues_considered": 16,
+    "eligible_correction_issues": 3,
+    "unsupported_correction_issues": 13,
+    "overall_correction_mechanism_coverage": {
+      "numerator": 3,
+      "denominator": 16
+    },
+    "conditional_sensitivity_by_eligible_issue": {
+      "numerator": 3,
+      "denominator": 3
+    },
+    "matched_target_cells": {
+      "numerator": 5,
+      "denominator": 5
+    },
+    "eligible_issues_by_detector": {
+      "jats_cell_ratio_percentage_recomputation": 1,
+      "table_percentage_recomputation": 2
+    },
+    "selected_negative_controls": 17,
+    "candidate_bearing_selected_controls": 2,
+    "candidate_items_on_selected_controls": 4,
+    "all_candidate_items": 19,
+    "candidate_type_counts": {
+      "JATS_CELL_RATIO_PERCENTAGE_MISMATCH": 9,
+      "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH": 10
+    },
+    "candidate_items_not_matching_eligible_correction_targets": 14,
+    "candidate_adjudication": {
+      "total_current_candidate_items": 19,
+      "reviewed_candidate_items": 19,
+      "not_yet_adjudicated_candidate_items": 0,
+      "classification_counts": {
+        "SCOPE_DENOMINATOR_NOT_EXPLICIT": 2,
+        "SOURCE_REPRODUCED_ARITHMETIC_DISCREPANCY_VERSION_UNVERIFIED": 4,
+        "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET": 5,
+        "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY": 8
+      },
+      "candidate_arithmetic_validity": {
+        "numerator": 17,
+        "denominator": 19
+      },
+      "known_correction_target_share": {
+        "numerator": 5,
+        "denominator": 19
+      },
+      "source_reproduced_uncorrected_non_target_discrepancies": 8,
+      "source_reproduced_version_status_unverified_discrepancies": 4,
+      "scope_denominator_not_explicit_candidates": 2,
+      "parser_source_artifact_candidates": 0,
+      "unresolved_candidates": 0,
+      "all_current_candidates_adjudicated": true,
+      "candidate_review_sha256": "36b5234a8a9a926c4948cc35c602981703dfdaccdfeef84fc7ca3f872696ed74"
+    },
+    "reports_with_incomplete_table_or_detector_coverage": 33,
+    "extraction_failures": 0,
+    "repeatable_json_and_html_reports": 33,
+    "repeatability_denominator": 33
+  },
+  "historical_metrics_warning": "Selected historical controls are not certified error-free. The source-first matched-negative rate is reported separately and is development-only; it is not a population estimate.",
+  "synthetic_regression_evidence": {
+    "record_version": "1",
+    "status": "SYNTHETIC_AND_UNIT_REGRESSION_EVIDENCE",
+    "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+    "positive_candidate_fixture_counts": {
+      "table_percentage_recomputation": 1,
+      "jats_cell_ratio_percentage_recomputation": 1,
+      "jats_sample_flow_arithmetic": 1,
+      "prisma_synthesis_flow": 1,
+      "jats_unadjusted_2x2_odds_ratio": 1,
+      "jats_sd_se_n_recomputation_experimental": 1
+    },
+    "hard_negative_scenarios": [
+      {
+        "detector_id": "table_percentage_recomputation",
+        "scenarios": 10,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_jats.py",
+        "coverage": "local and smaller subgroup denominators, rate units, footnoted denominators and labels, weighted/adjusted/multiple-response/missingness cues, ragged rows"
+      },
+      {
+        "detector_id": "markdown_table_percentage_recomputation",
+        "scenarios": 6,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_audit.py",
+        "coverage": "missing stub and ragged rows, local denominators, footnoted headers and cells, repeated smaller-denominator scope notes"
+      },
+      {
+        "detector_id": "jats_cell_ratio_percentage_recomputation",
+        "scenarios": 11,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_ratio.py",
+        "coverage": "invalid numeric domains, multiple-response/available-case/changing-denominator and unknown footnotes, unsafe row or table cues, referenced cells"
+      },
+      {
+        "detector_id": "jats_sample_flow_arithmetic",
+        "scenarios": 6,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_flow_source.py",
+        "coverage": "unproven or overlapping exclusions, unit and group mismatch, synthetic multi-exclusion ambiguity, non-JATS input"
+      },
+      {
+        "detector_id": "prisma_synthesis_flow",
+        "scenarios": 7,
+        "false_candidate_outputs": 0,
+        "test_files": [
+          "tests/test_paper_prisma_flow.py",
+          "tests/test_jats.py"
+        ],
+        "coverage": "multiple database and later-stage scope, unlabelled/non-review counts, malformed and oversized operands, image-only flow with no OCR"
+      },
+      {
+        "detector_id": "jats_unadjusted_2x2_odds_ratio",
+        "scenarios": 9,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_two_by_two_source.py",
+        "coverage": "adjusted/missing/reversed OR direction, zero cells, missing timepoint, weighted context, CI text, noninteger counts, multiple outcome rows"
+      },
+      {
+        "detector_id": "jats_sd_se_n_recomputation",
+        "scenarios": 17,
+        "false_candidate_outputs": 0,
+        "test_file": "tests/test_paper_statistics_source.py",
+        "coverage": "SEM ambiguity, weighted/adjusted/repeated/transformed values, footnotes and cross-references, missing or duplicate columns, unit/time scope, oversized numbers, unreliable grid, non-JATS input"
+      }
+    ],
+    "totals": {
+      "positive_candidate_fixtures": 6,
+      "hard_negative_scenarios": 66,
+      "false_candidate_outputs_on_hard_negative_scenarios": 0
+    },
+    "limitations": [
+      "Counts are explicit synthetic/unit input scenarios in regression tests, not independent papers or estimates of real-world false-positive rates.",
+      "The SD/SE/n screen is experimental and has no correction-backed positive in the source corpus.",
+      "Rate recomputation and source-mapped cross-section identity are not implemented detectors and are not included as active-family regression counts."
+    ]
+  },
+  "contracts": [
+    {
+      "detector_id": "explicit_count_marker_scan",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "table_percentage_recomputation",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 2
+    },
+    {
+      "detector_id": "markdown_table_percentage_recomputation",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "explicit_sample_flow_arithmetic",
+      "implementation_status": "IMPLEMENTED_HELPER",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "explicit_exclusion_flow_locator",
+      "implementation_status": "EXPERIMENTAL",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "two_by_two_effect_size_recomputation",
+      "implementation_status": "IMPLEMENTED_HELPER",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "cross_section_numeric_identity",
+      "implementation_status": "IMPLEMENTED_HELPER",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 1
+    },
+    {
+      "detector_id": "jats_sample_flow_arithmetic",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "jats_sd_se_n_recomputation",
+      "implementation_status": "EXPERIMENTAL",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "prisma_synthesis_flow",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "jats_unadjusted_2x2_odds_ratio",
+      "implementation_status": "ACTIVE_SOURCE_MAPPED",
+      "eligible_correction_issues": 0
+    },
+    {
+      "detector_id": "simple_rate_recomputation",
+      "implementation_status": "UNSUPPORTED",
+      "eligible_correction_issues": 0
+    }
+  ],
+  "per_detector_coverage": [
+    {
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "INCOMPLETE": 2,
+        "NOT_APPLICABLE": 31
+      },
+      "object_counts": {
+        "applicability_unknown": 8,
+        "applicable": 10,
+        "candidates": 2,
+        "checked": 2,
+        "eligible": 2,
+        "potential": 123,
+        "skipped": 8
+      },
+      "operand_counts": {
+        "applicable": 194,
+        "candidates": 9,
+        "checked": 76,
+        "eligible": 76,
+        "potential": 194,
+        "skipped": 118
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "ELIGIBLE": 2,
+        "INCOMPLETE": 7,
+        "NOT_APPLICABLE": 113,
+        "UNSUPPORTED": 1
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {},
+      "table_reason_counts_by_status": {
+        "INCOMPLETE": {
+          "FOOTNOTE_SCOPE_UNRESOLVED": 7
+        },
+        "UNSUPPORTED": {
+          "ADJUSTED_RESULT": 1,
+          "FOOTNOTE_SCOPE_UNRESOLVED": 1
+        }
+      },
+      "table_reason_count_unit": "normalized reason strings per table result, grouped by table status"
+    },
+    {
+      "detector_id": "jats_sample_flow_arithmetic",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "INCOMPLETE": 1,
+        "NOT_APPLICABLE": 32
+      },
+      "object_counts": {
+        "applicable": 1,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 1,
+        "skipped": 1
+      },
+      "operand_counts": {
+        "checked": 0,
+        "potential": 6,
+        "skipped": 6
+      },
+      "per_table_records": 0,
+      "per_table_status_counts": {},
+      "parser_status_counts": {},
+      "skip_reason_counts": {
+        "FLOW_DISJOINTNESS_EXHAUSTIVENESS_OR_SEQUENCE_NOT_EXPLICIT": 1
+      },
+      "table_reason_counts_by_status": {},
+      "table_reason_count_unit": "normalized reason strings per table result, grouped by table status"
+    },
+    {
+      "detector_id": "jats_sd_se_n_recomputation",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "INCOMPLETE": 2,
+        "NOT_APPLICABLE": 25,
+        "UNSUPPORTED": 6
+      },
+      "object_counts": {
+        "applicability_unknown": 9,
+        "applicable": 9,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 123,
+        "skipped": 9
+      },
+      "operand_counts": {
+        "applicable": 227,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 227,
+        "skipped": 227
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "INCOMPLETE": 2,
+        "NOT_APPLICABLE": 114,
+        "UNSUPPORTED": 7
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {},
+      "table_reason_counts_by_status": {
+        "INCOMPLETE": {
+          "DUPLICATE_OPERAND_COLUMNS": 11,
+          "MISSING_REQUIRED_OPERAND_COLUMN": 16
+        },
+        "NOT_APPLICABLE": {
+          "NO_RECOGNIZED_OPERAND_HEADER": 114
+        },
+        "UNSUPPORTED": {
+          "TABLE_STRUCTURE_NOT_RELIABLE": 7
+        }
+      },
+      "table_reason_count_unit": "normalized reason strings per table result, grouped by table status"
+    },
+    {
+      "detector_id": "jats_unadjusted_2x2_odds_ratio",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "NOT_APPLICABLE": 33
+      },
+      "object_counts": {
+        "applicability_unknown": 0,
+        "applicable": 0,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 123,
+        "skipped": 0
+      },
+      "operand_counts": {
+        "applicable": 0,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 0,
+        "skipped": 0
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "NOT_APPLICABLE": 123
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {},
+      "table_reason_counts_by_status": {},
+      "table_reason_count_unit": "normalized reason strings per table result, grouped by table status"
+    },
+    {
+      "detector_id": "prisma_synthesis_flow",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "NOT_APPLICABLE": 20,
+        "UNSUPPORTED": 13
+      },
+      "object_counts": {
+        "applicable": 23,
+        "candidates": 0,
+        "checked": 0,
+        "eligible": 0,
+        "potential": 23,
+        "skipped": 23
+      },
+      "operand_counts": {
+        "candidates": 0,
+        "checked": 0,
+        "potential": 0,
+        "skipped": 0
+      },
+      "per_table_records": 0,
+      "per_table_status_counts": {},
+      "parser_status_counts": {},
+      "skip_reason_counts": {
+        "NO_PRISMA_OR_SYNTHESIS_FLOW_CUE": 20,
+        "PRISMA_FLOW_RELATION_NOT_IMPLEMENTED": 10,
+        "PRISMA_SCOPE_OR_STAGE_AMBIGUOUS": 1,
+        "UNSUPPORTED_IMAGE_FLOW": 11
+      },
+      "table_reason_counts_by_status": {},
+      "table_reason_count_unit": "normalized reason strings per table result, grouped by table status"
+    },
+    {
+      "detector_id": "table_percentage_recomputation",
+      "papers_reported": 33,
+      "coverage_status_counts": {
+        "ELIGIBLE": 1,
+        "INCOMPLETE": 32
+      },
+      "object_counts": {
+        "applicability_unknown": 88,
+        "applicable": 90,
+        "candidates": 5,
+        "checked": 8,
+        "eligible": 2,
+        "potential": 123,
+        "skipped": 88
+      },
+      "operand_counts": {
+        "applicable": 1875,
+        "candidates": 10,
+        "checked": 146,
+        "eligible": 146,
+        "potential": 1875,
+        "skipped": 1729
+      },
+      "per_table_records": 123,
+      "per_table_status_counts": {
+        "ELIGIBLE": 2,
+        "INCOMPLETE": 84,
+        "NOT_APPLICABLE": 33,
+        "UNSUPPORTED": 4
+      },
+      "parser_status_counts": {
+        "STRUCTURE_RELIABLE": 62,
+        "TABLE_STRUCTURE_UNSUPPORTED": 61
+      },
+      "skip_reason_counts": {},
+      "table_reason_counts_by_status": {
+        "INCOMPLETE": {
+          "ADJUSTED_RESULT": 4,
+          "CONFLICTING_HEADER_DENOMINATORS": 2,
+          "DECIMAL_SEPARATOR_UNSUPPORTED": 4,
+          "DENOMINATOR_NOT_EXPLICIT": 38,
+          "FOOTNOTE_SCOPE_UNRESOLVED": 10,
+          "GROUPED_INTEGER_FORMAT_UNSUPPORTED": 2,
+          "LOCAL_ROW_DENOMINATOR": 4,
+          "MALFORMED_NUMERIC_TOKEN": 25,
+          "MISSINGNESS_CHANGES_DENOMINATOR": 4,
+          "OPERANDS_OUTSIDE_PROPORTION_DOMAIN": 1,
+          "PERCENT_UNIT_NOT_EXPLICIT": 16,
+          "SOURCE_SCOPE_AMBIGUOUS": 6,
+          "TABLE_STRUCTURE_UNSUPPORTED": 61
+        },
+        "UNSUPPORTED": {
+          "ADJUSTED_RESULT": 2,
+          "DECIMAL_SEPARATOR_UNSUPPORTED": 1,
+          "DENOMINATOR_NOT_EXPLICIT": 3,
+          "FOOTNOTE_SCOPE_UNRESOLVED": 1,
+          "MALFORMED_NUMERIC_TOKEN": 3,
+          "PERCENT_UNIT_NOT_EXPLICIT": 2
+        }
+      },
+      "table_reason_count_unit": "normalized reason strings per table result, grouped by table status"
+    }
+  ],
+  "percentage_relation_telemetry": {
+    "applicable_relations": 2069,
+    "checked_matches": 203,
+    "checked_mismatches": 19,
+    "checked_relations": 222,
+    "eligible_relations": 222,
+    "incomplete_relations": 902,
+    "potential_relations": 2069,
+    "skipped_relations": 1847,
+    "unsupported_relations": 945,
+    "status_counts": {
+      "ELIGIBLE_CHECKED_MATCH": 203,
+      "ELIGIBLE_CHECKED_MISMATCH": 19,
+      "INCOMPLETE": 902,
+      "NOT_APPLICABLE": 0,
+      "UNSUPPORTED": 945
+    },
+    "primary_skip_reason_counts": {
+      "ADJUSTED_RESULT": 26,
+      "CONFLICTING_HEADER_DENOMINATORS": 134,
+      "DECIMAL_SEPARATOR_UNSUPPORTED": 3,
+      "DENOMINATOR_NOT_EXPLICIT": 149,
+      "FOOTNOTE_SCOPE_UNRESOLVED": 246,
+      "GROUPED_INTEGER_FORMAT_UNSUPPORTED": 30,
+      "LOCAL_ROW_DENOMINATOR": 34,
+      "MALFORMED_NUMERIC_TOKEN": 88,
+      "MISSINGNESS_CHANGES_DENOMINATOR": 198,
+      "PERCENT_UNIT_NOT_EXPLICIT": 213,
+      "TABLE_STRUCTURE_UNSUPPORTED": 726
+    },
+    "secondary_skip_reason_counts_overlapping": {
+      "ADJUSTED_RESULT": 108,
+      "DECIMAL_SEPARATOR_UNSUPPORTED": 14,
+      "DENOMINATOR_NOT_EXPLICIT": 846,
+      "FOOTNOTE_SCOPE_UNRESOLVED": 145,
+      "GROUPED_INTEGER_FORMAT_UNSUPPORTED": 31,
+      "LOCAL_ROW_DENOMINATOR": 30,
+      "MALFORMED_NUMERIC_TOKEN": 227,
+      "MISSINGNESS_CHANGES_DENOMINATOR": 164,
+      "OPERANDS_OUTSIDE_PROPORTION_DOMAIN": 2,
+      "PERCENT_UNIT_NOT_EXPLICIT": 282,
+      "SOURCE_SCOPE_AMBIGUOUS": 115
+    },
+    "accounting_invariant": true,
+    "primary_skip_reason_count_unit": "one canonical primary reason per skipped relation"
+  },
+  "matched_negative_relation_replay": {
+    "source_manifest_sha256": "76114422e36c3891700fbbdae2b23d20c3fb1be6bd964850f1c3eedb2145a6a6",
+    "eligible_correct_relations": 4163,
+    "source_documents": 61,
+    "source_tables": 110,
+    "matched_relation_records": 615,
+    "source_anchor_joined_relation_records": 3404,
+    "source_anchor_joined_status_counts": {
+      "ELIGIBLE_CHECKED_MATCH": 617,
+      "ELIGIBLE_CHECKED_MISMATCH": 14,
+      "INCOMPLETE": 1373,
+      "UNSUPPORTED": 1400
+    },
+    "source_anchor_operand_mismatch_status_counts": {
+      "ELIGIBLE_CHECKED_MATCH": 2,
+      "ELIGIBLE_CHECKED_MISMATCH": 14,
+      "INCOMPLETE": 1373,
+      "UNSUPPORTED": 1400
+    },
+    "anchor_mismatch_candidate_records": 14,
+    "checked_matches": 615,
+    "checked_mismatches": 0,
+    "unmatched_or_invalid_relation_records": 3548,
+    "false_candidate_relations": 14,
+    "false_candidate_documents": 2,
+    "relation_false_candidate_rate": {
+      "numerator": 14,
+      "denominator": 4163
+    },
+    "document_false_candidate_occurrence": {
+      "numerator": 2,
+      "denominator": 61
+    },
+    "source_report_replay": {
+      "repeatable_json_reports": 61,
+      "repeatable_html_reports": 61,
+      "report_denominator": 61
+    },
+    "percentage_relation_telemetry": {
+      "applicable_relations": 5037,
+      "checked_matches": 622,
+      "checked_mismatches": 49,
+      "checked_relations": 671,
+      "eligible_relations": 671,
+      "incomplete_relations": 1854,
+      "potential_relations": 5037,
+      "skipped_relations": 4366,
+      "unsupported_relations": 2512,
+      "status_counts": {
+        "ELIGIBLE_CHECKED_MATCH": 622,
+        "ELIGIBLE_CHECKED_MISMATCH": 49,
+        "INCOMPLETE": 1854,
+        "NOT_APPLICABLE": 0,
+        "UNSUPPORTED": 2512
+      },
+      "primary_skip_reason_counts": {
+        "ADJUSTED_RESULT": 63,
+        "CONFLICTING_HEADER_DENOMINATORS": 223,
+        "DECIMAL_SEPARATOR_UNSUPPORTED": 16,
+        "DENOMINATOR_NOT_EXPLICIT": 217,
+        "FOOTNOTE_SCOPE_UNRESOLVED": 473,
+        "GROUPED_INTEGER_FORMAT_UNSUPPORTED": 119,
+        "LOCAL_ROW_DENOMINATOR": 73,
+        "MALFORMED_NUMERIC_TOKEN": 143,
+        "MISSINGNESS_CHANGES_DENOMINATOR": 68,
+        "OPERANDS_OUTSIDE_PROPORTION_DOMAIN": 3,
+        "PERCENT_UNIT_NOT_EXPLICIT": 935,
+        "TABLE_STRUCTURE_UNSUPPORTED": 2015,
+        "WEIGHTED_RESULT": 18
+      },
+      "secondary_skip_reason_counts_overlapping": {
+        "ADJUSTED_RESULT": 370,
+        "DECIMAL_SEPARATOR_UNSUPPORTED": 80,
+        "DENOMINATOR_NOT_EXPLICIT": 585,
+        "FOOTNOTE_SCOPE_UNRESOLVED": 393,
+        "GROUPED_INTEGER_FORMAT_UNSUPPORTED": 94,
+        "LOCAL_ROW_DENOMINATOR": 48,
+        "MALFORMED_NUMERIC_TOKEN": 500,
+        "MISSINGNESS_CHANGES_DENOMINATOR": 135,
+        "OPERANDS_OUTSIDE_PROPORTION_DOMAIN": 9,
+        "PERCENT_UNIT_NOT_EXPLICIT": 1592,
+        "SOURCE_SCOPE_AMBIGUOUS": 125,
+        "WEIGHTED_RESULT": 6
+      },
+      "accounting_invariant": true,
+      "primary_skip_reason_count_unit": "one canonical primary reason per skipped relation"
+    },
+    "source_first_labels_joined_after_lock": true
+  },
+  "limitations": [
+    "The direct JATS replay and eligibility classification are post-hoc development work; neither is blinded.",
+    "Individual source bindings and per-document reports are deliberately omitted from this public summary.",
+    "Source-level candidate adjudication is post-hoc DEVELOPMENT evidence and does not establish a paper error; paper_error_established remains false and verified_findings remains empty in every report.",
+    "Publisher-version and supplement checks are limited to the evidence capsules for the reviewed items; no claim is made about scientific consequences."
+  ]
+}

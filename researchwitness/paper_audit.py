@@ -25,6 +25,7 @@ from .paper_coverage import build_paper_coverage
 from .paper_flow_source import map_jats_sample_flows
 from .paper_prisma_flow import map_jats_prisma_relations
 from .paper_ratio import check_jats_cell_ratio_percentages
+from .paper_relation_telemetry import summarize_relations
 from .paper_statistics_source import check_jats_sd_se_n_tables
 from .paper_two_by_two_source import check_jats_unadjusted_2x2_tables
 from .strict import Bundle, Invalid, byte_hash, canonical, require, text
@@ -1576,7 +1577,9 @@ def run_paper_audit(
         check_structured_table_percentages(jats_document)
         if jats_document is not None else {
             'detector_id': 'table_percentage_recomputation', 'findings': [], 'tables': [],
-            'checked_cells': 0, 'scan_complete': True, 'limitations': [],
+            'checked_cells': 0, 'relations': [], 'relation_telemetry': summarize_relations([]),
+            'candidate_findings_omitted': 0,
+            'scan_complete': True, 'limitations': [],
         }
     )
     if jats_document is not None:
@@ -1594,6 +1597,7 @@ def run_paper_audit(
             'detector_id': 'jats_cell_ratio_percentage_recomputation',
             'operand_unit': 'n_over_N_percent_cell', 'findings': [], 'tables': [],
             'potential_cells': 0, 'checked_cells': 0, 'skipped_cells': 0,
+            'relations': [], 'relation_telemetry': summarize_relations([]), 'candidate_findings_omitted': 0,
             'scan_complete': False, 'limitations': ['SOURCE_FORMAT_NOT_JATS_XML'],
         }
         statistics_screen = {
@@ -1622,6 +1626,9 @@ def run_paper_audit(
             'image_contents_read': False, 'ocr_performed': False,
         }
         paper_coverage = None
+    percentage_relation_telemetry = summarize_relations(
+        structured_table_screen.get('relations', []) + ratio_screen.get('relations', [])
+    )
     source_id = text(identifier or ('local:' + path.name), 2000)
     source_version = text(version or 'unspecified', 100)
     table_candidates = table_screen['findings']
@@ -1836,7 +1843,7 @@ def run_paper_audit(
     unsupported_checks = [
         'The count scan does not determine whether separate values refer to the same cohort, subgroup, or timepoint.',
         'Structured JATS count/percentage checks do not infer local denominators, row totals, column totals, or additive category semantics.',
-        'The same-cell n/N (%) check accepts only bounded explicit ratios and skips unknown footnotes, scoped cells, and weighted or overlapping contexts.',
+        'The same-cell n/N (%) check accepts only bounded explicit ratios; category overlap is irrelevant to a cell-local quotient when its denominator and percentage base are explicit.',
         'Source-mapped sample-flow arithmetic is limited to one paragraph with explicit disjoint/exhaustive or sequential relation cues and common scope.',
         'PRISMA arithmetic checks only one explicitly labelled JATS record/duplicate/screened sequence; later review stages and figure contents remain unsupported.',
         'The source-mapped 2x2 odds-ratio check requires a one-row JATS table with four explicit event cells, timepoint, and a crude exposed-versus-unexposed estimate; other effect measures remain unsupported.',
@@ -1920,6 +1927,7 @@ def run_paper_audit(
             'table_percentages': table_screen,
             'structured_table_percentages': structured_table_screen,
             'cell_ratio_percentages': ratio_screen,
+            'percentage_relation_telemetry': percentage_relation_telemetry,
             'sd_se_n_statistics': statistics_screen,
             'source_mapped_sample_flow': source_flow_screen,
             'prisma_synthesis_flow': prisma_screen,
