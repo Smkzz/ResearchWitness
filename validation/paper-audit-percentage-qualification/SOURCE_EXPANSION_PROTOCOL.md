@@ -40,6 +40,19 @@ process the next complete metadata batch under the same rules. Stop when the
 threshold is met or the metadata result set is exhausted; do not alter any
 eligibility rule to change the result.
 
+## Reserved negative capacity exception
+
+Before the first expanded metadata batch is retrieved, the separate
+`RESERVED_NEGATIVE_CUSTODIAN_PROTOCOL.md` is frozen as a narrow exception to
+the no-reserved-body rule above. A `RESERVED` document may be retrieved only
+by the source-only custodian under that protocol, solely to estimate the
+reserve pool's source-qualified negative capacity. The custodian must not
+receive detector code or development outputs, and must return only the
+aggregate counts and sealed record hash specified there. No reserved document
+or relation may enter a development runner input, and no detector result may
+be joined, scored, or reported for any reserved source. All other reserved
+content remains unopened to the development work.
+
 ## Source-first review and detector join
 
 For each DEVELOPMENT source, locate candidate count/denominator/percentage
