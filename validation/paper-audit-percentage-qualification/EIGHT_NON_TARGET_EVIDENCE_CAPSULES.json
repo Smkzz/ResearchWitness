@@ -1,0 +1,398 @@
+{
+  "artifact_type": "RESEARCHWITNESS_NON_TARGET_ARITHMETIC_EVIDENCE_CAPSULES",
+  "candidate_adjudication_sha256": "36b5234a8a9a926c4948cc35c602981703dfdaccdfeef84fc7ca3f872696ed74",
+  "evidence_limitations": [
+    "The OUP original publisher PDF for paper-020 was not byte-captured because its signed CDN download was inaccessible; the publisher original-page full text and later corrected table were checked.",
+    "No authors were contacted and no underlying source dataset was accessed.",
+    "These capsules concern printed arithmetic only and do not establish the correct underlying value or scientific consequence."
+  ],
+  "items": [
+    {
+      "candidate_id": "jats-cell-ratio-percentage-0001",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "618",
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 0,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "20",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+          "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z"
+        },
+        "later_version_check": "Publisher erratum replacement table checked; none of these seven exact items is changed or corrected.",
+        "publisher_rendering": {
+          "same_source_version_confirmed": true,
+          "sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_LAYOUT_PDF"
+        },
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "source_identifier": "doi:10.1186/s13054-016-1577-x",
+        "source_version": "2016 original article version before the 2017 erratum",
+        "supplement_check": "No supplementary material node or linked explanatory supplement was found; data availability states not applicable."
+      },
+      "recomputed_at_display_precision": "3",
+      "recomputed_exact_rational_percent": "1000/309",
+      "recomputed_unrounded_percent_decimal": "3.2362459546925566343042071197411003236245954692557",
+      "relation_id": "4e48c518e01e16e629c45a79da889d1a760bd0040e59b655e21e20afec4b3933",
+      "relation_type": "DIRECT_N_OVER_N_PERCENTAGE",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "reported_percentage": "32",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[10]/td[2]"
+      ],
+      "source_identifier": "doi:10.1186/s13054-016-1577-x",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "source_version": "2016 original article version before the 2017 erratum",
+      "table_id": "Tab1"
+    },
+    {
+      "candidate_id": "jats-cell-ratio-percentage-0002",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "267",
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 1,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "25",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+          "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z"
+        },
+        "later_version_check": "Publisher erratum replacement table checked; none of these seven exact items is changed or corrected.",
+        "publisher_rendering": {
+          "same_source_version_confirmed": true,
+          "sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_LAYOUT_PDF"
+        },
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "source_identifier": "doi:10.1186/s13054-016-1577-x",
+        "source_version": "2016 original article version before the 2017 erratum",
+        "supplement_check": "No supplementary material node or linked explanatory supplement was found; data availability states not applicable."
+      },
+      "recomputed_at_display_precision": "9.4",
+      "recomputed_exact_rational_percent": "2500/267",
+      "recomputed_unrounded_percent_decimal": "9.3632958801498127340823970037453183520599250936330",
+      "relation_id": "cc6ae51802cf06957cc6e0c72c48bfa2af46b1551632cae660a95ea5376fc9c0",
+      "relation_type": "DIRECT_N_OVER_N_PERCENTAGE",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "reported_percentage": "9.3",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[43]/td[3]"
+      ],
+      "source_identifier": "doi:10.1186/s13054-016-1577-x",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "source_version": "2016 original article version before the 2017 erratum",
+      "table_id": "Tab1"
+    },
+    {
+      "candidate_id": "jats-cell-ratio-percentage-0003",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "614",
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 0,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "359",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+          "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z"
+        },
+        "later_version_check": "Publisher erratum replacement table checked; none of these seven exact items is changed or corrected.",
+        "publisher_rendering": {
+          "same_source_version_confirmed": true,
+          "sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_LAYOUT_PDF"
+        },
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "source_identifier": "doi:10.1186/s13054-016-1577-x",
+        "source_version": "2016 original article version before the 2017 erratum",
+        "supplement_check": "No supplementary material node or linked explanatory supplement was found; data availability states not applicable."
+      },
+      "recomputed_at_display_precision": "58",
+      "recomputed_exact_rational_percent": "17950/307",
+      "recomputed_unrounded_percent_decimal": "58.469055374592833876221498371335504885993485342020",
+      "relation_id": "91f593ef6e7ce9f67fe8fae4389df9a3846654d49793c8f7946abf37d6d19d96",
+      "relation_type": "DIRECT_N_OVER_N_PERCENTAGE",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "reported_percentage": "59",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[45]/td[2]"
+      ],
+      "source_identifier": "doi:10.1186/s13054-016-1577-x",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "source_version": "2016 original article version before the 2017 erratum",
+      "table_id": "Tab1"
+    },
+    {
+      "candidate_id": "jats-cell-ratio-percentage-0004",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "267",
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 0,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "92",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+          "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z"
+        },
+        "later_version_check": "Publisher erratum replacement table checked; none of these seven exact items is changed or corrected.",
+        "publisher_rendering": {
+          "same_source_version_confirmed": true,
+          "sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_LAYOUT_PDF"
+        },
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "source_identifier": "doi:10.1186/s13054-016-1577-x",
+        "source_version": "2016 original article version before the 2017 erratum",
+        "supplement_check": "No supplementary material node or linked explanatory supplement was found; data availability states not applicable."
+      },
+      "recomputed_at_display_precision": "34",
+      "recomputed_exact_rational_percent": "9200/267",
+      "recomputed_unrounded_percent_decimal": "34.456928838951310861423220973782771535580524344569",
+      "relation_id": "1b082a5c86ebe4fcafa59932dab2091af08c438499dd4d9c123ff47dfb747a55",
+      "relation_type": "DIRECT_N_OVER_N_PERCENTAGE",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "reported_percentage": "35",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[51]/td[3]"
+      ],
+      "source_identifier": "doi:10.1186/s13054-016-1577-x",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "source_version": "2016 original article version before the 2017 erratum",
+      "table_id": "Tab1"
+    },
+    {
+      "candidate_id": "jats-cell-ratio-percentage-0005",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "267",
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 1,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "3",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+          "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z"
+        },
+        "later_version_check": "Publisher erratum replacement table checked; none of these seven exact items is changed or corrected.",
+        "publisher_rendering": {
+          "same_source_version_confirmed": true,
+          "sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_LAYOUT_PDF"
+        },
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "source_identifier": "doi:10.1186/s13054-016-1577-x",
+        "source_version": "2016 original article version before the 2017 erratum",
+        "supplement_check": "No supplementary material node or linked explanatory supplement was found; data availability states not applicable."
+      },
+      "recomputed_at_display_precision": "1.1",
+      "recomputed_exact_rational_percent": "100/89",
+      "recomputed_unrounded_percent_decimal": "1.1235955056179775280898876404494382022471910112360",
+      "relation_id": "bca19e997f25d4b5c069c4d268d4b233f82512dff18e7cfd9e165fd9cabcb0c7",
+      "relation_type": "DIRECT_N_OVER_N_PERCENTAGE",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "reported_percentage": "1.2",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[54]/td[3]"
+      ],
+      "source_identifier": "doi:10.1186/s13054-016-1577-x",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "source_version": "2016 original article version before the 2017 erratum",
+      "table_id": "Tab1"
+    },
+    {
+      "candidate_id": "jats-cell-ratio-percentage-0008",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "607",
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 1,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "1",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+          "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z"
+        },
+        "later_version_check": "Publisher erratum replacement table checked; none of these seven exact items is changed or corrected.",
+        "publisher_rendering": {
+          "same_source_version_confirmed": true,
+          "sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_LAYOUT_PDF"
+        },
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "source_identifier": "doi:10.1186/s13054-016-1577-x",
+        "source_version": "2016 original article version before the 2017 erratum",
+        "supplement_check": "No supplementary material node or linked explanatory supplement was found; data availability states not applicable."
+      },
+      "recomputed_at_display_precision": "0.2",
+      "recomputed_exact_rational_percent": "100/607",
+      "recomputed_unrounded_percent_decimal": "0.16474464579901153212520593080724876441515650741351",
+      "relation_id": "1cbc9c4b8632bbbe6c676f34a72525ed1ed096f2d2485ac2e10668fa957737b1",
+      "relation_type": "DIRECT_N_OVER_N_PERCENTAGE",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "reported_percentage": "0.1",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[5]/td[2]"
+      ],
+      "source_identifier": "doi:10.1186/s13054-016-1577-x",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "source_version": "2016 original article version before the 2017 erratum",
+      "table_id": "Tab2"
+    },
+    {
+      "candidate_id": "jats-cell-ratio-percentage-0009",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "625",
+      "detector_id": "jats_cell_ratio_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 1,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "5",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "81c58fa0daef9b4caf24a6162cac84072592f24bb422749590b56370edf8dfff",
+          "publisher_url": "https://link.springer.com/article/10.1186/s13054-017-1627-z"
+        },
+        "later_version_check": "Publisher erratum replacement table checked; none of these seven exact items is changed or corrected.",
+        "publisher_rendering": {
+          "same_source_version_confirmed": true,
+          "sha256": "304f614fb615fda2a18583cc94eeee5675b6a5334c6453dc868deb4a9d3fb334",
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_LAYOUT_PDF"
+        },
+        "publisher_url": "https://link.springer.com/article/10.1186/s13054-016-1577-x",
+        "source_identifier": "doi:10.1186/s13054-016-1577-x",
+        "source_version": "2016 original article version before the 2017 erratum",
+        "supplement_check": "No supplementary material node or linked explanatory supplement was found; data availability states not applicable."
+      },
+      "recomputed_at_display_precision": "0.8",
+      "recomputed_exact_rational_percent": "4/5",
+      "recomputed_unrounded_percent_decimal": "0.8",
+      "relation_id": "0e0e14169a95d53957d0bfe6c6af7350d1e68d4b292e2f3962a09abad22f8d81",
+      "relation_type": "DIRECT_N_OVER_N_PERCENTAGE",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "reported_percentage": "1.8",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[10]/td[2]"
+      ],
+      "source_identifier": "doi:10.1186/s13054-016-1577-x",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "source_version": "2016 original article version before the 2017 erratum",
+      "table_id": "Tab2"
+    },
+    {
+      "candidate_id": "structured-table-percentage-0001",
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "denominator": "1327",
+      "detector_id": "table_percentage_recomputation",
+      "detector_version": "0.4",
+      "display_precision_digits": 0,
+      "eligibility_contract_version": "1.2",
+      "interpretation_limits": [
+        "This record establishes a source-level printed arithmetic inconsistency under the stated relation and display precision.",
+        "It does not establish which operand reflects the underlying data, the reason for the discrepancy, its impact on results or conclusions, scientific invalidity, or misconduct."
+      ],
+      "numerator": "262",
+      "publisher_source_checks": {
+        "correction_checked": {
+          "exact_non_target_item_corrected": false,
+          "jats_sha256": "702ab4e9bd798933f59927f99d57e8452522d544cc085aed1962bd0367affd3c",
+          "publisher_url": "https://academic.oup.com/jamiaopen/article/8/6/ooaf124/8381379"
+        },
+        "later_version_check": "The 2025 publisher corrected table was checked; this exact Employed/Yes row is retained without a denominator clarification.",
+        "publisher_rendering": {
+          "limitation": "Original publisher PDF URL redirected to an inaccessible signed CDN; publisher page full text and table identity were checked.",
+          "same_source_version_confirmed": true,
+          "sha256": null,
+          "status": "CONFIRMED_ORIGINAL_PUBLISHER_PAGE_FULL_TEXT"
+        },
+        "publisher_url": "https://academic.oup.com/jamiaopen/article/2/4/429/5621518",
+        "source_identifier": "doi:10.1093/jamiaopen/ooz061",
+        "source_version": "2019 original article version before the 2025 correction",
+        "supplement_check": "No supplementary material node or publisher supplement explaining a different denominator was located."
+      },
+      "recomputed_at_display_precision": "20",
+      "recomputed_exact_rational_percent": "26200/1327",
+      "recomputed_unrounded_percent_decimal": "19.743782969103240391861341371514694800301431801055",
+      "relation_id": "f7f9d3f5a910f278a687fdabb54b4784f1fe2ca549f789f20e713b22bed0966c",
+      "relation_type": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+      "report_sha256": "e75cdaaa91ec1bb90f48b9c90a3dc889b24b1702c953a218af4b37f49e4e0ff3",
+      "reported_percentage": "27",
+      "rounding_rule": "ROUND_HALF_UP directly at the source-displayed decimal precision",
+      "source_anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[32]/td[1]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[32]/td[3]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/thead[1]/tr[2]/th[1]"
+      ],
+      "source_identifier": "doi:10.1093/jamiaopen/ooz061",
+      "source_sha256": "04eabe20acdf46771e15e6e6710ce2ec30dc4ed092662a1332568eae22b1776a",
+      "source_version": "2019 original article version before the 2025 correction",
+      "table_id": "ooz061-T1"
+    }
+  ],
+  "percentage_contract_version": "1.2",
+  "record_version": "1",
+  "status": "POST_HOC_DEVELOPMENT_SOURCE_REVIEW",
+  "summary": {
+    "fully_classified": 8,
+    "jats_confirmed": 8,
+    "later_version_checked": 8,
+    "published_correction_checked": 8,
+    "publisher_original_pdf_captured": 7,
+    "publisher_original_pdf_not_captured": 1,
+    "publisher_rendering_confirmed": 8,
+    "source_reproduced_non_target_discrepancies": 8,
+    "source_version_confirmed": 8,
+    "supplement_checked": 8,
+    "unresolved": 0
+  }
+}

@@ -1,0 +1,425 @@
+{
+  "artifact_type": "RESEARCHWITNESS_PERCENTAGE_CANDIDATE_ADJUDICATION",
+  "record_version": 2,
+  "status": "POST_HOC_DEVELOPMENT_SOURCE_ADJUDICATION",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "percentage_contract_version": "1.2",
+  "evidence_policy": "Candidate facts are bound to deterministic report/source hashes and exact source anchors. Arithmetic validity and source-version confirmation are classified separately; no result establishes a paper error or scientific consequence.",
+  "source_blinding": "Post-hoc DEVELOPMENT review; candidate facts were available to reviewers, but report artifacts were not used as ground truth.",
+  "source_review_ledger_sha256": "8c8d9e287ce079fcf4151f38a41975cb4d3166f31afd2989fcdc2606d424ed5b",
+  "classification_counts": {
+    "SCOPE_DENOMINATOR_NOT_EXPLICIT": 2,
+    "SOURCE_REPRODUCED_ARITHMETIC_DISCREPANCY_VERSION_UNVERIFIED": 4,
+    "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET": 5,
+    "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY": 8
+  },
+  "summary": {
+    "current_candidate_count": 19,
+    "adjudicated_candidate_count": 19,
+    "candidate_arithmetic_validity": {
+      "numerator": 17,
+      "denominator": 19
+    },
+    "candidate_arithmetic_validity_threshold_90_percent_met": false,
+    "known_correction_target_candidates": 5,
+    "known_correction_target_share": {
+      "numerator": 5,
+      "denominator": 19
+    },
+    "source_reproduced_non_target_uncorrected": 8,
+    "source_reproduced_non_target_version_status_unverified": 4,
+    "scope_denominator_not_explicit": 2,
+    "parser_source_artifacts": 0,
+    "unresolved": 0,
+    "classification_counts": {
+      "SCOPE_DENOMINATOR_NOT_EXPLICIT": 2,
+      "SOURCE_REPRODUCED_ARITHMETIC_DISCREPANCY_VERSION_UNVERIFIED": 4,
+      "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET": 5,
+      "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY": 8
+    },
+    "all_current_candidates_adjudicated": true
+  },
+  "items": [
+    {
+      "case_id": "positive-j-einstein",
+      "candidate_id": "structured-table-percentage-0001",
+      "source_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+      "report_sha256": "c3792d936197377d3f97b286a27b09e22107c75af82a0d7b0c465bce59d197fb",
+      "relation_id": "3e1666895746254728fad74d653c1be9097fa520216ceb4b6a6ea733905b705d",
+      "table_id": "Tab3",
+      "row_identity": "Unchanged, n (%)",
+      "numerator": "2",
+      "denominator": "71",
+      "reported_percent": "2.9",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "2.8",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/sec[4]/table-wrap[2]/table[1]/tbody[1]/tr[14]/td[4]",
+        "/article[1]/body[1]/sec[3]/sec[4]/table-wrap[2]/table[1]/tbody[1]/tr[17]/td[1]",
+        "/article[1]/body[1]/sec[3]/sec[4]/table-wrap[2]/table[1]/tbody[1]/tr[17]/td[4]"
+      ],
+      "classification": "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET",
+      "review_basis": "The pinned original JATS and cited correction identify the same explicit N=71 cell; independent arithmetic gives 2.8% at one decimal."
+    },
+    {
+      "case_id": "positive-vitiligo-percent",
+      "candidate_id": "structured-table-percentage-0001",
+      "source_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+      "report_sha256": "a2421fd7d9bd09fe6ef3c5369a2fc5f1dbad7d7c808efd822f77178321e039fc",
+      "relation_id": "aad3ec7fee56e458eee8e1f927ab442481b3304b88c9cc7bd3bd46a3a4091e1e",
+      "table_id": "jocd16714-tbl-0002",
+      "row_identity": "≥ 75% repigmentation",
+      "numerator": "23",
+      "denominator": "30",
+      "reported_percent": "73.3",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "76.7",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[3]/td[1]",
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[3]/td[2]",
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/thead[1]/tr[1]/th[2]"
+      ],
+      "classification": "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET",
+      "review_basis": "Exact source cell mapped to a published correction; source operands and corrected value are hash-bound in the positive eligibility record."
+    },
+    {
+      "case_id": "positive-vitiligo-percent",
+      "candidate_id": "structured-table-percentage-0002",
+      "source_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+      "report_sha256": "a2421fd7d9bd09fe6ef3c5369a2fc5f1dbad7d7c808efd822f77178321e039fc",
+      "relation_id": "a787067ac13f4b416981c3adc3d8516c66c8bc8a29e9a58a47348b8096179b4d",
+      "table_id": "jocd16714-tbl-0002",
+      "row_identity": "≥ 75% repigmentation",
+      "numerator": "23",
+      "denominator": "30",
+      "reported_percent": "70",
+      "display_precision_digits": 0,
+      "recomputed_at_display_precision": "77",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[3]/td[1]",
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[3]/td[3]",
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/thead[1]/tr[1]/th[3]"
+      ],
+      "classification": "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET",
+      "review_basis": "Exact source cell mapped to a published correction; source operands and corrected value are hash-bound in the positive eligibility record."
+    },
+    {
+      "case_id": "negative-knitza",
+      "candidate_id": "structured-table-percentage-0001",
+      "source_sha256": "cc0abdc1786f485ed363b36310713936ccbb47b82489ade53f8b2b7af8bbbdf6",
+      "report_sha256": "5d93b1ce6abb9b56cd49dd1ac522b2e6150273b9eaadaaade9950079b4f087e9",
+      "relation_id": "91cadbb1e447d7dea0c00c466f930e47e8e93a7cd6eb2aa60310269b80a12529",
+      "table_id": "Tab1",
+      "row_identity": "Previous use of self-sampling device, n (%)",
+      "numerator": "12",
+      "denominator": "50",
+      "reported_percent": "48.0",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "24.0",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/sec[1]/p[1]/table-wrap[1]/table[1]/tbody[1]/tr[8]/td[1]",
+        "/article[1]/body[1]/sec[3]/sec[1]/p[1]/table-wrap[1]/table[1]/tbody[1]/tr[8]/td[4]",
+        "/article[1]/body[1]/sec[3]/sec[1]/p[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]"
+      ],
+      "classification": "SOURCE_REPRODUCED_ARITHMETIC_DISCREPANCY_VERSION_UNVERIFIED",
+      "review_basis": "Four byte-identical pinned JATS copies reproduce Total n=50 and 12 (48.0); 12/50 rounds to 24.0%. No publisher rendering, supplement, or exact-item correction/later-version record is captured locally; online correction search was not performed."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0001",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "4e48c518e01e16e629c45a79da889d1a760bd0040e59b655e21e20afec4b3933",
+      "table_id": "Tab1",
+      "row_identity": "Assault",
+      "numerator": "20",
+      "denominator": "618",
+      "reported_percent": "32",
+      "display_precision_digits": 0,
+      "recomputed_at_display_precision": "3",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[10]/td[2]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "Original JATS and publisher rendering agree on the printed relation; direct arithmetic differs at displayed precision; source notes, supplements, correction, and later-version checks did not resolve this exact item."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0002",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "cc6ae51802cf06957cc6e0c72c48bfa2af46b1551632cae660a95ea5376fc9c0",
+      "table_id": "Tab1",
+      "row_identity": "Intravenous fluid",
+      "numerator": "25",
+      "denominator": "267",
+      "reported_percent": "9.3",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "9.4",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[43]/td[3]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "Original JATS and publisher rendering agree on the printed relation; direct arithmetic differs at displayed precision; source notes, supplements, correction, and later-version checks did not resolve this exact item."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0003",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "91f593ef6e7ce9f67fe8fae4389df9a3846654d49793c8f7946abf37d6d19d96",
+      "table_id": "Tab1",
+      "row_identity": "Positive",
+      "numerator": "359",
+      "denominator": "614",
+      "reported_percent": "59",
+      "display_precision_digits": 0,
+      "recomputed_at_display_precision": "58",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[45]/td[2]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "Original JATS and publisher rendering agree on the printed relation; direct arithmetic differs at displayed precision; source notes, supplements, correction, and later-version checks did not resolve this exact item."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0004",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "1b082a5c86ebe4fcafa59932dab2091af08c438499dd4d9c123ff47dfb747a55",
+      "table_id": "Tab1",
+      "row_identity": "Closed CPR",
+      "numerator": "92",
+      "denominator": "267",
+      "reported_percent": "35",
+      "display_precision_digits": 0,
+      "recomputed_at_display_precision": "34",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[51]/td[3]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "Original JATS and publisher rendering agree on the printed relation; direct arithmetic differs at displayed precision; source notes, supplements, correction, and later-version checks did not resolve this exact item."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0005",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "bca19e997f25d4b5c069c4d268d4b233f82512dff18e7cfd9e165fd9cabcb0c7",
+      "table_id": "Tab1",
+      "row_identity": "Craterization",
+      "numerator": "3",
+      "denominator": "267",
+      "reported_percent": "1.2",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "1.1",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[54]/td[3]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "Original JATS and publisher rendering agree on the printed relation; direct arithmetic differs at displayed precision; source notes, supplements, correction, and later-version checks did not resolve this exact item."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0006",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "4f1f6d1108465ddd4a048b78a7f935596065a04eaef527d12761b1587a972868",
+      "table_id": "Tab2",
+      "row_identity": "Transferred",
+      "numerator": "11",
+      "denominator": "233",
+      "reported_percent": "1.8",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "4.7",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[3]/td[3]"
+      ],
+      "classification": "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET",
+      "review_basis": "Exact source cell mapped to a published correction; source operands and corrected value are hash-bound in the positive eligibility record."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0007",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "f209f0e839e916668df33649e14e1e0f0010d051bd83ba7e1aa56195f9bfb909",
+      "table_id": "Tab2",
+      "row_identity": "Home",
+      "numerator": "12",
+      "denominator": "233",
+      "reported_percent": "2.0",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "5.2",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[4]/td[3]"
+      ],
+      "classification": "SOURCE_REPRODUCED_KNOWN_CORRECTION_TARGET",
+      "review_basis": "Exact source cell mapped to a published correction; source operands and corrected value are hash-bound in the positive eligibility record."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0008",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "1cbc9c4b8632bbbe6c676f34a72525ed1ed096f2d2485ac2e10668fa957737b1",
+      "table_id": "Tab2",
+      "row_identity": "Other",
+      "numerator": "1",
+      "denominator": "607",
+      "reported_percent": "0.1",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "0.2",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[5]/td[2]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "Original JATS and publisher rendering agree on the printed relation; direct arithmetic differs at displayed precision; source notes, supplements, correction, and later-version checks did not resolve this exact item."
+    },
+    {
+      "case_id": "paper-001",
+      "candidate_id": "jats-cell-ratio-percentage-0009",
+      "source_sha256": "0fc0e27dfcbb87ece7ab9a4edf769c098512601ca7123b87e3c77e6fa73d9f62",
+      "report_sha256": "d90111a890d89bfde5f475b1918cac102390ea8298089d3cef62266dc6dc8234",
+      "relation_id": "0e0e14169a95d53957d0bfe6c6af7350d1e68d4b292e2f3962a09abad22f8d81",
+      "table_id": "Tab2",
+      "row_identity": "Other",
+      "numerator": "5",
+      "denominator": "625",
+      "reported_percent": "1.8",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "0.8",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[2]/table[1]/tbody[1]/tr[10]/td[2]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "Original JATS and publisher rendering agree on the printed relation; direct arithmetic differs at displayed precision; source notes, supplements, correction, and later-version checks did not resolve this exact item."
+    },
+    {
+      "case_id": "paper-005",
+      "candidate_id": "structured-table-percentage-0001",
+      "source_sha256": "4081c871df99da1eb20d6a2503251f85ef82bd54227b3bad99c263e65e583661",
+      "report_sha256": "f6af0c2f111b54db2b3223651ff03551f8839df80c6d5c22e399f347f7c70bd8",
+      "relation_id": "ac09863e6d62d8eda2d6bf2ef635b4f9e7d522f36d0ea664d7aab093e4ebb3ee",
+      "table_id": "Tab1",
+      "row_identity": "Existing lifeline subscribers, n (%)",
+      "numerator": "112",
+      "denominator": "331",
+      "reported_percent": "33.6",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "33.8",
+      "anchors": [
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[6]/td[1]",
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[6]/td[2]",
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[2]"
+      ],
+      "classification": "SOURCE_REPRODUCED_ARITHMETIC_DISCREPANCY_VERSION_UNVERIFIED",
+      "review_basis": "Pinned JATS and Springer PDF both reproduce the value under table headers n=331/172/159; independent arithmetic gives 33.8%, 30.8%, and 37.1%. A prior cohort could explain the printed values, but no row note binds it. No online correction search or later-version confirmation was performed; referenced supplement is not captured."
+    },
+    {
+      "case_id": "paper-005",
+      "candidate_id": "structured-table-percentage-0002",
+      "source_sha256": "4081c871df99da1eb20d6a2503251f85ef82bd54227b3bad99c263e65e583661",
+      "report_sha256": "f6af0c2f111b54db2b3223651ff03551f8839df80c6d5c22e399f347f7c70bd8",
+      "relation_id": "f736e39153efcb5e04052d11e7c15dfb73fc4b76a1a4571deb4af012a412d7cc",
+      "table_id": "Tab1",
+      "row_identity": "Existing lifeline subscribers, n (%)",
+      "numerator": "53",
+      "denominator": "172",
+      "reported_percent": "30.6",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "30.8",
+      "anchors": [
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[6]/td[1]",
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[6]/td[3]",
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]"
+      ],
+      "classification": "SOURCE_REPRODUCED_ARITHMETIC_DISCREPANCY_VERSION_UNVERIFIED",
+      "review_basis": "Pinned JATS and Springer PDF both reproduce the value under table headers n=331/172/159; independent arithmetic gives 33.8%, 30.8%, and 37.1%. A prior cohort could explain the printed values, but no row note binds it. No online correction search or later-version confirmation was performed; referenced supplement is not captured."
+    },
+    {
+      "case_id": "paper-005",
+      "candidate_id": "structured-table-percentage-0003",
+      "source_sha256": "4081c871df99da1eb20d6a2503251f85ef82bd54227b3bad99c263e65e583661",
+      "report_sha256": "f6af0c2f111b54db2b3223651ff03551f8839df80c6d5c22e399f347f7c70bd8",
+      "relation_id": "44c4f646190c70a6a46fbb3d017e30d13f12106d90e2b0d0ad82ad8e3f87094f",
+      "table_id": "Tab1",
+      "row_identity": "Existing lifeline subscribers, n (%)",
+      "numerator": "59",
+      "denominator": "159",
+      "reported_percent": "36.9",
+      "display_precision_digits": 1,
+      "recomputed_at_display_precision": "37.1",
+      "anchors": [
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[6]/td[1]",
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[6]/td[4]",
+        "/article[1]/body[1]/sec[2]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]"
+      ],
+      "classification": "SOURCE_REPRODUCED_ARITHMETIC_DISCREPANCY_VERSION_UNVERIFIED",
+      "review_basis": "Pinned JATS and Springer PDF both reproduce the value under table headers n=331/172/159; independent arithmetic gives 33.8%, 30.8%, and 37.1%. A prior cohort could explain the printed values, but no row note binds it. No online correction search or later-version confirmation was performed; referenced supplement is not captured."
+    },
+    {
+      "case_id": "paper-020",
+      "candidate_id": "structured-table-percentage-0001",
+      "source_sha256": "04eabe20acdf46771e15e6e6710ce2ec30dc4ed092662a1332568eae22b1776a",
+      "report_sha256": "e75cdaaa91ec1bb90f48b9c90a3dc889b24b1702c953a218af4b37f49e4e0ff3",
+      "relation_id": "f7f9d3f5a910f278a687fdabb54b4784f1fe2ca549f789f20e713b22bed0966c",
+      "table_id": "ooz061-T1",
+      "row_identity": "Employed",
+      "numerator": "262",
+      "denominator": "1327",
+      "reported_percent": "27",
+      "display_precision_digits": 0,
+      "recomputed_at_display_precision": "20",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[32]/td[1]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[32]/td[3]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/thead[1]/tr[2]/th[1]"
+      ],
+      "classification": "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY",
+      "review_basis": "The source-mapped Employed/Yes relation uses the explicitly stated column denominator; the printed percentage does not match at displayed precision. The publisher correction and later table were checked and do not resolve this exact item."
+    },
+    {
+      "case_id": "paper-020",
+      "candidate_id": "structured-table-percentage-0002",
+      "source_sha256": "04eabe20acdf46771e15e6e6710ce2ec30dc4ed092662a1332568eae22b1776a",
+      "report_sha256": "e75cdaaa91ec1bb90f48b9c90a3dc889b24b1702c953a218af4b37f49e4e0ff3",
+      "relation_id": "232fa7d414a6adc6e56f93b86bc6037b9d282aaccb8ea1c1cd489d0966bbc6c7",
+      "table_id": "ooz061-T1",
+      "row_identity": "$35k–$55k",
+      "numerator": "391",
+      "denominator": "1327",
+      "reported_percent": "30",
+      "display_precision_digits": 0,
+      "recomputed_at_display_precision": "29",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[40]/td[1]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[40]/td[3]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/thead[1]/tr[2]/th[1]"
+      ],
+      "classification": "SCOPE_DENOMINATOR_NOT_EXPLICIT",
+      "review_basis": "Source review found that the detector-selected denominator is not explicitly bound to this individual category relation; alternate category totals may explain the displayed percentage, so v1.2 fails closed. The 2025 corrected table was also reviewed for this item; source review still does not establish an explicit cell-level denominator under v1.2."
+    },
+    {
+      "case_id": "paper-020",
+      "candidate_id": "structured-table-percentage-0003",
+      "source_sha256": "04eabe20acdf46771e15e6e6710ce2ec30dc4ed092662a1332568eae22b1776a",
+      "report_sha256": "e75cdaaa91ec1bb90f48b9c90a3dc889b24b1702c953a218af4b37f49e4e0ff3",
+      "relation_id": "1609ab468de8135e066aeb8bc4a971a837013230d411e957ee304cbae87690cf",
+      "table_id": "ooz061-T1",
+      "row_identity": ">$55k",
+      "numerator": "536",
+      "denominator": "1327",
+      "reported_percent": "41",
+      "display_precision_digits": 0,
+      "recomputed_at_display_precision": "40",
+      "anchors": [
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[41]/td[1]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[41]/td[3]",
+        "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/thead[1]/tr[2]/th[1]"
+      ],
+      "classification": "SCOPE_DENOMINATOR_NOT_EXPLICIT",
+      "review_basis": "Source review found that the detector-selected denominator is not explicitly bound to this individual category relation; alternate category totals may explain the displayed percentage, so v1.2 fails closed. The 2025 corrected table was also reviewed for this item; source review still does not establish an explicit cell-level denominator under v1.2."
+    }
+  ]
+}

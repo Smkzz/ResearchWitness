@@ -1,6 +1,8 @@
 """Coverage accounting stays scoped to represented source objects and detector outputs."""
 from __future__ import annotations
 
+from dataclasses import replace
+
 import pytest
 
 from researchwitness.jats import parse_jats
@@ -81,6 +83,13 @@ def test_jats_coverage_tracks_tables_operands_and_candidates_separately():
     # An incomplete table can have a skipped cell without making the other
     # checked table or its candidate disappear from coverage accounting.
     assert detector['tables'][0]['counts']['operands']['candidates'] == 1
+    assert detector['percentage_relation_telemetry_complete'] is True
+    assert detector['percentage_relation_telemetry']['potential_relations'] == 2
+    assert detector['percentage_relation_telemetry']['checked_mismatches'] == 1
+    assert detector['percentage_relation_telemetry']['skipped_relations'] == 1
+    assert detector['percentage_relation_telemetry']['primary_skip_reason_counts'] == {
+        'LOCAL_ROW_DENOMINATOR': 1,
+    }
 
 
 def test_duplicate_and_missing_table_ids_do_not_collide_in_source_references():
@@ -95,6 +104,25 @@ def test_duplicate_and_missing_table_ids_do_not_collide_in_source_references():
     assert [table['table_id'] for table in tables] == ['', '']
     assert tables[0]['table_ref'] != tables[1]['table_ref']
     assert tables[0]['table_ref']['source_sha256'] == tables[1]['table_ref']['source_sha256']
+
+
+def test_percentage_coverage_rejects_relations_swapped_between_duplicate_table_ids():
+    import json
+    document = _document(
+        _table('<tr><th scope="row">A</th><td>1 (5%)</td></tr>')
+        + _table('<tr><th scope="row">B</th><td>2 (10%)</td></tr>')
+    )
+    record = json.loads(json.dumps(check_structured_table_percentages(document)))
+    record['tables'][0]['relations'], record['tables'][1]['relations'] = (
+        record['tables'][1]['relations'], record['tables'][0]['relations'],
+    )
+    record['relations'] = record['tables'][0]['relations'] + record['tables'][1]['relations']
+
+    detector = build_paper_coverage(document, record)['detectors'][0]
+
+    assert detector['percentage_relation_telemetry_complete'] is False
+    assert detector['percentage_relation_telemetry'] is None
+    assert detector['status'] == 'INCOMPLETE'
 
 
 def test_missing_detector_table_result_is_incomplete_and_counted_as_skipped():
@@ -112,13 +140,123 @@ def test_missing_detector_table_result_is_incomplete_and_counted_as_skipped():
 
     detector = build_paper_coverage(document, record)['detectors'][0]
     assert detector['status'] == 'INCOMPLETE'
-    assert detector['reasons'] == ['DETECTOR_TABLE_RESULT_COUNT_MISMATCH']
+    assert detector['reasons'] == [
+        'DETECTOR_TABLE_RESULT_COUNT_MISMATCH', 'PERCENTAGE_RELATION_TELEMETRY_INCOMPLETE',
+    ]
     assert detector['tables'][1]['status'] == 'INCOMPLETE'
-    assert detector['tables'][1]['skip_reasons'] == ['DETECTOR_TABLE_RESULT_MISSING']
+    assert detector['tables'][1]['skip_reasons'] == [
+        'DETECTOR_TABLE_RESULT_MISSING', 'PERCENTAGE_RELATION_TELEMETRY_INCOMPLETE',
+    ]
     assert detector['object_counts']['potential'] == 2
-    assert detector['object_counts']['skipped'] == 1
-    assert detector['operand_counts']['skipped'] == 1
+    assert detector['object_counts']['skipped'] is None
+    assert detector['operand_counts']['skipped'] is None
     assert detector['object_counts']['candidates'] is None
+    assert detector['percentage_relation_telemetry_complete'] is False
+    assert detector['percentage_relation_telemetry'] is None
+
+
+def test_missing_direct_detector_row_uses_direct_ratio_shape_and_withholds_totals():
+    document = _document(
+        '<table-wrap><table><thead><tr><th>Outcome</th><th>n/N (%)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>11/20 (55%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    )
+    detector = build_paper_coverage(document, {
+        'detector_id': 'jats_cell_ratio_percentage_recomputation',
+        'tables': [],
+    })['detectors'][0]
+
+    assert detector['status'] == 'INCOMPLETE'
+    assert detector['operand_counts']['potential'] == 1
+    assert detector['operand_counts']['checked'] is None
+    assert detector['tables'][0]['counts']['operands']['potential'] == 1
+    assert detector['percentage_relation_telemetry'] is None
+
+
+def test_direct_ratio_coverage_uses_relation_semantics_when_table_grid_is_unsupported():
+    document = _document(
+        '<table-wrap><table><thead><tr><th>Outcome</th><th>n/N (%)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>11/20 (55%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    )
+    table = document.tables[0]
+    document = replace(
+        document,
+        tables=(replace(table, structure_status='TABLE_STRUCTURE_UNSUPPORTED'),),
+    )
+
+    screen = check_jats_cell_ratio_percentages(document)
+    detector = build_paper_coverage(document, screen)['detectors'][0]
+
+    assert screen['tables'][0]['status'] == 'ELIGIBLE'
+    assert detector['percentage_relation_telemetry_complete'] is True
+    assert detector['percentage_relation_telemetry']['checked_matches'] == 1
+    assert detector['status'] == 'ELIGIBLE'
+    assert detector['tables'][0]['parser_status'] == 'TABLE_STRUCTURE_UNSUPPORTED'
+    assert detector['tables'][0]['status'] == 'ELIGIBLE'
+
+
+def test_direct_finding_cap_marks_table_incomplete_without_skipping_checked_relation(monkeypatch):
+    from researchwitness import paper_ratio
+
+    monkeypatch.setattr(paper_ratio, 'MAX_RATIO_FINDINGS', 0)
+    document = _document(
+        '<table-wrap><table><thead><tr><th>Outcome</th><th>n/N (%)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>11/20 (50%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    )
+
+    screen = check_jats_cell_ratio_percentages(document)
+    detector = build_paper_coverage(document, screen)['detectors'][0]
+
+    assert screen['candidate_findings_omitted'] == 1
+    assert screen['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MISMATCH'
+    assert screen['relations'][0]['finding_emitted'] is False
+    assert detector['percentage_relation_telemetry_complete'] is True
+    assert detector['percentage_relation_telemetry']['checked_mismatches'] == 1
+    assert detector['percentage_relation_telemetry']['skipped_relations'] == 0
+    assert detector['status'] == 'INCOMPLETE'
+    table_coverage = detector['tables'][0]
+    assert table_coverage['status'] == 'INCOMPLETE'
+    assert table_coverage['candidate_findings_omitted'] == 1
+    assert table_coverage['counts']['operands']['checked'] == 1
+    assert table_coverage['counts']['operands']['skipped'] == 0
+    assert 'CANDIDATE_FINDINGS_OMITTED' in table_coverage['reasons']
+
+
+def test_percentage_coverage_rejects_inconsistent_relation_telemetry_summary():
+    document = _document(_table('<tr><th scope="row">A</th><td>1 (5%)</td></tr>'))
+    screen = check_structured_table_percentages(document)
+    import json
+    screen = json.loads(json.dumps(screen))
+    screen['relation_telemetry']['checked_matches'] = 0
+
+    detector = build_paper_coverage(document, screen)['detectors'][0]
+
+    assert detector['percentage_relation_telemetry_complete'] is False
+    assert detector['percentage_relation_telemetry'] is None
+    assert detector['status'] == 'INCOMPLETE'
+    assert detector['operand_counts']['checked'] is None
+
+
+def test_percentage_coverage_rejects_altered_per_table_relation_and_counters():
+    import json
+    document = _document(_table('<tr><th scope="row">A</th><td>1 (5%)</td></tr>'))
+    original = check_structured_table_percentages(document)
+
+    altered_relation = json.loads(json.dumps(original))
+    altered_relation['tables'][0]['relations'][0]['status'] = 'ELIGIBLE_CHECKED_MISMATCH'
+    altered_relation['tables'][0]['relations'][0]['primary_skip_reason'] = None
+    altered_relation['tables'][0]['relations'][0]['secondary_skip_reasons'] = []
+    altered_counter = json.loads(json.dumps(original))
+    altered_counter['tables'][0]['checked_cells'] = 0
+
+    for record in (altered_relation, altered_counter):
+        detector = build_paper_coverage(document, record)['detectors'][0]
+        assert detector['percentage_relation_telemetry_complete'] is False
+        assert detector['percentage_relation_telemetry'] is None
+        assert detector['status'] == 'INCOMPLETE'
+        assert detector['operand_counts']['checked'] is None
 
 
 def test_paper_scoped_coverage_preserves_status_and_unknown_counts():
@@ -148,10 +286,7 @@ def test_paper_scoped_coverage_preserves_status_and_unknown_counts():
 
 def test_detector_order_is_deterministic_and_no_table_screen_is_unsupported():
     document = _document('')
-    no_tables = {
-        'detector_id': 'table_percentage_recomputation',
-        'tables': [],
-    }
+    no_tables = check_structured_table_percentages(document)
     flow = {
         'detector_id': 'explicit_exclusion_flow_locator',
         'status': 'NOT_APPLICABLE',

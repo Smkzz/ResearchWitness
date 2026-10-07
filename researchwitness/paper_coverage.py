@@ -9,11 +9,15 @@ shape.
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
+from hashlib import sha256
 import re
 from typing import Any
 
 from .paper_document import PaperDocument, Table
-from .table_arithmetic import COUNT_PERCENT
+from .paper_contracts import PERCENTAGE_CONTRACT_VERSION
+from .paper_ratio import CELL_RATIO_SHAPE
+from .table_arithmetic import COUNT_PERCENT, COUNT_PERCENT_SHAPE
+from .paper_relation_telemetry import relation_id, summarize_relations
 
 
 _TABLE_STATUSES = frozenset({'ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'})
@@ -87,13 +91,19 @@ def _status(record: Mapping[str, Any]) -> str:
     return value
 
 
-def _potential_count_percent_cells(table: Table) -> int:
-    """Count only tbody cells matching the active table detector's input shape."""
+def _potential_count_percent_cells(table: Table, detector_id: str) -> int:
+    """Count the exact broad candidate shape used by a percentage detector."""
+    if detector_id == 'jats_cell_ratio_percentage_recomputation':
+        pattern = CELL_RATIO_SHAPE
+    elif detector_id == 'table_percentage_recomputation':
+        pattern = COUNT_PERCENT_SHAPE
+    else:
+        pattern = COUNT_PERCENT
     return sum(
         1
         for row in table.rows if row.row_group == 'tbody'
         for cell in row.cells
-        if COUNT_PERCENT.fullmatch(cell.raw_text)
+        if pattern.fullmatch(cell.raw_text)
     )
 
 
@@ -189,15 +199,36 @@ def _build_table_detector(document: PaperDocument, record: Mapping[str, Any]) ->
     potential_operands = checked_operands = skipped_operands = candidate_items = 0
     tables_checked = tables_skipped = tables_with_candidates = 0
     candidate_counts_known = True
+    percentage_detector = detector_id in {
+        'table_percentage_recomputation', 'jats_cell_ratio_percentage_recomputation',
+    }
+    relation_records: list[Mapping[str, Any]] = []
+    relation_table_results: list[tuple[Table, Mapping[str, Any]]] = []
+    source_potentials: list[int] = []
+    relation_arrays_complete = percentage_detector and result_count == table_count
     if extra_count:
         candidate_counts_known = False
 
     for index, table in enumerate(model_tables):
-        potential = _potential_count_percent_cells(table)
+        source_potential = _potential_count_percent_cells(table, detector_id)
+        source_potentials.append(source_potential)
+        potential = source_potential
+        candidate_findings_omitted: int | None = None
         if table.source_anchor.source_sha256 != document.source_sha256:
             raise ValueError('table source anchor hash differs from its PaperDocument source hash')
         if index < matched_count:
             result = raw_rows[index]
+            if percentage_detector:
+                relation_table_results.append((table, result))
+                raw_relations = result.get('relations')
+                if not isinstance(raw_relations, (list, tuple)) or any(
+                    not isinstance(item, Mapping) for item in raw_relations
+                ):
+                    relation_arrays_complete = False
+                else:
+                    relation_records.extend(raw_relations)
+                    if len(raw_relations) != result.get('potential_relations', -1):
+                        relation_arrays_complete = False
             status = _status(result)
             result_table_id = result.get('table_id')
             if result_table_id is not None and result_table_id != table.table_id:
@@ -222,6 +253,9 @@ def _build_table_detector(document: PaperDocument, record: Mapping[str, Any]) ->
             else:
                 candidates = _nonnegative_integer(candidates, f'{detector_id} candidate count', _MAX_CANDIDATES)
                 candidate_count_known = True
+            raw_omitted = result.get('candidate_findings_omitted')
+            if percentage_detector and type(raw_omitted) is int and 0 <= raw_omitted <= _MAX_CHECKED_CELLS:
+                candidate_findings_omitted = raw_omitted
             reasons, reasons_truncated = _reasons(result)
             if checked > potential:
                 raise ValueError(f'{detector_id} checked more cells than its recognized table operands')
@@ -235,6 +269,7 @@ def _build_table_detector(document: PaperDocument, record: Mapping[str, Any]) ->
             checked = 0
             candidates = 0
             candidate_count_known = False
+            candidate_findings_omitted = None
             candidate_counts_known = False
             skipped = potential
             reasons = ['DETECTOR_TABLE_RESULT_MISSING']
@@ -272,6 +307,7 @@ def _build_table_detector(document: PaperDocument, record: Mapping[str, Any]) ->
             'reasons': reasons,
             'reasons_truncated': reasons_truncated,
             'skip_reasons': reasons if status in ('INCOMPLETE', 'UNSUPPORTED') else [],
+            'candidate_findings_omitted': candidate_findings_omitted,
             'counts': {
                 'objects': {
                     'unit': 'table',
@@ -284,10 +320,10 @@ def _build_table_detector(document: PaperDocument, record: Mapping[str, Any]) ->
                     'candidates': int(candidates > 0) if candidate_count_known else None,
                 },
                 'operands': {
-                'unit': _bounded_text(
-                    record.get('operand_unit', 'count_percentage_cell'),
-                    f'{detector_id} operand unit', 100, allow_empty=False,
-                ),
+                    'unit': _bounded_text(
+                        record.get('operand_unit', 'count_percentage_cell'),
+                        f'{detector_id} operand unit', 100, allow_empty=False,
+                    ),
                     'potential': potential,
                     'applicable': potential if status != 'NOT_APPLICABLE' else 0,
                     'eligible': checked,
@@ -301,47 +337,253 @@ def _build_table_detector(document: PaperDocument, record: Mapping[str, Any]) ->
 
     # Keep extra detector rows visible in the summary rather than attaching
     # them to a table using an ambiguous or duplicated table ID.
+    telemetry_complete = (
+        _percentage_relation_telemetry_complete(
+            document, record, relation_table_results, relation_records, relation_arrays_complete,
+        ) if percentage_detector else False
+    )
     status = (
         'UNSUPPORTED' if table_count == 0 and result_count == 0
         else _rollup_status(table_statuses, has_missing_results=bool(missing_count or extra_count))
     )
-    return {
+    reasons = (
+        ['NO_JATS_TABLES_FOUND'] if table_count == 0 and result_count == 0 else
+        (['DETECTOR_TABLE_RESULT_COUNT_MISMATCH'] if missing_count or extra_count else [])
+    )
+    operand_counts: dict[str, Any] = {
+        'unit': _bounded_text(
+            record.get('operand_unit', 'count_percentage_cell'),
+            f'{detector_id} operand unit', 100, allow_empty=False,
+        ),
+        'potential': potential_operands,
+        'applicable': potential_operands,
+        'eligible': checked_operands,
+        'checked': checked_operands,
+        'skipped': skipped_operands,
+        'candidates': candidate_items if candidate_counts_known else None,
+    }
+    object_counts: dict[str, Any] = {
+        'unit': 'table',
+        'potential': table_count,
+        # Unsupported and incomplete tables are counted as possible
+        # applicability; status_counts keeps their uncertainty explicit.
+        'applicable': sum(count for key, count in status_counts.items()
+                          if key in ('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE')),
+        'applicability_unknown': status_counts.get('UNSUPPORTED', 0) + status_counts.get('INCOMPLETE', 0),
+        'eligible': status_counts.get('ELIGIBLE', 0),
+        'checked': tables_checked,
+        'skipped': tables_skipped,
+        'candidates': tables_with_candidates if candidate_counts_known else None,
+    }
+    if percentage_detector and not telemetry_complete:
+        status = 'INCOMPLETE'
+        reasons = list(dict.fromkeys(reasons + ['PERCENTAGE_RELATION_TELEMETRY_INCOMPLETE']))
+        status_counts = {'INCOMPLETE': table_count} if table_count else {}
+        object_counts = {
+            'unit': 'table', 'potential': table_count, 'applicable': table_count,
+            'applicability_unknown': table_count, 'eligible': None, 'checked': None,
+            'skipped': None, 'candidates': None,
+        }
+        operand_counts = {
+            'unit': operand_counts['unit'], 'potential': sum(source_potentials),
+            'applicable': sum(source_potentials),
+            'eligible': None, 'checked': None, 'skipped': None, 'candidates': None,
+        }
+        for index, table_result in enumerate(table_results):
+            original_reasons = table_result['reasons']
+            table_result['status'] = 'INCOMPLETE'
+            table_result['applicability'] = 'UNKNOWN'
+            table_result['reasons'] = list(dict.fromkeys(
+                original_reasons + ['PERCENTAGE_RELATION_TELEMETRY_INCOMPLETE'],
+            ))
+            table_result['reasons_truncated'] = False
+            table_result['skip_reasons'] = table_result['reasons']
+            table_result['candidate_findings_omitted'] = None
+            table_result['counts']['objects'].update({
+                'applicable': 1, 'applicability_unknown': 1, 'eligible': None,
+                'checked': None, 'skipped': None, 'candidates': None,
+            })
+            table_result['counts']['operands'].update({
+                'potential': source_potentials[index], 'applicable': source_potentials[index],
+                'eligible': None, 'checked': None,
+                'skipped': None, 'candidates': None, 'candidate_count_known': False,
+            })
+
+    result_record = {
         'detector_id': detector_id,
         'scope': 'table',
         'status': status,
         'status_counts': dict(sorted(status_counts.items())),
-        'object_counts': {
-            'unit': 'table',
-            'potential': table_count,
-            # Unsupported and incomplete tables are counted as possible
-            # applicability; status_counts keeps their uncertainty explicit.
-            'applicable': sum(count for key, count in status_counts.items()
-                              if key in ('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE')),
-            'applicability_unknown': status_counts.get('UNSUPPORTED', 0) + status_counts.get('INCOMPLETE', 0),
-            'eligible': status_counts.get('ELIGIBLE', 0),
-            'checked': tables_checked,
-            'skipped': tables_skipped,
-            'candidates': tables_with_candidates if candidate_counts_known else None,
-        },
-        'operand_counts': {
-            'unit': _bounded_text(
-                record.get('operand_unit', 'count_percentage_cell'),
-                f'{detector_id} operand unit', 100, allow_empty=False,
-            ),
-            'potential': potential_operands,
-            'applicable': potential_operands,
-            'eligible': checked_operands,
-            'checked': checked_operands,
-            'skipped': skipped_operands,
-            'candidates': candidate_items if candidate_counts_known else None,
-        },
-        'reasons': (
-            ['NO_JATS_TABLES_FOUND'] if table_count == 0 and result_count == 0 else
-            (['DETECTOR_TABLE_RESULT_COUNT_MISMATCH'] if missing_count or extra_count else [])
-        ),
+        'object_counts': object_counts,
+        'operand_counts': operand_counts,
+        'reasons': reasons,
         'unmatched_result_count': extra_count,
+        **({
+            'percentage_relation_telemetry': (
+                summarize_relations(relation_records) if telemetry_complete else None
+            ),
+            'percentage_relation_telemetry_complete': telemetry_complete,
+        } if percentage_detector else {}),
         'tables': table_results,
     }
+    return result_record
+
+
+def _percentage_relation_telemetry_complete(
+    document: PaperDocument,
+    record: Mapping[str, Any],
+    relation_table_results: list[tuple[Table, Mapping[str, Any]]],
+    table_relations: list[Mapping[str, Any]],
+    table_arrays_complete: bool,
+) -> bool:
+    supplied = record.get('relations')
+    summary = record.get('relation_telemetry')
+    if (not table_arrays_complete or len(relation_table_results) != len(document.tables)
+            or not isinstance(supplied, (list, tuple))):
+        return False
+    if any(not isinstance(item, Mapping) for item in supplied):
+        return False
+    flattened: list[Mapping[str, Any]] = []
+    expected_type = (
+        'CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE'
+        if _detector_id(record) == 'table_percentage_recomputation'
+        else 'DIRECT_N_OVER_N_PERCENTAGE'
+    )
+    detector_id = _detector_id(record)
+    for table, table_result in relation_table_results:
+        relations = table_result.get('relations')
+        if not isinstance(relations, (list, tuple)) or any(not isinstance(item, Mapping) for item in relations):
+            return False
+        try:
+            computed_table = summarize_relations(relations)
+        except (TypeError, ValueError):
+            return False
+        table_key = sha256(
+            (table.source_anchor.source_sha256 + '\0' + table.source_anchor.element_path).encode('utf-8')
+        ).hexdigest()
+        for relation in relations:
+            anchor = relation.get('source_anchor')
+            if (relation.get('detector_id') != _detector_id(record)
+                    or relation.get('relation_type') != expected_type
+                    or relation.get('contract_version') != PERCENTAGE_CONTRACT_VERSION
+                    or relation.get('table_key') != table_key
+                    or not isinstance(anchor, Mapping)
+                    or anchor.get('source_sha256') != document.source_sha256
+                    or not isinstance(anchor.get('element_path'), str)
+                    or not anchor.get('element_path').startswith(table.source_anchor.element_path + '/')):
+                return False
+            if relation.get('relation_id') != relation_id(
+                _detector_id(record), PERCENTAGE_CONTRACT_VERSION, document.source_sha256,
+                anchor['element_path'],
+            ):
+                return False
+            if relation['status'] in ('ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH'):
+                if (not isinstance(relation.get('finding_emitted'), bool)
+                        or (relation['status'] == 'ELIGIBLE_CHECKED_MATCH' and relation['finding_emitted'])):
+                    return False
+            elif 'finding_emitted' in relation:
+                return False
+
+        candidate_findings_omitted = sum(
+            relation.get('status') == 'ELIGIBLE_CHECKED_MISMATCH'
+            and relation.get('finding_emitted') is False
+            for relation in relations
+        )
+        if (type(table_result.get('candidate_findings_omitted')) is not int
+                or table_result.get('candidate_findings_omitted') != candidate_findings_omitted):
+            return False
+        expected_status = (
+            'INCOMPLETE' if candidate_findings_omitted or (
+                detector_id == 'table_percentage_recomputation'
+                and table.structure_status != 'STRUCTURE_RELIABLE'
+            ) else
+            'NOT_APPLICABLE' if not relations else
+            'UNSUPPORTED' if computed_table['skipped_relations']
+            and computed_table['unsupported_relations'] == computed_table['skipped_relations'] else
+            'INCOMPLETE' if computed_table['skipped_relations'] else 'ELIGIBLE'
+        )
+        reported_status = table_result.get('status', table_result.get('eligibility'))
+        checked_alias = table_result.get(
+            'checked_cells', table_result.get('checked_objects', table_result.get('checked_operands')),
+        )
+        expected_fields = {
+            'potential_relations': computed_table['potential_relations'],
+            'applicable_relations': computed_table['applicable_relations'],
+            'eligible_relations': computed_table['eligible_relations'],
+            'checked_matches': computed_table['checked_matches'],
+            'checked_mismatches': computed_table['checked_mismatches'],
+            'incomplete_relations': computed_table['incomplete_relations'],
+            'unsupported_relations': computed_table['unsupported_relations'],
+            'skipped_relations': computed_table['skipped_relations'],
+            'primary_skip_reason_counts': computed_table['primary_skip_reason_counts'],
+        }
+        if (reported_status != expected_status or checked_alias != computed_table['checked_relations']
+                or table_result.get('candidate_count') != sum(
+                    relation.get('finding_emitted') is True for relation in relations
+                ) or any(table_result.get(key) != value for key, value in expected_fields.items())):
+            return False
+        if detector_id in {
+            'table_percentage_recomputation', 'jats_cell_ratio_percentage_recomputation',
+        }:
+            reason_set: list[str] = []
+            for relation in relations:
+                primary = relation.get('primary_skip_reason')
+                if primary:
+                    reason_set.append(primary)
+                    reason_set.extend(relation.get('secondary_skip_reasons', []))
+            expected_reasons = list(dict.fromkeys(reason_set))
+            if (detector_id == 'table_percentage_recomputation'
+                    and table.structure_status != 'STRUCTURE_RELIABLE'
+                    and 'TABLE_STRUCTURE_UNSUPPORTED' not in expected_reasons):
+                expected_reasons.append('TABLE_STRUCTURE_UNSUPPORTED')
+            if candidate_findings_omitted:
+                expected_reasons.append(
+                    'STRUCTURED_TABLE_CANDIDATE_LIMIT'
+                    if detector_id == 'table_percentage_recomputation'
+                    else 'CANDIDATE_FINDINGS_OMITTED'
+                )
+            if table_result.get('reasons') != expected_reasons:
+                return False
+        if (detector_id == 'jats_cell_ratio_percentage_recomputation'
+                and table_result.get('skip_reasons') != list(computed_table['primary_skip_reason_counts'])):
+            return False
+        flattened.extend(relations)
+
+    if list(supplied) != flattened:
+        return False
+    try:
+        computed = summarize_relations(supplied)
+    except (TypeError, ValueError):
+        return False
+    if summary != computed:
+        return False
+    if list(supplied) != table_relations:
+        return False
+    findings = record.get('findings')
+    if not isinstance(findings, (list, tuple)):
+        return False
+    emitted = [
+        relation.get('relation_id') for relation in supplied
+        if relation.get('status') == 'ELIGIBLE_CHECKED_MISMATCH' and relation.get('finding_emitted') is True
+    ]
+    omitted = sum(
+        relation.get('status') == 'ELIGIBLE_CHECKED_MISMATCH' and relation.get('finding_emitted') is False
+        for relation in supplied
+    )
+    finding_ids = [item.get('relation_id') for item in findings if isinstance(item, Mapping)]
+    if (any(not isinstance(item, str) for item in finding_ids)
+            or len(finding_ids) != len(findings)
+            or sorted(finding_ids) != sorted(emitted)
+            or record.get('candidate_findings_omitted') != omitted):
+        return False
+    checked = computed['checked_relations']
+    if record.get('checked_cells') != checked:
+        return False
+    if 'potential_cells' in record and record.get('potential_cells') != computed['potential_relations']:
+        return False
+    if 'skipped_cells' in record and record.get('skipped_cells') != computed['skipped_relations']:
+        return False
+    return True
 
 
 def _build_paper_detector(record: Mapping[str, Any]) -> dict[str, Any]:

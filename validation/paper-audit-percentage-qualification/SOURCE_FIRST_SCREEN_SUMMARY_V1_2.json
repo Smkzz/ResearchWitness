@@ -1,0 +1,149 @@
+{
+  "artifact_type": "RESEARCHWITNESS_V1_2_SOURCE_FIRST_SCREEN_AGGREGATE",
+  "classification_timing": "Source paths, scope, operands, precision, rounding, footnotes, missingness, weighting, adjustment, and arithmetic were recorded before joining detector output.",
+  "evaluation_use": "POST_HOC_DEVELOPMENT_ONLY_NOT_BLIND_OR_HOLDOUT",
+  "expanded_yields": {
+    "contract_eligible_relationships": {
+      "denominator": 4776,
+      "numerator": 4063
+    },
+    "correct_negative_eligibility_yield_percent": 83.2705,
+    "independently_correct_negative_relationships": {
+      "denominator": 4776,
+      "numerator": 3977
+    }
+  },
+  "limitations": [
+    "All results are post-hoc DEVELOPMENT evidence and are not blinded or holdout estimates.",
+    "The expanded batches partition 4,776 source relations into eligible-correct, eligible-incorrect, and ineligible categories; prose mentions and source-shaped non-relations are separately excluded as shown by batch.",
+    "Exact source operands joined to an emitted report relation for 615 of the 4,163 locked correct negatives; source-anchor candidates with differing parsed denominators are reported separately by the replay artifact.",
+    "Pattern-based JATS review may miss less regular narrative, figures, or supplementary material outside pinned sources.",
+    "The cumulative reserved-negative pool source review is incomplete because of earlier source identity mismatches; the verified subset exceeds the frozen 50-relation/15-document minimum.",
+    "A reserved correction lead was opened only by the separate custodian and classified ineligible; its details remain sealed from the development runner.",
+    "The reviewer process deviation and reassignment are recorded in SOURCE_REVIEW_PROCESS_NOTES_V1_2.md.",
+    "Two additional source-anchor records were reported as checked matches even though the parsed denominator differed from the source-first denominator; zero numerators made the displayed arithmetic coincide. They are excluded from exact-operand coverage and documented in the replay artifact."
+  ],
+  "locked_negative_manifest": {
+    "correct_eligible_relations": 4163,
+    "distinct_documents": 61,
+    "emitted_false_candidates_on_source_labeled_correct_relations": 14,
+    "exact_operand_report_relation_joins": 615,
+    "reserved_records_included": false,
+    "sha256": "76114422e36c3891700fbbdae2b23d20c3fb1be6bd964850f1c3eedb2145a6a6",
+    "source_documents_with_false_candidates": 2,
+    "source_label_exact_operand_join_coverage": {
+      "denominator": 4163,
+      "numerator": 615
+    },
+    "source_labels_locked_before_detector_join": true,
+    "tables": 110
+  },
+  "percentage_contract_version": "1.2",
+  "record_version": 2,
+  "reserved_pool": {
+    "reserved_correction_body_opened_to_development_runner": false,
+    "reserved_correction_leads_screened_by_custodian": 1,
+    "reserved_detector_outputs_joined": false,
+    "reserved_eligible_correction_positive_confirmed": 0,
+    "reserved_negative_correct_relations_from_reviewed_subset": 1152,
+    "reserved_negative_documents_from_reviewed_subset": 16,
+    "reserved_negative_source_review_complete": false,
+    "reserved_negative_tables_from_reviewed_subset": 31
+  },
+  "scope": {
+    "batch_partitions": {
+      "batch_3": {
+        "documents": 28,
+        "eligible_correct": 434,
+        "eligible_incorrect": 6,
+        "ineligible": 9,
+        "potential_relations": 449,
+        "table_wraps_screened": 45
+      },
+      "batch_4": {
+        "documents": 27,
+        "eligible_correct": 324,
+        "eligible_incorrect": 4,
+        "ineligible": 2,
+        "potential_relations": 330,
+        "table_wraps_screened": 45
+      },
+      "batch_5": {
+        "documents": 24,
+        "eligible_correct": 627,
+        "eligible_incorrect": 27,
+        "ineligible": 262,
+        "non_tabular_or_unstructured_wraps": 1,
+        "potential_relations": 916,
+        "separately_excluded_prose_mentions": 196,
+        "structured_tables": 51,
+        "table_wraps_screened": 52
+      },
+      "batches_1_2": {
+        "documents": 51,
+        "eligible_correct": 1898,
+        "eligible_incorrect": 25,
+        "ineligible": 58,
+        "potential_relations": 1981,
+        "tables_screened": 98
+      },
+      "batches_6_7": {
+        "documents": 47,
+        "documents_with_correct_relations": 17,
+        "eligible_correct": 694,
+        "eligible_incorrect": 24,
+        "ineligible": 382,
+        "potential_relations": 1100,
+        "separately_excluded_source_shaped_nonrelations": 47,
+        "tables_screened": 93
+      }
+    },
+    "detector_output_joined_only_after_source_ledgers_were_sealed": true,
+    "development_expansion_batches": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "expanded_source_documents_screened": 177,
+    "expanded_source_relation_partition": {
+      "eligible_correct": 3977,
+      "eligible_incorrect": 86,
+      "ineligible": 713,
+      "partition_sum": 4776,
+      "potential_source_relations": 4776
+    },
+    "expanded_table_wraps_screened": 333,
+    "reserved_records_included": false
+  },
+  "separate_prior_overlap_screen": {
+    "counted_again_in_expansion_batch_totals": false,
+    "documents_represented_by_preexisting_correct_negative_manifest": 7,
+    "eligible_correct": 186,
+    "eligible_incorrect_excluded_from_negative_set": 15,
+    "eligible_relationships_total": 201,
+    "newly_eligible_overlap_relations_in_this_separate_screen": 0,
+    "overlap_cues_reviewed_in_40_documents": true,
+    "potential_relationship_attempts": 2345,
+    "preexisting_correct_negative_manifest_relations": 186,
+    "source_documents_with_candidate_surfaces": 40,
+    "tables_represented_by_preexisting_correct_negative_manifest": 8
+  },
+  "source_evidence_input_hashes": {
+    "batch1_2_ordered_manifest_bundle_sha256": "548d641e004c0ad4f3d5d32bd62c4e40ee1715914c54c13622e48aece9178212",
+    "batch1_2_private_ledger_canonical_sha256": "5f0cee213f6c89ab1c3fd916a4d488776c0e795e0ac45094c839986c567a5185",
+    "batch1_2_private_ledger_file_sha256": "75cfa6037a57c06a1b2b804e6a5fbac9fd162246fd9af8bef545f67027391441",
+    "batch1_manifest_sha256": "63dd4df0ca392b8116ec5a10f3ead8db67d79a23d57da55e94dbc5f5f145a3b0",
+    "batch2_manifest_sha256": "8e2706d34b487ce225151f91d577dacdc25213cc7da3dfad548bf9e8f44df893",
+    "batch3_private_ledger_file_sha256": "8651ec30fabbcd4d35272494e77bdb0ead628bec97eae02b9deb5cf726eeebf6",
+    "batch4_private_ledger_file_sha256": "e5cf924aafe6f4abff4bc7ef6bc562cd1491ad2a6e84b798053980ee8ae84a08",
+    "batch5_canonical_ledger_sha256": "6c035cd8a1c535f9c88f0d76d6e5984fd9338d38be554aae2eb3f79aee50b3fc",
+    "batch5_private_ledger_file_sha256": "e0bd313dbc35da8c2ac13ef0fd6fa78ea2d03dd6dfa8f9a8ed92ac67f2e027a4",
+    "batch6_7_canonical_ledger_sha256": "d68c4f612af006ef445127d210502ec10203fa2472e91fa6a3cb9bcdb7e54808",
+    "batch6_7_private_ledger_file_sha256": "28f46f9ec472ee0863c65547a15530217163d9f0d850c6152051aa15a1b284cf"
+  },
+  "status": "SOURCE_FIRST_DEVELOPMENT_BATCHES_1_TO_7_LOCKED_BEFORE_NEGATIVE_DETECTOR_JOIN"
+}

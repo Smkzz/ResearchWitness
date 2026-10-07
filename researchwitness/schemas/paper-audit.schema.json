@@ -668,6 +668,147 @@
                     "minimum": 0,
                     "maximum": 1000
                   },
+                  "percentage_relation_telemetry": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "potential_relations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "applicable_relations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "eligible_relations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "checked_matches": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "checked_mismatches": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "checked_relations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "incomplete_relations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "unsupported_relations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "skipped_relations": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 50000
+                          },
+                          "status_counts": {
+                            "type": "object",
+                            "properties": {
+                              "NOT_APPLICABLE": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 50000
+                              },
+                              "ELIGIBLE_CHECKED_MATCH": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 50000
+                              },
+                              "ELIGIBLE_CHECKED_MISMATCH": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 50000
+                              },
+                              "INCOMPLETE": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 50000
+                              },
+                              "UNSUPPORTED": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 50000
+                              }
+                            },
+                            "required": [
+                              "NOT_APPLICABLE",
+                              "ELIGIBLE_CHECKED_MATCH",
+                              "ELIGIBLE_CHECKED_MISMATCH",
+                              "INCOMPLETE",
+                              "UNSUPPORTED"
+                            ],
+                            "additionalProperties": false
+                          },
+                          "primary_skip_reason_counts": {
+                            "type": "object",
+                            "maxProperties": 32,
+                            "propertyNames": {
+                              "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                            },
+                            "additionalProperties": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 50000
+                            }
+                          },
+                          "secondary_skip_reason_counts_overlapping": {
+                            "type": "object",
+                            "maxProperties": 32,
+                            "propertyNames": {
+                              "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                            },
+                            "additionalProperties": {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 50000
+                            }
+                          },
+                          "accounting_invariant": {
+                            "const": true
+                          }
+                        },
+                        "required": [
+                          "potential_relations",
+                          "applicable_relations",
+                          "eligible_relations",
+                          "checked_matches",
+                          "checked_mismatches",
+                          "checked_relations",
+                          "incomplete_relations",
+                          "unsupported_relations",
+                          "skipped_relations",
+                          "status_counts",
+                          "primary_skip_reason_counts",
+                          "secondary_skip_reason_counts_overlapping",
+                          "accounting_invariant"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "percentage_relation_telemetry_complete": {
+                    "type": "boolean"
+                  },
                   "tables": {
                     "type": "array",
                     "items": {
@@ -737,7 +878,7 @@
                             "maxLength": 200
                           },
                           "minItems": 0,
-                          "maxItems": 16
+                          "maxItems": 32
                         },
                         "reasons_truncated": {
                           "type": "boolean"
@@ -750,7 +891,19 @@
                             "maxLength": 200
                           },
                           "minItems": 0,
-                          "maxItems": 16
+                          "maxItems": 32
+                        },
+                        "candidate_findings_omitted": {
+                          "oneOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 0,
+                              "maximum": 100000
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
                         },
                         "counts": {
                           "type": "object",
@@ -973,6 +1126,7 @@
                         "reasons",
                         "reasons_truncated",
                         "skip_reasons",
+                        "candidate_findings_omitted",
                         "counts"
                       ],
                       "additionalProperties": false
@@ -989,7 +1143,208 @@
                   "operand_counts",
                   "tables"
                 ],
-                "additionalProperties": false
+                "additionalProperties": false,
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "detector_id": {
+                          "enum": [
+                            "table_percentage_recomputation",
+                            "jats_cell_ratio_percentage_recomputation"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "detector_id"
+                      ]
+                    },
+                    "then": {
+                      "required": [
+                        "percentage_relation_telemetry",
+                        "percentage_relation_telemetry_complete"
+                      ],
+                      "oneOf": [
+                        {
+                          "properties": {
+                            "percentage_relation_telemetry": {
+                              "type": "object",
+                              "properties": {
+                                "potential_relations": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "applicable_relations": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "eligible_relations": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "checked_matches": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "checked_mismatches": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "checked_relations": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "incomplete_relations": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "unsupported_relations": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "skipped_relations": {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 50000
+                                },
+                                "status_counts": {
+                                  "type": "object",
+                                  "properties": {
+                                    "NOT_APPLICABLE": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 50000
+                                    },
+                                    "ELIGIBLE_CHECKED_MATCH": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 50000
+                                    },
+                                    "ELIGIBLE_CHECKED_MISMATCH": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 50000
+                                    },
+                                    "INCOMPLETE": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 50000
+                                    },
+                                    "UNSUPPORTED": {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 50000
+                                    }
+                                  },
+                                  "required": [
+                                    "NOT_APPLICABLE",
+                                    "ELIGIBLE_CHECKED_MATCH",
+                                    "ELIGIBLE_CHECKED_MISMATCH",
+                                    "INCOMPLETE",
+                                    "UNSUPPORTED"
+                                  ],
+                                  "additionalProperties": false
+                                },
+                                "primary_skip_reason_counts": {
+                                  "type": "object",
+                                  "maxProperties": 32,
+                                  "propertyNames": {
+                                    "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                                  },
+                                  "additionalProperties": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 50000
+                                  }
+                                },
+                                "secondary_skip_reason_counts_overlapping": {
+                                  "type": "object",
+                                  "maxProperties": 32,
+                                  "propertyNames": {
+                                    "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                                  },
+                                  "additionalProperties": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 50000
+                                  }
+                                },
+                                "accounting_invariant": {
+                                  "const": true
+                                }
+                              },
+                              "required": [
+                                "potential_relations",
+                                "applicable_relations",
+                                "eligible_relations",
+                                "checked_matches",
+                                "checked_mismatches",
+                                "checked_relations",
+                                "incomplete_relations",
+                                "unsupported_relations",
+                                "skipped_relations",
+                                "status_counts",
+                                "primary_skip_reason_counts",
+                                "secondary_skip_reason_counts_overlapping",
+                                "accounting_invariant"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "percentage_relation_telemetry_complete": {
+                              "const": true
+                            }
+                          },
+                          "required": [
+                            "percentage_relation_telemetry",
+                            "percentage_relation_telemetry_complete"
+                          ]
+                        },
+                        {
+                          "properties": {
+                            "percentage_relation_telemetry": {
+                              "type": "null"
+                            },
+                            "percentage_relation_telemetry_complete": {
+                              "const": false
+                            },
+                            "status": {
+                              "const": "INCOMPLETE"
+                            }
+                          },
+                          "required": [
+                            "percentage_relation_telemetry",
+                            "percentage_relation_telemetry_complete",
+                            "status"
+                          ]
+                        }
+                      ]
+                    },
+                    "else": {
+                      "not": {
+                        "anyOf": [
+                          {
+                            "required": [
+                              "percentage_relation_telemetry"
+                            ]
+                          },
+                          {
+                            "required": [
+                              "percentage_relation_telemetry_complete"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
               },
               "minItems": 0,
               "maxItems": 32
@@ -1031,7 +1386,8 @@
           "contract_version": {
             "enum": [
               "1.0",
-              "1.1"
+              "1.1",
+              "1.2"
             ]
           },
           "status": {
@@ -1096,7 +1452,8 @@
           "version": {
             "enum": [
               "1.0",
-              "1.1"
+              "1.1",
+              "1.2"
             ]
           },
           "implementation_status": {
@@ -1188,6 +1545,36 @@
             },
             "minItems": 1,
             "maxItems": 16
+          },
+          "relationship_types": {
+            "type": "object",
+            "properties": {
+              "checked": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "minItems": 1,
+                "maxItems": 4
+              },
+              "out_of_scope": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "minItems": 1,
+                "maxItems": 8
+              }
+            },
+            "required": [
+              "checked",
+              "out_of_scope"
+            ],
+            "additionalProperties": false
           },
           "supported_source_formats": {
             "type": "array",
@@ -2535,6 +2922,10 @@
                       "CANDIDATE_ANOMALY"
                     ]
                   },
+                  "relation_id": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
                   "table_id": {
                     "type": "string",
                     "maxLength": 500
@@ -2669,6 +3060,7 @@
                   "id",
                   "type",
                   "status",
+                  "relation_id",
                   "table_id",
                   "table_caption",
                   "numerator_exact",
@@ -2714,7 +3106,12 @@
                       "maxLength": 200
                     },
                     "minItems": 0,
-                    "maxItems": 16
+                    "maxItems": 32
+                  },
+                  "candidate_findings_omitted": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
                   },
                   "checked_cells": {
                     "type": "integer",
@@ -2725,14 +3122,536 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 256
+                  },
+                  "potential_objects": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "potential_cells": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "potential_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "applicable_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "eligible_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "checked_matches": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "checked_mismatches": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "incomplete_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "unsupported_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "skipped_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "primary_skip_reason_counts": {
+                    "type": "object",
+                    "maxProperties": 32,
+                    "propertyNames": {
+                      "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                    },
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 50000
+                    }
+                  },
+                  "relations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "relation_id": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "relation_type": {
+                          "enum": [
+                            "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+                            "DIRECT_N_OVER_N_PERCENTAGE"
+                          ]
+                        },
+                        "detector_id": {
+                          "enum": [
+                            "table_percentage_recomputation",
+                            "jats_cell_ratio_percentage_recomputation"
+                          ]
+                        },
+                        "contract_version": {
+                          "enum": [
+                            "1.2"
+                          ]
+                        },
+                        "table_key": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "status": {
+                          "enum": [
+                            "NOT_APPLICABLE",
+                            "ELIGIBLE_CHECKED_MATCH",
+                            "ELIGIBLE_CHECKED_MISMATCH",
+                            "INCOMPLETE",
+                            "UNSUPPORTED"
+                          ]
+                        },
+                        "primary_skip_reason": {
+                          "oneOf": [
+                            {
+                              "enum": [
+                                "TABLE_STRUCTURE_UNSUPPORTED",
+                                "SOURCE_SCOPE_AMBIGUOUS",
+                                "CONFLICTING_HEADER_DENOMINATORS",
+                                "LOCAL_ROW_DENOMINATOR",
+                                "FOOTNOTE_SCOPE_UNRESOLVED",
+                                "WEIGHTED_RESULT",
+                                "ADJUSTED_RESULT",
+                                "MISSINGNESS_CHANGES_DENOMINATOR",
+                                "MULTIPLE_RESPONSE",
+                                "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                                "DENOMINATOR_NOT_EXPLICIT",
+                                "PERCENT_UNIT_NOT_EXPLICIT",
+                                "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                                "DECIMAL_SEPARATOR_UNSUPPORTED",
+                                "MALFORMED_NUMERIC_TOKEN",
+                                "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                                "CANDIDATE_LIMIT"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "secondary_skip_reasons": {
+                          "type": "array",
+                          "items": {
+                            "enum": [
+                              "TABLE_STRUCTURE_UNSUPPORTED",
+                              "SOURCE_SCOPE_AMBIGUOUS",
+                              "CONFLICTING_HEADER_DENOMINATORS",
+                              "LOCAL_ROW_DENOMINATOR",
+                              "FOOTNOTE_SCOPE_UNRESOLVED",
+                              "WEIGHTED_RESULT",
+                              "ADJUSTED_RESULT",
+                              "MISSINGNESS_CHANGES_DENOMINATOR",
+                              "MULTIPLE_RESPONSE",
+                              "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                              "DENOMINATOR_NOT_EXPLICIT",
+                              "PERCENT_UNIT_NOT_EXPLICIT",
+                              "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                              "DECIMAL_SEPARATOR_UNSUPPORTED",
+                              "MALFORMED_NUMERIC_TOKEN",
+                              "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                              "CANDIDATE_LIMIT"
+                            ]
+                          },
+                          "minItems": 0,
+                          "maxItems": 16,
+                          "uniqueItems": true
+                        },
+                        "source_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "denominator_source_anchor": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "source_file": {
+                                  "enum": [
+                                    "source.xml",
+                                    "source.nxml"
+                                  ]
+                                },
+                                "source_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "source_format": {
+                                  "enum": [
+                                    "jats_xml"
+                                  ]
+                                },
+                                "element_path": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 4000
+                                },
+                                "quote": {
+                                  "type": "string",
+                                  "maxLength": 1000
+                                },
+                                "start_byte": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 33554432
+                                    }
+                                  ]
+                                },
+                                "end_byte": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 33554432
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "source_file",
+                                "source_sha256",
+                                "source_format",
+                                "element_path",
+                                "quote",
+                                "start_byte",
+                                "end_byte"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "numerator_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                        },
+                        "denominator_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                        },
+                        "reported_percent": {
+                          "type": "string",
+                          "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                        },
+                        "display_precision": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 6
+                        },
+                        "recomputed_at_display_precision": {
+                          "type": "string",
+                          "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                        },
+                        "finding_emitted": {
+                          "type": "boolean"
+                        },
+                        "row_identity": {
+                          "type": "string",
+                          "maxLength": 2000
+                        }
+                      },
+                      "required": [
+                        "relation_id",
+                        "relation_type",
+                        "detector_id",
+                        "contract_version",
+                        "table_key",
+                        "status",
+                        "primary_skip_reason",
+                        "secondary_skip_reasons",
+                        "source_anchor",
+                        "denominator_source_anchor"
+                      ],
+                      "additionalProperties": false,
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "detector_id": {
+                                "const": "table_percentage_recomputation"
+                              }
+                            },
+                            "required": [
+                              "detector_id"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "relation_type": {
+                                "const": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "detector_id": {
+                                "const": "jats_cell_ratio_percentage_recomputation"
+                              }
+                            },
+                            "required": [
+                              "detector_id"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "relation_type": {
+                                "const": "DIRECT_N_OVER_N_PERCENTAGE"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "enum": [
+                                  "INCOMPLETE",
+                                  "UNSUPPORTED"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "primary_skip_reason": {
+                                "enum": [
+                                  "TABLE_STRUCTURE_UNSUPPORTED",
+                                  "SOURCE_SCOPE_AMBIGUOUS",
+                                  "CONFLICTING_HEADER_DENOMINATORS",
+                                  "LOCAL_ROW_DENOMINATOR",
+                                  "FOOTNOTE_SCOPE_UNRESOLVED",
+                                  "WEIGHTED_RESULT",
+                                  "ADJUSTED_RESULT",
+                                  "MISSINGNESS_CHANGES_DENOMINATOR",
+                                  "MULTIPLE_RESPONSE",
+                                  "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                                  "DENOMINATOR_NOT_EXPLICIT",
+                                  "PERCENT_UNIT_NOT_EXPLICIT",
+                                  "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                                  "DECIMAL_SEPARATOR_UNSUPPORTED",
+                                  "MALFORMED_NUMERIC_TOKEN",
+                                  "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                                  "CANDIDATE_LIMIT"
+                                ]
+                              }
+                            },
+                            "not": {
+                              "required": [
+                                "numerator_exact",
+                                "denominator_exact",
+                                "reported_percent",
+                                "display_precision",
+                                "recomputed_at_display_precision",
+                                "finding_emitted"
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "enum": [
+                                  "ELIGIBLE_CHECKED_MATCH",
+                                  "ELIGIBLE_CHECKED_MISMATCH"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "required": [
+                              "numerator_exact",
+                              "denominator_exact",
+                              "reported_percent",
+                              "display_precision",
+                              "recomputed_at_display_precision",
+                              "finding_emitted"
+                            ],
+                            "properties": {
+                              "primary_skip_reason": {
+                                "type": "null"
+                              },
+                              "secondary_skip_reasons": {
+                                "maxItems": 0
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "const": "ELIGIBLE_CHECKED_MATCH"
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "finding_emitted": {
+                                "const": false
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "const": "NOT_APPLICABLE"
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "primary_skip_reason": {
+                                "type": "null"
+                              },
+                              "secondary_skip_reasons": {
+                                "maxItems": 0
+                              }
+                            },
+                            "not": {
+                              "required": [
+                                "numerator_exact",
+                                "denominator_exact",
+                                "reported_percent",
+                                "display_precision",
+                                "recomputed_at_display_precision",
+                                "finding_emitted"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "minItems": 0,
+                    "maxItems": 50000
                   }
                 },
                 "required": [
                   "table_id",
                   "status",
                   "reasons",
+                  "candidate_findings_omitted",
                   "checked_cells",
-                  "candidate_count"
+                  "candidate_count",
+                  "potential_objects",
+                  "potential_cells",
+                  "potential_relations",
+                  "applicable_relations",
+                  "eligible_relations",
+                  "checked_matches",
+                  "checked_mismatches",
+                  "incomplete_relations",
+                  "unsupported_relations",
+                  "skipped_relations",
+                  "primary_skip_reason_counts",
+                  "relations"
                 ],
                 "additionalProperties": false
               },
@@ -2743,6 +3662,589 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 100000
+            },
+            "relations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "relation_id": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "relation_type": {
+                    "enum": [
+                      "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+                      "DIRECT_N_OVER_N_PERCENTAGE"
+                    ]
+                  },
+                  "detector_id": {
+                    "enum": [
+                      "table_percentage_recomputation",
+                      "jats_cell_ratio_percentage_recomputation"
+                    ]
+                  },
+                  "contract_version": {
+                    "enum": [
+                      "1.2"
+                    ]
+                  },
+                  "table_key": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "status": {
+                    "enum": [
+                      "NOT_APPLICABLE",
+                      "ELIGIBLE_CHECKED_MATCH",
+                      "ELIGIBLE_CHECKED_MISMATCH",
+                      "INCOMPLETE",
+                      "UNSUPPORTED"
+                    ]
+                  },
+                  "primary_skip_reason": {
+                    "oneOf": [
+                      {
+                        "enum": [
+                          "TABLE_STRUCTURE_UNSUPPORTED",
+                          "SOURCE_SCOPE_AMBIGUOUS",
+                          "CONFLICTING_HEADER_DENOMINATORS",
+                          "LOCAL_ROW_DENOMINATOR",
+                          "FOOTNOTE_SCOPE_UNRESOLVED",
+                          "WEIGHTED_RESULT",
+                          "ADJUSTED_RESULT",
+                          "MISSINGNESS_CHANGES_DENOMINATOR",
+                          "MULTIPLE_RESPONSE",
+                          "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                          "DENOMINATOR_NOT_EXPLICIT",
+                          "PERCENT_UNIT_NOT_EXPLICIT",
+                          "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                          "DECIMAL_SEPARATOR_UNSUPPORTED",
+                          "MALFORMED_NUMERIC_TOKEN",
+                          "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                          "CANDIDATE_LIMIT"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "secondary_skip_reasons": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "TABLE_STRUCTURE_UNSUPPORTED",
+                        "SOURCE_SCOPE_AMBIGUOUS",
+                        "CONFLICTING_HEADER_DENOMINATORS",
+                        "LOCAL_ROW_DENOMINATOR",
+                        "FOOTNOTE_SCOPE_UNRESOLVED",
+                        "WEIGHTED_RESULT",
+                        "ADJUSTED_RESULT",
+                        "MISSINGNESS_CHANGES_DENOMINATOR",
+                        "MULTIPLE_RESPONSE",
+                        "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                        "DENOMINATOR_NOT_EXPLICIT",
+                        "PERCENT_UNIT_NOT_EXPLICIT",
+                        "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                        "DECIMAL_SEPARATOR_UNSUPPORTED",
+                        "MALFORMED_NUMERIC_TOKEN",
+                        "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                        "CANDIDATE_LIMIT"
+                      ]
+                    },
+                    "minItems": 0,
+                    "maxItems": 16,
+                    "uniqueItems": true
+                  },
+                  "source_anchor": {
+                    "type": "object",
+                    "properties": {
+                      "source_file": {
+                        "enum": [
+                          "source.xml",
+                          "source.nxml"
+                        ]
+                      },
+                      "source_sha256": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "source_format": {
+                        "enum": [
+                          "jats_xml"
+                        ]
+                      },
+                      "element_path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      },
+                      "quote": {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      "start_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      },
+                      "end_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "source_file",
+                      "source_sha256",
+                      "source_format",
+                      "element_path",
+                      "quote",
+                      "start_byte",
+                      "end_byte"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "denominator_source_anchor": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "source_file": {
+                            "enum": [
+                              "source.xml",
+                              "source.nxml"
+                            ]
+                          },
+                          "source_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "source_format": {
+                            "enum": [
+                              "jats_xml"
+                            ]
+                          },
+                          "element_path": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4000
+                          },
+                          "quote": {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          "start_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          },
+                          "end_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "source_file",
+                          "source_sha256",
+                          "source_format",
+                          "element_path",
+                          "quote",
+                          "start_byte",
+                          "end_byte"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "numerator_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                  },
+                  "denominator_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                  },
+                  "reported_percent": {
+                    "type": "string",
+                    "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                  },
+                  "display_precision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                  },
+                  "recomputed_at_display_precision": {
+                    "type": "string",
+                    "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                  },
+                  "finding_emitted": {
+                    "type": "boolean"
+                  },
+                  "row_identity": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "relation_id",
+                  "relation_type",
+                  "detector_id",
+                  "contract_version",
+                  "table_key",
+                  "status",
+                  "primary_skip_reason",
+                  "secondary_skip_reasons",
+                  "source_anchor",
+                  "denominator_source_anchor"
+                ],
+                "additionalProperties": false,
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "detector_id": {
+                          "const": "table_percentage_recomputation"
+                        }
+                      },
+                      "required": [
+                        "detector_id"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "relation_type": {
+                          "const": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "detector_id": {
+                          "const": "jats_cell_ratio_percentage_recomputation"
+                        }
+                      },
+                      "required": [
+                        "detector_id"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "relation_type": {
+                          "const": "DIRECT_N_OVER_N_PERCENTAGE"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "INCOMPLETE",
+                            "UNSUPPORTED"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "primary_skip_reason": {
+                          "enum": [
+                            "TABLE_STRUCTURE_UNSUPPORTED",
+                            "SOURCE_SCOPE_AMBIGUOUS",
+                            "CONFLICTING_HEADER_DENOMINATORS",
+                            "LOCAL_ROW_DENOMINATOR",
+                            "FOOTNOTE_SCOPE_UNRESOLVED",
+                            "WEIGHTED_RESULT",
+                            "ADJUSTED_RESULT",
+                            "MISSINGNESS_CHANGES_DENOMINATOR",
+                            "MULTIPLE_RESPONSE",
+                            "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                            "DENOMINATOR_NOT_EXPLICIT",
+                            "PERCENT_UNIT_NOT_EXPLICIT",
+                            "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                            "DECIMAL_SEPARATOR_UNSUPPORTED",
+                            "MALFORMED_NUMERIC_TOKEN",
+                            "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                            "CANDIDATE_LIMIT"
+                          ]
+                        }
+                      },
+                      "not": {
+                        "required": [
+                          "numerator_exact",
+                          "denominator_exact",
+                          "reported_percent",
+                          "display_precision",
+                          "recomputed_at_display_precision",
+                          "finding_emitted"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "ELIGIBLE_CHECKED_MATCH",
+                            "ELIGIBLE_CHECKED_MISMATCH"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "required": [
+                        "numerator_exact",
+                        "denominator_exact",
+                        "reported_percent",
+                        "display_precision",
+                        "recomputed_at_display_precision",
+                        "finding_emitted"
+                      ],
+                      "properties": {
+                        "primary_skip_reason": {
+                          "type": "null"
+                        },
+                        "secondary_skip_reasons": {
+                          "maxItems": 0
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "const": "ELIGIBLE_CHECKED_MATCH"
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "finding_emitted": {
+                          "const": false
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "const": "NOT_APPLICABLE"
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "primary_skip_reason": {
+                          "type": "null"
+                        },
+                        "secondary_skip_reasons": {
+                          "maxItems": 0
+                        }
+                      },
+                      "not": {
+                        "required": [
+                          "numerator_exact",
+                          "denominator_exact",
+                          "reported_percent",
+                          "display_precision",
+                          "recomputed_at_display_precision",
+                          "finding_emitted"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 50000
+            },
+            "relation_telemetry": {
+              "type": "object",
+              "properties": {
+                "potential_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "applicable_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "eligible_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "checked_matches": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "checked_mismatches": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "checked_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "incomplete_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "unsupported_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "skipped_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "status_counts": {
+                  "type": "object",
+                  "properties": {
+                    "NOT_APPLICABLE": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "ELIGIBLE_CHECKED_MATCH": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "ELIGIBLE_CHECKED_MISMATCH": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "INCOMPLETE": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "UNSUPPORTED": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    }
+                  },
+                  "required": [
+                    "NOT_APPLICABLE",
+                    "ELIGIBLE_CHECKED_MATCH",
+                    "ELIGIBLE_CHECKED_MISMATCH",
+                    "INCOMPLETE",
+                    "UNSUPPORTED"
+                  ],
+                  "additionalProperties": false
+                },
+                "primary_skip_reason_counts": {
+                  "type": "object",
+                  "maxProperties": 32,
+                  "propertyNames": {
+                    "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50000
+                  }
+                },
+                "secondary_skip_reason_counts_overlapping": {
+                  "type": "object",
+                  "maxProperties": 32,
+                  "propertyNames": {
+                    "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50000
+                  }
+                },
+                "accounting_invariant": {
+                  "const": true
+                }
+              },
+              "required": [
+                "potential_relations",
+                "applicable_relations",
+                "eligible_relations",
+                "checked_matches",
+                "checked_mismatches",
+                "checked_relations",
+                "incomplete_relations",
+                "unsupported_relations",
+                "skipped_relations",
+                "status_counts",
+                "primary_skip_reason_counts",
+                "secondary_skip_reason_counts_overlapping",
+                "accounting_invariant"
+              ],
+              "additionalProperties": false
+            },
+            "candidate_findings_omitted": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
             },
             "scan_complete": {
               "type": "boolean"
@@ -2763,6 +4265,9 @@
             "findings",
             "tables",
             "checked_cells",
+            "relations",
+            "relation_telemetry",
+            "candidate_findings_omitted",
             "scan_complete",
             "limitations"
           ],
@@ -2799,6 +4304,10 @@
                     "enum": [
                       "CANDIDATE_ANOMALY"
                     ]
+                  },
+                  "relation_id": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
                   },
                   "table_key": {
                     "type": "string",
@@ -2928,6 +4437,7 @@
                   "id",
                   "type",
                   "status",
+                  "relation_id",
                   "table_key",
                   "table_id",
                   "table_label",
@@ -3068,6 +4578,505 @@
                     "minimum": 0,
                     "maximum": 256
                   },
+                  "potential_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "applicable_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "eligible_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "checked_matches": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "checked_mismatches": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "incomplete_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "unsupported_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "skipped_relations": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
+                  },
+                  "primary_skip_reason_counts": {
+                    "type": "object",
+                    "maxProperties": 32,
+                    "propertyNames": {
+                      "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                    },
+                    "additionalProperties": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 50000
+                    }
+                  },
+                  "relations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "relation_id": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "relation_type": {
+                          "enum": [
+                            "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+                            "DIRECT_N_OVER_N_PERCENTAGE"
+                          ]
+                        },
+                        "detector_id": {
+                          "enum": [
+                            "table_percentage_recomputation",
+                            "jats_cell_ratio_percentage_recomputation"
+                          ]
+                        },
+                        "contract_version": {
+                          "enum": [
+                            "1.2"
+                          ]
+                        },
+                        "table_key": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "status": {
+                          "enum": [
+                            "NOT_APPLICABLE",
+                            "ELIGIBLE_CHECKED_MATCH",
+                            "ELIGIBLE_CHECKED_MISMATCH",
+                            "INCOMPLETE",
+                            "UNSUPPORTED"
+                          ]
+                        },
+                        "primary_skip_reason": {
+                          "oneOf": [
+                            {
+                              "enum": [
+                                "TABLE_STRUCTURE_UNSUPPORTED",
+                                "SOURCE_SCOPE_AMBIGUOUS",
+                                "CONFLICTING_HEADER_DENOMINATORS",
+                                "LOCAL_ROW_DENOMINATOR",
+                                "FOOTNOTE_SCOPE_UNRESOLVED",
+                                "WEIGHTED_RESULT",
+                                "ADJUSTED_RESULT",
+                                "MISSINGNESS_CHANGES_DENOMINATOR",
+                                "MULTIPLE_RESPONSE",
+                                "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                                "DENOMINATOR_NOT_EXPLICIT",
+                                "PERCENT_UNIT_NOT_EXPLICIT",
+                                "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                                "DECIMAL_SEPARATOR_UNSUPPORTED",
+                                "MALFORMED_NUMERIC_TOKEN",
+                                "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                                "CANDIDATE_LIMIT"
+                              ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "secondary_skip_reasons": {
+                          "type": "array",
+                          "items": {
+                            "enum": [
+                              "TABLE_STRUCTURE_UNSUPPORTED",
+                              "SOURCE_SCOPE_AMBIGUOUS",
+                              "CONFLICTING_HEADER_DENOMINATORS",
+                              "LOCAL_ROW_DENOMINATOR",
+                              "FOOTNOTE_SCOPE_UNRESOLVED",
+                              "WEIGHTED_RESULT",
+                              "ADJUSTED_RESULT",
+                              "MISSINGNESS_CHANGES_DENOMINATOR",
+                              "MULTIPLE_RESPONSE",
+                              "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                              "DENOMINATOR_NOT_EXPLICIT",
+                              "PERCENT_UNIT_NOT_EXPLICIT",
+                              "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                              "DECIMAL_SEPARATOR_UNSUPPORTED",
+                              "MALFORMED_NUMERIC_TOKEN",
+                              "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                              "CANDIDATE_LIMIT"
+                            ]
+                          },
+                          "minItems": 0,
+                          "maxItems": 16,
+                          "uniqueItems": true
+                        },
+                        "source_anchor": {
+                          "type": "object",
+                          "properties": {
+                            "source_file": {
+                              "enum": [
+                                "source.xml",
+                                "source.nxml"
+                              ]
+                            },
+                            "source_sha256": {
+                              "type": "string",
+                              "pattern": "^[a-f0-9]{64}$"
+                            },
+                            "source_format": {
+                              "enum": [
+                                "jats_xml"
+                              ]
+                            },
+                            "element_path": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 4000
+                            },
+                            "quote": {
+                              "type": "string",
+                              "maxLength": 1000
+                            },
+                            "start_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            },
+                            "end_byte": {
+                              "oneOf": [
+                                {
+                                  "type": "null"
+                                },
+                                {
+                                  "type": "integer",
+                                  "minimum": 0,
+                                  "maximum": 33554432
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "source_file",
+                            "source_sha256",
+                            "source_format",
+                            "element_path",
+                            "quote",
+                            "start_byte",
+                            "end_byte"
+                          ],
+                          "additionalProperties": false
+                        },
+                        "denominator_source_anchor": {
+                          "oneOf": [
+                            {
+                              "type": "object",
+                              "properties": {
+                                "source_file": {
+                                  "enum": [
+                                    "source.xml",
+                                    "source.nxml"
+                                  ]
+                                },
+                                "source_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "source_format": {
+                                  "enum": [
+                                    "jats_xml"
+                                  ]
+                                },
+                                "element_path": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 4000
+                                },
+                                "quote": {
+                                  "type": "string",
+                                  "maxLength": 1000
+                                },
+                                "start_byte": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 33554432
+                                    }
+                                  ]
+                                },
+                                "end_byte": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "type": "integer",
+                                      "minimum": 0,
+                                      "maximum": 33554432
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "source_file",
+                                "source_sha256",
+                                "source_format",
+                                "element_path",
+                                "quote",
+                                "start_byte",
+                                "end_byte"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "numerator_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                        },
+                        "denominator_exact": {
+                          "type": "string",
+                          "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                        },
+                        "reported_percent": {
+                          "type": "string",
+                          "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                        },
+                        "display_precision": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 6
+                        },
+                        "recomputed_at_display_precision": {
+                          "type": "string",
+                          "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                        },
+                        "finding_emitted": {
+                          "type": "boolean"
+                        },
+                        "row_identity": {
+                          "type": "string",
+                          "maxLength": 2000
+                        }
+                      },
+                      "required": [
+                        "relation_id",
+                        "relation_type",
+                        "detector_id",
+                        "contract_version",
+                        "table_key",
+                        "status",
+                        "primary_skip_reason",
+                        "secondary_skip_reasons",
+                        "source_anchor",
+                        "denominator_source_anchor"
+                      ],
+                      "additionalProperties": false,
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "detector_id": {
+                                "const": "table_percentage_recomputation"
+                              }
+                            },
+                            "required": [
+                              "detector_id"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "relation_type": {
+                                "const": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "detector_id": {
+                                "const": "jats_cell_ratio_percentage_recomputation"
+                              }
+                            },
+                            "required": [
+                              "detector_id"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "relation_type": {
+                                "const": "DIRECT_N_OVER_N_PERCENTAGE"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "enum": [
+                                  "INCOMPLETE",
+                                  "UNSUPPORTED"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "primary_skip_reason": {
+                                "enum": [
+                                  "TABLE_STRUCTURE_UNSUPPORTED",
+                                  "SOURCE_SCOPE_AMBIGUOUS",
+                                  "CONFLICTING_HEADER_DENOMINATORS",
+                                  "LOCAL_ROW_DENOMINATOR",
+                                  "FOOTNOTE_SCOPE_UNRESOLVED",
+                                  "WEIGHTED_RESULT",
+                                  "ADJUSTED_RESULT",
+                                  "MISSINGNESS_CHANGES_DENOMINATOR",
+                                  "MULTIPLE_RESPONSE",
+                                  "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                                  "DENOMINATOR_NOT_EXPLICIT",
+                                  "PERCENT_UNIT_NOT_EXPLICIT",
+                                  "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                                  "DECIMAL_SEPARATOR_UNSUPPORTED",
+                                  "MALFORMED_NUMERIC_TOKEN",
+                                  "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                                  "CANDIDATE_LIMIT"
+                                ]
+                              }
+                            },
+                            "not": {
+                              "required": [
+                                "numerator_exact",
+                                "denominator_exact",
+                                "reported_percent",
+                                "display_precision",
+                                "recomputed_at_display_precision",
+                                "finding_emitted"
+                              ]
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "enum": [
+                                  "ELIGIBLE_CHECKED_MATCH",
+                                  "ELIGIBLE_CHECKED_MISMATCH"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "required": [
+                              "numerator_exact",
+                              "denominator_exact",
+                              "reported_percent",
+                              "display_precision",
+                              "recomputed_at_display_precision",
+                              "finding_emitted"
+                            ],
+                            "properties": {
+                              "primary_skip_reason": {
+                                "type": "null"
+                              },
+                              "secondary_skip_reasons": {
+                                "maxItems": 0
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "const": "ELIGIBLE_CHECKED_MATCH"
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "finding_emitted": {
+                                "const": false
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "if": {
+                            "properties": {
+                              "status": {
+                                "const": "NOT_APPLICABLE"
+                              }
+                            },
+                            "required": [
+                              "status"
+                            ]
+                          },
+                          "then": {
+                            "properties": {
+                              "primary_skip_reason": {
+                                "type": "null"
+                              },
+                              "secondary_skip_reasons": {
+                                "maxItems": 0
+                              }
+                            },
+                            "not": {
+                              "required": [
+                                "numerator_exact",
+                                "denominator_exact",
+                                "reported_percent",
+                                "display_precision",
+                                "recomputed_at_display_precision",
+                                "finding_emitted"
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "minItems": 0,
+                    "maxItems": 50000
+                  },
                   "status": {
                     "enum": [
                       "ELIGIBLE",
@@ -3075,6 +5084,16 @@
                       "INCOMPLETE",
                       "NOT_APPLICABLE"
                     ]
+                  },
+                  "reasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "minItems": 0,
+                    "maxItems": 32
                   },
                   "skip_reasons": {
                     "type": "array",
@@ -3084,7 +5103,12 @@
                       "maxLength": 100
                     },
                     "minItems": 0,
-                    "maxItems": 16
+                    "maxItems": 32
+                  },
+                  "candidate_findings_omitted": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 50000
                   }
                 },
                 "required": [
@@ -3100,8 +5124,20 @@
                   "checked_objects",
                   "skipped_objects",
                   "candidate_count",
+                  "potential_relations",
+                  "applicable_relations",
+                  "eligible_relations",
+                  "checked_matches",
+                  "checked_mismatches",
+                  "incomplete_relations",
+                  "unsupported_relations",
+                  "skipped_relations",
+                  "primary_skip_reason_counts",
+                  "relations",
                   "status",
-                  "skip_reasons"
+                  "reasons",
+                  "skip_reasons",
+                  "candidate_findings_omitted"
                 ],
                 "additionalProperties": false
               },
@@ -3122,6 +5158,589 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 50001
+            },
+            "relations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "relation_id": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "relation_type": {
+                    "enum": [
+                      "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE",
+                      "DIRECT_N_OVER_N_PERCENTAGE"
+                    ]
+                  },
+                  "detector_id": {
+                    "enum": [
+                      "table_percentage_recomputation",
+                      "jats_cell_ratio_percentage_recomputation"
+                    ]
+                  },
+                  "contract_version": {
+                    "enum": [
+                      "1.2"
+                    ]
+                  },
+                  "table_key": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "status": {
+                    "enum": [
+                      "NOT_APPLICABLE",
+                      "ELIGIBLE_CHECKED_MATCH",
+                      "ELIGIBLE_CHECKED_MISMATCH",
+                      "INCOMPLETE",
+                      "UNSUPPORTED"
+                    ]
+                  },
+                  "primary_skip_reason": {
+                    "oneOf": [
+                      {
+                        "enum": [
+                          "TABLE_STRUCTURE_UNSUPPORTED",
+                          "SOURCE_SCOPE_AMBIGUOUS",
+                          "CONFLICTING_HEADER_DENOMINATORS",
+                          "LOCAL_ROW_DENOMINATOR",
+                          "FOOTNOTE_SCOPE_UNRESOLVED",
+                          "WEIGHTED_RESULT",
+                          "ADJUSTED_RESULT",
+                          "MISSINGNESS_CHANGES_DENOMINATOR",
+                          "MULTIPLE_RESPONSE",
+                          "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                          "DENOMINATOR_NOT_EXPLICIT",
+                          "PERCENT_UNIT_NOT_EXPLICIT",
+                          "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                          "DECIMAL_SEPARATOR_UNSUPPORTED",
+                          "MALFORMED_NUMERIC_TOKEN",
+                          "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                          "CANDIDATE_LIMIT"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "secondary_skip_reasons": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "TABLE_STRUCTURE_UNSUPPORTED",
+                        "SOURCE_SCOPE_AMBIGUOUS",
+                        "CONFLICTING_HEADER_DENOMINATORS",
+                        "LOCAL_ROW_DENOMINATOR",
+                        "FOOTNOTE_SCOPE_UNRESOLVED",
+                        "WEIGHTED_RESULT",
+                        "ADJUSTED_RESULT",
+                        "MISSINGNESS_CHANGES_DENOMINATOR",
+                        "MULTIPLE_RESPONSE",
+                        "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                        "DENOMINATOR_NOT_EXPLICIT",
+                        "PERCENT_UNIT_NOT_EXPLICIT",
+                        "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                        "DECIMAL_SEPARATOR_UNSUPPORTED",
+                        "MALFORMED_NUMERIC_TOKEN",
+                        "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                        "CANDIDATE_LIMIT"
+                      ]
+                    },
+                    "minItems": 0,
+                    "maxItems": 16,
+                    "uniqueItems": true
+                  },
+                  "source_anchor": {
+                    "type": "object",
+                    "properties": {
+                      "source_file": {
+                        "enum": [
+                          "source.xml",
+                          "source.nxml"
+                        ]
+                      },
+                      "source_sha256": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      "source_format": {
+                        "enum": [
+                          "jats_xml"
+                        ]
+                      },
+                      "element_path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4000
+                      },
+                      "quote": {
+                        "type": "string",
+                        "maxLength": 1000
+                      },
+                      "start_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      },
+                      "end_byte": {
+                        "oneOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 33554432
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "source_file",
+                      "source_sha256",
+                      "source_format",
+                      "element_path",
+                      "quote",
+                      "start_byte",
+                      "end_byte"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "denominator_source_anchor": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "source_file": {
+                            "enum": [
+                              "source.xml",
+                              "source.nxml"
+                            ]
+                          },
+                          "source_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          },
+                          "source_format": {
+                            "enum": [
+                              "jats_xml"
+                            ]
+                          },
+                          "element_path": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4000
+                          },
+                          "quote": {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          "start_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          },
+                          "end_byte": {
+                            "oneOf": [
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 33554432
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "source_file",
+                          "source_sha256",
+                          "source_format",
+                          "element_path",
+                          "quote",
+                          "start_byte",
+                          "end_byte"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "numerator_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                  },
+                  "denominator_exact": {
+                    "type": "string",
+                    "pattern": "^(?:0|[1-9][0-9]{0,8})$"
+                  },
+                  "reported_percent": {
+                    "type": "string",
+                    "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                  },
+                  "display_precision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                  },
+                  "recomputed_at_display_precision": {
+                    "type": "string",
+                    "pattern": "^[0-9]{1,3}(?:\\.[0-9]{1,6})?$"
+                  },
+                  "finding_emitted": {
+                    "type": "boolean"
+                  },
+                  "row_identity": {
+                    "type": "string",
+                    "maxLength": 2000
+                  }
+                },
+                "required": [
+                  "relation_id",
+                  "relation_type",
+                  "detector_id",
+                  "contract_version",
+                  "table_key",
+                  "status",
+                  "primary_skip_reason",
+                  "secondary_skip_reasons",
+                  "source_anchor",
+                  "denominator_source_anchor"
+                ],
+                "additionalProperties": false,
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "detector_id": {
+                          "const": "table_percentage_recomputation"
+                        }
+                      },
+                      "required": [
+                        "detector_id"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "relation_type": {
+                          "const": "CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "detector_id": {
+                          "const": "jats_cell_ratio_percentage_recomputation"
+                        }
+                      },
+                      "required": [
+                        "detector_id"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "relation_type": {
+                          "const": "DIRECT_N_OVER_N_PERCENTAGE"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "INCOMPLETE",
+                            "UNSUPPORTED"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "primary_skip_reason": {
+                          "enum": [
+                            "TABLE_STRUCTURE_UNSUPPORTED",
+                            "SOURCE_SCOPE_AMBIGUOUS",
+                            "CONFLICTING_HEADER_DENOMINATORS",
+                            "LOCAL_ROW_DENOMINATOR",
+                            "FOOTNOTE_SCOPE_UNRESOLVED",
+                            "WEIGHTED_RESULT",
+                            "ADJUSTED_RESULT",
+                            "MISSINGNESS_CHANGES_DENOMINATOR",
+                            "MULTIPLE_RESPONSE",
+                            "CATEGORY_OVERLAP_RELEVANT_TO_RELATION",
+                            "DENOMINATOR_NOT_EXPLICIT",
+                            "PERCENT_UNIT_NOT_EXPLICIT",
+                            "GROUPED_INTEGER_FORMAT_UNSUPPORTED",
+                            "DECIMAL_SEPARATOR_UNSUPPORTED",
+                            "MALFORMED_NUMERIC_TOKEN",
+                            "OPERANDS_OUTSIDE_PROPORTION_DOMAIN",
+                            "CANDIDATE_LIMIT"
+                          ]
+                        }
+                      },
+                      "not": {
+                        "required": [
+                          "numerator_exact",
+                          "denominator_exact",
+                          "reported_percent",
+                          "display_precision",
+                          "recomputed_at_display_precision",
+                          "finding_emitted"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "enum": [
+                            "ELIGIBLE_CHECKED_MATCH",
+                            "ELIGIBLE_CHECKED_MISMATCH"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "required": [
+                        "numerator_exact",
+                        "denominator_exact",
+                        "reported_percent",
+                        "display_precision",
+                        "recomputed_at_display_precision",
+                        "finding_emitted"
+                      ],
+                      "properties": {
+                        "primary_skip_reason": {
+                          "type": "null"
+                        },
+                        "secondary_skip_reasons": {
+                          "maxItems": 0
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "const": "ELIGIBLE_CHECKED_MATCH"
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "finding_emitted": {
+                          "const": false
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "status": {
+                          "const": "NOT_APPLICABLE"
+                        }
+                      },
+                      "required": [
+                        "status"
+                      ]
+                    },
+                    "then": {
+                      "properties": {
+                        "primary_skip_reason": {
+                          "type": "null"
+                        },
+                        "secondary_skip_reasons": {
+                          "maxItems": 0
+                        }
+                      },
+                      "not": {
+                        "required": [
+                          "numerator_exact",
+                          "denominator_exact",
+                          "reported_percent",
+                          "display_precision",
+                          "recomputed_at_display_precision",
+                          "finding_emitted"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "minItems": 0,
+              "maxItems": 50000
+            },
+            "relation_telemetry": {
+              "type": "object",
+              "properties": {
+                "potential_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "applicable_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "eligible_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "checked_matches": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "checked_mismatches": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "checked_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "incomplete_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "unsupported_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "skipped_relations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "status_counts": {
+                  "type": "object",
+                  "properties": {
+                    "NOT_APPLICABLE": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "ELIGIBLE_CHECKED_MATCH": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "ELIGIBLE_CHECKED_MISMATCH": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "INCOMPLETE": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    },
+                    "UNSUPPORTED": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 50000
+                    }
+                  },
+                  "required": [
+                    "NOT_APPLICABLE",
+                    "ELIGIBLE_CHECKED_MATCH",
+                    "ELIGIBLE_CHECKED_MISMATCH",
+                    "INCOMPLETE",
+                    "UNSUPPORTED"
+                  ],
+                  "additionalProperties": false
+                },
+                "primary_skip_reason_counts": {
+                  "type": "object",
+                  "maxProperties": 32,
+                  "propertyNames": {
+                    "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50000
+                  }
+                },
+                "secondary_skip_reason_counts_overlapping": {
+                  "type": "object",
+                  "maxProperties": 32,
+                  "propertyNames": {
+                    "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+                  },
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 50000
+                  }
+                },
+                "accounting_invariant": {
+                  "const": true
+                }
+              },
+              "required": [
+                "potential_relations",
+                "applicable_relations",
+                "eligible_relations",
+                "checked_matches",
+                "checked_mismatches",
+                "checked_relations",
+                "incomplete_relations",
+                "unsupported_relations",
+                "skipped_relations",
+                "status_counts",
+                "primary_skip_reason_counts",
+                "secondary_skip_reason_counts_overlapping",
+                "accounting_invariant"
+              ],
+              "additionalProperties": false
+            },
+            "candidate_findings_omitted": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
             },
             "scan_complete": {
               "type": "boolean"
@@ -3145,8 +5764,142 @@
             "potential_cells",
             "checked_cells",
             "skipped_cells",
+            "relations",
+            "relation_telemetry",
+            "candidate_findings_omitted",
             "scan_complete",
             "limitations"
+          ],
+          "additionalProperties": false
+        },
+        "percentage_relation_telemetry": {
+          "type": "object",
+          "properties": {
+            "potential_relations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "applicable_relations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "eligible_relations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "checked_matches": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "checked_mismatches": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "checked_relations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "incomplete_relations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "unsupported_relations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "skipped_relations": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 50000
+            },
+            "status_counts": {
+              "type": "object",
+              "properties": {
+                "NOT_APPLICABLE": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "ELIGIBLE_CHECKED_MATCH": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "ELIGIBLE_CHECKED_MISMATCH": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "INCOMPLETE": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                },
+                "UNSUPPORTED": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 50000
+                }
+              },
+              "required": [
+                "NOT_APPLICABLE",
+                "ELIGIBLE_CHECKED_MATCH",
+                "ELIGIBLE_CHECKED_MISMATCH",
+                "INCOMPLETE",
+                "UNSUPPORTED"
+              ],
+              "additionalProperties": false
+            },
+            "primary_skip_reason_counts": {
+              "type": "object",
+              "maxProperties": 32,
+              "propertyNames": {
+                "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50000
+              }
+            },
+            "secondary_skip_reason_counts_overlapping": {
+              "type": "object",
+              "maxProperties": 32,
+              "propertyNames": {
+                "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50000
+              }
+            },
+            "accounting_invariant": {
+              "const": true
+            }
+          },
+          "required": [
+            "potential_relations",
+            "applicable_relations",
+            "eligible_relations",
+            "checked_matches",
+            "checked_mismatches",
+            "checked_relations",
+            "incomplete_relations",
+            "unsupported_relations",
+            "skipped_relations",
+            "status_counts",
+            "primary_skip_reason_counts",
+            "secondary_skip_reason_counts_overlapping",
+            "accounting_invariant"
           ],
           "additionalProperties": false
         },
@@ -6642,6 +9395,10 @@
                   "CANDIDATE_ANOMALY"
                 ]
               },
+              "relation_id": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
               "table_id": {
                 "type": "string",
                 "maxLength": 500
@@ -6776,6 +9533,7 @@
               "id",
               "type",
               "status",
+              "relation_id",
               "table_id",
               "table_caption",
               "numerator_exact",
@@ -6809,6 +9567,10 @@
                 "enum": [
                   "CANDIDATE_ANOMALY"
                 ]
+              },
+              "relation_id": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
               },
               "table_key": {
                 "type": "string",
@@ -6938,6 +9700,7 @@
               "id",
               "type",
               "status",
+              "relation_id",
               "table_key",
               "table_id",
               "table_label",

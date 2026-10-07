@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 CONTRACT_VERSION = '1.1'
+PERCENTAGE_CONTRACT_VERSION = '1.2'
 
 _CONTRACTS: tuple[dict[str, Any], ...] = (
     {
@@ -24,7 +25,7 @@ _CONTRACTS: tuple[dict[str, Any], ...] = (
     },
     {
         'detector_id': 'table_percentage_recomputation',
-        'version': CONTRACT_VERSION,
+        'version': PERCENTAGE_CONTRACT_VERSION,
         'implementation_status': 'ACTIVE_SOURCE_MAPPED',
         'purpose': 'exact_arithmetic_candidate',
         'required_source_structure': ['RESOLVED_TABLE_GRID', 'EXPLICIT_HEADER_HIERARCHY'],
@@ -34,21 +35,32 @@ _CONTRACTS: tuple[dict[str, Any], ...] = (
             'row identity and measure header are available',
             'display precision is known',
         ],
-        'allowed_ambiguity': ['none affecting the operands or denominator scope'],
+        'relationship_types': {
+            'checked': ['CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE'],
+            'out_of_scope': [
+                'CATEGORY_TOTAL', 'CATEGORY_PARTITION', 'PERCENTAGE_COMPLEMENT', 'PERCENTAGE_SUM',
+            ],
+        },
+        'allowed_ambiguity': [
+            'sibling categories may overlap when this cell numerator, denominator, units, population, and percentage base are explicit',
+        ],
         'rounding_policy': 'ROUND_HALF_UP to displayed precision; exact ties round away from zero',
         'units': ['count', 'percent'],
         'exclusions': [
             'PDF table layout', 'local or unresolved denominator', 'footnoted operands or denominator',
-            'weighted or adjusted estimates', 'multiple response or overlapping categories',
-            'missing-data or available-case subset cue',
+            'weighted or adjusted estimates', 'missingness or available-case scope that changes the denominator',
+            'ambiguous numerator/denominator units, population, group, timepoint, analysis set, or percentage base',
+            'category totals, partitions, complements, and percentage sums',
         ],
         'positive_result_establishes': 'The displayed percentage differs from ROUND_HALF_UP of the exact count/denominator ratio at its displayed precision.',
         'positive_result_does_not_establish': 'That the paper is wrong, that the table values were extracted faithfully, or that any conclusion changes.',
         'unsupported_or_incomplete_reasons': [
-            'TABLE_STRUCTURE_UNSUPPORTED', 'NO_EXPLICIT_COLUMN_DENOMINATOR',
-            'CONFLICTING_HEADER_DENOMINATORS', 'LOCAL_DENOMINATOR', 'LOCAL_GROUP_DENOMINATOR_INDICATED',
-            'FOOTNOTE_SCOPE_UNRESOLVED', 'FOOTNOTED_OR_SCOPED_ROW_LABEL',
-            'WEIGHTED_OR_ADJUSTED', 'OVERLAPPING_OR_MULTIPLE_RESPONSE', 'MISSING_DATA_SCOPE',
+            'TABLE_STRUCTURE_UNSUPPORTED', 'SOURCE_SCOPE_AMBIGUOUS', 'DENOMINATOR_NOT_EXPLICIT',
+            'CONFLICTING_HEADER_DENOMINATORS', 'LOCAL_ROW_DENOMINATOR', 'FOOTNOTE_SCOPE_UNRESOLVED',
+            'WEIGHTED_RESULT', 'ADJUSTED_RESULT', 'MISSINGNESS_CHANGES_DENOMINATOR',
+            'MULTIPLE_RESPONSE', 'PERCENT_UNIT_NOT_EXPLICIT', 'GROUPED_INTEGER_FORMAT_UNSUPPORTED',
+            'DECIMAL_SEPARATOR_UNSUPPORTED', 'MALFORMED_NUMERIC_TOKEN', 'OPERANDS_OUTSIDE_PROPORTION_DOMAIN',
+            'CANDIDATE_LIMIT',
         ],
     },
     {
@@ -133,30 +145,45 @@ _CONTRACTS: tuple[dict[str, Any], ...] = (
     },
     {
         'detector_id': 'jats_cell_ratio_percentage_recomputation',
-        'version': CONTRACT_VERSION,
+        'version': PERCENTAGE_CONTRACT_VERSION,
         'implementation_status': 'ACTIVE_SOURCE_MAPPED',
         'purpose': 'exact_same_cell_arithmetic_candidate',
         'required_source_structure': ['JATS_TBODY_CELL_WITH_EXPLICIT_N_OVER_N_PERCENT'],
         'required_operands': ['integer numerator', 'integer denominator', 'displayed percentage in the same cell'],
         'required_context': [
-            'same-cell operands', 'source hash and table/cell element path',
-            'known display precision', 'bounded explicit footnote semantics',
+            'same-cell count numerator, count denominator, and percentage',
+            'row identity and percentage base are explicit in source labels',
+            'source hash and exact table/cell element path', 'known display precision',
+            'bounded explicit footnote semantics',
         ],
-        'allowed_ambiguity': ['unrelated table grid errors do not alter the same-cell operands'],
+        'relationship_types': {
+            'checked': ['DIRECT_N_OVER_N_PERCENTAGE'],
+            'out_of_scope': [
+                'CATEGORY_TOTAL', 'CATEGORY_PARTITION', 'PERCENTAGE_COMPLEMENT', 'PERCENTAGE_SUM',
+            ],
+        },
+        'allowed_ambiguity': [
+            'unrelated table grid errors or overlapping sibling categories do not alter explicit same-cell operands',
+        ],
         'rounding_policy': 'Decimal ratio rounded with ROUND_HALF_UP at the printed percentage precision',
         'units': ['count', 'count', 'percent'],
         'exclusions': [
-            'PDF or Markdown', 'weighted or adjusted values', 'overlap or multiple response',
-            'missing-data or changing-denominator cues', 'unknown footnote semantics',
+            'PDF or Markdown', 'weighted or adjusted values',
+            'missingness or changing-denominator cues that alter the cell percentage base',
+            'multiple-response cues when numerator/denominator units or percentage base are ambiguous',
+            'unknown footnote semantics',
             'cell or row-label references that alter scope',
+            'ambiguous population, group, timepoint, analysis set, or percentage base',
+            'category totals, partitions, complements, and percentage sums',
         ],
         'positive_result_establishes': 'The explicit same-cell n/N ratio does not round to the displayed percentage under the stated rule.',
         'positive_result_does_not_establish': 'Which printed operand is wrong, whether the cell was faithfully captured, or whether any conclusion changes.',
         'unsupported_or_incomplete_reasons': [
-            'CELL_SPAN_UNSUPPORTED', 'CELL_FOOTNOTE_OR_CROSS_REFERENCE_SCOPE',
-            'CELL_FOOTNOTE_MARKER_UNRESOLVED', 'ROW_LABEL_SCOPE_UNRESOLVED',
-            'UNSAFE_TABLE_SCOPE_CUE', 'FOOTNOTE_SCOPE_CUE', 'FOOTNOTE_SEMANTICS_UNRESOLVED',
-            'OPERANDS_OUTSIDE_PROPORTION_DOMAIN', 'DIRECT_RATIO_CELL_LIMIT', 'RATIO_CANDIDATE_LIMIT',
+            'TABLE_STRUCTURE_UNSUPPORTED', 'SOURCE_SCOPE_AMBIGUOUS', 'FOOTNOTE_SCOPE_UNRESOLVED',
+            'WEIGHTED_RESULT', 'ADJUSTED_RESULT', 'MISSINGNESS_CHANGES_DENOMINATOR',
+            'MULTIPLE_RESPONSE',
+            'GROUPED_INTEGER_FORMAT_UNSUPPORTED', 'DECIMAL_SEPARATOR_UNSUPPORTED', 'MALFORMED_NUMERIC_TOKEN',
+            'OPERANDS_OUTSIDE_PROPORTION_DOMAIN', 'CANDIDATE_LIMIT',
         ],
     },
     {
@@ -367,9 +394,12 @@ def eligibility(
 ) -> dict[str, Any]:
     if detector_id not in {contract['detector_id'] for contract in _CONTRACTS}:
         raise ValueError(f'No detector contract registered for {detector_id}')
+    contract_version = PERCENTAGE_CONTRACT_VERSION if detector_id in {
+        'table_percentage_recomputation', 'jats_cell_ratio_percentage_recomputation',
+    } else CONTRACT_VERSION
     result: dict[str, Any] = {
         'detector_id': detector_id,
-        'contract_version': CONTRACT_VERSION,
+        'contract_version': contract_version,
         'status': status,
         'source_format': source_format,
         'reasons': list(dict.fromkeys(reasons)),
