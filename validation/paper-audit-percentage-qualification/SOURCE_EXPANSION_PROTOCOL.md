@@ -35,10 +35,14 @@ Process every `DEVELOPMENT` record in DOI order within each batch. Retrieve the
 original Europe PMC JATS XML, verify the returned PMCID and DOI against the
 metadata record, and pin the exact bytes with SHA-256. Do not choose a subset
 based on table content, arithmetic, correction status, or detector output.
-If the mandatory 50-correct-relation / 15-document threshold remains unmet,
-process the next complete metadata batch under the same rules. Stop when the
-threshold is met or the metadata result set is exhausted; do not alter any
-eligibility rule to change the result.
+If either the DEVELOPMENT negative pool or the source-only RESERVED capacity
+pool remains below its frozen 50-correct-relation / 15-document gate, process
+the next complete metadata batch under the same rules. Stop only when both
+capacity gates are met or the metadata result set is exhausted; do not alter
+any eligibility rule to change the result. This addendum aligns the search
+stop condition with frozen graduation criterion 10; it does not change the
+threshold or any label rule. It was recorded before batch 1 source labels or
+detector scores were joined, and before retrieval of any later-batch source.
 
 ## Reserved negative capacity exception
 
