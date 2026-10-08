@@ -9,26 +9,16 @@ from typing import Any
 from .paper_contracts import PERCENTAGE_CONTRACT_VERSION
 from .paper_document import PaperDocument, SourceAnchor, Table, TableCell
 from .paper_relation_telemetry import relation_id, summarize_relations, terminal_relation
+from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
 
 COUNT_PERCENT = re.compile(
-    r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*(?P<mark>%?)\s*\)\s*$'
+    r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*'
+    r'(?P<mark>%?)\s*\)\s*(?:[;,]?\s*\(?\s*[nN]\s*=\s*[0-9][0-9, .\u00a0\u202f]{0,24}\s*\)?)?\s*$'
 )
 COUNT_PERCENT_SHAPE = re.compile(
     r'^\s*(?P<count>[0-9][0-9, .\u00a0\u202f]{0,24})\s*'
-    r'\(\s*(?P<percent>[0-9][0-9, .\u00a0\u202f]{0,24})\s*(?P<mark>%?)\s*\)\s*$'
-)
-DENOMINATOR = re.compile(
-    r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})'
-    r'(?![0-9]|[,.]\s*[0-9]|\s+[0-9])'
-)
-DENOMINATOR_SHAPE = re.compile(r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9][0-9, .\u00a0\u202f]{0,24})')
-BODY_DENOMINATOR_SHAPE = re.compile(
-    r'^\s*[nN]\s*=\s*(?P<value>[0-9][0-9, .\u00a0\u202f]{0,24})\s*$'
-)
-UNSAFE_TABLE_CUE = re.compile(
-    r'\b(?:weighted|adjusted|standardized|missing data|available cases?|denominator varies|'
-    r'per row|complete cases?)\b',
-    re.IGNORECASE,
+    r'\(\s*(?P<percent>[0-9][0-9, .\u00a0\u202f]{0,24})\s*(?P<mark>%?)\s*\)\s*'
+    r'(?:[;,]?\s*\(?\s*[nN]\s*=\s*[0-9][0-9, .\u00a0\u202f]{0,24}\s*\)?)?\s*$'
 )
 MULTIPLE_RESPONSE_CUE = re.compile(r'\bmultiple responses?\b', re.IGNORECASE)
 AMBIGUOUS_RESPONSE_BASE = re.compile(
@@ -36,20 +26,12 @@ AMBIGUOUS_RESPONSE_BASE = re.compile(
     re.IGNORECASE,
 )
 POPULATION_UNIT = re.compile(r'\b(?:participants?|patients?|respondents?|subjects?|individuals?)\b', re.IGNORECASE)
-OVERLAPPING_LABEL = re.compile(
-    r'(?:[<>]=?|[≤≥])|\b(?:at least|at most|or more|or less|greater than|less than|above|below)\b',
+PERCENT_UNIT_MARKER = re.compile(
+    r'\b(?:n|no\.?|number)\s*,?\s*\(\s*%\s*\)'
+    r'|(?<!\w)%\s*(?!\w)'
+    r'|\bpercent(?:age)?\b',
     re.IGNORECASE,
 )
-THRESHOLD_LABEL = re.compile(
-    r'(?P<operator>>=|<=|≥|≤|>|<|at least|at most|greater than|less than|above|below)\s*'
-    r'(?P<value>[0-9]+(?:\.[0-9]+)?)\s*%?',
-    re.IGNORECASE,
-)
-ROW_LOCAL_DENOMINATOR = re.compile(
-    r'\bn\s*=\s*[0-9]+',
-    re.IGNORECASE,
-)
-PERCENT_UNIT_MARKER = re.compile(r'\bn\s*\(%\)', re.IGNORECASE)
 MAX_TABLE_PERCENTAGE_FINDINGS = 256
 
 
@@ -68,19 +50,6 @@ def _number_shape_reason(match: re.Match[str]) -> str | None:
     return None
 
 
-def _explicit_grouped_header_denominator(table: Table, column: int) -> bool:
-    for row in table.rows:
-        if row.row_group != 'thead':
-            continue
-        for cell in row.cells:
-            if cell.column_start <= column < cell.column_start + cell.column_span:
-                for match in DENOMINATOR_SHAPE.finditer(cell.raw_text):
-                    raw = match.group('value').strip()
-                    if ',' in raw or re.search(r'[ \u00a0\u202f]', raw):
-                        return True
-    return False
-
-
 def _as_dict(anchor: SourceAnchor) -> dict[str, Any]:
     return {
         'source_file': anchor.source_file,
@@ -93,233 +62,124 @@ def _as_dict(anchor: SourceAnchor) -> dict[str, Any]:
     }
 
 
-def _denominator_header(table: Table, column: int) -> tuple[int | None, TableCell | None, str | None]:
-    values: set[int] = set()
-    matched: TableCell | None = None
-    for row in table.rows:
-        if row.row_group != 'thead':
-            continue
-        for cell in row.cells:
-            if cell.column_start <= column < cell.column_start + cell.column_span:
-                for match in DENOMINATOR.finditer(cell.raw_text):
-                    values.add(int(match.group('value')))
-                    matched = cell
-    if len(values) == 1:
-        return next(iter(values)), matched, None
-    if not values:
-        return None, None, 'NO_EXPLICIT_COLUMN_DENOMINATOR'
-    return None, None, 'CONFLICTING_HEADER_DENOMINATORS'
-
-
-def _body_subgroup_denominators(
-    table: Table,
-) -> dict[int, dict[int, tuple[int | None, TableCell | None, str | None]] | None]:
-    """Resolve explicit denominator rows that scope following body rows.
-
-    Some JATS tables put subgroup Ns in the body rather than in the thead. A
-    row is treated as a subgroup boundary only when its row label is present
-    and every other nonempty cell is either an explicit N value or a dash.
-    The latest such row applies until another subgroup row or a blank/label-
-    only separator. Missing, malformed, or footnoted values stay incomplete;
-    they never fall back to a broader thead denominator.
-    """
-    dash_values = {'-', '–', '—', '−'}
-    subgroup_rows: dict[int, dict[int, tuple[int | None, TableCell | None, str | None]]] = {}
-    for row_index, row in enumerate(table.rows):
+def _block_has_missingness_row(table: Table, row_index: int) -> bool:
+    """Find missing/unknown categories in the same source-labelled row block."""
+    label_only_rows = []
+    for index, row in enumerate(table.rows):
         if row.row_group != 'tbody':
             continue
         label = next((cell for cell in row.cells if cell.column_start == 0), None)
         if label is None or not label.raw_text.strip():
             continue
-        values: dict[int, tuple[int | None, TableCell | None, str | None]] = {}
-        has_denominator = False
-        valid_boundary = True
-        for cell in row.cells:
-            if cell.column_start == 0:
-                continue
-            raw = cell.raw_text.strip()
-            if not raw or raw in dash_values:
-                continue
-            match = BODY_DENOMINATOR_SHAPE.fullmatch(raw)
-            if match is None:
-                # A malformed N value still marks a denominator boundary, so
-                # subsequent cells cannot inherit the broader header N.
-                if re.match(r'^\s*[nN]\s*=', raw):
-                    has_denominator = True
-                    reason = (
-                        'FOOTNOTE_SCOPE_UNRESOLVED'
-                        if cell.footnote_references or cell.cross_references
-                        else 'MALFORMED_NUMERIC_TOKEN'
-                    )
-                    values[cell.column_start] = (None, cell, reason)
-                    continue
-                valid_boundary = False
-                break
-            has_denominator = True
-            value = match.group('value').strip()
-            reason: str | None = None
-            denominator: int | None = None
-            if ',' in value or re.search(r'[ \u00a0\u202f]', value):
-                reason = 'GROUPED_INTEGER_FORMAT_UNSUPPORTED'
-            elif not re.fullmatch(r'[0-9]{1,9}', value):
-                reason = 'MALFORMED_NUMERIC_TOKEN'
-            else:
-                denominator = int(value)
-            if cell.footnote_references or cell.cross_references:
-                reason = 'FOOTNOTE_SCOPE_UNRESOLVED'
-                denominator = None
-            prior = values.get(cell.column_start)
-            if prior is not None:
-                values[cell.column_start] = (None, cell, 'CONFLICTING_HEADER_DENOMINATORS')
-            else:
-                values[cell.column_start] = (denominator, cell, reason)
-        if valid_boundary and has_denominator:
-            subgroup_rows[row_index] = values
-
-    states: dict[int, dict[int, tuple[int | None, TableCell | None, str | None]] | None] = {}
-    active: dict[int, tuple[int | None, TableCell | None, str | None]] | None = None
-    for row_index, row in enumerate(table.rows):
-        if row_index in subgroup_rows:
-            active = subgroup_rows[row_index]
-        elif row.row_group == 'tbody':
-            label = next((cell for cell in row.cells if cell.column_start == 0), None)
-            other_text = [cell.raw_text.strip() for cell in row.cells if cell.column_start > 0]
-            if (not any(cell.raw_text.strip() for cell in row.cells)
-                    or (label is not None and label.raw_text.strip()
-                        and not any(value for value in other_text))):
-                active = None
-        states[row_index] = active
-    return states
-
-
-def _table_context(table: Table) -> str:
-    parts = [table.label, table.caption]
-    parts.extend(footnote.text for footnote in table.footnotes)
-    parts.extend(cell.raw_text for row in table.rows if row.row_group == 'thead' for cell in row.cells)
-    return ' '.join(parts)
-
-
-def _threshold_interval(label: str) -> tuple[Decimal | None, bool, Decimal | None, bool] | None:
-    """Parse one simple threshold into an open/closed numeric interval."""
-    match = THRESHOLD_LABEL.search(label)
-    if match is None:
-        return None
-    operator = match.group('operator').lower()
-    value = Decimal(match.group('value'))
-    if operator in ('>=', '≥', 'at least'):
-        return value, True, None, False
-    if operator in ('>', 'greater than', 'above'):
-        return value, False, None, False
-    if operator in ('<=', '≤', 'at most'):
-        return None, False, value, True
-    return None, False, value, False
-
-
-def _intervals_overlap(
-    left: tuple[Decimal | None, bool, Decimal | None, bool],
-    right: tuple[Decimal | None, bool, Decimal | None, bool],
-) -> bool:
-    lower_bounds = [(left[0], left[1]), (right[0], right[1])]
-    upper_bounds = [(left[2], left[3]), (right[2], right[3])]
-    finite_lowers = [item for item in lower_bounds if item[0] is not None]
-    finite_uppers = [item for item in upper_bounds if item[0] is not None]
-    lower = max(finite_lowers, key=lambda item: item[0]) if finite_lowers else (None, False)
-    upper = min(finite_uppers, key=lambda item: item[0]) if finite_uppers else (None, False)
-    if lower[0] is None or upper[0] is None:
-        return True
-    if lower[0] < upper[0]:
-        return True
-    return lower[0] == upper[0] and lower[1] and upper[1]
-
-
-def _contains_overlapping_thresholds(labels: list[str]) -> bool:
-    threshold_labels = [label for label in labels if OVERLAPPING_LABEL.search(label)]
-    if len(threshold_labels) < 2:
-        return False
-    intervals = [_threshold_interval(label) for label in threshold_labels]
-    for index, left in enumerate(intervals):
-        for right in intervals[index + 1:]:
-            # If a threshold cue cannot be interpreted safely, do not infer a
-            # shared denominator from sibling category sums.
-            if left is None or right is None or _intervals_overlap(left, right):
-                return True
+        if all(cell.column_start == 0 or not cell.raw_text.strip()
+               for cell in row.cells):
+            label_only_rows.append(index)
+    start = max((index for index in label_only_rows if index <= row_index), default=-1)
+    end = min((index for index in label_only_rows if index > row_index), default=len(table.rows))
+    for row in table.rows[start + 1:end]:
+        if row.row_group != 'tbody':
+            continue
+        label = next((cell for cell in row.cells if cell.column_start == 0), None)
+        if label and re.fullmatch(
+            r'\s*(?:missing|not reported|not available|unrecorded)\s*',
+            label.raw_text, re.IGNORECASE,
+        ):
+            return True
     return False
 
 
-def _local_group_denominator_cells(table: Table) -> set[tuple[str, int]]:
-    """Identify category blocks whose percentages use their summed count total.
+def _category_block_has_unresolved_base(
+    table: Table,
+    row_index: int,
+    cell: TableCell,
+    denominator: int | None,
+) -> bool:
+    """Fail closed when a source-labelled category block suggests available cases.
 
-    This is a fail-closed scope guard, not a row-total finding. A block is
-    suppressed only when its explicit row structure separates it from adjacent
-    variables, all cells in one column have count/percentage pairs, their
-    counts sum to less than the column header, and every percentage rounds
-    exactly from that smaller sum while at least one differs at the header N.
+    The block totals are used only as evidence that the printed header base may
+    not apply. They never become a denominator candidate or an arithmetic base.
     """
-    if MULTIPLE_RESPONSE_CUE.search(_table_context(table)):
-        return set()
-
-    header_denominators = {
-        column: denominator for column in range(len(table.columns))
-        if (denominator := _denominator_header(table, column)[0]) is not None
-    }
-    body_rows = [row for row in table.rows if row.row_group == 'tbody']
-    blocks: list[list[Any]] = []
-    current: list[Any] = []
-    for row in body_rows:
-        if len(row.cells) > 1 and all(not cell.raw_text.strip() for cell in row.cells[1:]):
-            if current:
-                blocks.append(current)
-                current = []
-        else:
-            current.append(row)
-    if current:
-        blocks.append(current)
-
-    suppressed: set[tuple[str, int]] = set()
-    for block in blocks:
-        if len(block) < 2:
+    if denominator is None:
+        return False
+    label_only_rows: list[int] = []
+    for index, row in enumerate(table.rows):
+        if row.row_group != 'tbody':
             continue
-        labels = [
-            next((cell.raw_text for cell in row.cells if cell.column_start == 0), '')
-            for row in block
+        label = next((item for item in row.cells if item.column_start == 0), None)
+        if label is None or not label.raw_text.strip():
+            continue
+        if all(item.column_start == 0 or not item.raw_text.strip() for item in row.cells):
+            label_only_rows.append(index)
+    start = max((index for index in label_only_rows if index <= row_index), default=-1)
+    if start < 0:
+        return False
+    end = min((index for index in label_only_rows if index > row_index), default=len(table.rows))
+
+    category_values: list[tuple[int, Decimal, int]] = []
+    for row in table.rows[start + 1:end]:
+        if row.row_group != 'tbody':
+            continue
+        data_cell = next((
+            item for item in row.cells
+            if item.column_start <= cell.column_identity < item.column_start + item.column_span
+        ), None)
+        if data_cell is None:
+            continue
+        match = COUNT_PERCENT.fullmatch(data_cell.raw_text)
+        if match is None:
+            continue
+        try:
+            count = int(match.group('count'))
+            percent = Decimal(match.group('percent'))
+        except (ValueError, InvalidOperation):
+            return False
+        precision = len(match.group('percent').partition('.')[2]) if '.' in match.group('percent') else 0
+        category_values.append((count, percent, precision))
+
+    if len(category_values) < 2:
+        return False
+    count_total = sum(count for count, _percent, _precision in category_values)
+    if count_total >= denominator:
+        return False
+    mismatches = 0
+    for count, percent, precision in category_values:
+        quantum = Decimal(1).scaleb(-precision)
+        recomputed = (Decimal(count) * Decimal(100) / Decimal(denominator)).quantize(
+            quantum, rounding=ROUND_HALF_UP,
+        )
+        mismatches += percent != recomputed
+    if mismatches < max(2, len(category_values) // 2 + 1):
+        return False
+    percent_total = sum((percent for _count, percent, _precision in category_values), Decimal(0))
+    rounding_tolerance = sum(
+        (Decimal(1).scaleb(-precision) / Decimal(2) for _count, _percent, precision in category_values),
+        Decimal(0),
+    )
+    return abs(percent_total - Decimal(100)) <= rounding_tolerance
+
+
+def _mark_denominator_scope_unresolved_for_category_base(
+    resolved: dict[str, Any],
+) -> None:
+    """Retain the explicit header as rejected provenance without selecting it."""
+    provenance = resolved['denominator_provenance']
+    selected = provenance.get('selected_denominator')
+    if selected is not None:
+        selected = dict(selected)
+        selected['eligibility'] = 'INELIGIBLE'
+        selected['rejection_reasons'] = ['MISSINGNESS_CHANGES_DENOMINATOR']
+        provenance['rejected_competing_denominators'] = [
+            *provenance.get('rejected_competing_denominators', []), selected,
         ]
-        if _contains_overlapping_thresholds(labels):
-            continue
-        for column, header_denominator in header_denominators.items():
-            parsed_cells: list[tuple[Any, Any, int, Decimal, int]] = []
-            for row in block:
-                cell = next((item for item in row.cells if item.column_start == column), None)
-                if cell is None or cell.footnote_references or cell.scope_denominator_cues:
-                    parsed_cells = []
-                    break
-                match = COUNT_PERCENT.fullmatch(cell.raw_text)
-                if match is None:
-                    parsed_cells = []
-                    break
-                count = int(match.group('count'))
-                reported = Decimal(match.group('percent'))
-                precision = len(match.group('percent').partition('.')[2]) if '.' in match.group('percent') else 0
-                parsed_cells.append((row, cell, count, reported, precision))
-            if len(parsed_cells) != len(block):
-                continue
-            local_denominator = sum(item[2] for item in parsed_cells)
-            if not 0 < local_denominator < header_denominator:
-                continue
-            local_matches = True
-            header_differs = False
-            for _row, _cell, count, reported, precision in parsed_cells:
-                quantum = Decimal(1).scaleb(-precision)
-                local = (Decimal(count) * Decimal(100) / Decimal(local_denominator)).quantize(
-                    quantum, rounding=ROUND_HALF_UP,
-                )
-                header = (Decimal(count) * Decimal(100) / Decimal(header_denominator)).quantize(
-                    quantum, rounding=ROUND_HALF_UP,
-                )
-                local_matches = local_matches and reported == local
-                header_differs = header_differs or reported != header
-            if local_matches and header_differs:
-                suppressed.update((cell.source_anchor.element_path, column) for _row, cell, *_ in parsed_cells)
-    return suppressed
+    provenance['selected_denominator'] = None
+    provenance['resolution_status'] = 'UNRESOLVED'
+    provenance['resolution_reason'] = 'DENOMINATOR_SCOPE_UNRESOLVED'
+    resolved['denominator_scope_resolved'] = False
+    resolved['denominator_exact'] = None
+    resolved['denominator_source_anchor'] = None
+    resolved['skip_reasons'] = list(dict.fromkeys([
+        *resolved.get('skip_reasons', []), 'MISSINGNESS_CHANGES_DENOMINATOR',
+    ]))
 
 
 def _cell_scope_reasons(
@@ -328,9 +188,9 @@ def _cell_scope_reasons(
     row_index: int,
     cell: TableCell,
     match: re.Match[str],
-    local_group_cells: set[tuple[str, int]],
-    body_subgroup_states: dict[int, dict[int, tuple[int | None, TableCell | None, str | None]] | None],
-) -> tuple[list[str], int | None, TableCell | None]:
+    boundaries: tuple[Any, ...],
+    parent_groups: tuple[Any, ...],
+) -> tuple[list[str], int | None, dict[str, Any], dict[str, Any] | None]:
     reasons: list[str] = []
     if table.structure_status != 'STRUCTURE_RELIABLE':
         reasons.append('TABLE_STRUCTURE_UNSUPPORTED')
@@ -338,19 +198,13 @@ def _cell_scope_reasons(
     row_label = row_label_cell.raw_text if row_label_cell else ''
     if not row_label.strip():
         reasons.append('SOURCE_SCOPE_AMBIGUOUS')
-    if ROW_LOCAL_DENOMINATOR.search(row_label):
-        reasons.append('LOCAL_ROW_DENOMINATOR')
     if row_label_cell is not None and (
         row_label_cell.footnote_references or row_label_cell.cross_references
         or any('FOOTNOTE' in cue or 'CROSS_REFERENCE' in cue for cue in row_label_cell.scope_denominator_cues)
     ):
         reasons.append('FOOTNOTE_SCOPE_UNRESOLVED')
-    if row_label_cell is not None and 'CELL_LOCAL_DENOMINATOR' in row_label_cell.scope_denominator_cues:
-        reasons.append('LOCAL_ROW_DENOMINATOR')
     if cell.row_span != 1 or cell.column_span != 1:
         reasons.append('TABLE_STRUCTURE_UNSUPPORTED')
-    if (cell.source_anchor.element_path, cell.column_identity) in local_group_cells:
-        reasons.append('LOCAL_ROW_DENOMINATOR')
     if cell.footnote_references or cell.cross_references or any(
         'FOOTNOTE' in cue or 'CROSS_REFERENCE' in cue for cue in cell.scope_denominator_cues
     ):
@@ -365,32 +219,20 @@ def _cell_scope_reasons(
         reasons.append('ADJUSTED_RESULT')
     if re.search(r'\b(?:missing data|available cases?|complete cases?|nonresponse|denominator varies)\b', cue_text, re.IGNORECASE):
         reasons.append('MISSINGNESS_CHANGES_DENOMINATOR')
-    subgroup_state = body_subgroup_states.get(row_index)
-    if subgroup_state is not None:
-        denominator, denominator_cell, denominator_reason = subgroup_state.get(
-            cell.column_identity, (None, None, 'DENOMINATOR_NOT_EXPLICIT'),
-        )
-        if denominator_reason:
-            reasons.append(denominator_reason)
-    else:
-        denominator, denominator_cell, denominator_reason = _denominator_header(table, cell.column_identity)
-        if _explicit_grouped_header_denominator(table, cell.column_identity):
-            reasons.append('GROUPED_INTEGER_FORMAT_UNSUPPORTED')
-            if denominator_reason == 'CONFLICTING_HEADER_DENOMINATORS':
-                reasons.append('CONFLICTING_HEADER_DENOMINATORS')
-            elif denominator_reason:
-                reasons.append('DENOMINATOR_NOT_EXPLICIT')
-        elif denominator_reason == 'CONFLICTING_HEADER_DENOMINATORS':
-            reasons.append('CONFLICTING_HEADER_DENOMINATORS')
-        elif denominator_reason:
-            reasons.append('DENOMINATOR_NOT_EXPLICIT')
-    if denominator_cell is not None and (denominator_cell.footnote_references or denominator_cell.cross_references):
-        reasons.append('FOOTNOTE_SCOPE_UNRESOLVED')
+    if _block_has_missingness_row(table, row_index):
+        reasons.append('MISSINGNESS_CHANGES_DENOMINATOR')
+    resolved = resolve_denominator(table, row, cell, row_index, boundaries, parent_groups)
+    denominator = resolved.get('denominator_exact')
+    if _category_block_has_unresolved_base(table, row_index, cell, denominator):
+        _mark_denominator_scope_unresolved_for_category_base(resolved)
+        reasons.append('MISSINGNESS_CHANGES_DENOMINATOR')
+    if not resolved['denominator_scope_resolved']:
+        reasons.extend(resolved.get('skip_reasons') or ['DENOMINATOR_SCOPE_UNRESOLVED'])
     if MULTIPLE_RESPONSE_CUE.search(cue_text):
         has_population_unit = bool(POPULATION_UNIT.search(cue_text))
         if AMBIGUOUS_RESPONSE_BASE.search(cue_text) or not has_population_unit:
             reasons.append('MULTIPLE_RESPONSE')
-    if denominator is not None and denominator_cell is not None:
+    if denominator is not None:
         header_text = ' '.join(cell.effective_headers)
         row_or_header_text = ' '.join((row_label, header_text))
         if not match.group('mark') and not PERCENT_UNIT_MARKER.search(row_or_header_text):
@@ -398,7 +240,12 @@ def _cell_scope_reasons(
     numeric_reason = _number_shape_reason(match)
     if numeric_reason:
         reasons.append(numeric_reason)
-    return list(dict.fromkeys(reasons)), denominator, denominator_cell
+    return (
+        list(dict.fromkeys(reasons)),
+        denominator,
+        resolved['denominator_provenance'],
+        resolved.get('denominator_source_anchor'),
+    )
 
 
 def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any]:
@@ -413,8 +260,8 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
         table_findings_before = len(findings)
         table_omissions_before = finding_omissions
         table_relations: list[dict[str, Any]] = []
-        local_group_cells = _local_group_denominator_cells(table)
-        body_subgroup_states = _body_subgroup_denominators(table)
+        boundaries = subgroup_boundaries(table)
+        parent_groups = parent_count_groups(table)
         for row_index, row in enumerate(table.rows):
             if row.row_group != 'tbody':
                 continue
@@ -422,8 +269,8 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                 match = COUNT_PERCENT_SHAPE.fullmatch(cell.raw_text)
                 if match is None:
                     continue
-                relation_reasons, denominator, denominator_cell = _cell_scope_reasons(
-                    table, row, row_index, cell, match, local_group_cells, body_subgroup_states,
+                relation_reasons, denominator, denominator_provenance, denominator_anchor = _cell_scope_reasons(
+                    table, row, row_index, cell, match, boundaries, parent_groups,
                 )
                 exact_match = COUNT_PERCENT.fullmatch(cell.raw_text)
                 count: int | None = None
@@ -461,9 +308,11 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                         source_anchor=_as_dict(cell.source_anchor),
                         status='UNSUPPORTED' if unsupported else 'INCOMPLETE',
                         reasons=relation_reasons,
-                        denominator_source_anchor=(
-                            _as_dict(denominator_cell.source_anchor) if denominator_cell else None
+                        denominator_source_anchor=denominator_anchor,
+                        denominator_scope_resolved=bool(
+                            denominator_provenance.get('resolution_status') == 'RESOLVED'
                         ),
+                        denominator_provenance=denominator_provenance,
                         row_identity=cell.row_identity[:2000],
                     )
                 else:
@@ -485,9 +334,9 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                         source_anchor=_as_dict(cell.source_anchor),
                         status='ELIGIBLE_CHECKED_MATCH' if is_match else 'ELIGIBLE_CHECKED_MISMATCH',
                         numerator_exact=str(count), denominator_exact=str(denominator),
-                        denominator_source_anchor=(
-                            _as_dict(denominator_cell.source_anchor) if denominator_cell else None
-                        ),
+                        denominator_source_anchor=denominator_anchor,
+                        denominator_scope_resolved=True,
+                        denominator_provenance=denominator_provenance,
                         reported_percent=exact_match.group('percent') if exact_match else '',
                         display_precision=precision,
                         recomputed_at_display_precision=format(rounded, 'f'),
@@ -497,7 +346,7 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                     if not is_match:
                         if emitted:
                             tolerance = Decimal(5).scaleb(-(precision + 1))
-                            source_anchors = [_as_dict(denominator_cell.source_anchor)] if denominator_cell else []
+                            source_anchors = [denominator_anchor] if denominator_anchor else []
                             label_cell = next((item for item in row.cells if item.column_start == 0), None)
                             if label_cell is not None:
                                 source_anchors.append(_as_dict(label_cell.source_anchor))
@@ -520,9 +369,11 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                                 'row_identity': cell.row_identity[:2000],
                                 'effective_headers': list(cell.effective_headers),
                                 'source_anchors': source_anchors,
+                                'denominator_provenance': denominator_provenance,
                                 'interpretation': (
                                     f'The displayed {exact_match.group("percent")}% differs from {count}/{denominator} '
-                                    f'({computed_text}%) using the explicit JATS denominator applicable to this table section.'
+                                    f'({computed_text}%) using denominator {denominator}, selected from '
+                                    f'{denominator_provenance["selected_denominator"]["structural_source"]}.'
                                 ),
                                 'required_review': (
                                     'Confirm the source relation, denominator applicability, and display rounding. '

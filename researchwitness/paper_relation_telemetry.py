@@ -18,6 +18,10 @@ _REASON_PRECEDENCE = (
     'TABLE_STRUCTURE_UNSUPPORTED',
     'SOURCE_SCOPE_AMBIGUOUS',
     'CONFLICTING_HEADER_DENOMINATORS',
+    'DENOMINATOR_AMBIGUOUS',
+    'DENOMINATOR_SCOPE_MISMATCH',
+    'DENOMINATOR_SCOPE_UNRESOLVED',
+    'DENOMINATOR_CANDIDATE_LIMIT',
     'LOCAL_ROW_DENOMINATOR',
     'FOOTNOTE_SCOPE_UNRESOLVED',
     'WEIGHTED_RESULT',
@@ -68,6 +72,29 @@ def terminal_relation(
 ) -> dict[str, Any]:
     if status not in RELATION_STATUSES:
         raise ValueError(f'unknown relation terminal status: {status}')
+    if contract_version == '1.3':
+        provenance = details.get('denominator_provenance')
+        scope_resolved = details.get('denominator_scope_resolved')
+        if not isinstance(provenance, Mapping) or not isinstance(scope_resolved, bool):
+            raise ValueError('percentage contract 1.3 relations require denominator provenance and scope status')
+        resolved = provenance.get('resolution_status') == 'RESOLVED'
+        if scope_resolved != resolved:
+            raise ValueError('denominator scope status must agree with denominator provenance')
+        selected = provenance.get('selected_denominator')
+        if resolved:
+            if not isinstance(selected, Mapping) or not selected.get('value_exact'):
+                raise ValueError('resolved denominator provenance requires a positive selected value')
+            if not isinstance(selected.get('source_anchor'), Mapping):
+                raise ValueError('resolved denominator provenance requires a selected source anchor')
+            if details.get('denominator_source_anchor') != selected.get('source_anchor'):
+                raise ValueError('denominator anchor must match the selected provenance source')
+        elif selected is not None:
+            raise ValueError('unresolved denominator provenance cannot contain a selected denominator')
+        if status in ('ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH'):
+            if scope_resolved is not True or not isinstance(selected, Mapping):
+                raise ValueError('arithmetic status requires a uniquely resolved denominator source')
+            if details.get('denominator_exact') != selected.get('value_exact'):
+                raise ValueError('checked denominator value must match the selected provenance value')
     ordered = ordered_reasons(reasons)
     if status in ('INCOMPLETE', 'UNSUPPORTED') and not ordered:
         raise ValueError('skipped percentage relations require a primary reason')

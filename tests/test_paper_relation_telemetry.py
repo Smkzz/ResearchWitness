@@ -86,3 +86,80 @@ def test_duplicate_relation_ids_and_missing_primary_reasons_fail_closed():
             status='ELIGIBLE_CHECKED_MATCH',
             reasons=['DENOMINATOR_NOT_EXPLICIT'],
         )
+
+
+def _v13_relation(status='ELIGIBLE_CHECKED_MATCH', *, scope_resolved=True, value='20'):
+    selected_anchor = {'source_sha256': 'c' * 64, 'element_path': '/header[1]'}
+    selected = {'value_exact': value, 'source_anchor': selected_anchor} if scope_resolved else None
+    provenance = {
+        'resolution_status': 'RESOLVED' if scope_resolved else 'UNRESOLVED',
+        'selected_denominator': selected,
+    }
+    details = {
+        'denominator_scope_resolved': scope_resolved,
+        'denominator_provenance': provenance,
+        'denominator_source_anchor': selected_anchor if scope_resolved else None,
+    }
+    if status in ('ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH'):
+        details.update({'numerator_exact': '4', 'denominator_exact': value})
+    return terminal_relation(
+        relation_id_value='v13',
+        relation_type='CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE',
+        detector_id='table_percentage_recomputation',
+        contract_version='1.3',
+        table_key='b' * 64,
+        source_anchor=_SOURCE,
+        status=status,
+        reasons=['DENOMINATOR_NOT_EXPLICIT'] if status == 'INCOMPLETE' else (),
+        **details,
+    )
+
+
+def test_v1_3_checked_status_requires_resolved_source_and_exact_selected_value():
+    record = _v13_relation()
+    assert record['denominator_scope_resolved'] is True
+
+    with pytest.raises(ValueError, match='arithmetic status requires'):
+        _v13_relation(scope_resolved=False)
+
+    with pytest.raises(ValueError, match='must match the selected provenance value'):
+        terminal_relation(
+            relation_id_value='wrong-value',
+            relation_type='CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE',
+            detector_id='table_percentage_recomputation',
+            contract_version='1.3',
+            table_key='b' * 64,
+            source_anchor=_SOURCE,
+            status='ELIGIBLE_CHECKED_MATCH',
+            numerator_exact='0',
+            denominator_exact='100',
+            denominator_scope_resolved=True,
+            denominator_source_anchor={'source_sha256': 'c' * 64, 'element_path': '/header[1]'},
+            denominator_provenance={
+                'resolution_status': 'RESOLVED',
+                'selected_denominator': {
+                    'value_exact': '20',
+                    'source_anchor': {'source_sha256': 'c' * 64, 'element_path': '/header[1]'},
+                },
+            },
+        )
+
+
+def test_v1_3_unresolved_scope_cannot_retain_a_selected_denominator():
+    with pytest.raises(ValueError, match='cannot contain a selected denominator'):
+        terminal_relation(
+            relation_id_value='unresolved-selection',
+            relation_type='CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE',
+            detector_id='table_percentage_recomputation',
+            contract_version='1.3',
+            table_key='b' * 64,
+            source_anchor=_SOURCE,
+            status='INCOMPLETE',
+            reasons=['DENOMINATOR_AMBIGUOUS'],
+            denominator_scope_resolved=False,
+            denominator_source_anchor={'source_sha256': 'c' * 64, 'element_path': '/header[1]'},
+            denominator_provenance={
+                'resolution_status': 'AMBIGUOUS',
+                'selected_denominator': {'value_exact': '20'},
+            },
+        )

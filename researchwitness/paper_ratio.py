@@ -8,6 +8,7 @@ from typing import Any
 
 from .paper_contracts import PERCENTAGE_CONTRACT_VERSION
 from .paper_document import PaperDocument, SourceAnchor, Table, TableCell
+from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
 from .paper_relation_telemetry import relation_id, summarize_relations, terminal_relation
 
 
@@ -204,7 +205,9 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
             'status': 'NOT_APPLICABLE',
             'skip_reasons': [],
         }
-        for row in table.rows:
+        boundaries = subgroup_boundaries(table)
+        parent_groups = parent_count_groups(table)
+        for row_index, row in enumerate(table.rows):
             if row.row_group != 'tbody':
                 continue
             for cell in row.cells:
@@ -236,6 +239,21 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                         reported = Decimal(raw_percent)
                     except InvalidOperation:
                         relation_reasons.append('MALFORMED_NUMERIC_TOKEN')
+                denominator_resolution = resolve_denominator(
+                    table, row, cell, row_index, boundaries, parent_groups,
+                    explicit_cell_denominator=(
+                        exact_match.group('denominator') if exact_match is not None
+                        else match.group('denominator')
+                    ),
+                )
+                if not denominator_resolution['denominator_scope_resolved']:
+                    relation_reasons.extend(
+                        denominator_resolution.get('skip_reasons') or ['DENOMINATOR_SCOPE_UNRESOLVED']
+                    )
+                elif denominator is not None and denominator_resolution.get('denominator_exact') != denominator:
+                    relation_reasons.append('DENOMINATOR_SCOPE_MISMATCH')
+                else:
+                    denominator = denominator_resolution.get('denominator_exact')
                 if numerator is not None and denominator is not None and reported is not None:
                     if denominator <= 0 or numerator > denominator or reported > 100:
                         relation_reasons.append('OPERANDS_OUTSIDE_PROPORTION_DOMAIN')
@@ -257,7 +275,11 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                         source_anchor=_anchor_dict(cell.source_anchor),
                         status='UNSUPPORTED' if unsupported else 'INCOMPLETE',
                         reasons=relation_reasons,
-                        denominator_source_anchor=_anchor_dict(cell.source_anchor),
+                        denominator_source_anchor=denominator_resolution.get('denominator_source_anchor'),
+                        denominator_scope_resolved=bool(
+                            denominator_resolution['denominator_provenance'].get('resolution_status') == 'RESOLVED'
+                        ),
+                        denominator_provenance=denominator_resolution['denominator_provenance'],
                         row_identity=cell.row_identity[:2000],
                     )
                     table_relations.append(relation)
@@ -295,6 +317,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                         'recomputed_at_display_precision': format(rounded, 'f'),
                         'display_precision': precision,
                         'source_anchors': [_anchor_dict(cell.source_anchor)],
+                        'denominator_provenance': denominator_resolution['denominator_provenance'],
                         'interpretation': (
                             f'The same source cell states {numerator}/{denominator} and {raw_percent}%; '
                             f'the ratio rounds to {format(rounded, "f")}% under ROUND_HALF_UP at the displayed precision.'
@@ -314,7 +337,9 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                     source_anchor=_anchor_dict(cell.source_anchor),
                     status='ELIGIBLE_CHECKED_MATCH' if matched else 'ELIGIBLE_CHECKED_MISMATCH',
                     numerator_exact=str(numerator), denominator_exact=str(denominator),
-                    denominator_source_anchor=_anchor_dict(cell.source_anchor),
+                    denominator_source_anchor=denominator_resolution.get('denominator_source_anchor'),
+                    denominator_scope_resolved=True,
+                    denominator_provenance=denominator_resolution['denominator_provenance'],
                     reported_percent=raw_percent, display_precision=precision,
                     recomputed_at_display_precision=format(rounded, 'f'),
                     finding_emitted=finding_emitted,

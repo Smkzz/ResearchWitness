@@ -10,7 +10,7 @@ from typing import Iterable
 import re
 
 from .paper_document import (
-    CellSpan, Figure, NumericAssertion, NumericValue, PaperDocument, Paragraph, Section,
+    CellSpan, Figure, HeaderCellReference, NumericAssertion, NumericValue, PaperDocument, Paragraph, Section,
     SourceAnchor, Table, TableCell, TableColumn, TableFootnote, TableRow,
 )
 from .strict import Invalid
@@ -119,6 +119,24 @@ def _node_text(node: _Node | None) -> str:
         else:
             stack.append((item, 0))
     return re.sub(r'\s+', ' ', ''.join(parts)).strip()
+
+
+def _leading_nonbreaking_indent(node: _Node) -> int:
+    """Preserve bounded source indentation encoded with leading NBSPs."""
+    count = 0
+    for item in node.content:
+        if not isinstance(item, str):
+            break
+        prefix = re.match(r'^[\t\r\n ]*([\u00a0]*)', item)
+        if prefix is None:
+            break
+        count += len(prefix.group(1))
+        remainder = item[prefix.end():]
+        if remainder.strip():
+            break
+        if remainder:
+            break
+    return min(count, 16)
 
 
 def _descendants(node: _Node, names: set[str] | None = None) -> Iterable[_Node]:
@@ -365,6 +383,11 @@ def _table(
 
     header_grid = grids.get('thead', [])
     body_grid = grids.get('tbody', [])
+    header_placements = placements.get('thead', [])
+    header_meta: dict[int, tuple[int, int, int, int]] = {}
+    for header_row_index, row_placements in enumerate(header_placements):
+        for header_node, column_start, row_span, column_span in row_placements:
+            header_meta[id(header_node)] = (header_row_index, column_start, row_span, column_span)
     header_width = max((len(row) for row in header_grid), default=0)
     body_width = max((len(row) for row in body_grid), default=0)
     width = max(header_width, body_width)
@@ -450,6 +473,40 @@ def _table(
                 if rowspan > 1 or colspan > 1:
                     spans.append(CellSpan(group_name, row_index, start, rowspan, colspan, raw))
                 effective = header_matrix[start] if group_name != 'thead' and start < len(header_matrix) else ()
+                effective_header_refs: list[HeaderCellReference] = []
+                seen_header_nodes: set[int] = set()
+                if group_name != 'thead' and start < width:
+                    for header_row in header_grid:
+                        header_node = header_row[start] if start < len(header_row) else None
+                        if header_node is None or id(header_node) in seen_header_nodes:
+                            continue
+                        seen_header_nodes.add(id(header_node))
+                        meta = header_meta.get(id(header_node))
+                        if meta is None:
+                            continue
+                        header_row_index, header_column_start, header_row_span, header_column_span = meta
+                        header_text = _node_text(header_node)
+                        if not header_text:
+                            continue
+                        header_footnote_refs: list[str] = []
+                        header_cross_refs: list[tuple[str, str]] = []
+                        for xref in _descendants(header_node, {'xref'}):
+                            reference_type = xref.attributes.get('ref-type', '').lower()
+                            for rid in xref.attributes.get('rid', '').split():
+                                if reference_type in ('table-fn', 'fn', 'author-notes') or rid in footnote_nodes:
+                                    header_footnote_refs.append(rid)
+                                else:
+                                    header_cross_refs.append((reference_type, rid))
+                        effective_header_refs.append(HeaderCellReference(
+                            text=header_text,
+                            source_anchor=_anchor(header_node, source_file, source_digest, header_text),
+                            row_index=header_row_index,
+                            column_start=header_column_start,
+                            row_span=header_row_span,
+                            column_span=header_column_span,
+                            footnote_references=tuple(dict.fromkeys(header_footnote_refs)),
+                            cross_references=tuple(dict.fromkeys(header_cross_refs)),
+                        ))
                 footnote_refs = []
                 cross_refs = []
                 for xref in _descendants(cell_node, {'xref'}):
@@ -487,6 +544,8 @@ def _table(
                     column_span=colspan,
                     column_start=start,
                     source_anchor=_anchor(cell_node, source_file, source_digest, raw),
+                    effective_header_refs=tuple(effective_header_refs),
+                    indentation_level=_leading_nonbreaking_indent(cell_node),
                 )
                 cells.append(cell)
                 if group_name == 'tbody':
@@ -546,6 +605,8 @@ def _table(
         extraction_confidence=confidence,
         structure_status=structure_status,
         limitations=tuple(dict.fromkeys(limitations)),
+        label_anchor=_anchor(label_node, source_file, source_digest, label) if label_node is not None else None,
+        caption_anchor=_anchor(caption_node, source_file, source_digest, caption) if caption_node is not None else None,
     )
     return table, numeric_assertions
 
