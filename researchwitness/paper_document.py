@@ -45,6 +45,20 @@ class Section:
 
 
 @dataclass(frozen=True, slots=True)
+class HeaderCellReference:
+    """An applicable header cell with its original span and source location."""
+
+    text: str
+    source_anchor: SourceAnchor
+    row_index: int
+    column_start: int
+    row_span: int
+    column_span: int
+    footnote_references: tuple[str, ...] = ()
+    cross_references: tuple[tuple[str, str], ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class TableCell:
     raw_text: str
     normalized_numeric_values: tuple[NumericValue, ...]
@@ -58,6 +72,8 @@ class TableCell:
     column_span: int
     column_start: int
     source_anchor: SourceAnchor
+    effective_header_refs: tuple[HeaderCellReference, ...] = ()
+    indentation_level: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,6 +132,8 @@ class Table:
     extraction_confidence: float
     structure_status: str
     limitations: tuple[str, ...]
+    label_anchor: SourceAnchor | None = None
+    caption_anchor: SourceAnchor | None = None
 
 
 @dataclass(frozen=True, slots=True)

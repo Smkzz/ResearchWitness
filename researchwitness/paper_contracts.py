@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 CONTRACT_VERSION = '1.1'
-PERCENTAGE_CONTRACT_VERSION = '1.2'
+PERCENTAGE_CONTRACT_VERSION = '1.3'
 
 _CONTRACTS: tuple[dict[str, Any], ...] = (
     {
@@ -31,8 +31,9 @@ _CONTRACTS: tuple[dict[str, Any], ...] = (
         'required_source_structure': ['RESOLVED_TABLE_GRID', 'EXPLICIT_HEADER_HIERARCHY'],
         'required_operands': ['one integer numerator', 'one explicit denominator', 'one displayed percentage'],
         'required_context': [
-            'denominator applies to the same cell by resolved header',
+            'explicit denominator provenance is resolved for the relationship scope',
             'row identity and measure header are available',
+            'the percent unit is explicit in the cell or applicable row/column label',
             'display precision is known',
         ],
         'relationship_types': {
@@ -43,11 +44,19 @@ _CONTRACTS: tuple[dict[str, Any], ...] = (
         },
         'allowed_ambiguity': [
             'sibling categories may overlap when this cell numerator, denominator, units, population, and percentage base are explicit',
+            'only a unique most-specific compatible explicit denominator may authorize arithmetic; equally scoped candidates remain ambiguous',
+            'a source-delimited category block with evidence of an alternate available-case base may only force a missingness skip; category totals never become a denominator candidate',
+            'the source-mapped relation resolves denominator provenance before arithmetic, including when the numerator is zero',
         ],
         'rounding_policy': 'ROUND_HALF_UP to displayed precision; exact ties round away from zero',
         'units': ['count', 'percent'],
         'exclusions': [
-            'PDF table layout', 'local or unresolved denominator', 'footnoted operands or denominator',
+            'PDF table layout', 'unresolved or equally scoped competing denominator',
+            'denominator inferred only from arithmetic or sibling-count convenience',
+            'zero-numerator arithmetic coincidence used to choose or validate a denominator',
+            'available-case bases reconstructed from missing counts or category sums',
+            'historical v1.2 reports silently reinterpreted under v1.3',
+            'footnoted operands or denominator',
             'weighted or adjusted estimates', 'missingness or available-case scope that changes the denominator',
             'ambiguous numerator/denominator units, population, group, timepoint, analysis set, or percentage base',
             'category totals, partitions, complements, and percentage sums',
@@ -56,7 +65,9 @@ _CONTRACTS: tuple[dict[str, Any], ...] = (
         'positive_result_does_not_establish': 'That the paper is wrong, that the table values were extracted faithfully, or that any conclusion changes.',
         'unsupported_or_incomplete_reasons': [
             'TABLE_STRUCTURE_UNSUPPORTED', 'SOURCE_SCOPE_AMBIGUOUS', 'DENOMINATOR_NOT_EXPLICIT',
-            'CONFLICTING_HEADER_DENOMINATORS', 'LOCAL_ROW_DENOMINATOR', 'FOOTNOTE_SCOPE_UNRESOLVED',
+            'CONFLICTING_HEADER_DENOMINATORS', 'DENOMINATOR_AMBIGUOUS',
+            'DENOMINATOR_SCOPE_UNRESOLVED', 'DENOMINATOR_SCOPE_MISMATCH',
+            'FOOTNOTE_SCOPE_UNRESOLVED',
             'WEIGHTED_RESULT', 'ADJUSTED_RESULT', 'MISSINGNESS_CHANGES_DENOMINATOR',
             'MULTIPLE_RESPONSE', 'PERCENT_UNIT_NOT_EXPLICIT', 'GROUPED_INTEGER_FORMAT_UNSUPPORTED',
             'DECIMAL_SEPARATOR_UNSUPPORTED', 'MALFORMED_NUMERIC_TOKEN', 'OPERANDS_OUTSIDE_PROPORTION_DOMAIN',

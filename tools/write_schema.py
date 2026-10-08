@@ -560,6 +560,79 @@ def make_paper_audit_schema():
         'start_byte': {'oneOf': [{'type': 'null'}, {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024}]},
         'end_byte': {'oneOf': [{'type': 'null'}, {'type': 'integer', 'minimum': 0, 'maximum': 32 * 1024 * 1024}]},
     }, required=['source_file', 'source_sha256', 'source_format', 'element_path', 'quote', 'start_byte', 'end_byte'])
+    scope_dimension = obj({
+        'value': {'oneOf': [text(240), {'type': 'null'}]},
+        'status': enum('UNSTATED', 'EXPLICIT', 'AMBIGUOUS'),
+        'source_anchors': arr(structured_anchor, 0, 8),
+    }, required=['value', 'status', 'source_anchors'])
+    relationship_scope = obj({
+        field: scope_dimension for field in (
+            'population', 'subgroup', 'treatment_arm', 'timepoint',
+            'analysis_set', 'outcome', 'unit', 'percentage_base',
+        )
+    }, required=[
+        'population', 'subgroup', 'treatment_arm', 'timepoint',
+        'analysis_set', 'outcome', 'unit', 'percentage_base',
+    ])
+    scope_match = obj({
+        'matching_fields': arr(enum(
+            'population', 'subgroup', 'treatment_arm', 'timepoint',
+            'analysis_set', 'outcome', 'unit', 'percentage_base',
+        ), 0, 8),
+        'unmatched_relationship_fields': arr(enum(
+            'population', 'subgroup', 'treatment_arm', 'timepoint',
+            'analysis_set', 'outcome', 'unit', 'percentage_base',
+        ), 0, 8),
+        'conflicting_fields': arr(enum(
+            'population', 'subgroup', 'treatment_arm', 'timepoint',
+            'analysis_set', 'outcome', 'unit', 'percentage_base',
+        ), 0, 8),
+    }, required=['matching_fields', 'unmatched_relationship_fields', 'conflicting_fields'])
+    denominator_candidate = obj({
+        'candidate_id': hash_value,
+        'value_exact': {'oneOf': [small_int_string, {'type': 'null'}]},
+        'raw_value': {'type': 'string', 'maxLength': 80},
+        'source_anchor': structured_anchor,
+        'structural_source': text(500),
+        'semantic_scope': relationship_scope,
+        'provenance_class': enum(
+            'CELL_LOCAL_EXPLICIT', 'ROW_LOCAL_EXPLICIT', 'SUBGROUP_ROW_EXPLICIT',
+            'COLUMN_HEADER_EXPLICIT', 'HEADER_GROUP_EXPLICIT', 'TABLE_GLOBAL_EXPLICIT',
+            'PROSE_CONTEXT_EXPLICIT',
+        ),
+        'applicability': {'type': 'object', 'maxProperties': 12, 'additionalProperties': {
+            'oneOf': [{'type': 'integer', 'minimum': 0, 'maximum': 50_000}, text(200)],
+        }},
+        'footnote_linkage': arr(text(200), 0, 16),
+        'confidence': enum('HIGH', 'LOW'),
+        'eligibility': enum('ELIGIBLE', 'INELIGIBLE', 'AMBIGUOUS'),
+        'precedence_class': text(80),
+        'structural_directness': {'type': 'integer', 'minimum': 0, 'maximum': 10},
+        'scope_match': scope_match,
+        'rejection_reasons': arr(text(80), 0, 16),
+    }, required=[
+        'candidate_id', 'value_exact', 'raw_value', 'source_anchor', 'structural_source',
+        'semantic_scope', 'provenance_class', 'applicability', 'footnote_linkage',
+        'confidence', 'eligibility', 'precedence_class', 'structural_directness',
+        'scope_match', 'rejection_reasons',
+    ])
+    denominator_provenance = obj({
+        'resolution_status': enum('RESOLVED', 'AMBIGUOUS', 'UNRESOLVED'),
+        'resolution_reason': enum(
+            'UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE', 'DENOMINATOR_AMBIGUOUS',
+            'DENOMINATOR_SCOPE_UNRESOLVED', 'DENOMINATOR_SCOPE_MISMATCH',
+            'DENOMINATOR_NOT_EXPLICIT', 'DENOMINATOR_CANDIDATE_LIMIT',
+            'FOOTNOTE_SCOPE_UNRESOLVED', 'GROUPED_INTEGER_FORMAT_UNSUPPORTED',
+            'DECIMAL_SEPARATOR_UNSUPPORTED', 'MALFORMED_NUMERIC_TOKEN',
+            'OPERANDS_OUTSIDE_PROPORTION_DOMAIN',
+        ),
+        'relationship_scope': relationship_scope,
+        'selected_denominator': {'oneOf': [denominator_candidate, {'type': 'null'}]},
+        'rejected_competing_denominators': arr(denominator_candidate, 0, 64),
+    }, required=[
+        'resolution_status', 'resolution_reason', 'relationship_scope',
+        'selected_denominator', 'rejected_competing_denominators',
+    ])
     stage_cue = obj({'stage': enum(
         'screened', 'eligible', 'enrolled', 'randomized', 'excluded', 'completed',
         'analyzed', 'follow_up', 'available',
@@ -654,6 +727,7 @@ def make_paper_audit_schema():
         'row_identity': empty_text,
         'effective_headers': arr(text(2000), 1, 32),
         'source_anchors': arr(structured_anchor, 3, 3),
+        'denominator_provenance': denominator_provenance,
         'interpretation': text(1000),
         'required_review': text(1000),
     })
@@ -674,6 +748,7 @@ def make_paper_audit_schema():
         'recomputed_at_display_precision': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,2})(?:\\.[0-9]{1,6})?$'},
         'display_precision': {'type': 'integer', 'minimum': 0, 'maximum': 6},
         'source_anchors': arr(structured_anchor, 1, 1),
+        'denominator_provenance': denominator_provenance,
         'interpretation': text(1000),
         'required_review': text(1000),
     })
@@ -848,6 +923,8 @@ def make_paper_audit_schema():
     percentage_reason_code = enum(
         'TABLE_STRUCTURE_UNSUPPORTED', 'SOURCE_SCOPE_AMBIGUOUS', 'CONFLICTING_HEADER_DENOMINATORS',
         'LOCAL_ROW_DENOMINATOR', 'FOOTNOTE_SCOPE_UNRESOLVED', 'WEIGHTED_RESULT', 'ADJUSTED_RESULT',
+        'DENOMINATOR_AMBIGUOUS', 'DENOMINATOR_SCOPE_UNRESOLVED', 'DENOMINATOR_SCOPE_MISMATCH',
+        'DENOMINATOR_CANDIDATE_LIMIT',
         'MISSINGNESS_CHANGES_DENOMINATOR', 'MULTIPLE_RESPONSE', 'CATEGORY_OVERLAP_RELEVANT_TO_RELATION',
         'DENOMINATOR_NOT_EXPLICIT', 'PERCENT_UNIT_NOT_EXPLICIT', 'GROUPED_INTEGER_FORMAT_UNSUPPORTED',
         'DECIMAL_SEPARATOR_UNSUPPORTED', 'MALFORMED_NUMERIC_TOKEN', 'OPERANDS_OUTSIDE_PROPORTION_DOMAIN',
@@ -857,7 +934,7 @@ def make_paper_audit_schema():
         'relation_id': hash_value,
         'relation_type': enum('CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE', 'DIRECT_N_OVER_N_PERCENTAGE'),
         'detector_id': enum('table_percentage_recomputation', 'jats_cell_ratio_percentage_recomputation'),
-        'contract_version': enum('1.2'),
+        'contract_version': enum('1.2', '1.3'),
         'table_key': hash_value,
         'status': enum('NOT_APPLICABLE', 'ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH', 'INCOMPLETE', 'UNSUPPORTED'),
         'primary_skip_reason': {'oneOf': [percentage_reason_code, {'type': 'null'}]},
@@ -867,6 +944,8 @@ def make_paper_audit_schema():
         },
         'source_anchor': structured_anchor,
         'denominator_source_anchor': {'oneOf': [structured_anchor, {'type': 'null'}]},
+        'denominator_scope_resolved': {'type': 'boolean'},
+        'denominator_provenance': denominator_provenance,
         'numerator_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'},
         'denominator_exact': {'type': 'string', 'pattern': '^(?:0|[1-9][0-9]{0,8})$'},
         'reported_percent': {'type': 'string', 'pattern': '^[0-9]{1,3}(?:\\.[0-9]{1,6})?$'},
@@ -943,6 +1022,42 @@ def make_paper_audit_schema():
                     'numerator_exact', 'denominator_exact', 'reported_percent', 'display_precision',
                     'recomputed_at_display_precision', 'finding_emitted',
                 ]},
+            },
+        },
+        {
+            'if': {
+                'properties': {'contract_version': {'const': '1.3'}},
+                'required': ['contract_version'],
+            },
+            'then': {
+                'required': ['denominator_scope_resolved', 'denominator_provenance'],
+                'allOf': [{
+                    'if': {
+                        'properties': {'status': {'enum': ['ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH']}},
+                        'required': ['status'],
+                    },
+                    'then': {
+                        'properties': {
+                            'denominator_scope_resolved': {'const': True},
+                            'denominator_source_anchor': structured_anchor,
+                            'denominator_provenance': {
+                                'properties': {
+                                    'resolution_status': {'const': 'RESOLVED'},
+                                    'selected_denominator': {
+                                        'allOf': [
+                                            denominator_candidate,
+                                            {
+                                                'properties': {'value_exact': small_int_string},
+                                                'required': ['value_exact'],
+                                            },
+                                        ],
+                                    },
+                                },
+                                'required': ['resolution_status', 'selected_denominator'],
+                            },
+                        },
+                    },
+                }],
             },
         },
     ]
@@ -1299,7 +1414,7 @@ def make_paper_audit_schema():
                                 'jats_sample_flow_arithmetic', 'jats_sd_se_n_recomputation',
                                 'prisma_synthesis_flow', 'jats_unadjusted_2x2_odds_ratio',
                                 'simple_rate_recomputation'),
-            'contract_version': enum('1.0', '1.1', '1.2'),
+            'contract_version': enum('1.0', '1.1', '1.2', '1.3'),
             'status': enum('ELIGIBLE', 'UNSUPPORTED', 'INCOMPLETE', 'NOT_APPLICABLE'),
             'source_format': enum('txt', 'md', 'markdown', 'pdf', 'jats_xml'),
             'reasons': arr(text(500), 0, 16),
@@ -1308,7 +1423,7 @@ def make_paper_audit_schema():
         }, required=['detector_id', 'contract_version', 'status', 'source_format', 'reasons', 'checked_operands']), 0, 4000),
         'detector_contracts': arr(obj({
             'detector_id': {'type': 'string', 'maxLength': 100},
-            'version': enum('1.0', '1.1', '1.2'),
+            'version': enum('1.0', '1.1', '1.2', '1.3'),
             'implementation_status': {'type': 'string', 'maxLength': 60},
             'purpose': {'type': 'string', 'maxLength': 100},
             'required_source_structure': arr(text(500), 1, 8),
@@ -1320,7 +1435,7 @@ def make_paper_audit_schema():
             'exclusions': arr(text(500), 0, 16),
             'positive_result_establishes': {'type': 'string', 'maxLength': 1000},
             'positive_result_does_not_establish': {'type': 'string', 'maxLength': 1000},
-            'unsupported_or_incomplete_reasons': arr(text(200), 1, 16),
+            'unsupported_or_incomplete_reasons': arr(text(200), 1, 24),
             'relationship_types': obj({
                 'checked': arr(text(100), 1, 4),
                 'out_of_scope': arr(text(100), 1, 8),

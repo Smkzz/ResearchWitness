@@ -47,49 +47,47 @@ def test_jats_coverage_tracks_tables_operands_and_candidates_separately():
         'parser_status_counts': {'STRUCTURE_RELIABLE': 3},
     }
     detector = coverage['detectors'][0]
-    assert detector['status'] == 'INCOMPLETE'
+    assert detector['status'] == 'ELIGIBLE'
     assert detector['status_counts'] == {
-        'ELIGIBLE': 1,
-        'INCOMPLETE': 1,
+        'ELIGIBLE': 2,
         'NOT_APPLICABLE': 1,
     }
     assert detector['object_counts'] == {
         'unit': 'table',
         'potential': 3,
         'applicable': 2,
-        'applicability_unknown': 1,
-        'eligible': 1,
-        'checked': 1,
-        'skipped': 1,
+        'applicability_unknown': 0,
+        'eligible': 2,
+        'checked': 2,
+        'skipped': 0,
         'candidates': 1,
     }
     assert detector['operand_counts'] == {
         'unit': 'count_percentage_cell',
         'potential': 2,
         'applicable': 2,
-        'eligible': 1,
-        'checked': 1,
-        'skipped': 1,
+        'eligible': 2,
+        'checked': 2,
+        'skipped': 0,
         'candidates': 1,
     }
     assert [item['status'] for item in detector['tables']] == [
-        'ELIGIBLE', 'NOT_APPLICABLE', 'INCOMPLETE',
+        'ELIGIBLE', 'NOT_APPLICABLE', 'ELIGIBLE',
     ]
     assert len({item['table_ref']['element_path'] for item in detector['tables']}) == 3
     assert all(item['table_ref']['source_sha256'] == document.source_sha256
                for item in detector['tables'])
     assert detector['tables'][1]['applicability'] == 'NOT_APPLICABLE'
-    assert detector['tables'][2]['skip_reasons'] == ['LOCAL_ROW_DENOMINATOR']
-    # An incomplete table can have a skipped cell without making the other
-    # checked table or its candidate disappear from coverage accounting.
+    assert detector['tables'][2]['skip_reasons'] == []
+    # The v1.3 row-local denominator is resolved before arithmetic, while the
+    # unrelated non-numeric table remains NOT_APPLICABLE.
     assert detector['tables'][0]['counts']['operands']['candidates'] == 1
     assert detector['percentage_relation_telemetry_complete'] is True
     assert detector['percentage_relation_telemetry']['potential_relations'] == 2
     assert detector['percentage_relation_telemetry']['checked_mismatches'] == 1
-    assert detector['percentage_relation_telemetry']['skipped_relations'] == 1
-    assert detector['percentage_relation_telemetry']['primary_skip_reason_counts'] == {
-        'LOCAL_ROW_DENOMINATOR': 1,
-    }
+    assert detector['percentage_relation_telemetry']['checked_matches'] == 1
+    assert detector['percentage_relation_telemetry']['skipped_relations'] == 0
+    assert detector['percentage_relation_telemetry']['primary_skip_reason_counts'] == {}
 
 
 def test_duplicate_and_missing_table_ids_do_not_collide_in_source_references():

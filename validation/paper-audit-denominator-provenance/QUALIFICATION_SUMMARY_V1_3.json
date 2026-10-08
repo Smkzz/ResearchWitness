@@ -1,0 +1,207 @@
+{
+  "artifact_type": "RESEARCHWITNESS_PERCENTAGE_DENOMINATOR_PROVENANCE_QUALIFICATION_V1_3",
+  "evaluation_use": "POST_HOC_DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "contract_version": "1.3",
+  "reserved_records_included_in_development_replays": false,
+  "wave_3_run": false,
+  "merge_or_release": false,
+  "baseline": {
+    "pr_number": 10,
+    "head_sha": "f2490bd55568915c501b3c81d1ae3d08fda18cad",
+    "tree_sha": "2e38c8485c4cb9915b41318f5e45733d299bda50",
+    "state": "OPEN_DRAFT_UNMERGED_MERGEABLE",
+    "ci_run_id": 37576329966,
+    "ci": "PASS",
+    "codeql_run_id": 37576329974,
+    "codeql": "PASS"
+  },
+  "contract": {
+    "previous_version": "1.2",
+    "current_version": "1.3",
+    "resolver": "source-anchored explicit denominator candidate set with semantic scope, applicability, precedence, and rejected competitors",
+    "precedence": "semantic scope compatibility and specificity first; structural directness breaks remaining ties",
+    "ambiguity": "fail closed as DENOMINATOR_AMBIGUOUS or unresolved scope",
+    "zero_numerator": "denominator provenance must resolve before arithmetic; coincident 0 percent cannot validate a base",
+    "backward_compatibility": "historical v1.2 artifacts remain unchanged and versioned; schema accepts both versions"
+  },
+  "known_failures": {
+    "former_local_denominator_false_candidates": 14,
+    "source_valid_matches_after_v1_3": 10,
+    "fail_closed_missingness_cases": 4,
+    "zero_numerator_wrong_denominator_records": 2,
+    "zero_n_records_select_local_base_and_reject_broad_base": 2,
+    "remaining_known_wrong_denominator_checked_matches": 0,
+    "negative_source_label_false_candidates": 0
+  },
+  "development_positives": {
+    "reports": 33,
+    "repeatable_json": 33,
+    "repeatable_html": 33,
+    "correction_issues_eligible": 3,
+    "correction_issues_detected": 3,
+    "eligible_target_cells": 5,
+    "target_cells_detected": 5,
+    "current_candidates": 21,
+    "candidate_classes": {
+      "KNOWN_CORRECTION_TARGET": 5,
+      "SOURCE_REPRODUCED_UNCORRECTED_ARITHMETIC_DISCREPANCY": 8,
+      "SOURCE_REPRODUCED_VERSION_UNVERIFIED_DISCREPANCY": 8
+    },
+    "arithmetic_valid_candidates": 21,
+    "invalid_or_unresolved_candidates": 0,
+    "candidate_validity": 1.0,
+    "historical_v1_2_slots": {
+      "raw_valid": 17,
+      "raw_total": 19,
+      "raw_rate": 0.8947368421052632,
+      "v1_3_eligible_valid": 17,
+      "v1_3_eligible_total": 17,
+      "scope_ineligible_after_reaudit": 2,
+      "ineligible_reason": "SCOPE_DENOMINATOR_NOT_EXPLICIT"
+    }
+  },
+  "development_negatives": {
+    "source_labelled_correct_relations": 4163,
+    "documents": 61,
+    "tables": 110,
+    "exact_operand_joins": 1128,
+    "exact_operand_join_rate": 0.27095892481479705,
+    "anchor_only_joins": 2276,
+    "unmatched_relations": 759,
+    "source_label_candidate_emissions": 0,
+    "documents_with_false_candidates": 0,
+    "tables_with_false_candidates": 0,
+    "checked_wrong_denominator_relations": 0,
+    "zero_numerator_wrong_denominator_checked_matches": 0,
+    "repeatable_json_reports": 61,
+    "repeatable_html_reports": 61
+  },
+  "telemetry": {
+    "positive_33_report_replay": {
+      "potential": 2069,
+      "eligible": 311,
+      "checked": 311,
+      "matches": 290,
+      "mismatches": 21,
+      "incomplete": 812,
+      "unsupported": 946,
+      "skipped": 1758,
+      "checked_relations_with_full_provenance": 311,
+      "accounting_invariant": true,
+      "primary_skip_reasons": {
+        "ADJUSTED_RESULT": 26,
+        "DECIMAL_SEPARATOR_UNSUPPORTED": 3,
+        "DENOMINATOR_NOT_EXPLICIT": 115,
+        "DENOMINATOR_SCOPE_UNRESOLVED": 5,
+        "FOOTNOTE_SCOPE_UNRESOLVED": 314,
+        "GROUPED_INTEGER_FORMAT_UNSUPPORTED": 30,
+        "MALFORMED_NUMERIC_TOKEN": 94,
+        "MISSINGNESS_CHANGES_DENOMINATOR": 213,
+        "PERCENT_UNIT_NOT_EXPLICIT": 232,
+        "TABLE_STRUCTURE_UNSUPPORTED": 726
+      }
+    },
+    "negative_61_full_report_replay": {
+      "potential": 5037,
+      "eligible": 1230,
+      "checked": 1230,
+      "matches": 1189,
+      "mismatches": 41,
+      "incomplete": 1293,
+      "unsupported": 2514,
+      "accounting_invariant": true,
+      "note": "Whole-report telemetry is broader than the independently source-labelled 4,163-relation negative set."
+    }
+  },
+  "reserve": {
+    "metadata_pairs_reported": 225080,
+    "previous_reserved_count": 22305,
+    "previous_allocation_rule": "separate DOI-pair modulo-10 rule; does not match repository protocol",
+    "canonical_reserved_count_reported_by_custodian": 45211,
+    "canonical_bucket_counts": [
+      45211,
+      44783,
+      45204,
+      44885,
+      44997
+    ],
+    "metadata_inventory_digest_verified": true,
+    "canonical_allocation_ledger_created_and_hash_verified": true,
+    "canonical_order_created_before_any_further_body_access": true,
+    "legacy_metadata_screened_pairs_excluded_from_body_retrieval": 50,
+    "allocation_reconciled_for_future_unopened_screening": true,
+    "source_body_pairs_opened_under_mismatched_allocation": 14,
+    "canonical_v1_3_pairs_screened_after_reconciliation": 2,
+    "positive_eligible_under_canonical_v1_3_reserve_confirmed": 0,
+    "positive_absence_conclusion": false,
+    "positive_target_details_disclosed_to_runner": false,
+    "detector_run_on_any_reserved_positive": false,
+    "reserved_negative_prior_v1_2_subset": {
+      "correct_relations": 1152,
+      "tables": 31,
+      "documents": 16,
+      "cumulative_review_complete": false,
+      "revalidated_under_v1_3": false
+    },
+    "contamination_events": [
+      "Fourteen source-body pairs were opened by the independent custodian under an allocation rule that differed from the repository split; those pairs are excluded from any untouched-positive count.",
+      "Fifty pairs were metadata-screened under the mismatched allocation; exact membership of the 14 body-opened pairs was not retained, so all 50 were excluded from further body retrieval and the untouched-positive count.",
+      "No source identity, target detail, correction value, or detector output was disclosed to the development runner; no reserved positive was passed to detector behavior or used for tuning.",
+      "Canonical positive screening stopped after two pairs because one source was unresolved and the publisher page was inaccessible; automatic review rejected an external metadata fetch that would transmit a custody-held identifier, and no alternate route was used."
+    ],
+    "status": "NOT_ESTABLISHED",
+    "canonical_v1_3_pairs_fully_assessed": 1,
+    "canonical_v1_3_pairs_unresolved_access_limited": 1,
+    "positive_screening_confidence": "LOW",
+    "positive_screening_limitation": "Publisher material inaccessible; automatic review rejected a Crossref metadata fetch that would transmit a custody-held identifier externally; no alternate route used.",
+    "reserved_negative_v1_3_source_only_review": {
+      "pool_complete": false,
+      "available_ledgers_cover_relations": 950,
+      "expected_relations": 1152,
+      "available_ledgers_cover_tables": 20,
+      "expected_relation_bearing_tables": 31,
+      "available_ledgers_cover_documents": 13,
+      "expected_documents": 16,
+      "ledger_labeled_eligible_correct_relations": 554,
+      "independently_validated_v1_3_eligible_correct_relations": 363,
+      "unqualified_due_to_unresolved_row_column_denominator_scope": 191,
+      "validated_tables": 10,
+      "validated_documents": 5,
+      "source_version_integrity": "PASS_FOR_13_AVAILABLE_DOCUMENTS_AND_BOTH_SEALED_RECORDS",
+      "detector_executed": false,
+      "detector_outputs_joined": false,
+      "confidence": "MODERATE_FOR_VALIDATED_COUNT_HIGH_FOR_INTEGRITY_AND_INCOMPLETENESS",
+      "sealed_record_sha256": [
+        "feb3e9862f7cc3ceeb139f77469a26efa28d64d701a5091270e406aced0543e5",
+        "c207fee7d4e349aed1370ba042f19f01fe213f84f2160fe0bb39ba1891234813"
+      ]
+    }
+  },
+  "local_qualification": {
+    "pytest_passed": 593,
+    "denominator_adversarial_scenarios": 30,
+    "development_failure_regression_records": 16,
+    "source_replay_json_html_deterministic": true,
+    "synthetic_conformance": "500/500_PASS",
+    "historical_verifier_fixtures": "3/3_PASS",
+    "schemas_checksums_compile_static_wheel_install_cli": "PASS",
+    "wheel_builds_byte_identical": true,
+    "wheel_sha256": "4a308752049c4006d5acf7127c443c4f097410b8c1f777d58a2a4fdfbee6bd9b"
+  },
+  "remote_qualification": {
+    "new_draft_pr": 11,
+    "url": "https://github.com/Smkzz/ResearchWitness/pull/11",
+    "state": "OPEN_DRAFT_UNMERGED",
+    "base_branch": "codex/paper-audit-percentage-qualification",
+    "base_sha": "f2490bd55568915c501b3c81d1ae3d08fda18cad",
+    "head_branch": "codex/paper-audit-denominator-provenance",
+    "status_observed_on_commit": "465e16d597e6de2f62d1233cc4f1112ccd89beb2",
+    "ci_at_observation": "IN_PROGRESS",
+    "codeql_at_observation": "IN_PROGRESS"
+  },
+  "readiness": {
+    "ready_to_freeze_for_wave_3": false,
+    "blocking_sentence": "No eligible unseen positive is confirmed, and the incomplete v1.3 negative reserve validates only 363 eligible relations across 5 documents, below the frozen 15-document threshold.",
+    "single_next_action": "Complete source-only v1.3 custody screening of both canonical reserve pools through an approved source-access route, then update the readiness table; do not run Wave 3."
+  }
+}

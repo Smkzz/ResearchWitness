@@ -368,10 +368,15 @@ def test_local_row_denominator_is_not_replaced_by_the_column_denominator():
     from researchwitness.table_arithmetic import check_structured_table_percentages
 
     result = check_structured_table_percentages(document)
-    assert result['findings'] == []
-    assert result['tables'][0]['status'] == 'INCOMPLETE'
-    assert 'LOCAL_ROW_DENOMINATOR' in result['tables'][0]['reasons']
-    assert result['relations'][0]['primary_skip_reason'] == 'LOCAL_ROW_DENOMINATOR'
+    assert result['tables'][0]['status'] == 'ELIGIBLE'
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MISMATCH'
+    assert result['relations'][0]['denominator_exact'] == '10'
+    provenance = result['relations'][0]['denominator_provenance']
+    assert provenance['selected_denominator']['source_anchor']['quote'] == 'Event (n=10)'
+    assert any(
+        item['value_exact'] == '20' and item['rejection_reasons'] == ['BROADER_SCOPE_THAN_SELECTED']
+        for item in provenance['rejected_competing_denominators']
+    )
 
 
 def test_generic_n_percent_row_marker_uses_explicit_denominators_for_each_column():
@@ -441,7 +446,7 @@ def test_body_subgroup_denominator_overrides_broader_column_header():
     assert result['relations'][2]['denominator_source_anchor']['quote'] == 'N = 71'
     assert 'tbody[1]/tr[3]/td[1]' in result['relations'][2]['denominator_source_anchor']['element_path']
     assert 'tbody[1]/tr[3]/td[1]' in result['findings'][0]['source_anchors'][0]['element_path']
-    assert 'explicit JATS denominator applicable to this table section' in result['findings'][0]['interpretation']
+    assert 'selected from explicit denominator row bounding this subgroup' in result['findings'][0]['interpretation']
 
 
 def test_body_subgroup_with_missing_column_denominator_does_not_fall_back_to_header():
@@ -459,6 +464,7 @@ def test_body_subgroup_with_missing_column_denominator_does_not_fall_back_to_hea
     assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MATCH'
     assert result['relations'][1]['status'] == 'INCOMPLETE'
     assert result['relations'][1]['primary_skip_reason'] == 'DENOMINATOR_NOT_EXPLICIT'
+    assert result['relations'][1]['denominator_scope_resolved'] is False
     assert result['findings'] == []
 
 
@@ -507,9 +513,9 @@ def test_n_percent_unit_marker_does_not_override_explicit_local_denominator():
 
     result = check_structured_table_percentages(document)
 
-    assert result['findings'] == []
-    assert result['relations'][0]['status'] == 'INCOMPLETE'
-    assert result['relations'][0]['primary_skip_reason'] == 'LOCAL_ROW_DENOMINATOR'
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MISMATCH'
+    assert result['relations'][0]['denominator_exact'] == '10'
+    assert result['relations'][0]['denominator_provenance']['selected_denominator']['provenance_class'] == 'ROW_LOCAL_EXPLICIT'
 
 
 def test_n_percent_unit_marker_does_not_override_row_footnote_scope():
@@ -530,7 +536,7 @@ def test_n_percent_unit_marker_does_not_override_row_footnote_scope():
     assert result['relations'][0]['primary_skip_reason'] == 'FOOTNOTE_SCOPE_UNRESOLVED'
 
 
-def test_generic_n_percent_marker_does_not_override_conflicting_column_headers():
+def test_specific_subgroup_header_denominator_outranks_broader_header():
     document = parse_jats(_source(
         '<table-wrap id="conflicting-header-n-percent"><table><thead>'
         '<tr><th>Outcome</th><th>All patients (N=71)</th></tr>'
@@ -542,12 +548,17 @@ def test_generic_n_percent_marker_does_not_override_conflicting_column_headers()
 
     result = check_structured_table_percentages(document)
 
-    assert result['findings'] == []
-    assert result['tables'][0]['status'] == 'INCOMPLETE'
-    assert result['relations'][0]['primary_skip_reason'] == 'CONFLICTING_HEADER_DENOMINATORS'
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MISMATCH'
+    assert result['relations'][0]['denominator_exact'] == '43'
+    assert result['findings'][0]['denominator_exact'] == '43'
+    assert any(
+        item['value_exact'] == '71'
+        and item['rejection_reasons'] == ['BROADER_SCOPE_THAN_SELECTED']
+        for item in result['relations'][0]['denominator_provenance']['rejected_competing_denominators']
+    )
 
 
-def test_explicit_category_block_with_smaller_complete_case_denominator_is_incomplete():
+def test_category_sum_is_not_selected_as_an_available_case_denominator():
     document = parse_jats(_source(
         '<table-wrap id="available-cases"><caption><title>Patient characteristics</title></caption>'
         '<table><thead><tr><th>Characteristic</th><th>Responded (n=20)</th></tr></thead><tbody>'
@@ -562,7 +573,17 @@ def test_explicit_category_block_with_smaller_complete_case_denominator_is_incom
     result = check_structured_table_percentages(document)
     assert result['findings'] == []
     assert result['tables'][0]['status'] == 'INCOMPLETE'
-    assert 'LOCAL_ROW_DENOMINATOR' in result['tables'][0]['reasons']
+    for item in result['relations']:
+        assert item['status'] == 'INCOMPLETE'
+        assert item['primary_skip_reason'] == 'MISSINGNESS_CHANGES_DENOMINATOR'
+        assert item['denominator_scope_resolved'] is False
+        assert item.get('denominator_exact') is None
+        assert item['denominator_provenance']['selected_denominator'] is None
+        assert any(
+            candidate['value_exact'] == '20'
+            and candidate['rejection_reasons'] == ['MISSINGNESS_CHANGES_DENOMINATOR']
+            for candidate in item['denominator_provenance']['rejected_competing_denominators']
+        )
 
 
 @pytest.mark.parametrize(('value', 'reason'), [
@@ -775,8 +796,8 @@ def test_contract_registry_covers_every_reported_detector():
     assert 'PDF table layout' in registry[
         'table_percentage_recomputation'
     ]['exclusions']
-    assert registry['table_percentage_recomputation']['version'] == '1.2'
-    assert registry['jats_cell_ratio_percentage_recomputation']['version'] == '1.2'
+    assert registry['table_percentage_recomputation']['version'] == '1.3'
+    assert registry['jats_cell_ratio_percentage_recomputation']['version'] == '1.3'
     assert registry['table_percentage_recomputation']['relationship_types'] == {
         'checked': ['CELL_COUNT_OVER_DENOMINATOR_PERCENTAGE'],
         'out_of_scope': ['CATEGORY_TOTAL', 'CATEGORY_PARTITION', 'PERCENTAGE_COMPLEMENT', 'PERCENTAGE_SUM'],
@@ -807,6 +828,21 @@ def test_percentage_relation_schema_rejects_contradictory_skip_states(tmp_path):
     bad_relation['status'] = 'NOT_APPLICABLE'
     bad_relation['primary_skip_reason'] = 'GROUPED_INTEGER_FORMAT_UNSUPPORTED'
     assert list(Draft202012Validator(SCHEMA).iter_errors(bad_not_applicable))
+
+    checked_tmp = tmp_path / 'checked-source'
+    checked_tmp.mkdir()
+    _, checked_report, _ = _run_jats(checked_tmp, _simple_table())
+    bad_v13_resolution = json.loads(json.dumps(checked_report))
+    checked = bad_v13_resolution['arithmetic_screens']['structured_table_percentages']['relations'][0]
+    assert checked['contract_version'] == '1.3'
+    assert checked['status'] == 'ELIGIBLE_CHECKED_MISMATCH'
+    checked['denominator_provenance']['selected_denominator'] = None
+    assert list(Draft202012Validator(SCHEMA).iter_errors(bad_v13_resolution))
+
+    bad_v13_scope = json.loads(json.dumps(checked_report))
+    checked = bad_v13_scope['arithmetic_screens']['structured_table_percentages']['relations'][0]
+    checked['denominator_scope_resolved'] = False
+    assert list(Draft202012Validator(SCHEMA).iter_errors(bad_v13_scope))
 
 
 @pytest.mark.parametrize(('value', 'expected'), [

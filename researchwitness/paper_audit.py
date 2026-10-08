@@ -1321,6 +1321,7 @@ def _html_report(report: dict[str, Any]) -> str:
     candidates = []
     for anomaly in report['candidate_anomalies']:
         assertions = []
+        denominator_details = ''
         for anchor in anomaly['source_anchors']:
             role = anchor.get('role') if isinstance(anchor, dict) else None
             if isinstance(anchor, dict) and 'source_anchor' in anchor:
@@ -1372,10 +1373,36 @@ def _html_report(report: dict[str, Any]) -> str:
         else:
             title = 'A numeric passage needs review'
             summary = anomaly.get('interpretation', 'A supported screen found a numeric discrepancy candidate.')
+        provenance = anomaly.get('denominator_provenance')
+        if isinstance(provenance, dict):
+            selected = provenance.get('selected_denominator')
+            provenance_rows = []
+            if isinstance(selected, dict):
+                selected_anchor = selected.get('source_anchor', {})
+                provenance_rows.append(
+                    '<li><strong>Selected denominator:</strong> <code>'
+                    + escape(str(selected.get('value_exact') or 'unresolved'))
+                    + '</code> — ' + escape(selected.get('structural_source', 'explicit source'))
+                    + (': <code>' + escape(selected_anchor.get('quote', '')) + '</code>'
+                       if selected_anchor.get('quote') else '')
+                    + '</li>'
+                )
+            for competing in provenance.get('rejected_competing_denominators', [])[:4]:
+                anchor = competing.get('source_anchor', {})
+                reasons = ', '.join(competing.get('rejection_reasons', [])) or 'lower semantic scope'
+                provenance_rows.append(
+                    '<li><strong>Competing denominator rejected:</strong> <code>'
+                    + escape(str(competing.get('value_exact') or competing.get('raw_value') or 'unknown'))
+                    + '</code> — ' + escape(reasons)
+                    + (': <code>' + escape(anchor.get('quote', '')) + '</code>' if anchor.get('quote') else '')
+                    + '</li>'
+                )
+            if provenance_rows:
+                denominator_details = '<p><strong>Denominator provenance</strong></p><ul>' + ''.join(provenance_rows) + '</ul>'
         candidates.append(
             '<article><h3>' + escape(title) + '</h3><p><strong>Status:</strong> Candidate anomaly · requires review.</p><p>'
-            + escape(summary) +
-            ' This is a review candidate; the paper may give a different row denominator or an additional flow step.</p>'
+            + escape(summary) + '</p>' + denominator_details +
+            '<p>This is a review candidate; the paper may give a different row denominator or an additional flow step.</p>'
             '<p>ResearchWitness has not determined whether this affects the paper\'s conclusions.</p>'
             '<ul>' + ''.join(assertions) + '</ul><p>' + escape(anomaly['required_review']) + '</p></article>'
         )
@@ -1385,6 +1412,44 @@ def _html_report(report: dict[str, Any]) -> str:
         candidate_html = '<p>No candidate was found by the supported numeric screens.</p>'
     else:
         candidate_html = '<p>No candidate was identified, but extraction or scan coverage was incomplete.</p>'
+    skipped_percentage_relations = []
+    arithmetic_screens = report.get('arithmetic_screens', {})
+    for detector_key in ('structured_table_percentages', 'cell_ratio_percentages'):
+        screen = arithmetic_screens.get(detector_key, {})
+        for relation in screen.get('relations', []):
+            if relation.get('status') not in ('INCOMPLETE', 'UNSUPPORTED'):
+                continue
+            provenance = relation.get('denominator_provenance', {})
+            if relation.get('denominator_scope_resolved') is False:
+                explanation = 'Check not performed because denominator scope was not resolved.'
+            else:
+                explanation = 'Check not performed because this relationship is outside the supported scope.'
+            reason = relation.get('primary_skip_reason')
+            if reason:
+                explanation += ' Reason: ' + reason + '.'
+            competitors = provenance.get('rejected_competing_denominators', [])
+            if reason == 'DENOMINATOR_AMBIGUOUS' and competitors:
+                examples = [
+                    str(item.get('value_exact') or item.get('raw_value') or 'unknown')
+                    for item in competitors[:3]
+                ]
+                explanation += ' Competing explicit denominators: ' + ', '.join(examples) + '.'
+            anchor = relation.get('source_anchor', {})
+            location = anchor.get('element_path', '')
+            quote = anchor.get('quote', '')
+            skipped_percentage_relations.append(
+                '<li><strong>' + escape(location) + '</strong>'
+                + (': <code>' + escape(quote) + '</code>' if quote else '')
+                + ' — ' + escape(explanation) + '</li>'
+            )
+            if len(skipped_percentage_relations) >= 64:
+                break
+        if len(skipped_percentage_relations) >= 64:
+            break
+    skipped_percentage_html = (
+        '<ul>' + ''.join(skipped_percentage_relations) + '</ul>'
+        if skipped_percentage_relations else '<p>No percentage relations were skipped.</p>'
+    )
     scope_items = []
     for item in report['possible_scope_differences']:
         anchor_items = []
@@ -1488,6 +1553,7 @@ article{{border-top:1px solid #aaa;padding:1rem 0}}blockquote,code{{background:#
   if table_checking_incomplete else ''}
 <ul>{eligibility_items}</ul>
 <h2>Review candidates</h2>{candidate_html}
+<h2>Percentage checks not performed</h2>{skipped_percentage_html}
 <h2>Flow questions left unresolved</h2>{'<ul>' + flow_items + '</ul>' if flow_items else '<p>None recorded.</p>'}
 <h2>Possible scope or denominator differences</h2>{''.join(scope_items) if scope_items else '<p>None recorded.</p>'}
 <h2>Extraction warnings</h2>{'<ul>' + warnings + '</ul>' if warnings else '<p>None recorded.</p>'}

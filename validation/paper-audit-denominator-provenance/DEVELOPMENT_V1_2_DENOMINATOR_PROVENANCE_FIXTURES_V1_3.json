@@ -1,0 +1,2593 @@
+{
+  "artifact_type": "RESEARCHWITNESS_DEVELOPMENT_V1_2_DENOMINATOR_PROVENANCE_FIXTURES",
+  "record_version": 1,
+  "status": "SOURCE_ANCHORED_RECONSTRUCTION_COMPLETE",
+  "evaluation_use": "DEVELOPMENT_ONLY_NOT_HOLDOUT",
+  "contract_version": "1.2",
+  "reserved_records_included": false,
+  "provenance": {
+    "development_source_manifest_path": "validation/paper-audit-percentage-qualification/DEVELOPMENT_NEGATIVE_SOURCE_MANIFEST_V1_2.json",
+    "development_source_manifest_sha256": "76114422e36c3891700fbbdae2b23d20c3fb1be6bd964850f1c3eedb2145a6a6",
+    "source_manifest_relation_count": 4163,
+    "source_manifest_document_count": 61,
+    "source_manifest_reserved_records_included": false,
+    "qualification_plan_path": "validation/paper-audit-denominator-provenance/QUALIFICATION_PLAN_V1_3.md",
+    "qualification_plan_sha256": "46ea89db7155675d5b0140acbd2430746f2429dd523dc77cf76d08ae1e9a05fb",
+    "v1_2_detector_revision": "f2490bd55568915c501b3c81d1ae3d08fda18cad",
+    "reconstruction_checkout_revision": "7bed2bb6deb4c2413bd7f4f0e13c75251be6c25d",
+    "source_reports": {
+      "PMC12444187": {
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "repeat_report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table"
+      },
+      "PMC12699583": {
+        "path": "/tmp/rw-v12-expansion-development-batch1/PMC12699583.xml",
+        "sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "report_json_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "repeat_report_json_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "table_id": "T2",
+        "table_path": "/article/body/sec[3]/sec/table-wrap/table"
+      }
+    },
+    "report_policy": "Each source was hash-verified against the DEVELOPMENT source manifest before parsing. Reports were generated into ephemeral temporary directories and byte-identical on repeat replay; report JSON hashes are recorded and the generated files were not retained.",
+    "join_policy": "Source-first locators were paired to report relations using the existing v1.2 DEVELOPMENT join rule; source labels remain authoritative.",
+    "v1_3_negative_replay_artifact_path": "validation/paper-audit-denominator-provenance/DEVELOPMENT_NEGATIVE_REPLAY_V1_3.json",
+    "v1_3_negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b"
+  },
+  "summary": {
+    "denominator_scope_false_candidates": 14,
+    "zero_numerator_wrong_denominator_matches": 2,
+    "distinct_source_documents": 2,
+    "source_valid_false_candidate_expected_outcome": "No candidate after selecting and recording the local denominator; fail closed if v1.3 cannot establish its provenance.",
+    "zero_numerator_expected_outcome": "Identify denominator-selection failure. Select the source-local denominator with provenance before arithmetic, or fail closed; never validate solely because 0% coincides."
+  },
+  "fixtures": [
+    {
+      "fixture_id": "development-denominator-provenance-01",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[2]",
+        "row_identity": "First",
+        "numerator": "4",
+        "correct_local_denominator": "6",
+        "reported_percent": "67",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[16]/td[2]",
+          "end_byte": null,
+          "quote": "4 (67%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "5542c129adc8a34aa4c1e161737c3feba75e696670c87979ba221aeb21e7d5d5",
+        "candidate_id": "structured-table-percentage-0002",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "4",
+        "parsed_denominator": "30",
+        "reported_percent": "67",
+        "recomputed_at_display_precision": "13",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "30",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[2]",
+          "end_byte": null,
+          "quote": "Placebo N = 30",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "6",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[2]",
+            "quote": "6 (20%)",
+            "meaning": "Placebo Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 6; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "6",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[2]",
+          "quote": "6 (20%)",
+          "meaning": "Placebo Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[2]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "d160057ce5010746d2dc1e852c0058d8f9f6773b71365624110e611b00ef60c3",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "4",
+          "denominator_exact": "6",
+          "reported_percent": "67",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "6",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[2]",
+            "end_byte": null,
+            "quote": "6 (20%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "30",
+            "raw_value": "30",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[2]",
+              "end_byte": null,
+              "quote": "Placebo N = 30",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-02",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[4]",
+        "row_identity": "First",
+        "numerator": "3",
+        "correct_local_denominator": "3",
+        "reported_percent": "100",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[16]/td[4]",
+          "end_byte": null,
+          "quote": "3 (100%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "a16331cb6d8d89f07cd7bcde5adbed9bdc84eba39ac2f0922d0fa5dd36a7fabf",
+        "candidate_id": "structured-table-percentage-0003",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "3",
+        "parsed_denominator": "5",
+        "reported_percent": "100",
+        "recomputed_at_display_precision": "60",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "5",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+          "end_byte": null,
+          "quote": "Lower dose N = 5",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "3",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[4]",
+            "quote": "3 (60%)",
+            "meaning": "Lower dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 3; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "3",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[4]",
+          "quote": "3 (60%)",
+          "meaning": "Lower dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[4]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "dd06126806238a009cd161fbfd13683e3b09df1dff8bba3721c529179b78774c",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "3",
+          "denominator_exact": "3",
+          "reported_percent": "100",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "3",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[4]",
+            "end_byte": null,
+            "quote": "3 (60%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "5",
+            "raw_value": "5",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+              "end_byte": null,
+              "quote": "Lower dose N = 5",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-03",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[6]",
+        "row_identity": "First",
+        "numerator": "2",
+        "correct_local_denominator": "10",
+        "reported_percent": "20",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[16]/td[6]",
+          "end_byte": null,
+          "quote": "2 (20%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "ebfda8f98a48bdfc7398be3808bf42526dde53ce37fec292736b54643cbf5e53",
+        "candidate_id": "structured-table-percentage-0004",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "2",
+        "parsed_denominator": "27",
+        "reported_percent": "20",
+        "recomputed_at_display_precision": "7",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "27",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]",
+          "end_byte": null,
+          "quote": "Full dose N = 27",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "10",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[6]",
+            "quote": "10 (37%)",
+            "meaning": "Full dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 10; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "10",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[6]",
+          "quote": "10 (37%)",
+          "meaning": "Full dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[6]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "a2532b5ff64d301bfbebd9a9818f43133940a8deb4b575388e1d3c64ddebf653",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "2",
+          "denominator_exact": "10",
+          "reported_percent": "20",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "10",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[6]",
+            "end_byte": null,
+            "quote": "10 (37%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "27",
+            "raw_value": "27",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]",
+              "end_byte": null,
+              "quote": "Full dose N = 27",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-04",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[8]",
+        "row_identity": "First",
+        "numerator": "9",
+        "correct_local_denominator": "19",
+        "reported_percent": "47",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[16]/td[8]",
+          "end_byte": null,
+          "quote": "9 (47%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "9c353cf92e41a252994cbc55e296d210bebf030aa3b967e44bfac8f875ff5bb1",
+        "candidate_id": "structured-table-percentage-0005",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "9",
+        "parsed_denominator": "62",
+        "reported_percent": "47",
+        "recomputed_at_display_precision": "15",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "62",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[5]",
+          "end_byte": null,
+          "quote": "Overall N = 62",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "19",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[8]",
+            "quote": "19 (31%)",
+            "meaning": "Overall Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 19; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "19",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[8]",
+          "quote": "19 (31%)",
+          "meaning": "Overall Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[16]/td[8]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "0d2c4e686b4a50277ab6124056b69ac43bbc5ebf385eec7c86aa3f7356d6178b",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "9",
+          "denominator_exact": "19",
+          "reported_percent": "47",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "19",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[8]",
+            "end_byte": null,
+            "quote": "19 (31%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "62",
+            "raw_value": "62",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[5]",
+              "end_byte": null,
+              "quote": "Overall N = 62",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-05",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[2]",
+        "row_identity": "Second",
+        "numerator": "1",
+        "correct_local_denominator": "6",
+        "reported_percent": "17",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[17]/td[2]",
+          "end_byte": null,
+          "quote": "1 (17%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "92553c0bf624154fbf6095b098acacdc4af52d3adc79ed68d7db1428389008f6",
+        "candidate_id": "structured-table-percentage-0006",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "1",
+        "parsed_denominator": "30",
+        "reported_percent": "17",
+        "recomputed_at_display_precision": "3",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "30",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[2]",
+          "end_byte": null,
+          "quote": "Placebo N = 30",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "6",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[2]",
+            "quote": "6 (20%)",
+            "meaning": "Placebo Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 6; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "6",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[2]",
+          "quote": "6 (20%)",
+          "meaning": "Placebo Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[2]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "137b8408996f9c5fbae52fcae1051003f1db3f59957c25cecd3dcec74c933099",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "1",
+          "denominator_exact": "6",
+          "reported_percent": "17",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "6",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[2]",
+            "end_byte": null,
+            "quote": "6 (20%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "30",
+            "raw_value": "30",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[2]",
+              "end_byte": null,
+              "quote": "Placebo N = 30",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-06",
+      "case_type": "ZERO_NUMERATOR_WRONG_DENOMINATOR_MATCH",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[4]",
+        "row_identity": "Second",
+        "numerator": "0",
+        "correct_local_denominator": "3",
+        "reported_percent": "0",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[17]/td[4]",
+          "end_byte": null,
+          "quote": "0 (0%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "a8931bed3d7ec7d1d37a9a62c2f2fbaeae85c02abea0f9cf013c8c8f950aab69",
+        "candidate_id": null,
+        "candidate_emitted": false,
+        "status": "ELIGIBLE_CHECKED_MATCH",
+        "parsed_numerator": "0",
+        "parsed_denominator": "5",
+        "reported_percent": "0",
+        "recomputed_at_display_precision": "0",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "5",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+          "end_byte": null,
+          "quote": "Lower dose N = 5",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": null
+      },
+      "correct_local_denominator_evidence": {
+        "value": "3",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[4]",
+            "quote": "3 (60%)",
+            "meaning": "Lower dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 3; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "ELIGIBLE_CHECKED_MATCH_AFTER_LOCAL_DENOMINATOR_RESOLUTION",
+        "selected_denominator": "3",
+        "required_provenance_anchor_quote": "3 (60%)",
+        "rejected_broad_denominator": "5",
+        "rejected_broad_denominator_reason": "BROADER_SCOPE_THAN_SELECTED",
+        "candidate_emitted": false,
+        "zero_arithmetic_coincidence_validated_wrong_denominator": false,
+        "criterion": 2
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[4]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "173027f72bca04ca6715cd8ec7b5cb8d7924a74d5ffb21b6f02477df8af20c3d",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "0",
+          "denominator_exact": "3",
+          "reported_percent": "0",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "3",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[4]",
+            "end_byte": null,
+            "quote": "3 (60%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "5",
+            "raw_value": "5",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+              "end_byte": null,
+              "quote": "Lower dose N = 5",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-07",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[6]",
+        "row_identity": "Second",
+        "numerator": "6",
+        "correct_local_denominator": "10",
+        "reported_percent": "60",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[17]/td[6]",
+          "end_byte": null,
+          "quote": "6 (60%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "eed641724bfa374569b349a47178ad0beb97e5feefcdfeddf38b2844e1ad40b7",
+        "candidate_id": "structured-table-percentage-0007",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "6",
+        "parsed_denominator": "27",
+        "reported_percent": "60",
+        "recomputed_at_display_precision": "22",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "27",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]",
+          "end_byte": null,
+          "quote": "Full dose N = 27",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "10",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[6]",
+            "quote": "10 (37%)",
+            "meaning": "Full dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 10; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "10",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[6]",
+          "quote": "10 (37%)",
+          "meaning": "Full dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[6]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "22233ecf46b39042c480af2342747bbc132d2f5a0b4d23406388b03701f1274f",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "6",
+          "denominator_exact": "10",
+          "reported_percent": "60",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "10",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[6]",
+            "end_byte": null,
+            "quote": "10 (37%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "27",
+            "raw_value": "27",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]",
+              "end_byte": null,
+              "quote": "Full dose N = 27",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-08",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[8]",
+        "row_identity": "Second",
+        "numerator": "7",
+        "correct_local_denominator": "19",
+        "reported_percent": "37",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[17]/td[8]",
+          "end_byte": null,
+          "quote": "7 (37%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "59656d79cf26f476296cf665023af94a4a40ff5c37729aa7ac9df5a253616c7b",
+        "candidate_id": "structured-table-percentage-0008",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "7",
+        "parsed_denominator": "62",
+        "reported_percent": "37",
+        "recomputed_at_display_precision": "11",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "62",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[5]",
+          "end_byte": null,
+          "quote": "Overall N = 62",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "19",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[8]",
+            "quote": "19 (31%)",
+            "meaning": "Overall Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 19; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "19",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[8]",
+          "quote": "19 (31%)",
+          "meaning": "Overall Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[17]/td[8]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "5d2b7ef0a1164675ae27188c57339ab59ab09b3529c9d32265ad309f417da07c",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "7",
+          "denominator_exact": "19",
+          "reported_percent": "37",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "19",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[8]",
+            "end_byte": null,
+            "quote": "19 (31%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "62",
+            "raw_value": "62",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[5]",
+              "end_byte": null,
+              "quote": "Overall N = 62",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-09",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[2]",
+        "row_identity": "Third",
+        "numerator": "1",
+        "correct_local_denominator": "6",
+        "reported_percent": "17",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[18]/td[2]",
+          "end_byte": null,
+          "quote": "1 (17%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "589aa63677cba375fc0e71ab78c7545539e6a835e90dc8ad7e86ba533a7e8be1",
+        "candidate_id": "structured-table-percentage-0009",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "1",
+        "parsed_denominator": "30",
+        "reported_percent": "17",
+        "recomputed_at_display_precision": "3",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "30",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[2]",
+          "end_byte": null,
+          "quote": "Placebo N = 30",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "6",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[2]",
+            "quote": "6 (20%)",
+            "meaning": "Placebo Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 6; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "6",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[2]",
+          "quote": "6 (20%)",
+          "meaning": "Placebo Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[2]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "b6933a7c4bfaa792140c65a58916537bc92f2e1afd50d55ff61794707b5c330f",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "1",
+          "denominator_exact": "6",
+          "reported_percent": "17",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "6",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[2]",
+            "end_byte": null,
+            "quote": "6 (20%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "30",
+            "raw_value": "30",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[2]",
+              "end_byte": null,
+              "quote": "Placebo N = 30",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-10",
+      "case_type": "ZERO_NUMERATOR_WRONG_DENOMINATOR_MATCH",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[4]",
+        "row_identity": "Third",
+        "numerator": "0",
+        "correct_local_denominator": "3",
+        "reported_percent": "0",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[18]/td[4]",
+          "end_byte": null,
+          "quote": "0 (0%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "310be1aa9c0c012f73c7dca543fbe05425e6b573d0d5ae88b0e0f8feeb710630",
+        "candidate_id": null,
+        "candidate_emitted": false,
+        "status": "ELIGIBLE_CHECKED_MATCH",
+        "parsed_numerator": "0",
+        "parsed_denominator": "5",
+        "reported_percent": "0",
+        "recomputed_at_display_precision": "0",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "5",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+          "end_byte": null,
+          "quote": "Lower dose N = 5",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": null
+      },
+      "correct_local_denominator_evidence": {
+        "value": "3",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[4]",
+            "quote": "3 (60%)",
+            "meaning": "Lower dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 3; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "ELIGIBLE_CHECKED_MATCH_AFTER_LOCAL_DENOMINATOR_RESOLUTION",
+        "selected_denominator": "3",
+        "required_provenance_anchor_quote": "3 (60%)",
+        "rejected_broad_denominator": "5",
+        "rejected_broad_denominator_reason": "BROADER_SCOPE_THAN_SELECTED",
+        "candidate_emitted": false,
+        "zero_arithmetic_coincidence_validated_wrong_denominator": false,
+        "criterion": 2
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[4]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "b4861b6091304beafc486596fb186c35a233d85a28d6319ddfa8597c232b2ba2",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "0",
+          "denominator_exact": "3",
+          "reported_percent": "0",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "3",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[4]",
+            "end_byte": null,
+            "quote": "3 (60%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "5",
+            "raw_value": "5",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+              "end_byte": null,
+              "quote": "Lower dose N = 5",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-11",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[6]",
+        "row_identity": "Third",
+        "numerator": "2",
+        "correct_local_denominator": "10",
+        "reported_percent": "20",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[18]/td[6]",
+          "end_byte": null,
+          "quote": "2 (20%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "73a7db33c71643a097887799c2cef9d4d03a34c392b4f5485659bac1aab92efa",
+        "candidate_id": "structured-table-percentage-0010",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "2",
+        "parsed_denominator": "27",
+        "reported_percent": "20",
+        "recomputed_at_display_precision": "7",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "27",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]",
+          "end_byte": null,
+          "quote": "Full dose N = 27",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "10",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[6]",
+            "quote": "10 (37%)",
+            "meaning": "Full dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 10; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "10",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[6]",
+          "quote": "10 (37%)",
+          "meaning": "Full dose Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[6]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "33c406140ab04c2bed8dc721bc5191f829642325ba25338435164364d741c2e8",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "2",
+          "denominator_exact": "10",
+          "reported_percent": "20",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "10",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[6]",
+            "end_byte": null,
+            "quote": "10 (37%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "27",
+            "raw_value": "27",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[4]",
+              "end_byte": null,
+              "quote": "Full dose N = 27",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-12",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12444187",
+        "path": "/tmp/rw-v12-expansion-development-batch2/PMC12444187.xml",
+        "sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "report_json_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_repeat_sha256": "7c7db32c4a3dac0f217304b7ed4c7a7921723a4f2601810b0cb25e21091dffd5",
+        "report_json_repeatable": true,
+        "report_source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "tbl2",
+        "table_path": "/article/body/sec[3]/sec[2]/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+          "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[8]",
+        "row_identity": "Third",
+        "numerator": "3",
+        "correct_local_denominator": "19",
+        "reported_percent": "16",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[18]/td[8]",
+          "end_byte": null,
+          "quote": "3 (16%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "a2c509cd24107929e551ad2fc16ed4ca5c7a978a88b3ca8a0371ac209caa1566",
+        "candidate_id": "structured-table-percentage-0011",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "3",
+        "parsed_denominator": "62",
+        "reported_percent": "16",
+        "recomputed_at_display_precision": "5",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "62",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[5]",
+          "end_byte": null,
+          "quote": "Overall N = 62",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "19",
+        "directly_printed_as_denominator_label": true,
+        "anchors": [
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[8]",
+            "quote": "19 (31%)",
+            "meaning": "Overall Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[15]/td[1]",
+            "quote": "Diary AE vaccination"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/caption/p",
+            "quote": "Summary of unsolicited adverse events by study arm, placebo, lower dose, and full dose."
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table-wrap-foot/fn/p",
+            "quote": "N = Number of Adverse Events; ‘Unsure’ = Symptoms may or may not be related to COVID-19 disease; AE = Adverse Events; SAE = Serious Adverse Events."
+          }
+        ],
+        "derivation": "The same-arm Diary AE parent count is 19; First/Second/Third rows are nested below the Diary AE vaccination label.",
+        "scope_interpretation": "Rows First/Second/Third are nested under Diary AE vaccination. For each arm, the local denominator is the same-arm count in the Diary AE parent row. The table footnote defines header N as number of adverse events, so the all-arm/event header is broader than the nested Diary AE vaccination subgroup."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "NO_FALSE_CANDIDATE_SOURCE_VALID_MATCH",
+        "correct_selected_denominator": "19",
+        "required_provenance_anchor": {
+          "element_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[14]/td[8]",
+          "quote": "19 (31%)",
+          "meaning": "Overall Diary AE parent-row count; local denominator for its nested Diary AE vaccination rows.",
+          "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45"
+        },
+        "fallback": "Fail closed if v1.3 cannot establish the local relationship.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12444187",
+        "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+        "source_cell_path": "/article/body/sec[3]/sec[2]/table-wrap/table/tbody/tr[18]/td[8]",
+        "join_level": "EXACT_OPERANDS",
+        "report_relation_id": "87716563bfc7fcc83a7ad77b940b948a581e250d2c3e7f2adf96695253595489",
+        "report_relation_status": "ELIGIBLE_CHECKED_MATCH",
+        "primary_skip_reason": null,
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": "3",
+          "denominator_exact": "19",
+          "reported_percent": "16",
+          "display_precision": 0
+        },
+        "denominator_scope_resolved": true,
+        "denominator_resolution_status": "RESOLVED",
+        "denominator_resolution_reason": "UNIQUE_MOST_SPECIFIC_EXPLICIT_SCOPE",
+        "selected_denominator": {
+          "value_exact": "19",
+          "provenance_class": "SUBGROUP_ROW_EXPLICIT",
+          "source_anchor": {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/tbody[1]/tr[14]/td[8]",
+            "end_byte": null,
+            "quote": "19 (31%)",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+            "start_byte": null
+          }
+        },
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "62",
+            "raw_value": "62",
+            "provenance_class": "HEADER_GROUP_EXPLICIT",
+            "rejection_reasons": [
+              "BROADER_SCOPE_THAN_SELECTED"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[2]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[5]",
+              "end_byte": null,
+              "quote": "Overall N = 62",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "ff23188a4281faa25c43a3304fb0ad047a701fa74d36ccec4cac45f15eaccb45",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-13",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12699583",
+        "path": "/tmp/rw-v12-expansion-development-batch1/PMC12699583.xml",
+        "sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "report_json_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_repeat_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_json_repeatable": true,
+        "report_source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "T2",
+        "table_path": "/article/body/sec[3]/sec/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec/table-wrap/caption",
+          "quote": "Differences in distributions between directly observed data and data extracted from medical records, for selected variables collected through observation or interview in a convenience sample of patients"
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[4]/td[3]",
+        "row_identity": "Female",
+        "numerator": "6",
+        "correct_local_denominator": "33",
+        "reported_percent": "18",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/tbody[1]/tr[4]/td[3]",
+          "end_byte": null,
+          "quote": "6 (18%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "721c8ca48ba899b05a3b438e0412507ac028e495341fe892ae6a50e39b47be53",
+        "candidate_id": "structured-table-percentage-0001",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "6",
+        "parsed_denominator": "55",
+        "reported_percent": "18",
+        "recomputed_at_display_precision": "11",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "55",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+          "end_byte": null,
+          "quote": "Medical records N=55",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "33",
+        "directly_printed_as_denominator_label": false,
+        "anchors": [
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+            "end_byte": null,
+            "quote": "Medical records N=55",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+            "start_byte": null
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[6]/td[3]",
+            "quote": "22",
+            "meaning": "Missing count for Sex, n (%) in the Medical records column.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[3]/td[1]",
+            "quote": "Sex, n (%)",
+            "meaning": "Variable scope heading.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[4]/td[3]",
+            "quote": "33 (75%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[5]/td[3]",
+            "quote": "11 (25%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          }
+        ],
+        "derivation": "Medical-record N=55 minus 22 missing sex records = 33 observed records. The displayed category counts independently sum to 6 + 27 = 33.",
+        "scope_interpretation": "The medical-record percentage denominator is variable-specific complete cases. The Missing row states 22 missing sex values and 23 missing injury-type values; N=55 is the full sample, not the non-missing denominator.",
+        "eligible_as_v1_3_denominator_candidate": false,
+        "v1_3_scope_decision": "Available-case base is reconstructed from missing-count/category evidence and is not an explicit denominator candidate under v1.3."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "INCOMPLETE_MISSINGNESS_CHANGES_DENOMINATOR_NO_CANDIDATE",
+        "selected_denominator": null,
+        "required_rejected_header_denominator": {
+          "value": "55",
+          "rejection_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+          "source_anchor_quote": "Medical records N=55"
+        },
+        "fallback": "Do not reconstruct or select an available-case base from missing counts or category totals; do not perform arithmetic.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12699583",
+        "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "source_cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[4]/td[3]",
+        "join_level": "SOURCE_ANCHOR_ONLY",
+        "report_relation_id": "3771073815876d56e97a4da9760f28bddb4af300eccfbf314cba4627ad83e610",
+        "report_relation_status": "INCOMPLETE",
+        "primary_skip_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": null,
+          "denominator_exact": null,
+          "reported_percent": null,
+          "display_precision": null
+        },
+        "denominator_scope_resolved": false,
+        "denominator_resolution_status": "UNRESOLVED",
+        "denominator_resolution_reason": "DENOMINATOR_SCOPE_UNRESOLVED",
+        "selected_denominator": null,
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "55",
+            "raw_value": null,
+            "provenance_class": "COLUMN_HEADER_EXPLICIT",
+            "rejection_reasons": [
+              "MISSINGNESS_CHANGES_DENOMINATOR"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+              "end_byte": null,
+              "quote": "Medical records N=55",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-14",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12699583",
+        "path": "/tmp/rw-v12-expansion-development-batch1/PMC12699583.xml",
+        "sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "report_json_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_repeat_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_json_repeatable": true,
+        "report_source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "T2",
+        "table_path": "/article/body/sec[3]/sec/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec/table-wrap/caption",
+          "quote": "Differences in distributions between directly observed data and data extracted from medical records, for selected variables collected through observation or interview in a convenience sample of patients"
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[5]/td[3]",
+        "row_identity": "Male",
+        "numerator": "27",
+        "correct_local_denominator": "33",
+        "reported_percent": "82",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/tbody[1]/tr[5]/td[3]",
+          "end_byte": null,
+          "quote": "27 (82%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "f958118d58da5a6e04d0e00a28b314d37ffa439c7ea963b5d976dc7f7aaa839c",
+        "candidate_id": "structured-table-percentage-0002",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "27",
+        "parsed_denominator": "55",
+        "reported_percent": "82",
+        "recomputed_at_display_precision": "49",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "55",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+          "end_byte": null,
+          "quote": "Medical records N=55",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "33",
+        "directly_printed_as_denominator_label": false,
+        "anchors": [
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+            "end_byte": null,
+            "quote": "Medical records N=55",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+            "start_byte": null
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[6]/td[3]",
+            "quote": "22",
+            "meaning": "Missing count for Sex, n (%) in the Medical records column.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[3]/td[1]",
+            "quote": "Sex, n (%)",
+            "meaning": "Variable scope heading.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[4]/td[3]",
+            "quote": "33 (75%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[5]/td[3]",
+            "quote": "11 (25%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          }
+        ],
+        "derivation": "Medical-record N=55 minus 22 missing sex records = 33 observed records. The displayed category counts independently sum to 6 + 27 = 33.",
+        "scope_interpretation": "The medical-record percentage denominator is variable-specific complete cases. The Missing row states 22 missing sex values and 23 missing injury-type values; N=55 is the full sample, not the non-missing denominator.",
+        "eligible_as_v1_3_denominator_candidate": false,
+        "v1_3_scope_decision": "Available-case base is reconstructed from missing-count/category evidence and is not an explicit denominator candidate under v1.3."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "INCOMPLETE_MISSINGNESS_CHANGES_DENOMINATOR_NO_CANDIDATE",
+        "selected_denominator": null,
+        "required_rejected_header_denominator": {
+          "value": "55",
+          "rejection_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+          "source_anchor_quote": "Medical records N=55"
+        },
+        "fallback": "Do not reconstruct or select an available-case base from missing counts or category totals; do not perform arithmetic.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12699583",
+        "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "source_cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[5]/td[3]",
+        "join_level": "SOURCE_ANCHOR_ONLY",
+        "report_relation_id": "0d5e18b16f00e350d0b6e1bef12b5d2d6041ef21667fea7aa6a9fd423c9752a0",
+        "report_relation_status": "INCOMPLETE",
+        "primary_skip_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": null,
+          "denominator_exact": null,
+          "reported_percent": null,
+          "display_precision": null
+        },
+        "denominator_scope_resolved": false,
+        "denominator_resolution_status": "UNRESOLVED",
+        "denominator_resolution_reason": "DENOMINATOR_SCOPE_UNRESOLVED",
+        "selected_denominator": null,
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "55",
+            "raw_value": null,
+            "provenance_class": "COLUMN_HEADER_EXPLICIT",
+            "rejection_reasons": [
+              "MISSINGNESS_CHANGES_DENOMINATOR"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+              "end_byte": null,
+              "quote": "Medical records N=55",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-15",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12699583",
+        "path": "/tmp/rw-v12-expansion-development-batch1/PMC12699583.xml",
+        "sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "report_json_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_repeat_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_json_repeatable": true,
+        "report_source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "T2",
+        "table_path": "/article/body/sec[3]/sec/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec/table-wrap/caption",
+          "quote": "Differences in distributions between directly observed data and data extracted from medical records, for selected variables collected through observation or interview in a convenience sample of patients"
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[8]/td[3]",
+        "row_identity": "Blunt",
+        "numerator": "29",
+        "correct_local_denominator": "32",
+        "reported_percent": "91",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/tbody[1]/tr[8]/td[3]",
+          "end_byte": null,
+          "quote": "29 (91%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "4c8fc7689c9ba1d703fcb25cbd6b7c9c988d55dff121a46b1acbceca46492555",
+        "candidate_id": "structured-table-percentage-0003",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "29",
+        "parsed_denominator": "55",
+        "reported_percent": "91",
+        "recomputed_at_display_precision": "53",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "55",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+          "end_byte": null,
+          "quote": "Medical records N=55",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "32",
+        "directly_printed_as_denominator_label": false,
+        "anchors": [
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+            "end_byte": null,
+            "quote": "Medical records N=55",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+            "start_byte": null
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[10]/td[3]",
+            "quote": "23",
+            "meaning": "Missing count for Dominating injury type, n (%) in the Medical records column.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[7]/td[1]",
+            "quote": "Dominating injury type, n (%)",
+            "meaning": "Variable scope heading.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[8]/td[3]",
+            "quote": "41 (93%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[9]/td[3]",
+            "quote": "2 (5%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          }
+        ],
+        "derivation": "Medical-record N=55 minus 23 missing injury-type records = 32 observed records. The displayed category counts independently sum to 29 + 3 = 32.",
+        "scope_interpretation": "The medical-record percentage denominator is variable-specific complete cases. The Missing row states 22 missing sex values and 23 missing injury-type values; N=55 is the full sample, not the non-missing denominator.",
+        "eligible_as_v1_3_denominator_candidate": false,
+        "v1_3_scope_decision": "Available-case base is reconstructed from missing-count/category evidence and is not an explicit denominator candidate under v1.3."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "INCOMPLETE_MISSINGNESS_CHANGES_DENOMINATOR_NO_CANDIDATE",
+        "selected_denominator": null,
+        "required_rejected_header_denominator": {
+          "value": "55",
+          "rejection_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+          "source_anchor_quote": "Medical records N=55"
+        },
+        "fallback": "Do not reconstruct or select an available-case base from missing counts or category totals; do not perform arithmetic.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12699583",
+        "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "source_cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[8]/td[3]",
+        "join_level": "SOURCE_ANCHOR_ONLY",
+        "report_relation_id": "cb44ebd21499d2a6aab5befc2feabbe13fa41dab37eb0e106baa82856995da1b",
+        "report_relation_status": "INCOMPLETE",
+        "primary_skip_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": null,
+          "denominator_exact": null,
+          "reported_percent": null,
+          "display_precision": null
+        },
+        "denominator_scope_resolved": false,
+        "denominator_resolution_status": "UNRESOLVED",
+        "denominator_resolution_reason": "DENOMINATOR_SCOPE_UNRESOLVED",
+        "selected_denominator": null,
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "55",
+            "raw_value": null,
+            "provenance_class": "COLUMN_HEADER_EXPLICIT",
+            "rejection_reasons": [
+              "MISSINGNESS_CHANGES_DENOMINATOR"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+              "end_byte": null,
+              "quote": "Medical records N=55",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": "development-denominator-provenance-16",
+      "case_type": "DENOMINATOR_SCOPE_FALSE_CANDIDATE",
+      "source": {
+        "source_id": "PMC12699583",
+        "path": "/tmp/rw-v12-expansion-development-batch1/PMC12699583.xml",
+        "sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "report_json_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_repeat_sha256": "a01e1aeda6d00f26bdccd7a8298c9f4defe1324f5e8010935d533fc5f04dc12f",
+        "report_json_repeatable": true,
+        "report_source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "manifest_allocation_status": "DEVELOPMENT_DOI_HASH_SPLIT",
+        "manifest_split_status": "DEVELOPMENT"
+      },
+      "table_anchor": {
+        "table_id": "T2",
+        "table_path": "/article/body/sec[3]/sec/table-wrap/table",
+        "caption_anchor": {
+          "element_path": "/article/body/sec[3]/sec/table-wrap/caption",
+          "quote": "Differences in distributions between directly observed data and data extracted from medical records, for selected variables collected through observation or interview in a convenience sample of patients"
+        }
+      },
+      "source_relation": {
+        "contract_id": "table_percentage_recomputation",
+        "cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[9]/td[3]",
+        "row_identity": "Penetrating",
+        "numerator": "3",
+        "correct_local_denominator": "32",
+        "reported_percent": "9",
+        "display_precision_digits": 0,
+        "arithmetic_correct_in_locked_source_manifest": true,
+        "source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/tbody[1]/tr[9]/td[3]",
+          "end_byte": null,
+          "quote": "3 (9%)",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        }
+      },
+      "v1_2_observation": {
+        "relation_id": "f94f36c6842b8b19058dd90920ebdfdeb3a38cfd42677f6b181d8fec18c2ae0e",
+        "candidate_id": "structured-table-percentage-0004",
+        "candidate_emitted": true,
+        "status": "ELIGIBLE_CHECKED_MISMATCH",
+        "parsed_numerator": "3",
+        "parsed_denominator": "55",
+        "reported_percent": "9",
+        "recomputed_at_display_precision": "5",
+        "display_precision_digits": 0,
+        "old_selected_denominator": "55",
+        "old_selected_denominator_source_anchor": {
+          "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+          "end_byte": null,
+          "quote": "Medical records N=55",
+          "source_file": "source.xml",
+          "source_format": "jats_xml",
+          "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+          "start_byte": null
+        },
+        "operands_exactly_matched_source_first_locator": false,
+        "candidate_type": "STRUCTURED_TABLE_PERCENTAGE_ARITHMETIC_MISMATCH"
+      },
+      "correct_local_denominator_evidence": {
+        "value": "32",
+        "directly_printed_as_denominator_label": false,
+        "anchors": [
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+            "end_byte": null,
+            "quote": "Medical records N=55",
+            "source_file": "source.xml",
+            "source_format": "jats_xml",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+            "start_byte": null
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[10]/td[3]",
+            "quote": "23",
+            "meaning": "Missing count for Dominating injury type, n (%) in the Medical records column.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[7]/td[1]",
+            "quote": "Dominating injury type, n (%)",
+            "meaning": "Variable scope heading.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[8]/td[3]",
+            "quote": "41 (93%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          },
+          {
+            "element_path": "/article[1]/body[1]/sec[3]/table-wrap[1]/table[1]/tbody[1]/tr[9]/td[3]",
+            "quote": "2 (5%)",
+            "meaning": "Observed category count; the category counts sum to the available-case denominator.",
+            "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72"
+          }
+        ],
+        "derivation": "Medical-record N=55 minus 23 missing injury-type records = 32 observed records. The displayed category counts independently sum to 29 + 3 = 32.",
+        "scope_interpretation": "The medical-record percentage denominator is variable-specific complete cases. The Missing row states 22 missing sex values and 23 missing injury-type values; N=55 is the full sample, not the non-missing denominator.",
+        "eligible_as_v1_3_denominator_candidate": false,
+        "v1_3_scope_decision": "Available-case base is reconstructed from missing-count/category evidence and is not an explicit denominator candidate under v1.3."
+      },
+      "expected_v1_3_outcome": {
+        "required_result": "INCOMPLETE_MISSINGNESS_CHANGES_DENOMINATOR_NO_CANDIDATE",
+        "selected_denominator": null,
+        "required_rejected_header_denominator": {
+          "value": "55",
+          "rejection_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+          "source_anchor_quote": "Medical records N=55"
+        },
+        "fallback": "Do not reconstruct or select an available-case base from missing counts or category totals; do not perform arithmetic.",
+        "criterion": 1
+      },
+      "evidence_missing": [],
+      "v1_3_observation": {
+        "negative_replay_artifact_sha256": "a962eaa629efbc998062ea330d03e6b687b0243f99007169aae9f2bf55e56b1b",
+        "contract_version": "1.3",
+        "source_id": "PMC12699583",
+        "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+        "source_cell_path": "/article/body/sec[3]/sec/table-wrap/table/tbody/tr[9]/td[3]",
+        "join_level": "SOURCE_ANCHOR_ONLY",
+        "report_relation_id": "1dc5491e761342515c7f9741cbbd58e5c0eaed0d554a784f3a3413c117bfd29d",
+        "report_relation_status": "INCOMPLETE",
+        "primary_skip_reason": "MISSINGNESS_CHANGES_DENOMINATOR",
+        "candidate_emitted": false,
+        "report_operands": {
+          "numerator_exact": null,
+          "denominator_exact": null,
+          "reported_percent": null,
+          "display_precision": null
+        },
+        "denominator_scope_resolved": false,
+        "denominator_resolution_status": "UNRESOLVED",
+        "denominator_resolution_reason": "DENOMINATOR_SCOPE_UNRESOLVED",
+        "selected_denominator": null,
+        "rejected_competing_denominators": [
+          {
+            "value_exact": "55",
+            "raw_value": null,
+            "provenance_class": "COLUMN_HEADER_EXPLICIT",
+            "rejection_reasons": [
+              "MISSINGNESS_CHANGES_DENOMINATOR"
+            ],
+            "source_anchor": {
+              "element_path": "/article[1]/body[1]/sec[3]/sec[1]/table-wrap[1]/table[1]/thead[1]/tr[1]/th[3]",
+              "end_byte": null,
+              "quote": "Medical records N=55",
+              "source_file": "source.xml",
+              "source_format": "jats_xml",
+              "source_sha256": "77533b865ee671ea89c47a369dc83e9eda8d0b5c2ac4f207468f566e74638c72",
+              "start_byte": null
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "v1_3_contract_version": "1.3",
+  "v1_3_summary": {
+    "fixture_count": 16,
+    "exact_operand_joins": 12,
+    "anchor_only_joins": 4,
+    "candidate_emissions": 0,
+    "relation_status_counts": {
+      "ELIGIBLE_CHECKED_MATCH": 12,
+      "INCOMPLETE": 4
+    },
+    "join_level_counts": {
+      "EXACT_OPERANDS": 12,
+      "SOURCE_ANCHOR_ONLY": 4
+    },
+    "source_valid_matches": 12,
+    "fail_closed_missingness_relations": 4
+  }
+}
