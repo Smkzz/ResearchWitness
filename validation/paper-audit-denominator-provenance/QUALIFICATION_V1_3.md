@@ -207,8 +207,11 @@ development runner. Neither reserved pool was used to tune detector behavior.
   checks, clean wheel installation, and CLI smoke checks: **pass**.
 - Two wheel builds were byte-identical. Wheel SHA-256:
   `4a308752049c4006d5acf7127c443c4f097410b8c1f777d58a2a4fdfbee6bd9b`.
-- GitHub CI and CodeQL are pending for the new stacked draft PR; PR #10's
-  existing checks remain passed.
+- Draft PR #11 stacks on PR #10 at baseline head
+  `f2490bd55568915c501b3c81d1ae3d08fda18cad`. CI and CodeQL were in progress
+  on the initial v1.3 commit `465e16d597e6de2f62d1233cc4f1112ccd89beb2` when
+  this qualification snapshot was recorded. PR #10's existing CI and CodeQL
+  checks passed.
 
 **NOT READY TO FREEZE FOR WAVE 3.** The development contract gates pass, but
 no eligible unseen positive is confirmed and the incomplete v1.3 negative

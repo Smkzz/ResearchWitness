@@ -189,9 +189,15 @@
     "wheel_sha256": "4a308752049c4006d5acf7127c443c4f097410b8c1f777d58a2a4fdfbee6bd9b"
   },
   "remote_qualification": {
-    "new_draft_pr": null,
-    "ci": "PENDING",
-    "codeql": "PENDING"
+    "new_draft_pr": 11,
+    "url": "https://github.com/Smkzz/ResearchWitness/pull/11",
+    "state": "OPEN_DRAFT_UNMERGED",
+    "base_branch": "codex/paper-audit-percentage-qualification",
+    "base_sha": "f2490bd55568915c501b3c81d1ae3d08fda18cad",
+    "head_branch": "codex/paper-audit-denominator-provenance",
+    "status_observed_on_commit": "465e16d597e6de2f62d1233cc4f1112ccd89beb2",
+    "ci_at_observation": "IN_PROGRESS",
+    "codeql_at_observation": "IN_PROGRESS"
   },
   "readiness": {
     "ready_to_freeze_for_wave_3": false,
