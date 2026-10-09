@@ -224,28 +224,63 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 mobile_screenshot = self.screenshot_dir / "synthetic-results-mobile.png"
                 page.screenshot(path=str(mobile_screenshot), full_page=True)
                 self.assertGreater(mobile_screenshot.stat().st_size, 10_000)
-                overflowing_elements = page.evaluate("""() => [...document.body.querySelectorAll('*')]
-                  .map((node) => {
+                overflow_diagnostics = page.evaluate("""() => {
+                  const describe = (node) => {
                     const rect = node.getBoundingClientRect();
+                    const style = getComputedStyle(node);
+                    const pseudo = (name) => {
+                      const value = getComputedStyle(node, name);
+                      return value.content === 'none' || value.content === 'normal' ? null : {
+                        content: value.content.slice(0, 120),
+                        width: value.width,
+                        minWidth: value.minWidth,
+                        position: value.position,
+                        transform: value.transform,
+                      };
+                    };
                     return {
                       tag: node.tagName,
                       id: node.id,
                       className: typeof node.className === 'string' ? node.className : '',
-                      left: Math.round(rect.left),
-                      right: Math.round(rect.right),
-                      width: Math.round(rect.width),
-                      scrollWidth: node.scrollWidth,
+                      left: Math.round(rect.left * 10) / 10,
+                      right: Math.round(rect.right * 10) / 10,
+                      width: Math.round(rect.width * 10) / 10,
                       clientWidth: node.clientWidth,
-                      text: (node.innerText || '').slice(0, 100),
+                      scrollWidth: node.scrollWidth,
+                      scrollLeft: node.scrollLeft,
+                      overflowX: style.overflowX,
+                      minWidth: style.minWidth,
+                      maxWidth: style.maxWidth,
+                      position: style.position,
+                      display: style.display,
+                      whiteSpace: style.whiteSpace,
+                      transform: style.transform,
+                      before: pseudo('::before'),
+                      after: pseudo('::after'),
+                      text: (node.innerText || '').slice(0, 140),
                     };
-                  })
-                  .filter((item) => item.width > 0 && (item.left < -1 || item.right > innerWidth + 1))
-                  .sort((left, right) => right.right - left.right)
-                  .slice(0, 12)""")
+                  };
+                  const rootNodes = [document.documentElement, document.body];
+                  const descendants = [...document.body.querySelectorAll('*')];
+                  const nodes = [...new Set([...rootNodes, ...descendants])];
+                  return {
+                    viewportWidth: innerWidth,
+                    devicePixelRatio,
+                    document: describe(document.documentElement),
+                    body: describe(document.body),
+                    offenders: nodes.map(describe).filter((item) => item.width > 0 && (
+                      item.left < -1 || item.right > innerWidth + 1 ||
+                      item.scrollWidth > item.clientWidth + 1
+                    )).sort((left, right) =>
+                      (right.scrollWidth - right.clientWidth) -
+                      (left.scrollWidth - left.clientWidth)
+                    ).slice(0, 24),
+                  };
+                }""")
                 self.assertLessEqual(
                     page.evaluate("document.documentElement.scrollWidth"),
                     page.evaluate("window.innerWidth"),
-                    f"mobile viewport overflow elements: {json.dumps(overflowing_elements, sort_keys=True)}",
+                    f"mobile viewport overflow diagnostics: {json.dumps(overflow_diagnostics, sort_keys=True)}",
                 )
 
                 page.evaluate("""() => {

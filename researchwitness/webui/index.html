@@ -54,7 +54,7 @@
         </div>
       </div>
       <button id="run-button" class="button primary" type="button" disabled>Run supported checks</button>
-      <p class="format-note"><strong>Format notes:</strong> JATS/XML is parsed as structured text. Markdown tables are checked only when their rows and denominator columns are explicit. PDF table layout is not reconstructed; image-only and encrypted PDFs may be unsupported.</p>
+      <p class="format-note"><strong>Format notes:</strong> JATS/XML is parsed as structured text. Markdown tables are checked only when their rows and denominator columns are explicit. PDF text extraction runs only when the operating system enforces the worker CPU and memory limits; on native Windows the source is retained but no PDF text checks run. PDF table layout is not reconstructed; image-only and encrypted PDFs may be unsupported.</p>
     </section>
 
     <section id="progress-panel" class="panel progress-panel" aria-labelledby="progress-title" hidden>

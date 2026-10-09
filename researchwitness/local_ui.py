@@ -37,8 +37,11 @@ from .paper_audit import (
 from .strict import Invalid, canonical, text
 
 UI_VERSION = "local-paper-audit/1"
+PDF_EXTRACTION_POLICY_VERSION = "required-os-worker-limits/1"
 MAX_JOBS = 10
 MAX_STORE_BYTES = 512 * 1024 * 1024
+MAX_HTTP_WORKERS = 8
+MAX_CONCURRENT_UPLOADS = 2
 MAX_METADATA_BYTES = 128 * 1024
 MAX_API_REPORT_BYTES = 32 * 1024 * 1024
 MAX_EXPORT_BYTES = 96 * 1024 * 1024
@@ -421,6 +424,10 @@ class LocalAuditStore:
             "identifier": identifier,
             "source_version": version,
         }
+        if suffix == ".pdf":
+            # Invalidate any completed result cached before PDF extraction
+            # became fail-closed when CPU and memory limits are unavailable.
+            config["pdf_extraction_policy_version"] = PDF_EXTRACTION_POLICY_VERSION
         return _hash(canonical(config))
 
     def submit(self, original_name: str, suffix: str, source: bytes,
@@ -733,7 +740,42 @@ class LocalUIHTTPServer(http.server.ThreadingHTTPServer):
     def __init__(self, address: tuple[str, int], store: LocalAuditStore, token: str):
         self.store = store
         self.token = token
+        self._http_worker_slots = threading.BoundedSemaphore(MAX_HTTP_WORKERS)
+        self.upload_slots = threading.BoundedSemaphore(MAX_CONCURRENT_UPLOADS)
         super().__init__(address, LocalUIRequestHandler)
+
+    def process_request(self, request, client_address) -> None:
+        # ThreadingHTTPServer otherwise starts one thread for every accepted
+        # connection. Bound that resource before a handler thread is created.
+        if not self._http_worker_slots.acquire(blocking=False):
+            body = b'{"error":"LOCAL_UI_OVERLOADED"}'
+            response = (
+                b"HTTP/1.1 503 Service Unavailable\r\n"
+                b"Content-Type: application/json; charset=utf-8\r\n"
+                b"Content-Length: " + str(len(body)).encode("ascii") + b"\r\n"
+                b"Cache-Control: no-store\r\n"
+                b"Connection: close\r\n\r\n" + body
+            )
+            try:
+                request.settimeout(1)
+                request.sendall(response)
+            except OSError:
+                pass
+            finally:
+                self.shutdown_request(request)
+            return
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            # ThreadingMixIn's worker may fail to start; do not leak a slot.
+            self._http_worker_slots.release()
+            raise
+
+    def process_request_thread(self, request, client_address) -> None:
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self._http_worker_slots.release()
 
 
 class LocalUIRequestHandler(http.server.BaseHTTPRequestHandler):
@@ -759,6 +801,8 @@ class LocalUIRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("X-Frame-Options", "DENY")
         self.send_header("Cross-Origin-Resource-Policy", "same-origin")
         self.send_header("Content-Security-Policy", "default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
+        if self.close_connection:
+            self.send_header("Connection", "close")
         if attachment:
             self.send_header("Content-Disposition", "attachment; filename=researchwitness-report.zip")
         self.end_headers()
@@ -892,14 +936,23 @@ class LocalUIRequestHandler(http.server.BaseHTTPRequestHandler):
                                      default="local:uploaded-paper")
         version = _decoded_header(self.headers.get("X-RW-Version"), limit=100,
                                   default="user-supplied/unverified")
-        source = self.rfile.read(size)
-        if len(source) != size:
-            raise LocalUIError("UPLOAD_INCOMPLETE", 400)
-        job, duplicate = self.server.store.submit(
-            original_name, suffix, source, identifier or "local:uploaded-paper",
-            version or "user-supplied/unverified",
-        )
-        self._json(200 if duplicate else 202, {"job": job.public(), "duplicate": duplicate})
+        # Reserve upload capacity before reading a request body into memory.
+        # This also bounds slow clients that hold a handler while streaming.
+        if not self.server.upload_slots.acquire(blocking=False):
+            self.close_connection = True
+            raise LocalUIError("LOCAL_UI_OVERLOADED", 503)
+        try:
+            source = self.rfile.read(size)
+            if len(source) != size:
+                raise LocalUIError("UPLOAD_INCOMPLETE", 400)
+            job, duplicate = self.server.store.submit(
+                original_name, suffix, source, identifier or "local:uploaded-paper",
+                version or "user-supplied/unverified",
+            )
+            del source
+            self._json(200 if duplicate else 202, {"job": job.public(), "duplicate": duplicate})
+        finally:
+            self.server.upload_slots.release()
 
 
 def create_server(data_directory: Path | None = None, *, port: int = 0) -> LocalUIHTTPServer:

@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import socket
 import tempfile
 import threading
 import time
@@ -17,8 +18,10 @@ from io import BytesIO
 from unittest.mock import patch
 
 from researchwitness.local_ui import (
-    ACTIVE_STATES, LocalAuditStore, LocalUIError, LocalUIHTTPServer,
+    ACTIVE_STATES, MAX_CONCURRENT_UPLOADS, MAX_HTTP_WORKERS,
+    LocalAuditStore, LocalUIError, LocalUIHTTPServer,
 )
+from researchwitness import local_ui
 from researchwitness.paper_audit import PaperAuditCancelled, run_paper_audit
 
 
@@ -119,6 +122,76 @@ class LocalUITests(unittest.TestCase):
         self.assertEqual(status, 404)
         self.assertNotIn(b"_send", body)
 
+    def test_http_worker_limit_returns_overload_without_starting_another_worker(self):
+        self.start_server()
+        held = 0
+        try:
+            for _ in range(MAX_HTTP_WORKERS):
+                self.assertTrue(self.server._http_worker_slots.acquire(blocking=False))
+                held += 1
+
+            status, _, body = self.request("GET", "/api/jobs")
+            self.assertEqual(status, 503)
+            self.assertEqual(json.loads(body)["error"], "LOCAL_UI_OVERLOADED")
+        finally:
+            for _ in range(held):
+                self.server._http_worker_slots.release()
+
+    def test_slow_uploads_cannot_exceed_upload_slots_or_buffer_a_third_body(self):
+        self.start_server()
+        slow_clients = []
+        try:
+            request_headers = (
+                f"POST /api/jobs HTTP/1.1\r\n"
+                f"Host: 127.0.0.1:{self.port}\r\n"
+                f"X-RW-Token: {self.token}\r\n"
+                "Content-Type: application/octet-stream\r\n"
+                "Content-Length: 1\r\n"
+                "X-RW-Name: slow.md\r\n"
+                "Connection: close\r\n\r\n"
+            ).encode("ascii")
+            for _ in range(MAX_CONCURRENT_UPLOADS):
+                client = socket.create_connection(("127.0.0.1", self.port), timeout=3)
+                client.sendall(request_headers)
+                slow_clients.append(client)
+
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline:
+                if not self.server.upload_slots.acquire(blocking=False):
+                    break
+                self.server.upload_slots.release()
+                time.sleep(0.01)
+            else:
+                self.fail("slow upload handlers did not reserve all upload slots")
+
+            status, headers, body = self.request(
+                "POST", "/api/jobs", body=b"x",
+                headers={
+                    "Content-Type": "application/octet-stream",
+                    "X-RW-Name": "third.md",
+                },
+            )
+            self.assertEqual(status, 503)
+            self.assertEqual(json.loads(body)["error"], "LOCAL_UI_OVERLOADED")
+            self.assertEqual(dict(headers).get("Connection"), "close")
+            self.assertEqual(self.store.jobs, {})
+        finally:
+            for client in slow_clients:
+                client.close()
+            # Ensure stalled handler threads observe EOF and release their
+            # reservations before the fixture shuts the server down.
+            deadline = time.monotonic() + 3
+            acquired = 0
+            while acquired < MAX_CONCURRENT_UPLOADS and time.monotonic() < deadline:
+                if self.server.upload_slots.acquire(blocking=False):
+                    acquired += 1
+                else:
+                    time.sleep(0.01)
+            self.assertEqual(acquired, MAX_CONCURRENT_UPLOADS,
+                             "closed slow uploads should release every upload slot")
+            for _ in range(acquired):
+                self.server.upload_slots.release()
+
     def test_size_of_counts_regular_files_in_nested_directories(self):
         run_dir = self.root / "synthetic-size-check"
         nested = run_dir / "report-data"
@@ -195,6 +268,38 @@ class LocalUITests(unittest.TestCase):
 
         self.store.delete_all()
         self.assertEqual(list((self.root / "runs").iterdir()), [])
+
+    def test_pdf_cache_key_invalidates_results_from_the_old_extraction_policy(self):
+        source_hash = hashlib.sha256(b"synthetic pdf").hexdigest()
+        identifier = "synthetic:cache-policy"
+        version = "fixture-v1"
+        legacy_pdf_key = local_ui._hash(local_ui.canonical({
+            "ui_version": local_ui.UI_VERSION,
+            "paper_audit_version": local_ui.PAPER_AUDIT_VERSION,
+            "source_sha256": source_hash,
+            "suffix": ".pdf",
+            "identifier": identifier,
+            "source_version": version,
+        }))
+        current_pdf_key = self.store._cache_key(
+            source_hash, ".pdf", identifier, version,
+        )
+        current_text_key = self.store._cache_key(
+            source_hash, ".md", identifier, version,
+        )
+        with patch.object(
+            local_ui, "PDF_EXTRACTION_POLICY_VERSION", "required-os-worker-limits/2",
+        ):
+            next_pdf_key = self.store._cache_key(
+                source_hash, ".pdf", identifier, version,
+            )
+            next_text_key = self.store._cache_key(
+                source_hash, ".md", identifier, version,
+            )
+
+        self.assertNotEqual(current_pdf_key, legacy_pdf_key)
+        self.assertNotEqual(current_pdf_key, next_pdf_key)
+        self.assertEqual(current_text_key, next_text_key)
 
     def test_export_refuses_a_completed_run_with_a_missing_report_artifact(self):
         job, _ = self.store.submit("sample.md", ".md", TABLE_PAPER,

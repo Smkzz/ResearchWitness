@@ -595,6 +595,43 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         with self.assertRaisesRegex(CustodyError, "DUPLICATE_CANONICAL_RELATIONSHIP"):
             self.record(second)
 
+    def test_harmless_row_text_edit_across_versions_is_unresolved(self):
+        first_text = self.original_text("28.6%")
+        second_text = first_text.rstrip("\n").replace("28.6%", "28.6% / confirmed") + "\n"
+        first_item, _ = self.source_setup(original=first_text, source_version="v1")
+        second_item, _ = self.source_setup(original=second_text, source_version="v2")
+        first = self.review_object(
+            first_item, None, review_id="review-one", original_text=first_text,
+        )
+        second = self.review_object(
+            second_item, None, review_id="review-two", original_text=second_text,
+        )
+
+        self.record(first)
+        with self.assertRaisesRegex(CustodyError, "SOURCE_ROW_LINEAGE_UNRESOLVED"):
+            self.record(second)
+        self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 1)
+
+    def test_cross_version_distinct_subgroups_remain_distinct(self):
+        first_text = self.original_text("28.6%", "Group A")
+        second_text = self.original_text("28.6%", "Group B")
+        first_item, _ = self.source_setup(original=first_text, source_version="v1")
+        second_item, _ = self.source_setup(original=second_text, source_version="v2")
+        first = self.review_object(
+            first_item, None, review_id="review-one", original_text=first_text,
+            group="Group A",
+        )
+        second = self.review_object(
+            second_item, None, review_id="review-two", original_text=second_text,
+            group="Group B",
+        )
+
+        self.record(first)
+        self.record(second)
+        counts = verify_all(self.root)
+        self.assertEqual(counts["eligible_negative_relations"], 2)
+        self.assertEqual(counts["eligible_negative_document_ids"], 1)
+
     def test_distinct_source_rows_with_equal_values_count_as_distinct_relations(self):
         original = (
             self.original_text("28.6%", "Group A")

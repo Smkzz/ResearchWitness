@@ -934,7 +934,10 @@ class ExplicitExclusionFlowDiscoverer:
 
 def capabilities() -> list[dict[str, Any]]:
     """List bounded paper checks and keep their interpretation limits explicit."""
-    prose_formats = ['UTF-8 .txt', 'UTF-8 .md', 'UTF-8 .markdown', 'born-digital .pdf with optional pypdf']
+    prose_formats = [
+        'UTF-8 .txt', 'UTF-8 .md', 'UTF-8 .markdown',
+        'born-digital .pdf with optional pypdf when OS worker limits are available',
+    ]
     return [
         {
             'kind': 'explicit_count_marker_conflict_screen',
@@ -943,7 +946,8 @@ def capabilities() -> list[dict[str, Any]]:
             'patterns': ['n = integer', 'N = integer'],
             'limits': (
                 '32 MiB source; PDF 500 pages, 16 MiB extracted text and 512 KiB/page; '
-                'PDF worker 20-second wall timeout, 15-second CPU and 768 MiB address-space limits where supported; '
+                'PDF worker 20-second wall timeout; pypdf is imported only when the OS applies both a 15-second CPU '
+                'limit and 768 MiB address-space limit, otherwise PDF extraction is unavailable and no detector runs; '
                 '512 count markers; 128 scope differences; 1,000,000 lines; 64 KiB per scanned line; 512 Markdown headings. '
                 'JATS narrative assertions are not scanned until native source anchors are available.'
             ),

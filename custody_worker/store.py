@@ -725,6 +725,15 @@ def _review_validation(raw: object, root: Path,
         "legacy_relationship_key": legacy_relationship_key,
         "row_content_key": row_content_key,
         "canonical_table_locator": canonical_table,
+        # A stable locator for a relation across source versions. If the
+        # selected relationship and operands recur at the same table/object/
+        # scope but the normalized physical row changed, their lineage is
+        # ambiguous: do not count the changed text as a new relationship.
+        "version_lineage_key": (
+            document_id, canonical_table, relation["object_locator"],
+            relation["scope"], relation["numerator"], relation["denominator"],
+            relation["percentage"], relation["decimals"],
+        ),
         "version_key": version_key,
         "table_key": table_key,
         "positive_issue_key": positive_issue_key,
@@ -803,6 +812,27 @@ def _reject_duplicate_current_relationship_keys(rows: list[dict]) -> None:
     for locations in locations_by_row.values():
         if len(locations) > 1 and len({tuple(sorted(value)) for value in locations.values()}) > 1:
             reject("SOURCE_TABLE_LINEAGE_UNRESOLVED")
+
+    # The row-content check above detects changed table labels only when the
+    # rest of the normalized row is identical. A harmless wording edit also
+    # changes row_content_key, so compare the explicitly selected relationship
+    # and exact operands across source versions. If those stay the same at the
+    # same work/table/object/scope, differing row text cannot establish a new
+    # independent relation; fail closed instead of inflating the denominator.
+    version_rows_by_lineage: dict[
+        tuple[Any, ...], dict[tuple[str, str], set[str]]
+    ] = {}
+    for row in rows:
+        details = row["details"]
+        versions = version_rows_by_lineage.setdefault(
+            details["version_lineage_key"], {},
+        )
+        versions.setdefault(details["version_key"], set()).add(
+            details["row_content_key"],
+        )
+    for versions in version_rows_by_lineage.values():
+        if len(versions) > 1 and len({key for row_keys in versions.values() for key in row_keys}) > 1:
+            reject("SOURCE_ROW_LINEAGE_UNRESOLVED")
 
 
 def _existing_relationship_keys(root: Path, source_index: dict[str, list[dict[str, Any]]],

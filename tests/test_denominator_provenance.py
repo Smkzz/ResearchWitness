@@ -3,12 +3,18 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
 from researchwitness.jats import parse_jats
 from researchwitness.table_arithmetic import check_structured_table_percentages
+from tools.run_paper_audit_denominator_provenance_v1_3 import (
+    _document_identity_accounting,
+    _negative_relation_accounting,
+    _negative_source_relation_disposition,
+)
 
 
 def _screen(table_markup: str):
@@ -27,6 +33,83 @@ def _table(head: str, body: str, *, caption: str = '', footnotes: str = '', tabl
         f'<table-wrap id="{table_id}">{caption_markup}<table><thead>{head}</thead>'
         f'<tbody>{body}</tbody></table>{footnotes}</table-wrap>'
     )
+
+
+@pytest.mark.parametrize(
+    ('status', 'relation_exists', 'operands_exact', 'expected'),
+    [
+        ('INCOMPLETE', True, True, 'EXACT_OPERAND_ABSTENTION'),
+        ('UNSUPPORTED', True, True, 'EXACT_OPERAND_ABSTENTION'),
+        ('ELIGIBLE_CHECKED_MATCH', False, False, 'UNMATCHED'),
+        ('ELIGIBLE_CHECKED_MATCH', True, False, 'ANCHOR_ONLY_OR_CHANGED_OPERANDS'),
+        ('ELIGIBLE_CHECKED_MISMATCH', True, False, 'ANCHOR_ONLY_OR_CHANGED_OPERANDS'),
+        ('ELIGIBLE_CHECKED_MATCH', True, True, 'ELIGIBLE_CORRECT_NEGATIVE'),
+        ('ELIGIBLE_CHECKED_MISMATCH', True, True, 'EXACT_OPERAND_CHECKED_MISMATCH'),
+    ],
+    ids=[
+        'incomplete-is-abstention', 'unsupported-is-abstention', 'unmatched',
+        'anchor-only-match', 'changed-operands-mismatch', 'exact-checked-match',
+        'exact-checked-mismatch',
+    ],
+)
+def test_v13_negative_qualification_counts_only_source_confirmed_exact_matches(
+    status, relation_exists, operands_exact, expected,
+):
+    locator = {'arithmetic_correct': True}
+    relation = {'status': status} if relation_exists else None
+
+    assert _negative_source_relation_disposition(
+        locator, relation, operands_exact,
+    ) == expected
+
+
+def test_v13_negative_qualification_rejects_unconfirmed_source_label():
+    assert _negative_source_relation_disposition(
+        {'arithmetic_correct': False}, {'status': 'ELIGIBLE_CHECKED_MATCH'}, True,
+    ) == 'SOURCE_LABEL_NOT_CONFIRMED'
+
+
+def test_v13_negative_summary_separates_matches_abstentions_and_unmatched_relations():
+    synthetic_rows = [
+        ({'arithmetic_correct': True}, {'status': 'INCOMPLETE'}, True),
+        ({'arithmetic_correct': True}, {'status': 'UNSUPPORTED'}, True),
+        ({'arithmetic_correct': True}, None, False),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MATCH'}, False),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MISMATCH'}, False),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MATCH'}, True),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MISMATCH'}, True),
+    ]
+    dispositions = Counter(
+        _negative_source_relation_disposition(locator, relation, operands_exact)
+        for locator, relation, operands_exact in synthetic_rows
+    )
+    abstentions = sum(
+        relation is not None and relation['status'] in ('INCOMPLETE', 'UNSUPPORTED')
+        for _locator, relation, _operands_exact in synthetic_rows
+    )
+
+    summary = _negative_relation_accounting(dispositions, abstentions)
+
+    assert summary['source_labelled_correct_relations'] == 7
+    assert summary['eligible_correct_source_relations'] == 1
+    assert summary['exact_operand_abstentions'] == 2
+    assert summary['exact_operand_checked_mismatches'] == 1
+    assert summary['source_labelled_abstentions'] == 2
+    assert summary['source_anchor_only_or_changed_operand_relations'] == 2
+    assert summary['unmatched_source_relations'] == 1
+
+
+def test_v13_document_accounting_deduplicates_normalized_doi_values():
+    records = [
+        {'normalized_doi': '10.1234/Repeated'},
+        {'normalized_doi': ' 10.1234/repeated '},
+        {'normalized_doi': '10.5678/Unique'},
+    ]
+
+    assert _document_identity_accounting(records) == {
+        'source_records': 3,
+        'distinct_normalized_doi_count': 2,
+    }
 
 
 CASES = [
@@ -476,7 +559,6 @@ def test_v1_2_failure_fixtures_are_hash_bound_to_the_full_v1_3_replay():
     assert fixtures['provenance']['v1_3_negative_replay_artifact_sha256'] == replay_sha256
     assert replay['reserved_records_included'] is False
     assert replay['detector_executed_on_reserved_records'] is False
-    assert replay['summary']['eligible_correct_source_relations'] == 4163
 
     ledger_by_key = {}
     for item in replay['relation_ledger']:

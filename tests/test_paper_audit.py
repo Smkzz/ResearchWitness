@@ -1,19 +1,29 @@
 """Paper-screening tests assert narrow candidate behavior and its limits."""
 from __future__ import annotations
 
+import builtins
+import io
 import json
+import os
 from pathlib import Path
+import sys
+from types import SimpleNamespace
 
 import pytest
 from jsonschema import Draft202012Validator
 
 from researchwitness.paper_audit import capabilities, run_paper_audit
 from researchwitness.strict import Invalid
+from researchwitness import _pdf_worker
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = json.loads((ROOT / 'schemas/paper-audit.schema.json').read_text(encoding='utf-8'))
 SCHEMA_VALIDATOR = Draft202012Validator(SCHEMA)
+requires_posix_pdf_limits = pytest.mark.skipif(
+    os.name == 'nt',
+    reason='native Windows PDF parsing is fail-closed without qualified worker memory limits',
+)
 
 
 def test_capability_registry_labels_paper_scan_as_candidate_discovery_only():
@@ -21,6 +31,8 @@ def test_capability_registry_labels_paper_scan_as_candidate_discovery_only():
 
     assert len(screens) == 4
     assert screens[0]['role'] == 'candidate_discovery_only'
+    assert 'when OS worker limits are available' in screens[0]['formats'][-1]
+    assert 'otherwise PDF extraction is unavailable and no detector runs' in screens[0]['limits']
     assert screens[2]['kind'] == 'jats_table_percentage_recomputation'
     assert screens[3]['role'] == 'unresolved_question_locator'
     assert 'same cohort or scope' in screens[0]['does_not_prove']
@@ -34,6 +46,15 @@ def _run(tmp_path: Path, content: bytes, suffix: str = '.txt', **kwargs):
     report = json.loads((output / 'report.json').read_text(encoding='utf-8'))
     assert not list(SCHEMA_VALIDATOR.iter_errors(report))
     return result, report, output
+
+
+def _skip_if_worker_limits_unavailable(report: dict) -> None:
+    warnings = report.get('extraction', {}).get('warnings', [])
+    if any(
+        'could not apply the required worker CPU and memory limits' in warning
+        for warning in warnings if isinstance(warning, str)
+    ):
+        pytest.skip('this OS did not allow the isolated PDF worker limits')
 
 
 def test_text_conflict_is_candidate_with_byte_exact_source_anchors(tmp_path):
@@ -270,11 +291,13 @@ def _image_only_pdf(pypdf) -> bytes:
     return output.getvalue()
 
 
+@requires_posix_pdf_limits
 def test_born_digital_pdf_maps_count_markers_back_to_physical_pages(tmp_path):
     import pypdf
 
     pdf = _pdf_with_text(pypdf, ['Group A n=20', 'Group B n=18'])
     _, report, output = _run(tmp_path, pdf, '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['decision'] == 'CANDIDATES_FOUND'
     assert report['extraction']['status'] == 'TEXT_AVAILABLE'
@@ -286,11 +309,13 @@ def test_born_digital_pdf_maps_count_markers_back_to_physical_pages(tmp_path):
     assert (output / 'source.pdf').read_bytes() == pdf
 
 
+@requires_posix_pdf_limits
 def test_two_column_unicode_pdf_preserves_extracted_text_and_page_anchors(tmp_path):
     import pypdf
 
     pdf = _pdf_with_positioned_unicode_text(pypdf)
     _, report, output = _run(tmp_path, pdf, '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     extracted = (output / 'extracted-text.txt').read_text(encoding='utf-8')
     assert report['extraction']['status'] == 'TEXT_AVAILABLE'
@@ -304,12 +329,14 @@ def test_two_column_unicode_pdf_preserves_extracted_text_and_page_anchors(tmp_pa
     assert report['extraction']['page_count'] == 1
 
 
+@requires_posix_pdf_limits
 def test_repeated_pdf_headers_and_footers_do_not_enable_table_arithmetic(tmp_path):
     import pypdf
 
     repeated_matter = 'Journal Table 1 Group A n=20 Footer'
     pdf = _pdf_with_text(pypdf, [repeated_matter, repeated_matter])
     _, report, _ = _run(tmp_path, pdf, '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['extraction']['status'] == 'TEXT_AVAILABLE'
     assert report['candidate_anomalies'] == []
@@ -317,11 +344,13 @@ def test_repeated_pdf_headers_and_footers_do_not_enable_table_arithmetic(tmp_pat
     assert report['arithmetic_screens']['table_percentages']['findings'] == []
 
 
+@requires_posix_pdf_limits
 def test_image_only_pdf_reports_no_extractable_text_and_no_ocr(tmp_path):
     import pypdf
 
     pdf = _image_only_pdf(pypdf)
     _, report, _ = _run(tmp_path, pdf, '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['extraction']['status'] == 'NO_EXTRACTABLE_TEXT'
     assert report['extraction']['ocr_performed'] is False
@@ -333,11 +362,13 @@ def test_image_only_pdf_reports_no_extractable_text_and_no_ocr(tmp_path):
     assert any('no OCR was attempted' in item for item in report['extraction']['warnings'])
 
 
+@requires_posix_pdf_limits
 def test_partial_pdf_extraction_never_returns_a_clean_scan(tmp_path):
     import pypdf
 
     pdf = _pdf_with_text(pypdf, ['Group A n=20', '', 'Group B n=18'])
     _, report, _ = _run(tmp_path, pdf, '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['extraction']['status'] == 'PARTIAL_TEXT'
     assert report['decision'] == 'CANDIDATES_FOUND_IN_INCOMPLETE_SCAN'
@@ -385,14 +416,107 @@ def test_worker_timeout_is_a_bounded_non_scan(monkeypatch, tmp_path):
     assert report['extraction']['warnings']
 
 
+def test_pdf_worker_requires_resource_module(monkeypatch):
+    monkeypatch.setitem(sys.modules, 'resource', None)
+
+    assert _pdf_worker._limits(768 * 1024 * 1024, 15) is False
+
+
+def test_pdf_worker_requires_both_setrlimit_calls(monkeypatch):
+    calls = []
+
+    def setrlimit(limit, bounds):
+        calls.append((limit, bounds))
+        if limit == 2:
+            raise OSError('synthetic resource-limit denial')
+
+    resource_module = SimpleNamespace(RLIMIT_CPU=1, RLIMIT_AS=2, setrlimit=setrlimit)
+    monkeypatch.setitem(sys.modules, 'resource', resource_module)
+
+    assert _pdf_worker._limits(768 * 1024 * 1024, 15) is False
+    assert calls == [(1, (15, 15)), (2, (768 * 1024 * 1024, 768 * 1024 * 1024))]
+
+
+def test_pdf_worker_does_not_import_pypdf_without_limits(monkeypatch, tmp_path):
+    import researchwitness._pdf_worker as pdf_worker
+
+    source = tmp_path / 'synthetic.pdf'
+    source.write_bytes(b'%PDF-1.4\n%%EOF\n')
+    output = io.StringIO()
+    original_import = builtins.__import__
+
+    def forbid_pypdf_import(name, *args, **kwargs):
+        if name == 'pypdf':
+            raise AssertionError('pypdf must not be imported when OS limits are unavailable')
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(pdf_worker, '_limits', lambda _memory, _cpu: False)
+    monkeypatch.setattr(builtins, '__import__', forbid_pypdf_import)
+    monkeypatch.setattr(sys, 'stdout', output)
+
+    result = pdf_worker.main([
+        str(Path(__file__).parents[1] / 'researchwitness' / '_pdf_worker.py'),
+        str(source), '500', '524288', '16777216', str(768 * 1024 * 1024), '15',
+    ])
+
+    payload = json.loads(output.getvalue())
+    assert result == 0
+    assert payload['status'] == 'LIMIT_OR_UNSUPPORTED'
+    assert payload['page_records'] == []
+    assert payload['text_base64'] == ''
+    assert any('No detector was run' in warning for warning in payload['warnings'])
+
+
+def test_resource_limit_unavailable_pdf_report_is_an_incomplete_non_scan(monkeypatch, tmp_path):
+    import researchwitness.paper_audit as paper_audit
+
+    worker_payload = {
+        'status': 'LIMIT_OR_UNSUPPORTED',
+        'extractor': 'pypdf isolated worker (not run)',
+        'page_records': [],
+        'warnings': [
+            'PDF extraction was skipped because the operating system could not apply the required worker CPU and memory limits. '
+            'No detector was run.'
+        ],
+        'text_base64': '',
+    }
+    completed = SimpleNamespace(returncode=0, stdout=json.dumps(worker_payload).encode('utf-8'))
+    monkeypatch.setattr(paper_audit.subprocess, 'run', lambda *args, **kwargs: completed)
+
+    _, report, _ = _run(tmp_path, b'%PDF-1.4\nsynthetic fixture\n%%EOF\n', '.pdf')
+
+    assert report['extraction']['status'] == 'LIMIT_OR_UNSUPPORTED'
+    assert report['extraction']['text_bytes'] == 0
+    assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
+    assert report['candidate_anomalies'] == []
+    assert report['discovery']['assertions'] == []
+    assert report['discovery']['scan_complete'] is False
+    assert any('No detector was run' in warning for warning in report['extraction']['warnings'])
+
+
+@pytest.mark.skipif(os.name != 'nt', reason='native Windows-only PDF fail-closed integration check')
+def test_native_windows_pdf_is_explicitly_unavailable(tmp_path):
+    _, report, _ = _run(tmp_path, b'%PDF-1.4\n%%EOF\n', '.pdf')
+
+    assert report['extraction']['status'] == 'LIMIT_OR_UNSUPPORTED'
+    assert report['extraction']['text_bytes'] == 0
+    assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
+    assert report['candidate_anomalies'] == []
+    assert report['discovery']['scan_complete'] is False
+    assert any('operating system could not apply' in warning for warning in report['extraction']['warnings'])
+
+
+@requires_posix_pdf_limits
 def test_malformed_pdf_is_not_treated_as_paper_text(tmp_path):
     _, report, _ = _run(tmp_path, b'%PDF-1.4\n%%EOF\n', '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['extraction']['status'] == 'MALFORMED_OR_UNSUPPORTED'
     assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
     assert report['candidate_anomalies'] == []
 
 
+@requires_posix_pdf_limits
 def test_encrypted_pdf_fails_closed_without_running_detectors(tmp_path):
     import io
     import pypdf
@@ -405,12 +529,14 @@ def test_encrypted_pdf_fails_closed_without_running_detectors(tmp_path):
     writer.write(encrypted)
 
     _, report, _ = _run(tmp_path, encrypted.getvalue(), '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['extraction']['status'] == 'LIMIT_OR_UNSUPPORTED'
     assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
     assert report['candidate_anomalies'] == []
 
 
+@requires_posix_pdf_limits
 def test_pdf_extraction_cap_is_degraded_to_a_clear_report(tmp_path, monkeypatch):
     import pypdf
     import researchwitness.paper_audit as paper_audit
@@ -419,6 +545,7 @@ def test_pdf_extraction_cap_is_degraded_to_a_clear_report(tmp_path, monkeypatch)
     pdf = _pdf_with_text(pypdf, ['Group A n=20', 'Group B n=18'])
 
     _, report, _ = _run(tmp_path, pdf, '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['extraction']['status'] == 'LIMIT_OR_UNSUPPORTED'
     assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'
@@ -426,6 +553,7 @@ def test_pdf_extraction_cap_is_degraded_to_a_clear_report(tmp_path, monkeypatch)
     assert report['candidate_anomalies'] == []
 
 
+@requires_posix_pdf_limits
 def test_oversized_pdf_page_text_stops_before_numeric_screening(tmp_path):
     import io
     import pypdf
@@ -448,6 +576,7 @@ def test_oversized_pdf_page_text_stops_before_numeric_screening(tmp_path):
     writer.write(pdf)
 
     _, report, _ = _run(tmp_path, pdf.getvalue(), '.pdf')
+    _skip_if_worker_limits_unavailable(report)
 
     assert report['extraction']['status'] == 'LIMIT_OR_UNSUPPORTED'
     assert report['decision'] == 'EXTRACTION_UNAVAILABLE_OR_EMPTY'

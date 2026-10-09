@@ -8,6 +8,7 @@ from tools.run_paper_audit_percentage_qualification import (
     _negative_locator_matches,
     _pair_negative_source_relations,
     _negative_source_table_ids,
+    _normalized_element_path,
 )
 
 
@@ -200,6 +201,57 @@ def test_negative_join_does_not_guess_between_ambiguous_same_anchor_relations():
         }
         for numerator, percent in ((3, '15.8'), (1, '5.3'))
     ]
+
+
+def test_xpath_normalization_preserves_id_and_omitted_position_identity():
+    identified_second_table = (
+        "/article[1]/*[local-name()='table-wrap'][@id='table-second']"
+        "/table[1]/tbody[1]/tr[1]/td[2]"
+    )
+    same_identified_path = (
+        '/article[1]/table-wrap[@id="table-second"]/table[1]/tbody[1]/tr[1]/td[2]'
+    )
+    positional_second_table = (
+        '/article[1]/table-wrap[2]/table[1]/tbody[1]/tr[1]/td[2]'
+    )
+    first_or_unspecified_table = (
+        '/article[1]/table-wrap/table[1]/tbody[1]/tr[1]/td[2]'
+    )
+
+    assert _normalized_element_path(identified_second_table) == _normalized_element_path(
+        same_identified_path,
+    )
+    assert _normalized_element_path(identified_second_table) != _normalized_element_path(
+        positional_second_table,
+    )
+    assert _normalized_element_path(first_or_unspecified_table) != _normalized_element_path(
+        '/article[1]/table-wrap[1]/table[1]/tbody[1]/tr[1]/td[2]',
+    )
+
+
+def test_negative_anchor_fallback_requires_matching_table_identity():
+    path = '/article[1]/table-wrap[2]/table[1]/tbody[1]/tr[1]/td[2]'
+    locator = {
+        'contract_id': 'table_percentage_recomputation',
+        'cell_path': path,
+        'table_id': 'Tab2',
+        'numerator': '4',
+        'denominator': '6',
+        'reported_percent': '67',
+        'display_precision_digits': 0,
+    }
+    relation = {
+        'detector_id': 'table_percentage_recomputation',
+        'source_anchor': {'element_path': path},
+        'table_id': 'Tab1',
+        'numerator_exact': '4',
+        'denominator_exact': '30',
+        'reported_percent': '67',
+        'display_precision': 0,
+    }
+
+    assert not _negative_locator_matches(relation, locator)
+    assert _pair_negative_source_relations([locator], [relation]) == [(None, False)]
     relation = {
         'detector_id': locators[0]['contract_id'],
         'source_anchor': {'element_path': path},
