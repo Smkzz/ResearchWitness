@@ -25,6 +25,7 @@ SOURCE_FILES = (
     "custody_worker/schemas/import-manifest.v2.schema.json",
     "custody_worker/schemas/review.v5.schema.json",
     "custody_worker/schemas/review-record.v4.schema.json",
+    "custody_worker/schemas/review-record.v5.schema.json",
     "custody_worker/schemas/summary.v3.schema.json",
     "custody_worker/schemas/public-summary.v2.schema.json",
     "custody_worker/schemas/public-export.v2.schema.json",

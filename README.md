@@ -17,11 +17,11 @@ It is intentionally **not** an AI that declares whole papers wrong. A positive r
 
 ## Status
 
-This branch is an **unreleased development candidate**, not a public release. The frozen 15-corrigendum verifier screen remains unchanged: 2/15 mechanisms are fully representable, 2/15 mechanism-only, 1/15 partial, and 10/15 unsupported; only two screen entries have committed runnable fixtures. In the post-hoc paper-audit development replay, 2/16 correction issues meet an active source-mapped contract (4/4 target cells matched); 14 remain unsupported. Seventeen selected controls produced no candidates, but they are not certified error-free, and eight unmatched candidates remain unadjudicated. All 33 reports expose incomplete coverage. These results are not a sealed benchmark. Wave 2 adds active source-mapped JATS sample flow, narrow PRISMA arithmetic, and crude 2×2 odds ratios, but no correction-backed positive yet meets those contracts. Rates remain unsupported and cross-section consistency is helper-only. See the [paper-audit capability boundaries](docs/PAPER_AUDIT_CAPABILITIES.md) and [wave 2 qualification](validation/paper-audit-capability-wave-2/QUALIFICATION.md).
+This branch is an **unreleased development candidate**, not a public release. The frozen 15-corrigendum verifier screen remains unchanged: 2/15 mechanisms are fully representable, 2/15 mechanism-only, 1/15 partial, and 10/15 unsupported; only two screen entries have committed runnable fixtures. In the post-hoc paper-audit development replay, 2/16 correction issues meet an active source-mapped contract (4/4 target cells matched); 14 remain unsupported. Seventeen selected controls produced no candidates, but they are not certified error-free, and eight unmatched candidates remain unadjudicated. All 33 reports expose incomplete coverage. These results are not a sealed benchmark. Wave 2 adds active source-mapped JATS sample flow, narrow PRISMA arithmetic, and crude 2×2 odds ratios, but no correction-backed positive yet meets those contracts. Rates remain unsupported and cross-section consistency is helper-only. See the [paper-audit capability boundaries](docs/PAPER_AUDIT_CAPABILITIES.md) and repository-only validation notes.
 
 Use it to verify **explicit formalization/witness pairs**, not to infer that an entire paper, author, or research program is wrong.
 
-See [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md).
+See [`docs/PAPER_AUDIT_CAPABILITIES.md`](docs/PAPER_AUDIT_CAPABILITIES.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md) for supported checks and their limits. The full repository contains development-only validation history that is not included in source archives.
 
 ## MVP product loop
 
@@ -201,7 +201,7 @@ python -m researchwitness ui
 
 It opens a local page where you can select a `.txt`, `.md`, `.markdown`, `.xml`, `.nxml`, or `.pdf` file, run the supported screens, inspect source-linked candidates and coverage, replay the same pinned input, and export the source plus report. `--no-browser` prints the URL without opening it. The server binds to `127.0.0.1`; it makes no source retrieval, model, analytics, or other external requests. An identifier and version label are local report metadata, not authenticated facts.
 
-The application retains up to ten recent runs in its default local data directory (`%LOCALAPPDATA%` on Windows or the XDG data directory on Linux/macOS), with a 512 MiB store limit; runs remain until deleted or the oldest inactive runs are evicted to satisfy capacity. Use **Delete all ResearchWitness run data** to remove the files created by this interface; exported ZIPs and operating-system backups are outside that deletion. If existing store content cannot be recognized safely, the app stops writes/deletion and reports that manual review is required. The loopback token protects browser requests from cross-origin sites; it is not an OS-user boundary. Other processes running as the same local account may reach the app and its files, and Windows directory privacy depends on inherited ACLs that have not been verified here. This local interface is not a custodian environment or evidence of scientific validity. Real-browser inspection was blocked in this sandbox; other browser/OS combinations remain unqualified.
+The application retains up to ten recent runs in its default local data directory (`%LOCALAPPDATA%` on Windows or the XDG data directory on Linux/macOS), with a 512 MiB store limit; runs remain until deleted or the oldest inactive runs are evicted to satisfy capacity. Use **Delete all ResearchWitness run data** to remove the files created by this interface; exported ZIPs and operating-system backups are outside that deletion. If existing store content cannot be recognized safely, the app stops writes/deletion and reports that manual review is required. The loopback token protects browser requests from cross-origin sites; it is not an OS-user boundary. Any local user or process able to connect to loopback on the same computer may be able to use the interface and its data, so do not use it for confidential material on a shared host. Windows directory privacy still depends on inherited ACLs that have not been verified here. This local interface is not a custodian environment or evidence of scientific validity. A dedicated synthetic Chromium workflow checks the browser journey; other browser/OS combinations remain unqualified.
 
 The [synthetic sample](examples/paper-audit/paper.md) reports `n = 20` at recruitment and `n = 18` after exclusions. The updated screen describes these as a possible study-stage difference instead of an error candidate. Run it to inspect the report:
 
@@ -211,7 +211,7 @@ python -m researchwitness paper-audit examples/paper-audit/paper.md \
   --output work/paper-audit
 ```
 
-The source-pinned development corpus, scoring definitions, per-paper JSON reports, and exact-hash retrieval/runner tools are in [`validation/paper-audit-wave-1/`](validation/paper-audit-wave-1/). The corpus contains four correction-backed positives and five selected negative controls; it has no sealed holdout and does not establish cross-field performance.
+The repository retains development and historical validation materials for reproducing their original checks. They are not a sealed holdout and do not establish cross-field performance. Generated source archives omit evaluation and evidence records; no such records are needed for the supported local application workflow.
 
 Start from a UTF-8 text capture of the exact paper version:
 
@@ -299,9 +299,9 @@ The earlier `0.2.0` validation notes also describe network-reliability `K3` and 
 
 The historical cases intentionally return `NOT_READY` for contact when a published correction is already known or source alignment remains unresolved.
 
-The previous frozen 15-paper screen is a mechanism-level coverage map, not an end-to-end discovery benchmark. Several corrigenda still require continuous probability/integration, PDE analysis, infinite-index arguments, database semantics, or domain-specific proof logic. See the candidate-specific coverage review under [`validation/verifier-wave/`](validation/verifier-wave/) for which screen entries are executable in this tree.
+The previous frozen 15-paper screen is a mechanism-level coverage map, not an end-to-end discovery benchmark. Several corrigenda still require continuous probability/integration, PDE analysis, infinite-index arguments, database semantics, or domain-specific proof logic. Repository-only historical notes describe which screen entries are executable in this tree.
 
-See [`validation/`](validation/) and [`docs/VALIDATION.md`](docs/VALIDATION.md).
+See [`docs/PAPER_AUDIT_CAPABILITIES.md`](docs/PAPER_AUDIT_CAPABILITIES.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the supported scope and remaining research-validation limits. The full repository contains additional development-only validation history.
 
 ## Contact readiness
 
@@ -369,7 +369,7 @@ Bug reports and bounded deterministic verifier proposals are welcome. Start with
 python -m pip install -e '.[dev]'
 python -m pytest -q
 python benchmarks/run_synthetic.py
-python validation/mvp_real/run_validation.py
+python validation/mvp_real/run_validation.py  # repository checkout only
 python tools/quality_gate.py
 ```
 

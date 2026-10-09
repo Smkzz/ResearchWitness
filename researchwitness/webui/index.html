@@ -60,17 +60,18 @@
     <section id="progress-panel" class="panel progress-panel" aria-labelledby="progress-title" hidden>
       <div class="section-heading">
         <span class="step" aria-hidden="true">02</span>
-        <div><h2 id="progress-title">Checking your paper</h2><p id="progress-stage" role="status" aria-live="polite">Waiting for an analysis worker</p></div>
+      <div><h2 id="progress-title" tabindex="-1">Checking your paper</h2><p id="progress-stage" role="status" aria-live="polite">Waiting for an analysis worker</p></div>
       </div>
       <div class="progress-track" aria-hidden="true"><span class="progress-indeterminate"></span></div>
       <p id="progress-detail" class="muted">Stages appear as the source is read and supported checks run. No percentage estimate is shown.</p>
+      <button id="status-retry-button" class="button secondary" type="button" hidden>Check run status again</button>
       <button id="cancel-button" class="button secondary" type="button">Cancel this run</button>
     </section>
 
     <section id="results-panel" class="panel results-panel" aria-labelledby="results-title" hidden>
       <div class="section-heading">
         <span class="step" aria-hidden="true">03</span>
-        <div><h2 id="results-title">Review the result</h2><p id="result-status" role="status" aria-live="polite"></p></div>
+        <div><h2 id="results-title">Review the result</h2><p id="result-status" role="status" aria-live="polite" tabindex="-1"></p></div>
       </div>
       <div id="duplicate-note" class="notice" hidden></div>
       <div id="result-summary"></div>
@@ -94,7 +95,7 @@
       </div>
       <div id="history-list" class="history-list"><p class="muted">No saved runs.</p></div>
       <button id="delete-data" class="text-button" type="button">Delete all ResearchWitness run data</button>
-      <p class="privacy-note">This removes files created by this interface from its local run store. It does not erase operating-system backups or copies you exported. Other processes running as your local account may be able to access this local app and its files; this is not a custodian security boundary.</p>
+      <p class="privacy-note">This removes files created by this interface from its local run store. It does not erase operating-system backups or copies you exported. Any local user or process able to connect to loopback on this computer may be able to use this interface and its data. Do not use it for confidential material on a shared host; this is not a custodian security boundary.</p>
     </section>
 
     <footer class="page-footer">

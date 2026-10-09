@@ -14,6 +14,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  browser-e2e:
+    name: Local UI browser acceptance
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up pinned Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12.14"
+      - name: Install test dependencies and pinned Playwright
+        run: python -m pip install -e '.[dev]' 'playwright==1.62.0'
+      - name: Install Chromium and Linux browser libraries
+        if: runner.os == 'Linux'
+        run: python -m playwright install --with-deps chromium
+      - name: Install Chromium on Windows
+        if: runner.os == 'Windows'
+        run: python -m playwright install chromium
+      - name: Run synthetic browser acceptance
+        env:
+          RW_BROWSER_REQUIRED: "1"
+          RW_BROWSER_SCREENSHOT_DIR: ${{ runner.temp }}/rw-browser-screenshots
+        run: python -m unittest tests.test_local_ui_browser -v
+      - name: Qualify clean application wheel on Windows
+        if: runner.os == 'Windows'
+        run: python tools/qualify_app_wheel.py
+      - name: Retain synthetic desktop and mobile screenshots for review
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: researchwitness-synthetic-browser-screenshots-${{ matrix.os }}
+          path: ${{ runner.temp }}/rw-browser-screenshots/*.png
+          if-no-files-found: error
+          retention-days: 1
+
   test:
     name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
@@ -59,3 +101,7 @@ jobs:
         run: python -m pip install -e '.[dev]'
       - name: Run offline release qualification
         run: python tools/quality_gate.py
+      - name: Qualify reproducible application wheel
+        run: python tools/qualify_app_wheel.py
+      - name: Qualify synthetic custody worker zipapp
+        run: python tools/qualify_custody_zipapp.py

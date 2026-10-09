@@ -676,6 +676,9 @@ class LocalAuditStore:
             run_dir = self._job_dir(job_id)
             self._validate_run_layout(run_dir, job.suffix)
             report_dir = run_dir / "report-data"
+            # A completed run is exportable only when its user-facing report is
+            # still present and readable. Do not silently produce a partial ZIP.
+            self.report(job_id)
             output = io.BytesIO()
             command = (
                 "After extracting this package, replay the source with:\n"
@@ -687,7 +690,7 @@ class LocalAuditStore:
             with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
                 for rel in ("report.json", "report.html", "extracted-text.txt", "paper-document.json"):
                     path = report_dir / rel
-                    if path.exists():
+                    if rel in {"report.json", "report.html"} or path.exists():
                         self._validate_report_path(path)
                         archive.writestr(rel, path.read_bytes())
                 source_name = "source" + job.suffix
@@ -743,7 +746,7 @@ class LocalUIRequestHandler(http.server.BaseHTTPRequestHandler):
         return
 
     def _send(self, status: int, body: bytes, content_type: str,
-              extra: dict[str, str] | None = None) -> None:
+              *, attachment: bool = False) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
@@ -753,8 +756,8 @@ class LocalUIRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("X-Frame-Options", "DENY")
         self.send_header("Cross-Origin-Resource-Policy", "same-origin")
         self.send_header("Content-Security-Policy", "default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
-        for key, value in (extra or {}).items():
-            self.send_header(key, value)
+        if attachment:
+            self.send_header("Content-Disposition", "attachment; filename=researchwitness-report.zip")
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(body)
@@ -798,10 +801,15 @@ class LocalUIRequestHandler(http.server.BaseHTTPRequestHandler):
                 body = template.replace("__RW_SESSION_TOKEN__", self.server.token).encode("utf-8")
                 self._send(200, body, "text/html; charset=utf-8")
                 return
-            if self.path in {"/app.js", "/style.css"}:
-                path = Path(__file__).with_name("webui") / self.path.lstrip("/")
+            static_assets = {
+                "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+                "/style.css": ("style.css", "text/css; charset=utf-8"),
+            }
+            asset = static_assets.get(self.path)
+            if asset:
+                filename, mime = asset
+                path = Path(__file__).with_name("webui") / filename
                 body = path.read_bytes()
-                mime = "text/javascript; charset=utf-8" if self.path.endswith(".js") else "text/css; charset=utf-8"
                 self._send(200, body, mime)
                 return
             self._guard(api=True)
@@ -820,9 +828,7 @@ class LocalUIRequestHandler(http.server.BaseHTTPRequestHandler):
             match = re.fullmatch(r"/api/exports/([0-9a-f]{32})\.zip", self.path)
             if match:
                 data = self.server.store.export_zip(match.group(1))
-                self._send(200, data, "application/zip", {
-                    "Content-Disposition": f"attachment; filename=researchwitness-report-{match.group(1)[:8]}.zip",
-                })
+                self._send(200, data, "application/zip", attachment=True)
                 return
             self._error(LocalUIError("NOT_FOUND", 404))
         except LocalUIError as exc:

@@ -113,6 +113,20 @@ class LocalUITests(unittest.TestCase):
         self.assertEqual(status, 400)
         self.assertEqual(json.loads(body)["error"], "FILENAME_INVALID")
 
+        status, _, body = self.request("GET", "/%2e%2e/local_ui.py")
+        self.assertEqual(status, 404)
+        self.assertNotIn(b"_send", body)
+
+    def test_export_response_uses_a_constant_download_header(self):
+        self.start_server()
+        job, _ = self.store.submit("sample.md", ".md", TABLE_PAPER,
+                                   "synthetic:header", "fixture-v1")
+        job.future.result(timeout=10)
+        status, headers, _ = self.request("GET", f"/api/exports/{job.job_id}.zip")
+        self.assertEqual(status, 200)
+        self.assertEqual(dict(headers)["Content-Disposition"],
+                         "attachment; filename=researchwitness-report.zip")
+
     def test_nested_percent_encoded_filenames_fail_closed(self):
         from researchwitness.local_ui import _safe_filename
 
@@ -167,6 +181,15 @@ class LocalUITests(unittest.TestCase):
 
         self.store.delete_all()
         self.assertEqual(list((self.root / "runs").iterdir()), [])
+
+    def test_export_refuses_a_completed_run_with_a_missing_report_artifact(self):
+        job, _ = self.store.submit("sample.md", ".md", TABLE_PAPER,
+                                   "synthetic:missing-report", "fixture-v1")
+        job.future.result(timeout=10)
+        report_html = self.root / "runs" / job.job_id / "report-data" / "report.html"
+        report_html.unlink()
+        with self.assertRaisesRegex(LocalUIError, "LOCAL_REPORT_UNAVAILABLE"):
+            self.store.export_zip(job.job_id)
 
     def test_report_api_discloses_truncation_and_scope_question_values(self):
         job, _ = self.store.submit("sample.md", ".md", TABLE_PAPER,

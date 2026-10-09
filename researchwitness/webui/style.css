@@ -22,6 +22,7 @@ button, input { font: inherit; }
 button:focus-visible, input:focus-visible, a:focus-visible, summary:focus-visible, .drop-zone:focus-within {
   outline: 3px solid var(--focus); outline-offset: 3px;
 }
+button:disabled { cursor: not-allowed; opacity: .58; }
 .skip-link { position: absolute; left: 1rem; top: -5rem; z-index: 5; padding: .65rem 1rem; background: white; }
 .skip-link:focus { top: .5rem; }
 .topbar { min-height: 70px; border-bottom: 1px solid var(--line); background: rgba(255,254,250,.8); display: flex; align-items: center; justify-content: space-between; padding: .7rem max(1.1rem, calc((100vw - 980px)/2)); }
@@ -42,6 +43,7 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 5v
 .step { flex: 0 0 auto; width: 2rem; height: 2rem; display: grid; place-items: center; border: 1px solid #b5cbc2; border-radius: 50%; background: var(--teal-soft); color: var(--teal-dark); font-size: .76rem; font-weight: 800; }
 .drop-zone { position: relative; min-height: 160px; border: 1.5px dashed #7fa29a; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: .35rem; text-align: center; padding: 1.2rem; background: #f7faf6; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
 .drop-zone:hover, .drop-zone.dragging { border-color: var(--teal); background: #edf6f0; }
+.drop-zone[aria-disabled="true"] { cursor: not-allowed; opacity: .62; }
 .upload-icon { display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 50%; background: var(--teal); color: white; font-size: 1.35rem; font-weight: 700; }
 .drop-title { color: var(--teal-dark); font-weight: 760; }
 .drop-subtitle { color: var(--muted); font-size: .86rem; }

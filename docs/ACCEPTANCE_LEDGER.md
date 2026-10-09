@@ -1,45 +1,39 @@
-# ResearchWitness acceptance ledger
+# ResearchWitness aggregate qualification summary
 
-This ledger evaluates the scoped local research-screening preview. A passing synthetic suite is evidence about tested code paths only; it does not establish source truth, evaluation readiness, or custody isolation.
+This public summary reports aggregate engineering and evaluation status. The detailed acceptance assessment is bound by SHA-256 `fcbca02199e3e6f1545dbac63a4a3c1fdd4049746feae7a91d2702f472d284a3`. This hash is an integrity commitment; it does not make the detailed assessment public.
 
-## Candidate and authority snapshot
+## Candidate
 
-- Qualified starting content: commit `6843593ff443d4a44c48d15a76949b323d0951ca`, tree `e218c518639b614a5bee5850ece62e2cbe6bc745`.
-- Candidate branch: `codex/researchwitness-scoped-preview`; separate dirty `/workspace/ResearchWitness` checkout was left untouched.
-- The new candidate has not received hosted CI/CodeQL, a public tree review, a merge, or a release. Starting-commit CI and CodeQL results do not cover this work.
-- Environment observed for this work: Linux/Python 3.12. The local API test's bind to `127.0.0.1` failed with `PermissionError: [Errno 1] Operation not permitted`. No alternate binding route was attempted.
-- No separate custodian execution environment is attached. No research source or identifier was requested from an external provider. No private custody path, reserve paper, label, or correction target was accessed. No Wave 3 run, merge, publication, or spending occurred.
-- The last inherited reserve aggregate is not a fresh observation: it reported zero confirmed untouched eligible positives and 363 source-reviewed negatives across 5 documents. That is below the required 15 distinct independent documents, and it does not establish the current positive minimum. The present session did not inspect or reconcile the private ledger.
+- Repository: `Smkzz/ResearchWitness`; PR #12 remains draft and unmerged, stacked on PR #11's count/percentage provenance contract v1.3.
+- The updated candidate commit, tree, and hosted check results are identified by the PR head and its checks.
+- No research-preview release is qualified by this record.
 
-## Ten-category acceptance matrix
+## Aggregate engineering evidence
 
-| # | Requirement | Inspection / test and artifact | Result | Limitation |
-| --- | --- | --- | --- | --- |
-| 1 | Product usefulness: paper-to-report-to-replay without user-authored JSON | `README.md`; `researchwitness/__main__.py`; `researchwitness/local_ui.py`; `researchwitness/webui/*`; `tests/test_local_ui.py` | BLOCKED | A local upload, report, export, retry/replay and deletion path is implemented and store-level lifecycle tests pass. The browser/API path could not run because loopback bind was denied. |
-| 2 | Scientific validity: faithful source bindings, explicit applicability, adjudicated results, sound unseen evaluation | `custody_worker/store.py`; review v5 schemas; `tests/test_custody_worker.py`; frozen wave qualification | BLOCKED | V5 synthetic source-span/arithmetic checks include the table-number operand exploit regression. No reserved case was reviewed; source identity, licensing, scope and correction applicability remain attestations. Required reserve minima are not confirmed. |
-| 3 | Security: fail-closed inputs and proven deployment/custody boundaries | `docs/custody-worker/SECURITY_REVIEW.md`; `docs/custody-worker/THREAT_MODEL.md`; custody and local-store synthetic tests | BLOCKED | The v4 operand-borrowing finding is fixed in v5 and regression-tested. The desktop scan-start tool is unavailable; no independent post-fix security review, Windows effective-access check, custodian isolation, runner denial, race assessment, or egress enforcement proof is available. |
-| 4 | Privacy: no unapproved egress or reserve leakage; tested deletion/retention/export | `researchwitness/local_ui.py`; `custody_worker/store.py`; synthetic deletion/export tests; execution log | BLOCKED | No source or reserve material left this session. Synthetic export refuses below thresholds and uses a keyed commitment. Production output channels and the approved host boundary are unverified. |
-| 5 | UX/accessibility: onboarding, findings/coverage, focus, errors/recovery and browser inspection | `researchwitness/webui/*`; `tests/test_local_ui.py`; UI review notes | BLOCKED | Static fixes disclose capped result counts, scope denominators, JATS element paths, duplicate state and actual retention behavior. No real-browser, keyboard, screen-reader or contrast review ran because loopback serving was denied. |
-| 6 | Reliability: interruption/retry/concurrency, deterministic evidence and restart recovery | `tests/test_custody_worker.py`; `tests/test_local_ui.py`; exact commands in `docs/custody-worker/QUALIFICATION.md` | BLOCKED | Targeted suite: 57 tests, one skipped, all other tests passed. Full discovery cannot import 19 modules because pytest is absent; `unittest` reported 76 runnable tests plus 19 import errors and one skipped. |
-| 7 | Performance/cost: representative bounded workload and no new spend | worker/UI size limits and runtime limits; execution log | NOT_CLAIMED | No representative product/UI benchmark was run. No spending occurred; no cost or performance claim is made. |
-| 8 | Installation/portability: clean supported install, offline use, tested platform scope | `tools/qualify_custody_zipapp.py`; `tools/qualify_app_wheel.py`; `docs/custody-worker/QUALIFICATION.md` | BLOCKED | Two clean Linux builds passed for both the custody zipapp and app wheel; clean-target wheel install and package-resource smoke passed. Windows custodian install, ACLs, host egress, and Windows UI behavior remain untested. |
-| 9 | Maintainability/reproducibility: strict versioned schemas, regressions, replay and verifiable artifacts | `custody_worker/schemas/*`; `tests/test_custody_worker.py`; package qualification tools | BLOCKED | V5 review/v4 record schemas, synthetic regressions, and deterministic artifacts are present. Full repository tests, hosted checks, independent v5 review and final release provenance remain outstanding. |
-| 10 | Documentation/release quality: clear scope, quickstart, examples, policy, changelog and verified release | `README.md`; `CHANGELOG.md`; `docs/custody-worker/*`; current Git state | BLOCKED | Documentation states supported scope and limits. No final public tree/check verification, merged source, downloadable release, clean supported-platform install, or rollback exercise exists. |
+- Focused synthetic unittest run: 76 tests, 71 passed, 5 skipped.
+- Reproducible app wheel SHA-256: `d2d8651684d643a5d58c13d922c78f1dde52bda340a8d9932aeddaff5144153f`.
+- Reproducible source archive SHA-256: `cd8e7a70ed3ab34033535648ce2940eba979d58e72c0eb352a211b5f3407a613`.
+- Reproducible offline custody-worker package SHA-256: `62931b5e2999d8744bbcd9ca9b6e34b8add4f9d4a4ede56aa79ced6d4f08b72e`.
+- The previous PR tree's CI and CodeQL checks passed. Checks for the updated tree are tracked on PR #12.
+- These results use synthetic fixtures and do not establish scientific detection performance.
 
-## Direct work log
+## Aggregate scientific gate
 
-| Candidate | Action | Result |
-| --- | --- | --- |
-| Starting qualified tree | Read-only branch, ancestry, draft-PR and starting CI/CodeQL audit, as recorded in the prior checkpoint | Baseline retained; those hosted checks apply only to the starting commit. |
-| Custody worker v2–v4 development | Source binding, correction mapping, inventory sealing/export constraints and synthetic hardening | Historical candidate work remains recorded in versioned source/schemas; no package was installed into custody. |
-| Custody worker v5 | Closed table-locator/numerator overlap and missing explicit-count-cue bypass; added positive-label and uncued-numerator regressions | `env TMPDIR=/tmp/rw-final-v5-tests python -m unittest tests.test_custody_worker -q`: 48 passed. |
-| Local product UI | Added visible denominator evidence and JATS paths, truncation totals, stale duplicate clearing, and accurate inactive-run retention wording | Covered by offline report/store test; `node --check researchwitness/webui/app.js` passed. Browser path remained blocked by socket denial. |
-| Worker and UI integration | `env TMPDIR=/tmp/rw-final-v5-tests python -m unittest tests.test_custody_worker tests.test_local_ui -q` | 57 tests, one skipped, all other tests passed. |
-| Syntax | `python -m py_compile researchwitness/*.py custody_worker/*.py tests/test_local_ui.py tests/test_custody_worker.py tools/qualify_custody_zipapp.py tools/qualify_app_wheel.py`; `node --check researchwitness/webui/app.js` | Passed on the committed candidate. |
-| Full test discovery | `python -m unittest discover -s tests -q` | Failed to import 19 pytest-based test modules because pytest is unavailable. No dependency was installed. |
-| Custody zipapp | `python tools/qualify_custody_zipapp.py` | Two independent clean builds matched; manifest/allowlist inspection and `python -I -S` synthetic CLI lifecycle passed; below-threshold export was refused. SHA-256 recorded in `docs/custody-worker/QUALIFICATION.md`. |
-| Application wheel | `python tools/qualify_app_wheel.py` | Two clean source snapshots built byte-identically; archive inspection and no-index clean-target install/CLI/resource smoke passed. SHA-256 recorded in `docs/custody-worker/QUALIFICATION.md`. |
+The inherited aggregate record reports zero confirmed untouched eligible positive cases and 363 eligible negative relationships across five DOI document IDs. The frozen minimums are at least one untouched eligible positive and 50 eligible correct negative relationships across 15 independent works. Those minimums remain unconfirmed. Wave 3 has not been run.
 
-## Remaining owner-controlled gates
+## Ten-category status
 
-Do not report evaluation-ready or run Wave 3. An owner must attach an already-authorized, technically separate custodian route under the existing custodian identity, with development-agent denial across source, store, temp, logs, backups and outputs and independently enforced four-host egress. That route must privately reconcile the canonical allocation and alias/work-family identity and qualify at least one untouched correction-backed positive plus 50 eligible correct relations across 15 independent works. A test route with loopback and a real browser, plus pytest already available without network installation, is needed to close the local interface and full-suite gates. The source, existing custody records, exclusion set and frozen v1.3 rules must remain unchanged. Only after all gates pass may the previously authorized frozen evaluation be considered; this candidate was not run on reserve papers.
+| Category | Status |
+| --- | --- |
+| Product usefulness | BLOCKED |
+| Scientific correctness | BLOCKED |
+| Security | BLOCKED |
+| Privacy | BLOCKED |
+| UX and accessibility | BLOCKED |
+| Reliability | BLOCKED |
+| Performance and cost | NOT_CLAIMED |
+| Installation and portability | BLOCKED |
+| Maintainability and reproducibility | BLOCKED |
+| Documentation and release quality | BLOCKED |
+
+The detailed assessment records per-category evidence and outstanding actions. Public findings remain limited to approved aggregates and artifact integrity commitments.

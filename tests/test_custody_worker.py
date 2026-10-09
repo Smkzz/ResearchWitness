@@ -24,7 +24,7 @@ from custody_worker.policy import (
 from custody_worker.store import (
     import_batch, make_store, record_review, verify_all, seal_inventory,
     summarize, export_public_summary, SCOPE_STATUS, SOURCE_VERSION_STATUS,
-    CORRECTION_STATUS,
+    CORRECTION_STATUS, _review_validation, _source_index,
 )
 
 DOCUMENT = "doi:10.5555/synthetic-study"
@@ -47,7 +47,7 @@ def span(text: str, needle: str, *, base: int = 0, occurrence: int = 0) -> dict:
 
 def relation(source_text: str, group: str, percentage: str, *, line_number: int = 0,
              numerator: str = "2", denominator: str = "N = 7",
-             table_locator: str = "Table 1") -> dict:
+             table_locator: str = "Table 1", numerator_occurrence: int = 0) -> dict:
     lines = source_text.splitlines(keepends=True)
     base = sum(len(line.encode("utf-8")) for line in lines[:line_number])
     line = lines[line_number].rstrip("\r\n")
@@ -55,7 +55,7 @@ def relation(source_text: str, group: str, percentage: str, *, line_number: int 
         "table_locator_span": span(line, table_locator, base=base),
         "object_locator_span": span(line, group, base=base),
         "context_span": span(line, line, base=base),
-        "numerator_span": span(line, numerator, base=base),
+        "numerator_span": span(line, numerator, base=base, occurrence=numerator_occurrence),
         "denominator_span": span(line, denominator, base=base),
         "percentage_span": span(line, percentage, base=base),
         "scope_span": span(line, f"{group} / main cohort", base=base),
@@ -157,6 +157,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
                       correction_numerator: str = "2", correction_denominator: str = "N = 7",
                       numerator: str = "2", denominator: str = "N = 7",
                       table_locator: str = "Table 1",
+                      numerator_occurrence: int = 0,
                       corrected_group: str | None = None,
                       changed_fields: list[str] | None = None, scope_status: str = SCOPE_STATUS,
                       line_number: int = 0):
@@ -164,6 +165,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         source_relation = relation(
             original_text, group, original_percent, line_number=line_number,
             numerator=numerator, denominator=denominator, table_locator=table_locator,
+            numerator_occurrence=numerator_occurrence,
         )
         source_relation["scope_status"] = scope_status
         correction_binding = None
@@ -215,6 +217,23 @@ class CustodyWorkerV5Tests(unittest.TestCase):
     def record(self, review: dict):
         self.write_review(review)
         return record_review(self.root, review["review_id"])
+
+    def write_v4_record(self, review: dict):
+        _, details = _review_validation(review, self.root, _source_index(self.root))
+        record = {
+            "schema_version": "rw-custody-review-record/4",
+            "review": review,
+            "checked": {
+                "original_arithmetic": details["original_arithmetic"],
+                "corrected_arithmetic": details["corrected_arithmetic"],
+                "relationship_key": details["legacy_relationship_key"],
+            },
+            "recorded_by": "SYNTHETIC_DEVELOPMENT",
+            "recorded_at_utc": "2026-10-09T00:00:00Z",
+        }
+        path = self.root / "manifests" / "reviews" / (review["review_id"] + ".json")
+        path.write_bytes(canonical_bytes(record))
+        return path
 
     def test_doi_normalization_is_stable_and_rejects_arbitrary_paper_labels(self):
         self.assertEqual(normalize_doi("https://doi.org/10.5555/Synthetic-Study"), DOCUMENT)
@@ -393,7 +412,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         from referencing import Registry, Resource
         schema_dir = Path(__file__).parents[1] / "custody_worker" / "schemas"
         review_schema = json.loads((schema_dir / "review.v5.schema.json").read_text())
-        record_schema = json.loads((schema_dir / "review-record.v4.schema.json").read_text())
+        record_schema = json.loads((schema_dir / "review-record.v5.schema.json").read_text())
         registry = Registry().with_resource(
             "review.v5.schema.json", Resource.from_contents(review_schema),
         )
@@ -576,7 +595,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         with self.assertRaisesRegex(CustodyError, "DUPLICATE_CANONICAL_RELATIONSHIP"):
             self.record(second)
 
-    def test_equal_numeric_relations_collapse_conservatively_within_a_document(self):
+    def test_distinct_source_rows_with_equal_values_count_as_distinct_relations(self):
         original = (
             self.original_text("28.6%", "Group A")
             + self.original_text("28.6%", "Group B")
@@ -590,15 +609,139 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             review_id="review-two", line_number=1,
         )
         self.record(first)
-        with self.assertRaisesRegex(CustodyError, "DUPLICATE_CANONICAL_RELATIONSHIP"):
-            self.record(second)
+        self.record(second)
         counts = verify_all(self.root)
-        # Same count/denominator/percentage in one DOI is conservatively
-        # treated as one unique numeric relation even across two object labels.
-        self.assertEqual(counts["eligible_negative_relations"], 1)
+        self.assertEqual(counts["eligible_negative_relations"], 2)
         self.assertEqual(counts["eligible_negative_document_ids"], 1)
         self.assertEqual(counts["eligible_negative_tables"], 1)
         self.assertEqual(counts["eligible_negative_versions"], 1)
+
+    def test_identical_rows_in_distinct_tables_count_as_distinct_relations(self):
+        original = (
+            "Table 1 / Group A / main cohort / N = 7 / count 2 / 28.6%\n"
+            "Table 2 / Group A / main cohort / N = 7 / count 2 / 28.6%\n"
+        )
+        original_item, _ = self.source_setup(original=original)
+        first = self.review_object(
+            original_item, None, original_text=original, group="Group A",
+            original_percent="28.6%", table_locator="Table 1", line_number=0,
+        )
+        second = self.review_object(
+            original_item, None, review_id="review-two", original_text=original,
+            group="Group A", original_percent="28.6%", table_locator="Table 2", line_number=1,
+            numerator_occurrence=1,
+        )
+        self.record(first)
+        self.record(second)
+        counts = verify_all(self.root)
+        self.assertEqual(counts["eligible_negative_relations"], 2)
+        self.assertEqual(counts["eligible_negative_tables"], 2)
+        self.assertEqual(counts["eligible_negative_document_ids"], 1)
+
+    def test_precision_aliases_of_the_same_source_row_collapse_across_versions(self):
+        first_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 6%\n"
+        first_item, _ = self.source_setup(original=first_text, source_version="v1")
+        second_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 5.9%\n"
+        second_item, _ = self.source_setup(original=second_text, source_version="owner-renamed-v2")
+        first = self.review_object(
+            first_item, None, review_id="review-one", original_text=first_text,
+            original_percent="6%", numerator="7", denominator="N = 118",
+        )
+        second = self.review_object(
+            second_item, None, review_id="review-two", original_text=second_text,
+            original_percent="5.9%", numerator="7", denominator="N = 118",
+        )
+        self.record(first)
+        with self.assertRaisesRegex(CustodyError, "DUPLICATE_CANONICAL_RELATIONSHIP"):
+            self.record(second)
+        self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 1)
+
+    def test_table_number_zero_padding_is_a_stable_locator_alias(self):
+        first_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 6%\n"
+        first_item, _ = self.source_setup(original=first_text, source_version="v1")
+        second_text = "Table 01 / Group A / main cohort / N = 118 / count 7 / 5.9%\n"
+        second_item, _ = self.source_setup(original=second_text, source_version="v2")
+        first = self.review_object(
+            first_item, None, review_id="review-one", original_text=first_text,
+            original_percent="6%", numerator="7", denominator="N = 118",
+        )
+        second = self.review_object(
+            second_item, None, review_id="review-two", original_text=second_text,
+            original_percent="5.9%", numerator="7", denominator="N = 118",
+            table_locator="Table 01",
+        )
+        self.record(first)
+        with self.assertRaisesRegex(CustodyError, "DUPLICATE_CANONICAL_RELATIONSHIP"):
+            self.record(second)
+
+    def test_changed_table_locator_across_versions_is_unresolved(self):
+        first_text = "Table 1 / Group A / main cohort / N = 7 / count 2 / 28.6%\n"
+        first_item, _ = self.source_setup(original=first_text, source_version="v1")
+        second_text = "Table 2 / Group A / main cohort / N = 7 / count 2 / 28.6%\n"
+        second_item, _ = self.source_setup(original=second_text, source_version="v2")
+        first = self.review_object(
+            first_item, None, review_id="review-one", original_text=first_text,
+        )
+        second = self.review_object(
+            second_item, None, review_id="review-two", original_text=second_text,
+            table_locator="Table 2", numerator_occurrence=1,
+        )
+        self.record(first)
+        with self.assertRaisesRegex(CustodyError, "SOURCE_TABLE_LINEAGE_UNRESOLVED"):
+            self.record(second)
+        self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 1)
+
+    def test_v4_record_is_verified_without_rewriting_and_uses_row_identity_for_new_counts(self):
+        original = (
+            self.original_text("28.6%", "Group A")
+            + self.original_text("28.6%", "Group B")
+        )
+        original_item, _ = self.source_setup(original=original)
+        first = self.review_object(
+            original_item, None, original_text=original,
+            group="Group A", original_percent="28.6%",
+        )
+        self.record(first)
+        record_path = self.root / "manifests" / "reviews" / "review-one.json"
+        stored = json.loads(record_path.read_text(encoding="utf-8"))
+        stored["schema_version"] = "rw-custody-review-record/4"
+        stored["checked"]["relationship_key"] = sha256_bytes(canonical_bytes({
+            "document_id": DOCUMENT,
+            "numerator": 2,
+            "denominator": 7,
+            "percentage": "28.6",
+        }))
+        v4_bytes = canonical_bytes(stored)
+        record_path.write_bytes(v4_bytes)
+
+        second = self.review_object(
+            original_item, None, review_id="review-two", original_text=original,
+            group="Group B", original_percent="28.6%", line_number=1,
+        )
+        self.record(second)
+        self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 2)
+        self.assertEqual(record_path.read_bytes(), v4_bytes)
+
+    def test_legacy_precision_alias_records_remain_intact_and_aggregate_once(self):
+        first_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 6%\n"
+        second_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 5.9%\n"
+        first_item, _ = self.source_setup(original=first_text, source_version="v1")
+        second_item, _ = self.source_setup(original=second_text, source_version="v2")
+        first = self.review_object(
+            first_item, None, review_id="review-one", original_text=first_text,
+            original_percent="6%", numerator="7", denominator="N = 118",
+        )
+        second = self.review_object(
+            second_item, None, review_id="review-two", original_text=second_text,
+            original_percent="5.9%", numerator="7", denominator="N = 118",
+        )
+        first_path = self.write_v4_record(first)
+        second_path = self.write_v4_record(second)
+        before = (first_path.read_bytes(), second_path.read_bytes())
+
+        counts = verify_all(self.root)
+        self.assertEqual(counts["eligible_negative_relations"], 1)
+        self.assertEqual((first_path.read_bytes(), second_path.read_bytes()), before)
 
     def test_same_numeric_relation_in_changed_source_version_counts_once(self):
         first_text = self.original_text("28.6%")

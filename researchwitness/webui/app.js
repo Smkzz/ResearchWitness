@@ -8,7 +8,31 @@ const progressPanel = document.getElementById("progress-panel");
 const resultsPanel = document.getElementById("results-panel");
 const findingsRoot = document.getElementById("findings");
 let currentJob = null;
-let polling = false;
+let activePollJobId = null;
+let pollGeneration = 0;
+let historyBusy = false;
+let submissionInFlight = false;
+
+function controlsBusy() { return historyBusy || submissionInFlight; }
+
+function updateControls() {
+  const busy = controlsBusy();
+  document.querySelectorAll("#history-list button").forEach((button) => { button.disabled = busy; });
+  document.getElementById("delete-data").disabled = busy;
+  document.getElementById("paper-file").disabled = busy;
+  document.getElementById("paper-id").disabled = busy;
+  document.getElementById("paper-version").disabled = busy;
+  document.getElementById("run-button").disabled = busy || !document.getElementById("paper-file").files?.length;
+  document.getElementById("export-button").disabled = busy;
+  document.getElementById("replay-button").disabled = busy;
+  document.getElementById("retry-button").disabled = busy;
+  document.getElementById("drop-zone").setAttribute("aria-disabled", String(busy));
+}
+
+function setHistoryBusy(busy) {
+  historyBusy = busy;
+  updateControls();
+}
 
 function apiHeaders(extra = {}) {
   return { "X-RW-Token": token, ...extra };
@@ -65,16 +89,20 @@ function clearError() {
 fileInput.addEventListener("change", () => {
   const file = fileInput.files?.[0];
   setText(selectedFile, file ? `${file.name} · ${formatBytes(file.size)}` : "No file selected.");
-  runButton.disabled = !file;
+  updateControls();
   clearError();
 });
 
 const dropZone = document.getElementById("drop-zone");
 dropZone.addEventListener("dragover", (event) => {
-  event.preventDefault(); dropZone.classList.add("dragging");
+  // Cancel the browser's default file navigation even while a run is busy.
+  event.preventDefault();
+  if (controlsBusy()) return;
+  dropZone.classList.add("dragging");
 });
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
 dropZone.addEventListener("drop", (event) => {
+  if (controlsBusy()) { event.preventDefault(); return; }
   event.preventDefault(); dropZone.classList.remove("dragging");
   const file = event.dataTransfer?.files?.[0];
   if (!file) return;
@@ -85,6 +113,7 @@ dropZone.addEventListener("drop", (event) => {
 runButton.addEventListener("click", () => submitFile(false));
 
 async function submitFile(force) {
+  if (controlsBusy()) return;
   clearError();
   const file = fileInput.files?.[0];
   if (!file) return;
@@ -102,44 +131,79 @@ async function submitFile(force) {
     "X-RW-Version": version,
   };
   try {
-    runButton.disabled = true;
+    submissionInFlight = true;
+    updateControls();
+    setText(document.getElementById("result-status"), "");
+    setText(document.getElementById("progress-stage"), "Uploading the selected file");
+    progressPanel.hidden = false;
+    resultsPanel.hidden = true;
+    document.getElementById("progress-title").focus();
     const { payload } = await api("/api/jobs", { method: "POST", headers, body: file });
     currentJob = payload.job;
     document.getElementById("duplicate-note").hidden = !payload.duplicate;
     if (payload.duplicate) setText(document.getElementById("duplicate-note"), "This exact file and configuration already has a local result. ResearchWitness opened the cached run; use Replay this exact input to run it again.");
-    await presentJob(currentJob.job_id, payload.duplicate);
+    const presentation = presentJob(currentJob.job_id, payload.duplicate);
+    submissionInFlight = false;
+    updateControls();
+    await presentation;
   } catch (error) {
+    progressPanel.hidden = true;
     showError(error.message);
   } finally {
-    runButton.disabled = !fileInput.files?.length;
+    submissionInFlight = false;
+    updateControls();
   }
 }
 
 async function presentJob(jobId, duplicate = false) {
+  if (activePollJobId && activePollJobId !== jobId) return;
+  const generation = ++pollGeneration;
+  activePollJobId = jobId;
+  setHistoryBusy(true);
   progressPanel.hidden = false;
   resultsPanel.hidden = true;
-  if (duplicate) progressPanel.hidden = true;
-  polling = true;
+  setText(document.getElementById("result-status"), "");
+  if (duplicate) setText(document.getElementById("progress-stage"), "Opening the saved result");
+  document.getElementById("progress-title").focus();
+  document.getElementById("status-retry-button").hidden = true;
+  let job = null;
   try {
-    while (polling) {
+    while (generation === pollGeneration) {
       const { payload } = await api(`/api/jobs/${jobId}`);
-      currentJob = payload.job;
-      updateProgress(currentJob);
-      if (!["QUEUED", "ANALYZING", "CANCELLING"].includes(currentJob.status)) break;
+      if (generation !== pollGeneration) return;
+      job = payload.job;
+      currentJob = job;
+      updateProgress(job);
+      if (!["QUEUED", "ANALYZING", "CANCELLING"].includes(job.status)) break;
       await new Promise((resolve) => setTimeout(resolve, 450));
     }
   } catch (error) {
-    polling = false;
-    progressPanel.hidden = true;
-    showError(error.message);
+    if (generation === pollGeneration) {
+      setText(document.getElementById("progress-detail"), "The status request failed. This run may still be active; check status again, cancel it here, or reload the page to reconnect.");
+      document.getElementById("status-retry-button").hidden = false;
+      showError(error.message);
+      document.getElementById("status-retry-button").focus();
+    }
     return;
   }
-  polling = false;
+  if (generation !== pollGeneration || !job) return;
+  activePollJobId = null;
+  setText(document.getElementById("progress-stage"), "Preparing the saved result");
+  setText(document.getElementById("progress-detail"), "This run has finished. ResearchWitness is loading the result and refreshing local history.");
+  await refreshHistory();
+  const reportLoaded = job.status === "COMPLETED"
+    ? await loadReport(jobId, duplicate)
+    : (renderTerminal(job), true);
+  if (!reportLoaded) {
+    progressPanel.hidden = true;
+    resultsPanel.hidden = true;
+    setHistoryBusy(false);
+    return;
+  }
   progressPanel.hidden = true;
   resultsPanel.hidden = false;
-  await refreshHistory();
-  if (currentJob.status === "COMPLETED") await loadReport(jobId, duplicate);
-  else renderTerminal(currentJob);
+  setHistoryBusy(false);
+  document.getElementById("result-status").focus();
 }
 
 function updateProgress(job) {
@@ -150,10 +214,11 @@ function updateProgress(job) {
 }
 
 document.getElementById("cancel-button").addEventListener("click", async () => {
-  if (!currentJob) return;
+  const jobId = activePollJobId;
+  if (!jobId) return;
   try {
-    const { payload } = await api(`/api/jobs/${currentJob.job_id}/cancel`, { method: "POST" });
-    currentJob = payload.job; updateProgress(currentJob);
+    const { payload } = await api(`/api/jobs/${jobId}/cancel`, { method: "POST" });
+    if (activePollJobId === jobId) { currentJob = payload.job; updateProgress(currentJob); }
   } catch (error) { showError(error.message); }
 });
 
@@ -161,9 +226,14 @@ async function loadReport(jobId, duplicate = false) {
   clearError();
   try {
     const { payload } = await api(`/api/reports/${jobId}`);
+    if (payload.job?.job_id !== jobId) throw new Error("LOCAL_REPORT_JOB_MISMATCH");
     currentJob = payload.job;
     renderReport(payload, duplicate);
-  } catch (error) { showError(error.message); }
+    return true;
+  } catch (error) {
+    showError(error.message);
+    return false;
+  }
 }
 
 function renderTerminal(job) {
@@ -365,30 +435,44 @@ function renderFindings(findings, scopeQuestions, findingsTotal, scopeQuestionsT
 }
 
 document.getElementById("export-button").addEventListener("click", async () => {
-  if (!currentJob) return;
+  if (!currentJob || controlsBusy()) return;
+  const jobId = currentJob.job_id;
   try {
-    const { payload } = await api(`/api/exports/${currentJob.job_id}.zip`);
+    const { payload } = await api(`/api/exports/${jobId}.zip`);
     const url = URL.createObjectURL(payload);
     const link = document.createElement("a");
-    link.href = url; link.download = `researchwitness-report-${currentJob.job_id.slice(0, 8)}.zip`;
-    document.body.append(link); link.click(); link.remove(); URL.revokeObjectURL(url);
+    link.href = url; link.download = `researchwitness-report-${jobId.slice(0, 8)}.zip`;
+    document.body.append(link); link.click(); link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (error) { showError(error.message); }
 });
 
-document.getElementById("replay-button").addEventListener("click", async () => {
-  if (!currentJob) return;
+async function retryCurrentJob() {
+  if (!currentJob || controlsBusy()) return;
+  const jobId = currentJob.job_id;
+  submissionInFlight = true;
+  updateControls();
+  setText(document.getElementById("result-status"), "");
+  setText(document.getElementById("progress-stage"), "Submitting the retry request");
+  progressPanel.hidden = false;
+  resultsPanel.hidden = true;
+  document.getElementById("progress-title").focus();
   try {
-    const { payload } = await api(`/api/jobs/${currentJob.job_id}/retry`, { method: "POST" });
-    currentJob = payload.job; await presentJob(currentJob.job_id, false);
+    const { payload } = await api(`/api/jobs/${jobId}/retry`, { method: "POST" });
+    currentJob = payload.job;
+    const presentation = presentJob(currentJob.job_id, false);
+    submissionInFlight = false;
+    updateControls();
+    await presentation;
   } catch (error) { showError(error.message); }
-});
+  finally { submissionInFlight = false; updateControls(); }
+}
 
-document.getElementById("retry-button").addEventListener("click", async () => {
-  if (!currentJob) return;
-  try {
-    const { payload } = await api(`/api/jobs/${currentJob.job_id}/retry`, { method: "POST" });
-    currentJob = payload.job; await presentJob(currentJob.job_id, false);
-  } catch (error) { showError(error.message); }
+document.getElementById("replay-button").addEventListener("click", retryCurrentJob);
+document.getElementById("retry-button").addEventListener("click", retryCurrentJob);
+
+document.getElementById("status-retry-button").addEventListener("click", () => {
+  if (activePollJobId) void presentJob(activePollJobId);
 });
 
 async function refreshHistory() {
@@ -401,17 +485,42 @@ async function refreshHistory() {
       const row = makeElement("div", "history-item");
       const button = makeElement("button", "", `${job.original_name} · ${job.status.toLowerCase()}`);
       button.type = "button";
+      button.disabled = controlsBusy();
       button.addEventListener("click", async () => {
+        if (controlsBusy()) return;
         currentJob = job;
+        setHistoryBusy(true);
         if (["QUEUED", "ANALYZING", "CANCELLING"].includes(job.status)) {
-          await presentJob(job.job_id);
-          resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+          try {
+            await presentJob(job.job_id);
+            if (!activePollJobId && !resultsPanel.hidden) {
+              resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          } finally {
+            if (!activePollJobId && controlsBusy()) setHistoryBusy(false);
+          }
           return;
         }
-        resultsPanel.hidden = false;
-        if (job.status === "COMPLETED") await loadReport(job.job_id);
-        else renderTerminal(job);
-        resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        setText(document.getElementById("result-status"), "");
+        setText(document.getElementById("progress-stage"), "Loading the saved report");
+        // Keep the history lock while a saved report is loaded so a rapid
+        // second selection cannot let an older response overwrite a newer one.
+        resultsPanel.hidden = true;
+        progressPanel.hidden = false;
+        document.getElementById("progress-title").focus();
+        let reportLoaded = true;
+        try {
+          if (job.status === "COMPLETED") reportLoaded = await loadReport(job.job_id);
+          else renderTerminal(job);
+        } finally {
+          progressPanel.hidden = true;
+          resultsPanel.hidden = !reportLoaded;
+          setHistoryBusy(false);
+          if (reportLoaded) {
+            document.getElementById("result-status").focus();
+            resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
       });
       row.append(button, makeElement("span", "", job.created_at_utc)); root.append(row);
     }
@@ -421,10 +530,12 @@ async function refreshHistory() {
 }
 
 document.getElementById("delete-data").addEventListener("click", async () => {
+  if (controlsBusy()) return;
   if (!window.confirm("Delete all ResearchWitness local run data and saved paper copies from this application? Exported packages and system backups are not deleted.")) return;
   try {
     await api("/api/data", { method: "DELETE" });
     resultsPanel.hidden = true; progressPanel.hidden = true; currentJob = null;
+    activePollJobId = null;
     fileInput.value = "";
     selectedFile.textContent = "No file selected.";
     runButton.disabled = true;
@@ -444,7 +555,7 @@ refreshHistory().then(async () => {
   try {
     const { payload } = await api("/api/jobs");
     const active = payload.jobs.find((job) => ["QUEUED", "ANALYZING", "CANCELLING"].includes(job.status));
-    if (active && !polling) {
+    if (active && !activePollJobId) {
       currentJob = active;
       await presentJob(active.job_id);
     }

@@ -43,7 +43,8 @@ SOURCE_VERSION_STATUS = "CUSTODIAN_CONFIRMED_SOURCE_VERSION"
 SCOPE_STATUS = "CUSTODIAN_CONFIRMED_SAME_SCOPE"
 CORRECTION_STATUS = "CUSTODIAN_CONFIRMED_EXACT_CORRECTION"
 PUBLIC_EXPORT_VERSION = "rw-custody-public-export/2"
-REVIEW_RECORD_VERSION = "rw-custody-review-record/4"
+REVIEW_RECORD_VERSION = "rw-custody-review-record/5"
+LEGACY_REVIEW_RECORD_VERSION = "rw-custody-review-record/4"
 
 
 def _authorize_path(path: Path) -> Path:
@@ -361,6 +362,14 @@ def _normalize_context(value: str) -> str:
     return " ".join(value.casefold().split())
 
 
+def _canonical_table_locator(value: str) -> str:
+    normalized = _normalize_context(value)
+    match = re.fullmatch(r"table\s+0*([0-9]+)", normalized)
+    if match and int(match.group(1)) > 0:
+        return f"table {int(match.group(1))}"
+    return normalized
+
+
 def _line_bounds(source: bytes, start: int) -> tuple[int, int]:
     line_start = source.rfind(b"\n", 0, start) + 1
     line_end = source.find(b"\n", start)
@@ -375,6 +384,48 @@ def _has_explicit_count_cue(source: bytes, numerator: tuple[str, int, int]) -> b
     """Require the selected numerator to follow a literal count field label."""
     prefix = source[_line_bounds(source, numerator[1])[0]:numerator[1]]
     return re.search(rb"(?i)(?<![a-z0-9_])count\s*[:=]?\s*$", prefix) is not None
+
+
+def _normalized_row_identity(source: bytes, context: tuple[str, int, int],
+                             fields: list[tuple[str, tuple[str, int, int]]]) -> list[str]:
+    """Return the validated physical row with selected numeric values masked.
+
+    Keeping the nonnumeric source text distinguishes separate groups/scopes while
+    masking printed operands makes precision aliases (for example 6% and 5.9%)
+    identify the same row. Exact duplicate normalized rows intentionally collapse
+    conservatively because their distinct meaning cannot be established from bytes.
+    """
+    cursor = context[1]
+    parts = []
+    for name, span in sorted(fields, key=lambda item: item[1][1]):
+        if span[1] < cursor or span[2] > context[2]:
+            reject("RELATION_VALUE_SPANS_OVERLAP")
+        try:
+            text = source[cursor:span[1]].decode("utf-8")
+        except UnicodeDecodeError:
+            reject("SOURCE_ENCODING_INVALID")
+        parts.extend((" ".join(text.casefold().split()), name))
+        cursor = span[2]
+    try:
+        tail = source[cursor:context[2]].decode("utf-8")
+    except UnicodeDecodeError:
+        reject("SOURCE_ENCODING_INVALID")
+    parts.append(" ".join(tail.casefold().split()))
+    return parts
+
+
+def _legacy_relationship_key(document_id: str, relation: dict[str, Any]) -> str:
+    percentage_value = str(relation["percentage"])
+    if "." in percentage_value:
+        whole, _, fraction = percentage_value.partition(".")
+        fraction = fraction.rstrip("0")
+        percentage_value = whole + ("." + fraction if fraction else "")
+    return sha256_bytes(canonical_bytes({
+        "document_id": document_id,
+        "numerator": relation["numerator"],
+        "denominator": relation["denominator"],
+        "percentage": percentage_value,
+    }))
 
 
 def _validate_relationship(source: bytes, raw: object, *,
@@ -436,6 +487,14 @@ def _validate_relationship(source: bytes, raw: object, *,
     d = parse_count_span(denominator[0], explicit_denominator=True)
     printed, places = parse_percent_span(percentage[0])
     arithmetic = computed_percent(n, d, printed, places)
+    row_identity = _normalized_row_identity(source, context, [
+        ("table", table_locator),
+        ("numerator", numerator),
+        ("denominator", denominator),
+        ("percentage", percentage),
+        *((f"correction-old-{index}", span) for index, span in enumerate(
+            sorted(additional_numeric_spans, key=lambda item: item[1]))),
+    ])
     return {
         "table_locator": _normalize_context(table_locator[0]),
         "object_locator": _normalize_context(object_locator[0]),
@@ -450,6 +509,7 @@ def _validate_relationship(source: bytes, raw: object, *,
         "denominator": d,
         "percentage": printed,
         "decimals": places,
+        "row_identity": row_identity,
         "arithmetic": arithmetic,
     }
 
@@ -633,29 +693,27 @@ def _review_validation(raw: object, root: Path,
     }:
         reject("OTHER_RELATION_CANNOT_BE_ELIGIBLE")
 
-    # Reviewers choose the surrounding context span. It proves that operand
-    # spans belong to one local statement, but it must not define relationship
-    # identity: widening or narrowing context would otherwise inflate counts.
-    # Use a conservative semantic key for the public eligibility count. A
-    # source can repeat the same fraction in separate tables, and a custodian
-    # can choose different valid context/locator spans or version labels for
-    # the same article. Collapsing equal numeric relations within one DOI may
-    # undercount distinct rows, but cannot inflate the frozen minimum through
-    # re-review, locator aliases, or alternate source-version labels.
-    percentage_value = relation["percentage"]
-    if "." in percentage_value:
-        whole, _, fraction = percentage_value.partition(".")
-        fraction = fraction.rstrip("0")
-        percentage_value = whole + ("." + fraction if fraction else "")
+    # Identity comes from the immutable source row, not reviewer-selected spans
+    # or only its numeric tuple. This keeps equal-valued, differently labelled
+    # rows distinct and collapses precision aliases of the same row.
+    canonical_table = _canonical_table_locator(relation["table_locator"])
+    row_content_key = sha256_bytes(canonical_bytes({
+        "document_id": document_id,
+        "source_row": relation["row_identity"],
+    }))
     fingerprint_material = {
         "document_id": document_id,
-        "numerator": relation["numerator"],
-        "denominator": relation["denominator"],
-        "percentage": percentage_value,
+        # Table locators are selected and validated against the physical row,
+        # but are masked in row_identity alongside the numeric operands. Keep
+        # the validated locator as a separate identity component so otherwise
+        # identical rows in different tables remain distinct.
+        "source_table": canonical_table,
+        "source_row": relation["row_identity"],
     }
     relationship_key = sha256_bytes(canonical_bytes(fingerprint_material))
+    legacy_relationship_key = _legacy_relationship_key(document_id, relation)
     version_key = (document_id, obj["source_version"])
-    table_key = (document_id, obj["source_version"], relation["table_locator"])
+    table_key = (document_id, obj["source_version"], canonical_table)
     positive_issue_key = None
     if correction_source_record is not None:
         # Without an independently validated correction-article identifier,
@@ -664,6 +722,9 @@ def _review_validation(raw: object, root: Path,
         positive_issue_key = document_id
     details = {
         "relationship_key": relationship_key,
+        "legacy_relationship_key": legacy_relationship_key,
+        "row_content_key": row_content_key,
+        "canonical_table_locator": canonical_table,
         "version_key": version_key,
         "table_key": table_key,
         "positive_issue_key": positive_issue_key,
@@ -683,7 +744,8 @@ def _read_existing_reviews(root: Path, source_index: dict[str, list[dict[str, An
         record = require_keys(read_json(path), {
             "schema_version", "review", "checked", "recorded_by", "recorded_at_utc",
         })
-        if record["schema_version"] != REVIEW_RECORD_VERSION:
+        record_version = record["schema_version"]
+        if record_version not in {LEGACY_REVIEW_RECORD_VERSION, REVIEW_RECORD_VERSION}:
             reject("REVIEW_RECORD_VERSION_UNSUPPORTED")
         if record["recorded_by"] != expected_actor:
             reject("REVIEW_RECORD_ACTOR_INVALID")
@@ -694,20 +756,60 @@ def _read_existing_reviews(root: Path, source_index: dict[str, list[dict[str, An
         expected = {
             "original_arithmetic": details["original_arithmetic"],
             "corrected_arithmetic": details["corrected_arithmetic"],
-            "relationship_key": details["relationship_key"],
+            "relationship_key": (
+                details["legacy_relationship_key"]
+                if record_version == LEGACY_REVIEW_RECORD_VERSION
+                else details["relationship_key"]
+            ),
         }
         if record["checked"] != expected:
             reject("REVIEW_LEDGER_CORRUPT")
-        result.append({"review": review, "details": details})
+        result.append({
+            "review": review, "details": details, "record_version": record_version,
+        })
     return result
 
 
-def _existing_relationship_keys(root: Path, source_index: dict[str, list[dict[str, Any]]]) -> set[str]:
+def _reject_duplicate_current_relationship_keys(rows: list[dict]) -> None:
+    # V4 records may contain precision aliases the old key kept separate.
+    # Preserve and verify those immutable records, then collapse them in the
+    # aggregate set. A duplicate involving a new v5 key is an integrity error.
+    entries_by_key: dict[str, list[tuple[str, str]]] = {}
+    for row in rows:
+        key = row["details"]["relationship_key"]
+        entries_by_key.setdefault(key, []).append((
+            row["record_version"], row["details"]["legacy_relationship_key"],
+        ))
+    for entries in entries_by_key.values():
+        if len(entries) <= 1:
+            continue
+        if any(version == REVIEW_RECORD_VERSION for version, _ in entries):
+            reject("DUPLICATE_CANONICAL_RELATIONSHIP")
+        legacy_keys = [legacy_key for _, legacy_key in entries]
+        if len(legacy_keys) != len(set(legacy_keys)):
+            reject("DUPLICATE_CANONICAL_RELATIONSHIP")
+
+    # If otherwise identical rows are present in more than one source version,
+    # a changed table label cannot be treated as either a new relation or a
+    # duplicate without an independently established table lineage. Refuse to
+    # aggregate that ambiguous version pair instead of inflating the count.
+    locations_by_row: dict[str, dict[tuple[str, str], set[str]]] = {}
+    for row in rows:
+        details = row["details"]
+        versions = locations_by_row.setdefault(details["row_content_key"], {})
+        versions.setdefault(details["version_key"], set()).add(
+            details["canonical_table_locator"],
+        )
+    for locations in locations_by_row.values():
+        if len(locations) > 1 and len({tuple(sorted(value)) for value in locations.values()}) > 1:
+            reject("SOURCE_TABLE_LINEAGE_UNRESOLVED")
+
+
+def _existing_relationship_keys(root: Path, source_index: dict[str, list[dict[str, Any]]],
+                                candidate: dict[str, Any] | None = None) -> set[str]:
     rows = _read_existing_reviews(root, source_index)
-    keys = [row["details"]["relationship_key"] for row in rows]
-    if len(keys) != len(set(keys)):
-        reject("DUPLICATE_CANONICAL_RELATIONSHIP")
-    return set(keys)
+    _reject_duplicate_current_relationship_keys(rows + ([candidate] if candidate else []))
+    return {row["details"]["relationship_key"] for row in rows}
 
 
 def import_batch(root: Path, batch_id: str) -> dict:
@@ -775,7 +877,8 @@ def record_review(root: Path, review_id: str) -> dict:
         review, details = _review_validation(raw, root, source_index)
         if review["review_id"] != review_id:
             reject("REVIEW_ID_MISMATCH")
-        if details["relationship_key"] in _existing_relationship_keys(root, source_index):
+        candidate = {"details": details, "record_version": REVIEW_RECORD_VERSION}
+        if details["relationship_key"] in _existing_relationship_keys(root, source_index, candidate):
             reject("DUPLICATE_CANONICAL_RELATIONSHIP")
         record = {
             "schema_version": REVIEW_RECORD_VERSION,
@@ -812,9 +915,7 @@ def _verify_all(root: Path) -> dict:
         for entries in source_index.values() for item in entries if item["role"] == "original"
     }
     rows = _read_existing_reviews(root, source_index)
-    relationship_keys = [row["details"]["relationship_key"] for row in rows]
-    if len(relationship_keys) != len(set(relationship_keys)):
-        reject("DUPLICATE_CANONICAL_RELATIONSHIP")
+    _reject_duplicate_current_relationship_keys(rows)
 
     positive_relations: set[str] = set()
     positive_issues: set[str] = set()
