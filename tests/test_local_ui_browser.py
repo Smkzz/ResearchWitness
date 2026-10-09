@@ -357,7 +357,8 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                       };
                     }""")
                     page.get_by_role("button", name="Replay this exact input").click()
-                self.assertEqual(replay_response.value.status, 200)
+                # Replay schedules an asynchronous job, so the HTTP response is Accepted.
+                self.assertEqual(replay_response.value.status, 202)
                 page.locator("body[data-rw-report-gate-pending='true']").wait_for(
                     state="attached", timeout=30_000,
                 )

@@ -47,6 +47,11 @@ jobs:
       - name: Qualify clean application wheel on Windows
         if: runner.os == 'Windows'
         run: python tools/qualify_app_wheel.py
+      - name: Qualify custody worker with synthetic data on Windows
+        if: runner.os == 'Windows'
+        run: |
+          python -m unittest tests.test_custody_worker -v
+          python tools/qualify_custody_zipapp.py
       - name: Retain synthetic desktop and mobile screenshots for review
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
