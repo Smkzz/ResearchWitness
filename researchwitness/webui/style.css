@@ -82,12 +82,13 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 5v
 .plain-list li { margin: .35rem 0; overflow-wrap: anywhere; }
 .coverage-list { display: grid; gap: .5rem; margin-top: .65rem; }
 .coverage-row { display: grid; grid-template-columns: minmax(180px,1.2fr) auto minmax(140px,2fr); align-items: baseline; gap: .6rem; border-bottom: 1px solid #e7ece7; padding: .5rem 0; font-size: .87rem; }
+.coverage-row > * { min-width: 0; }
 .coverage-row code { overflow-wrap: anywhere; color: #314846; font-size: .78rem; }
 .coverage-status { font-weight: 740; color: var(--teal-dark); }
-.coverage-reason { color: var(--muted); font-size: .8rem; }
+.coverage-reason { color: var(--muted); font-size: .8rem; overflow-wrap: anywhere; }
 .action-row { display: flex; flex-wrap: wrap; gap: .55rem; margin: 1rem 0; }
 .finding-card { border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; margin: .65rem 0; background: #fff; }
-.finding-card h4 { margin: 0 0 .3rem; font-size: 1rem; }
+.finding-card h4 { margin: 0 0 .3rem; font-size: 1rem; overflow-wrap: anywhere; }
 .finding-card p { margin: .35rem 0; }
 .evidence-quote { display: block; padding: .55rem .7rem; border-left: 2px solid #6e9487; background: #f4f8f4; color: #354b47; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .82rem; }
 .full-report { margin-top: 1.1rem; border-top: 1px solid var(--line); padding-top: .8rem; }
@@ -109,8 +110,9 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 5v
   .layout { width: min(100% - 1.1rem, 900px); margin-top: 2rem; }
   .form-grid { grid-template-columns: 1fr; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
-  .coverage-row { grid-template-columns: 1fr auto; gap: .2rem .55rem; }
+  .coverage-row { grid-template-columns: minmax(0,1fr) auto; gap: .2rem .55rem; }
   .coverage-reason { grid-column: 1 / -1; }
+  .coverage-status { overflow-wrap: anywhere; }
   .history-item { align-items: flex-start; flex-direction: column; gap: .2rem; }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -201,6 +201,18 @@ def test_negative_join_does_not_guess_between_ambiguous_same_anchor_relations():
         }
         for numerator, percent in ((3, '15.8'), (1, '5.3'))
     ]
+    relation = {
+        'detector_id': locators[0]['contract_id'],
+        'source_anchor': {'element_path': path},
+        'numerator_exact': '2',
+        'denominator_exact': '20',
+        'reported_percent': '10.0',
+        'display_precision': 1,
+    }
+
+    assert _pair_negative_source_relations(locators, [relation]) == [
+        (None, False), (None, False),
+    ]
 
 
 def test_xpath_normalization_preserves_id_and_omitted_position_identity():
@@ -252,18 +264,6 @@ def test_negative_anchor_fallback_requires_matching_table_identity():
 
     assert not _negative_locator_matches(relation, locator)
     assert _pair_negative_source_relations([locator], [relation]) == [(None, False)]
-    relation = {
-        'detector_id': locators[0]['contract_id'],
-        'source_anchor': {'element_path': path},
-        'numerator_exact': '2',
-        'denominator_exact': '20',
-        'reported_percent': '10.0',
-        'display_precision': 1,
-    }
-
-    assert _pair_negative_source_relations(locators, [relation]) == [
-        (None, False), (None, False),
-    ]
 
 
 def test_negative_source_table_count_excludes_prose_relations():

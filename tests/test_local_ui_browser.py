@@ -282,6 +282,34 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     page.evaluate("window.innerWidth"),
                     f"mobile viewport overflow diagnostics: {json.dumps(overflow_diagnostics, sort_keys=True)}",
                 )
+                for viewport_width in (360, 320):
+                    page.set_viewport_size({"width": viewport_width, "height": 844})
+                    narrow_diagnostics = page.evaluate("""() => ({
+                      documentScrollWidth: document.documentElement.scrollWidth,
+                      bodyScrollWidth: document.body.scrollWidth,
+                      overflowing: [...document.body.querySelectorAll('*')]
+                        .map(node => {
+                          const rect = node.getBoundingClientRect();
+                          return {
+                            tag: node.tagName,
+                            id: node.id,
+                            className: typeof node.className === 'string' ? node.className : '',
+                            left: Math.round(rect.left * 10) / 10,
+                            right: Math.round(rect.right * 10) / 10,
+                            clientWidth: node.clientWidth,
+                            scrollWidth: node.scrollWidth,
+                            text: (node.innerText || '').slice(0, 100),
+                          };
+                        })
+                        .filter(item => item.scrollWidth > item.clientWidth + 1 ||
+                          item.left < -1 || item.right > innerWidth + 1)
+                        .slice(0, 12),
+                    })""")
+                    self.assertLessEqual(
+                        narrow_diagnostics["documentScrollWidth"], viewport_width,
+                        f"{viewport_width}px mobile viewport overflow: "
+                        f"{json.dumps(narrow_diagnostics, sort_keys=True)}",
+                    )
 
                 page.evaluate("""() => {
                   const originalFetch = window.fetch.bind(window);
