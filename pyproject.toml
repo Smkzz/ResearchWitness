@@ -41,7 +41,7 @@ paper = ["pypdf>=5,<7"]
 include = ["researchwitness*"]
 
 [tool.setuptools.package-data]
-researchwitness = ["capability_examples.json", "schemas/*.json"]
+researchwitness = ["capability_examples.json", "schemas/*.json", "webui/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

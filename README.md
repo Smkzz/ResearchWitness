@@ -191,6 +191,18 @@ The command preserves the original input and creates JSON and static HTML report
 
 Text and Markdown are preserved byte-for-byte and must be UTF-8. JATS parsing never fetches external DTDs; it strips a simple external DTD reference and expands known named entities, while rejecting internal DTD/entity declarations and unknown entities. It applies explicit byte, element, nesting, text, table, row, column, span, and cell limits. PDF extraction uses optional `pypdf` (BSD-3-Clause) in a separate worker, performs no OCR, and may be partial or unavailable. PDF prose has a separate extraction status; PDF table structure is unsupported and no PDF table arithmetic runs. The worker has a 20-second wall timeout, a 15-second CPU limit, and a 768 MiB address-space limit where POSIX limits are supported; it is process isolation, not an OS sandbox. The report records page and extracted-text offsets, not precise PDF layout coordinates. Source identity, version, and authenticity remain unverified. Per-paper, per-detector, per-table coverage and skip reasons are in the report. See [`docs/PAPER_AUDIT_CAPABILITIES.md`](docs/PAPER_AUDIT_CAPABILITIES.md), [`schemas/paper-audit.schema.json`](schemas/paper-audit.schema.json), and the qualification report for exact limits.
 
+### Local paper-audit interface
+
+For an ordinary local workflow, launch the loopback-only interface:
+
+```bash
+python -m researchwitness ui
+```
+
+It opens a local page where you can select a `.txt`, `.md`, `.markdown`, `.xml`, `.nxml`, or `.pdf` file, run the supported screens, inspect source-linked candidates and coverage, replay the same pinned input, and export the source plus report. `--no-browser` prints the URL without opening it. The server binds to `127.0.0.1`; it makes no source retrieval, model, analytics, or other external requests. An identifier and version label are local report metadata, not authenticated facts.
+
+The application retains up to ten recent runs in its default local data directory (`%LOCALAPPDATA%` on Windows or the XDG data directory on Linux/macOS), with a 512 MiB store limit; runs remain until deleted or the oldest inactive runs are evicted to satisfy capacity. Use **Delete all ResearchWitness run data** to remove the files created by this interface; exported ZIPs and operating-system backups are outside that deletion. If existing store content cannot be recognized safely, the app stops writes/deletion and reports that manual review is required. The loopback token protects browser requests from cross-origin sites; it is not an OS-user boundary. Other processes running as the same local account may reach the app and its files, and Windows directory privacy depends on inherited ACLs that have not been verified here. This local interface is not a custodian environment or evidence of scientific validity. Real-browser inspection was blocked in this sandbox; other browser/OS combinations remain unqualified.
+
 The [synthetic sample](examples/paper-audit/paper.md) reports `n = 20` at recruitment and `n = 18` after exclusions. The updated screen describes these as a possible study-stage difference instead of an error candidate. Run it to inspect the report:
 
 ```bash

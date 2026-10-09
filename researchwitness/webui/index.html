@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="rw-session-token" content="__RW_SESSION_TOKEN__">
+  <meta name="theme-color" content="#f4f3ed">
+  <title>ResearchWitness · Local paper audit</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the paper checker</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="ResearchWitness local paper audit home">
+      <span class="brand-mark" aria-hidden="true">RW</span>
+      <span>ResearchWitness</span>
+    </a>
+    <span class="local-indicator"><span aria-hidden="true"></span> Runs on this computer</span>
+  </header>
+
+  <main id="main" class="layout">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">A careful first pass</p>
+      <h1 id="page-title">Check the numbers in a paper.</h1>
+      <p class="lede">Choose a file and ResearchWitness will run the checks it supports, then show the evidence and the parts it could not assess.</p>
+      <p class="scope-note"><strong>What a result means:</strong> this tool screens selected numerical relationships. It does not verify a paper, its source, or its conclusions.</p>
+    </section>
+
+    <div id="error-note" class="error-note" role="alert" tabindex="-1" hidden></div>
+
+    <section class="panel upload-panel" aria-labelledby="upload-title">
+      <div class="section-heading">
+        <span class="step" aria-hidden="true">01</span>
+        <div><h2 id="upload-title">Choose a paper</h2><p>Your file stays in this local application.</p></div>
+      </div>
+      <label id="drop-zone" class="drop-zone" for="paper-file">
+        <span class="upload-icon" aria-hidden="true">↑</span>
+        <span class="drop-title">Browse for a paper</span>
+        <span class="drop-subtitle">Text, Markdown, JATS/XML, or a text-based PDF · up to 32 MiB</span>
+        <input id="paper-file" type="file" accept=".txt,.md,.markdown,.xml,.nxml,.pdf,application/pdf,text/plain,text/markdown,application/xml,text/xml">
+      </label>
+      <p id="selected-file" class="selected-file" aria-live="polite">No file selected.</p>
+      <div class="form-grid">
+        <div class="field">
+          <label for="paper-id">Paper identifier <span class="optional">optional</span></label>
+          <input id="paper-id" type="text" maxlength="2000" autocomplete="off" placeholder="For example, a DOI or local label">
+          <small>Used only in your local report. No identifier is sent to a service.</small>
+        </div>
+        <div class="field">
+          <label for="paper-version">Uploaded version <span class="optional">optional</span></label>
+          <input id="paper-version" type="text" maxlength="100" autocomplete="off" placeholder="For example, accepted manuscript">
+          <small>This is your label; ResearchWitness does not authenticate the version.</small>
+        </div>
+      </div>
+      <button id="run-button" class="button primary" type="button" disabled>Run supported checks</button>
+      <p class="format-note"><strong>Format notes:</strong> JATS/XML is parsed as structured text. Markdown tables are checked only when their rows and denominator columns are explicit. PDF table layout is not reconstructed; image-only and encrypted PDFs may be unsupported.</p>
+    </section>
+
+    <section id="progress-panel" class="panel progress-panel" aria-labelledby="progress-title" hidden>
+      <div class="section-heading">
+        <span class="step" aria-hidden="true">02</span>
+        <div><h2 id="progress-title">Checking your paper</h2><p id="progress-stage" role="status" aria-live="polite">Waiting for an analysis worker</p></div>
+      </div>
+      <div class="progress-track" aria-hidden="true"><span class="progress-indeterminate"></span></div>
+      <p id="progress-detail" class="muted">Stages appear as the source is read and supported checks run. No percentage estimate is shown.</p>
+      <button id="cancel-button" class="button secondary" type="button">Cancel this run</button>
+    </section>
+
+    <section id="results-panel" class="panel results-panel" aria-labelledby="results-title" hidden>
+      <div class="section-heading">
+        <span class="step" aria-hidden="true">03</span>
+        <div><h2 id="results-title">Review the result</h2><p id="result-status" role="status" aria-live="polite"></p></div>
+      </div>
+      <div id="duplicate-note" class="notice" hidden></div>
+      <div id="result-summary"></div>
+      <div class="action-row">
+        <button id="export-button" class="button primary" type="button" hidden>Export source and report</button>
+        <button id="replay-button" class="button secondary" type="button" hidden>Replay this exact input</button>
+        <button id="retry-button" class="button secondary" type="button" hidden>Retry this run</button>
+      </div>
+      <p id="replay-help" class="privacy-note" hidden>The export contains the uploaded source, report, and a command for reproducing this local screen. Replaying the same source is not an independent observation.</p>
+      <div id="findings"></div>
+      <details id="full-report-details" class="full-report" hidden>
+        <summary>Open the complete evidence report</summary>
+        <iframe id="full-report" title="Complete source-bound screening report" sandbox=""></iframe>
+      </details>
+    </section>
+
+    <section class="panel history-panel" aria-labelledby="history-title">
+      <div class="section-heading compact">
+        <span class="step" aria-hidden="true">04</span>
+        <div><h2 id="history-title">Recent local runs</h2><p>Up to 10 runs remain here until you delete them or the app evicts the oldest inactive runs to meet its capacity limits.</p></div>
+      </div>
+      <div id="history-list" class="history-list"><p class="muted">No saved runs.</p></div>
+      <button id="delete-data" class="text-button" type="button">Delete all ResearchWitness run data</button>
+      <p class="privacy-note">This removes files created by this interface from its local run store. It does not erase operating-system backups or copies you exported. Other processes running as your local account may be able to access this local app and its files; this is not a custodian security boundary.</p>
+    </section>
+
+    <footer class="page-footer">
+      <p>No retrieval, OCR, model calls, analytics, or external network requests are made by this interface. Source authenticity and publication version remain unverified.</p>
+      <p id="store-warning" class="warning" role="status" hidden></p>
+    </footer>
+  </main>
+</body>
+</html>

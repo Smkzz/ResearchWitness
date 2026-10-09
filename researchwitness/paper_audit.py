@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from .jats import parse_jats
 from .paper_contracts import contract_registry, eligibility, source_capabilities
@@ -108,6 +108,15 @@ class CandidateDiscoverer(Protocol):
     def discover(
         self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool,
     ) -> dict[str, Any]: ...
+
+
+class PaperAuditCancelled(Exception):
+    """The caller cancelled a bounded paper-audit stage."""
+
+
+def _check_audit_cancel(should_cancel: Callable[[], bool] | None) -> None:
+    if should_cancel is not None and should_cancel():
+        raise PaperAuditCancelled()
 
 
 def _extract_pdf(source_bytes: bytes) -> tuple[bytes, str, str, list[dict[str, Any]], list[str]]:
@@ -203,6 +212,7 @@ class ExplicitCountDiscoverer:
 
     def discover(
         self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool,
+        should_cancel: Callable[[], bool] | None = None,
     ) -> dict[str, Any]:
         assertions: list[dict[str, Any]] = []
         sections: list[dict[str, Any]] = []
@@ -212,6 +222,8 @@ class ExplicitCountDiscoverer:
         line_start = 0
         line_number = 1
         while line_start < len(text_bytes):
+            if line_number % 128 == 1:
+                _check_audit_cancel(should_cancel)
             if line_number > MAX_SCAN_LINES:
                 truncated = True
                 break
@@ -487,7 +499,10 @@ class TablePercentageDiscoverer:
 
     name = 'markdown_table_percentage_recomputation'
 
-    def discover(self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool) -> dict[str, Any]:
+    def discover(
+        self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> dict[str, Any]:
         findings: list[dict[str, Any]] = []
         scope_differences: list[dict[str, Any]] = []
         checked = 0
@@ -519,6 +534,8 @@ class TablePercentageDiscoverer:
         table_checked_start = 0
         table_shape_mismatch = False
         while line_start < len(text_bytes):
+            if line_number % 128 == 1:
+                _check_audit_cancel(should_cancel)
             newline = text_bytes.find(b'\n', line_start)
             line_end = len(text_bytes) if newline < 0 else newline
             raw = text_bytes[line_start:line_end]
@@ -809,13 +826,18 @@ class ExplicitExclusionFlowDiscoverer:
 
     name = 'explicit_exclusion_flow_arithmetic_screen'
 
-    def discover(self, text_bytes: bytes, page_map: list[dict[str, Any]]) -> dict[str, Any]:
+    def discover(
+        self, text_bytes: bytes, page_map: list[dict[str, Any]],
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> dict[str, Any]:
         ambiguous_relations: list[dict[str, Any]] = []
         line_start = 0
         line_number = 1
         line_limit = False
         incomplete = False
         while line_start < len(text_bytes):
+            if line_number % 128 == 1:
+                _check_audit_cancel(should_cancel)
             newline = text_bytes.find(b'\n', line_start)
             line_end = len(text_bytes) if newline < 0 else newline
             raw = text_bytes[line_start:line_end]
@@ -1569,14 +1591,24 @@ def run_paper_audit(
     output_dir: Path | str,
     identifier: str | None = None,
     version: str | None = None,
+    *,
+    progress_callback: Callable[[str], None] | None = None,
+    cancellation_check: Callable[[], bool] | None = None,
 ) -> dict[str, Any]:
     """Create a source-pinned report with per-detector eligibility and limits."""
+    def stage(label: str) -> None:
+        _check_audit_cancel(cancellation_check)
+        if progress_callback is not None:
+            progress_callback(label)
+
+    stage('Reading source bytes')
     path = Path(input_path).absolute()
     source_bytes = Bundle(path.parent).read(path.name, MAX_SOURCE_BYTES)
     suffix = path.suffix.lower()
     source_name = 'source.pdf' if suffix == '.pdf' else 'source' + suffix
     jats_document = None
     jats_model_bytes = None
+    stage('Extracting text and source structure')
     if suffix in ('.xml', '.nxml'):
         try:
             jats_document = parse_jats(source_bytes, source_name)
@@ -1608,11 +1640,18 @@ def run_paper_audit(
     can_scan = extraction_status in ('TEXT_AVAILABLE', 'PARTIAL_TEXT') and jats_document is None
     discoverer: CandidateDiscoverer = ExplicitCountDiscoverer()
     if can_scan:
-        discovery = discoverer.discover(extracted, page_map, suffix in ('.md', '.markdown'))
-        table_screen = TablePercentageDiscoverer().discover(
-            extracted, page_map, suffix in ('.md', '.markdown'),
+        stage('Scanning explicit count statements')
+        discovery = discoverer.discover(
+            extracted, page_map, suffix in ('.md', '.markdown'), cancellation_check,
         )
-        flow_screen = ExplicitExclusionFlowDiscoverer().discover(extracted, page_map)
+        stage('Checking Markdown table percentages')
+        table_screen = TablePercentageDiscoverer().discover(
+            extracted, page_map, suffix in ('.md', '.markdown'), cancellation_check,
+        )
+        stage('Locating explicit exclusion-flow questions')
+        flow_screen = ExplicitExclusionFlowDiscoverer().discover(
+            extracted, page_map, cancellation_check,
+        )
     else:
         discovery = {
             'discoverer': discoverer.name, 'assertions': [], 'candidate_anomalies': [],
@@ -1639,6 +1678,7 @@ def run_paper_audit(
             ],
         }
 
+    stage('Checking structured JATS table percentages')
     structured_table_screen = (
         check_structured_table_percentages(jats_document)
         if jats_document is not None else {
@@ -1649,9 +1689,11 @@ def run_paper_audit(
         }
     )
     if jats_document is not None:
+        stage('Checking structured JATS ratios and summaries')
         ratio_screen = check_jats_cell_ratio_percentages(jats_document)
         statistics_screen = check_jats_sd_se_n_tables(jats_document)
         two_by_two_screen = check_jats_unadjusted_2x2_tables(jats_document)
+        stage('Checking source-mapped flow relationships')
         source_flow_screen, source_flow_coverage = _mapped_sample_flow_screen(jats_document)
         prisma_screen, prisma_coverage = _prisma_synthesis_screen(jats_document)
         paper_coverage = build_paper_coverage(jats_document, [
@@ -2015,6 +2057,7 @@ def run_paper_audit(
         ),
     }
 
+    stage('Writing source copy and reproducible report')
     output = Path(output_dir).absolute()
     require(not output.exists(), 'Paper-audit output directory already exists')
     output.mkdir(parents=True)
