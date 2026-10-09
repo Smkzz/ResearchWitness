@@ -79,7 +79,7 @@ h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 5v
 .subsection { margin: 1.4rem 0; }
 .subsection h3 { font-family: Georgia, "Times New Roman", serif; font-size: 1.25rem; margin: 0 0 .55rem; }
 .plain-list { padding-left: 1.25rem; margin: .35rem 0; }
-.plain-list li { margin: .35rem 0; }
+.plain-list li { margin: .35rem 0; overflow-wrap: anywhere; }
 .coverage-list { display: grid; gap: .5rem; margin-top: .65rem; }
 .coverage-row { display: grid; grid-template-columns: minmax(180px,1.2fr) auto minmax(140px,2fr); align-items: baseline; gap: .6rem; border-bottom: 1px solid #e7ece7; padding: .5rem 0; font-size: .87rem; }
 .coverage-row code { overflow-wrap: anywhere; color: #314846; font-size: .78rem; }

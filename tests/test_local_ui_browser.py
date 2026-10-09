@@ -212,6 +212,15 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 page.screenshot(path=str(desktop_screenshot), full_page=True)
                 self.assertGreater(desktop_screenshot.stat().st_size, 10_000)
                 page.set_viewport_size({"width": 390, "height": 844})
+                source_hash = page.locator("#result-summary .plain-list li").filter(
+                    has_text="Source SHA-256",
+                )
+                self.assertEqual(source_hash.count(), 1)
+                self.assertLessEqual(
+                    source_hash.evaluate("node => node.scrollWidth"),
+                    source_hash.evaluate("node => node.clientWidth"),
+                    "the source hash must wrap inside its mobile evidence row",
+                )
                 self.assertLessEqual(
                     page.evaluate("document.documentElement.scrollWidth"),
                     page.evaluate("window.innerWidth"),
