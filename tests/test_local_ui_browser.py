@@ -206,12 +206,16 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 self.assertIn("n=30", page.locator("#findings").inner_text())
                 self.assertIn("line 3 · byte 32", page.locator("#findings").inner_text())
                 page.locator("#full-report-details summary").click()
-                page.frame_locator("#full-report").locator("body").wait_for(timeout=10_000)
+                report_title = page.frame_locator("#full-report").get_by_role(
+                    "heading", name="ResearchWitness paper screening report",
+                )
+                report_title.wait_for(state="visible", timeout=10_000)
 
                 desktop_screenshot = self.screenshot_dir / "synthetic-results-desktop.png"
                 page.screenshot(path=str(desktop_screenshot), full_page=True)
                 self.assertGreater(desktop_screenshot.stat().st_size, 10_000)
                 page.set_viewport_size({"width": 390, "height": 844})
+                report_title.wait_for(state="visible", timeout=10_000)
                 source_hash = page.locator("#result-summary .plain-list li").filter(
                     has_text="Source SHA-256",
                 )
@@ -394,7 +398,15 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                         timeout=20_000,
                     ) as retry_response:
                         page.get_by_role("button", name="Retry this run").click()
-                    self.assertEqual(retry_response.value.status, 200)
+                    retry_response = retry_response.value
+                    self.assertEqual(retry_response.status, 202)
+                    previous_job = re.fullmatch(
+                        r"/api/jobs/([0-9a-f]{32})/retry",
+                        urllib.parse.urlsplit(retry_response.url).path,
+                    )
+                    self.assertIsNotNone(previous_job)
+                    retry_job = retry_response.json()["job"]
+                    self.assertNotEqual(retry_job["job_id"], previous_job.group(1))
                     wait_for_result_status(page, "Run failed", timeout=20_000)
 
                 self.assertEqual(off_origin, [])
