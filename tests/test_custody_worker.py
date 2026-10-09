@@ -83,7 +83,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
     def setUp(self):
         self.root = DEV_PARENT / ("rw-v5-test-" + uuid.uuid4().hex)
         self.root.mkdir()
-        (self.root / ".synthetic-only").write_text(MARKER, encoding="ascii")
+        (self.root / ".synthetic-only").write_bytes(MARKER.encode("ascii"))
         self.assertEqual(preflight(dev_root=self.root), self.root)
         make_store(self.root)
 
@@ -997,7 +997,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         other_root = DEV_PARENT / ("rw-v5-test-" + uuid.uuid4().hex)
         other_root.mkdir()
         try:
-            (other_root / ".synthetic-only").write_text(MARKER, encoding="ascii")
+            (other_root / ".synthetic-only").write_bytes(MARKER.encode("ascii"))
             make_store(other_root)
             self.assertNotEqual(seal_inventory(other_root)["seal_sha256"], first["seal_sha256"])
         finally:
@@ -1036,7 +1036,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
     def test_verify_does_not_create_missing_store_state(self):
         incomplete = DEV_PARENT / ("rw-incomplete-" + uuid.uuid4().hex)
         incomplete.mkdir()
-        (incomplete / ".synthetic-only").write_text(MARKER, encoding="ascii")
+        (incomplete / ".synthetic-only").write_bytes(MARKER.encode("ascii"))
         try:
             with self.assertRaises(CustodyError):
                 verify_all(incomplete)

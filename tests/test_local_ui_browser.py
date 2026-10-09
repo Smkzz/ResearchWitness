@@ -228,6 +228,9 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 mobile_screenshot = self.screenshot_dir / "synthetic-results-mobile.png"
                 page.screenshot(path=str(mobile_screenshot), full_page=True)
                 self.assertGreater(mobile_screenshot.stat().st_size, 10_000)
+                mobile_report_screenshot = self.screenshot_dir / "synthetic-full-report-mobile.png"
+                page.locator("#full-report").screenshot(path=str(mobile_report_screenshot))
+                self.assertGreater(mobile_report_screenshot.stat().st_size, 10_000)
                 overflow_diagnostics = page.evaluate("""() => {
                   const describe = (node) => {
                     const rect = node.getBoundingClientRect();

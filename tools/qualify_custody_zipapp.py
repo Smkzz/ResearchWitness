@@ -82,8 +82,8 @@ def exercise_synthetic_cli(archive: Path, workspace: Path) -> None:
     dev_parent = runtime_home / "rw-custody-synthetic-only"
     store = dev_parent / "zipapp-smoke"
     store.mkdir(parents=True)
-    (store / ".synthetic-only").write_text(
-        "RESEARCHWITNESS_SYNTHETIC_ONLY_V1\n", encoding="ascii",
+    (store / ".synthetic-only").write_bytes(
+        b"RESEARCHWITNESS_SYNTHETIC_ONLY_V1\n",
     )
     incoming = store / "incoming"
     incoming.mkdir()
