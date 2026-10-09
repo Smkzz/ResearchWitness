@@ -379,7 +379,10 @@ class LocalAuditStore:
                     visited += 1
                     if visited > max_entries:
                         raise LocalUIError("LOCAL_HISTORY_LIMIT_REQUIRES_DELETION", 507)
-                    info = entry.stat(follow_symlinks=False)
+                    # Use a fresh path-based no-follow stat here. On Windows,
+                    # DirEntry.stat() can report stale link-count metadata for
+                    # files changed by the worker's atomic report writes.
+                    info = os.lstat(entry.path)
                     if stat.S_ISLNK(info.st_mode) or (getattr(info, "st_file_attributes", 0) & 0x400):
                         raise LocalUIError("UNSAFE_LOCAL_HISTORY_ENTRY", 500)
                     if stat.S_ISDIR(info.st_mode):

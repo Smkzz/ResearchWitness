@@ -152,11 +152,19 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                   window.__rwUploadCalls = 0;
                   window.__rwUploadPending = false;
                   window.__rwReleaseUpload = null;
+                  window.__rwReportPending = false;
+                  window.__rwReleaseReport = null;
+                  window.__rwBlockedInitialReport = false;
                   window.fetch = async (input, options = {}) => {
                     if (String(input) === "/api/jobs" && options.method === "POST") {
                       window.__rwUploadCalls += 1;
                       window.__rwUploadPending = true;
                       await new Promise(resolve => { window.__rwReleaseUpload = resolve; });
+                    }
+                    if (String(input).startsWith("/api/reports/") && !window.__rwBlockedInitialReport) {
+                      window.__rwBlockedInitialReport = true;
+                      window.__rwReportPending = true;
+                      await new Promise(resolve => { window.__rwReleaseReport = resolve; });
                     }
                     return originalFetch(input, options);
                   };
@@ -182,9 +190,17 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 self.assertEqual(urllib.parse.urlparse(page.url).fragment, "main")
                 page.evaluate("window.__rwReleaseUpload()")
 
+                page.wait_for_function("window.__rwReportPending === true", timeout=30_000)
+                self.assertTrue(page.locator("#progress-panel").is_visible())
+                self.assertTrue(page.locator("#results-panel").is_hidden())
+                self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
+                self.assertEqual(page.locator("#progress-stage").inner_text(), "Preparing the saved result")
+                self.assertTrue(page.get_by_role("button", name="Cancel this run").is_disabled())
+                page.evaluate("window.__rwReleaseReport()")
                 wait_for_result_status(page, "Review candidates found", timeout=30_000)
                 self.assertIn("23 (73.3)", page.locator("#findings").inner_text())
-                self.assertIn("source", page.locator("#findings").inner_text().casefold())
+                self.assertIn("n=30", page.locator("#findings").inner_text())
+                self.assertIn("line 3 · byte 32", page.locator("#findings").inner_text())
                 page.locator("#full-report-details summary").click()
                 page.frame_locator("#full-report").locator("body").wait_for(timeout=10_000)
 
@@ -215,8 +231,7 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 export_path = page.evaluate("window.__rwExportRequestPath")
                 match = re.fullmatch(r"/api/exports/([0-9a-f]{32})\.zip", export_path or "")
                 self.assertIsNotNone(match)
-                self.assertEqual(download.suggested_filename,
-                                 f"researchwitness-report-{match.group(1)[:8]}.zip")
+                self.assertEqual(download.suggested_filename, "researchwitness-report.zip")
                 exported = Path(self.temporary.name) / "export.zip"
                 download.save_as(str(exported))
                 with zipfile.ZipFile(exported) as archive:

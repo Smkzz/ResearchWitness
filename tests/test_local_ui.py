@@ -119,6 +119,18 @@ class LocalUITests(unittest.TestCase):
         self.assertEqual(status, 404)
         self.assertNotIn(b"_send", body)
 
+    def test_size_of_counts_regular_files_in_nested_directories(self):
+        run_dir = self.root / "synthetic-size-check"
+        nested = run_dir / "report-data"
+        nested.mkdir(parents=True)
+        (run_dir / "source.md").write_bytes(b"synthetic source")
+        (nested / "report.json").write_bytes(b"synthetic report")
+
+        self.assertEqual(
+            self.store._size_of(run_dir),
+            len(b"synthetic source") + len(b"synthetic report"),
+        )
+
     def test_export_response_uses_a_constant_download_header(self):
         self.start_server()
         job, _ = self.store.submit("sample.md", ".md", TABLE_PAPER,

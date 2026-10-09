@@ -209,7 +209,8 @@ async function presentJob(jobId, duplicate = false) {
 function updateProgress(job) {
   setText(document.getElementById("progress-stage"), job.stage_label || job.stage);
   const cancelling = job.status === "CANCELLING";
-  document.getElementById("cancel-button").disabled = cancelling;
+  const cancellable = ["QUEUED", "ANALYZING"].includes(job.status);
+  document.getElementById("cancel-button").disabled = !cancellable;
   if (cancelling) setText(document.getElementById("progress-detail"), "Cancellation is cooperative. The active bounded parser/check stops at its next safe boundary.");
 }
 
