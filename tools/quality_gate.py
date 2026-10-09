@@ -33,9 +33,35 @@ def sha256(path: Path) -> str:
 
 
 def scan_core() -> None:
+    # The loopback HTTP interface is an I/O adapter, not a trusted numerical
+    # verifier. Audit its entrypoint separately; keep the import ban on every
+    # other core module rather than weakening BANNED_IMPORT_ROOTS.
+    adapter_path = CORE / 'local_ui.py'
+    adapter_tree = ast.parse(adapter_path.read_text(encoding='utf-8'), filename=str(adapter_path))
+    adapter_binds = [
+        node for node in ast.walk(adapter_tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        and node.func.id == 'LocalUIHTTPServer'
+    ]
+    if (len(adapter_binds) != 1 or not adapter_binds[0].args
+            or not isinstance(adapter_binds[0].args[0], ast.Tuple)
+            or not adapter_binds[0].args[0].elts
+            or not isinstance(adapter_binds[0].args[0].elts[0], ast.Constant)
+            or adapter_binds[0].args[0].elts[0].value != '127.0.0.1'):
+        raise RuntimeError('local HTTP adapter must bind only to the loopback address')
+    if any(isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+           and node.func.id in BANNED_CALLS for node in ast.walk(adapter_tree)):
+        raise RuntimeError('local HTTP adapter contains dynamic-code execution')
+
     for path in sorted(CORE.glob('*.py')):
+        if path == adapter_path:
+            continue
         tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
         for node in ast.walk(tree):
+            if (isinstance(node, ast.ImportFrom) and node.module
+                    and node.module.split('.')[-1] == 'local_ui'
+                    and path.name != '__main__.py'):
+                raise RuntimeError(f'trusted core imports the local HTTP adapter: {path.name}')
             if isinstance(node, ast.Import):
                 roots = {alias.name.split('.')[0] for alias in node.names}
                 banned = roots & BANNED_IMPORT_ROOTS
