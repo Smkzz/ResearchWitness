@@ -442,7 +442,7 @@ document.getElementById("export-button").addEventListener("click", async () => {
     const { payload } = await api(`/api/exports/${jobId}.zip`);
     const url = URL.createObjectURL(payload);
     const link = document.createElement("a");
-    link.href = url; link.download = `researchwitness-report-${jobId.slice(0, 8)}.zip`;
+    link.href = url; link.download = "researchwitness-report.zip";
     document.body.append(link); link.click(); link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   } catch (error) { showError(error.message); }
