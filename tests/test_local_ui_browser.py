@@ -50,11 +50,9 @@ def is_same_origin(url: str, expected_origin: str) -> bool:
 
 
 def wait_for_result_status(page, expected: str, timeout: int = 10_000) -> None:
-    page.wait_for_function(
-        "expected => !document.querySelector('#results-panel')?.hidden && "
-        "document.querySelector('#result-status')?.textContent.trim() === expected",
-        arg=expected, timeout=timeout,
-    )
+    page.locator("#results-panel:not([hidden])").get_by_text(
+        expected, exact=True,
+    ).wait_for(state="visible", timeout=timeout)
 
 
 @unittest.skipIf(sync_playwright is None, "Playwright is installed only in the browser qualification job")
@@ -159,18 +157,22 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     if (String(input) === "/api/jobs" && options.method === "POST") {
                       window.__rwUploadCalls += 1;
                       window.__rwUploadPending = true;
+                      document.body.dataset.rwUploadPending = "true";
                       await new Promise(resolve => { window.__rwReleaseUpload = resolve; });
                     }
                     if (String(input).startsWith("/api/reports/") && !window.__rwBlockedInitialReport) {
                       window.__rwBlockedInitialReport = true;
                       window.__rwReportPending = true;
+                      document.body.dataset.rwReportPending = "true";
                       await new Promise(resolve => { window.__rwReleaseReport = resolve; });
                     }
                     return originalFetch(input, options);
                   };
                 }""")
                 page.keyboard.press("Enter")
-                page.wait_for_function("window.__rwUploadPending === true", timeout=10_000)
+                page.locator("body[data-rw-upload-pending='true']").wait_for(
+                    state="attached", timeout=10_000,
+                )
                 self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
                 for control in ("#paper-file", "#paper-id", "#paper-version", "#run-button", "#delete-data"):
                     self.assertTrue(page.locator(control).is_disabled(), control)
@@ -190,7 +192,9 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 self.assertEqual(urllib.parse.urlparse(page.url).fragment, "main")
                 page.evaluate("window.__rwReleaseUpload()")
 
-                page.wait_for_function("window.__rwReportPending === true", timeout=30_000)
+                page.locator("body[data-rw-report-pending='true']").wait_for(
+                    state="attached", timeout=30_000,
+                )
                 self.assertTrue(page.locator("#progress-panel").is_visible())
                 self.assertTrue(page.locator("#results-panel").is_hidden())
                 self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
@@ -255,6 +259,7 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                       window.fetch = async (input, options = {}) => {
                         if (!window.__rwReportGatePending && String(input).startsWith('/api/reports/')) {
                           window.__rwReportGatePending = true;
+                          document.body.dataset.rwReportGatePending = "true";
                           await reportGate;
                         }
                         return originalFetch(input, options);
@@ -262,7 +267,9 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     }""")
                     page.get_by_role("button", name="Replay this exact input").click()
                 self.assertEqual(replay_response.value.status, 200)
-                page.wait_for_function("window.__rwReportGatePending === true", timeout=30_000)
+                page.locator("body[data-rw-report-gate-pending='true']").wait_for(
+                    state="attached", timeout=30_000,
+                )
                 self.assertTrue(page.locator("#progress-panel").is_visible())
                 self.assertEqual(page.locator("#progress-stage").inner_text(), "Preparing the saved result")
                 self.assertTrue(page.locator("#results-panel").is_hidden())
@@ -341,10 +348,7 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     )
                     self.assertEqual(page.evaluate("document.activeElement.id"), "status-retry-button")
                     buttons = page.locator("#history-list .history-item button")
-                    page.wait_for_function(
-                        "document.querySelectorAll('#history-list .history-item button').length >= 2",
-                        timeout=10_000,
-                    )
+                    buttons.nth(1).wait_for(state="visible", timeout=10_000)
                     self.assertGreaterEqual(buttons.count(), 2)
                     self.assertTrue(all(buttons.nth(index).is_disabled() for index in range(buttons.count())))
                     self.assertTrue(page.get_by_role("button", name="Delete all ResearchWitness run data").is_disabled())
@@ -395,13 +399,16 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                         if (path.startsWith('/api/reports/')) window.__rwReportCalls.push(path);
                         if (path === target) {{
                           window.__rwReportPending = true;
+                          document.body.dataset.rwHistoryReportPending = "true";
                           await new Promise(resolve => {{ window.__rwReleaseReport = resolve; }});
                         }}
                         return originalFetch(input, options);
                       }};
                     }}""")
                     completed_button.click()
-                    page.wait_for_function("window.__rwReportPending === true", timeout=10_000)
+                    page.locator("body[data-rw-history-report-pending='true']").wait_for(
+                        state="attached", timeout=10_000,
+                    )
                     self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
                     self.assertTrue(all(
                         page.locator("#history-list .history-item button").nth(index).is_disabled()
