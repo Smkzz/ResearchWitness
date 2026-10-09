@@ -179,7 +179,7 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 self.assertTrue(drag_state["dragoverPrevented"])
                 self.assertTrue(drag_state["dropPrevented"])
                 self.assertIn("synthetic.md", page.locator("#selected-file").inner_text())
-                self.assertEqual(urllib.parse.urlparse(page.url).fragment, "")
+                self.assertEqual(urllib.parse.urlparse(page.url).fragment, "main")
                 page.evaluate("window.__rwReleaseUpload()")
 
                 wait_for_result_status(page, "Review candidates found", timeout=30_000)
@@ -401,8 +401,12 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     wait_for_result_status(page, "Review candidates found")
                     self.assertTrue(page.locator("#progress-panel").is_hidden())
                     self.assertTrue(page.locator("#results-panel").is_visible())
-                    self.assertIn("Group B", page.locator("#findings").inner_text())
-                    self.assertNotIn("Group C", page.locator("#findings").inner_text())
+                    displayed_source = page.locator("#result-summary").inner_text()
+                    self.assertIn(hashlib.sha256(COMPLETED_PAPER).hexdigest(), displayed_source)
+                    self.assertNotIn(
+                        hashlib.sha256(COMPLETED_PAPER.replace(b"Group B", b"Group C")).hexdigest(),
+                        displayed_source,
+                    )
                     self.assertEqual(page.evaluate("window.__rwReportCalls"), [f"/api/reports/{completed.job_id}"])
                     self.assertEqual(off_origin, [])
                     self.assertEqual(page_errors, [])

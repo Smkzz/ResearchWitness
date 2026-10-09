@@ -63,6 +63,12 @@ class ReleasePackagingTests(unittest.TestCase):
             (self.root / directory / filename).write_text(
                 "synthetic reserved-evidence sentinel\n", encoding="utf-8",
             )
+        aggregate = self.root / "validation" / "paper-audit-real-evidence-wave"
+        aggregate.mkdir()
+        (aggregate / "SOURCE_ADJUDICATION_AGGREGATE.json").write_text(
+            '{"record_version":"1","status":"SYNTHETIC_AGGREGATE_ONLY"}\n',
+            encoding="utf-8",
+        )
         subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
         subprocess.run(["git", "config", "user.name", "Synthetic Test"], cwd=self.root, check=True)
         subprocess.run(["git", "config", "user.email", "synthetic@example.invalid"], cwd=self.root, check=True)
@@ -88,6 +94,11 @@ class ReleasePackagingTests(unittest.TestCase):
             }
             self.assertIn("docs/RELEASING.md", selected)
             self.assertIn("tools/make_release.py", selected)
+            approved_aggregate = (
+                "validation/paper-audit-real-evidence-wave/SOURCE_ADJUDICATION_AGGREGATE.json"
+            )
+            self.assertIn(approved_aggregate, selected)
+            self.assertIn(approved_aggregate, checksum_selected)
             self.assertNotIn("docs/ACCEPTANCE_LEDGER.md", selected)
             self.assertNotIn("docs/VALIDATION.md", selected)
             self.assertNotIn("docs/owner-private.md", selected)
@@ -95,7 +106,9 @@ class ReleasePackagingTests(unittest.TestCase):
             self.assertNotIn("tools/review_frozen_screen.py", selected)
             self.assertNotIn("tools/custody_worker_owner_action.ps1", selected)
             self.assertNotIn("tests/test_private_fixture.py", selected)
-            self.assertFalse(any(name.startswith(("validation/", "evidence/")) for name in selected))
+            self.assertFalse(any(name.startswith("validation/") and name != approved_aggregate
+                                 for name in selected))
+            self.assertFalse(any(name.startswith("evidence/") for name in selected))
             self.assertNotIn("docs/owner-private.md", checksum_selected)
             self.assertNotIn("docs/ACCEPTANCE_LEDGER.md", checksum_selected)
             self.assertNotIn("docs/VALIDATION.md", checksum_selected)
@@ -103,8 +116,9 @@ class ReleasePackagingTests(unittest.TestCase):
             self.assertNotIn("tools/review_frozen_screen.py", checksum_selected)
             self.assertNotIn("tools/custody_worker_owner_action.ps1", checksum_selected)
             self.assertNotIn("tests/test_private_fixture.py", checksum_selected)
-            self.assertFalse(any(name.startswith(("validation/", "evidence/"))
+            self.assertFalse(any(name.startswith("validation/") and name != approved_aggregate
                                  for name in checksum_selected))
+            self.assertFalse(any(name.startswith("evidence/") for name in checksum_selected))
             self.assertNotIn("docs/untracked-sentinel.md", selected)
             self.assertNotIn("docs/untracked-link.md", selected)
             self.assertNotIn("docs/untracked-sentinel.md", checksum_selected)
@@ -116,6 +130,11 @@ class ReleasePackagingTests(unittest.TestCase):
             bundled_readme = archive.read("researchwitness-test/README.md").decode("utf-8")
             self.assertIn("researchwitness-test/docs/RELEASING.md", names)
             self.assertIn("researchwitness-test/tools/make_release.py", names)
+            self.assertIn(f"researchwitness-test/{approved_aggregate}", names)
+            self.assertEqual(
+                archive.read(f"researchwitness-test/{approved_aggregate}"),
+                b'{"record_version":"1","status":"SYNTHETIC_AGGREGATE_ONLY"}\n',
+            )
             self.assertIn("docs/PAPER_AUDIT_CAPABILITIES.md", bundled_readme)
             self.assertNotIn("docs/VALIDATION.md", bundled_readme)
             self.assertFalse(any(name.endswith("/docs/owner-private.md") for name in names))
@@ -125,7 +144,10 @@ class ReleasePackagingTests(unittest.TestCase):
             self.assertFalse(any(name.endswith("/tools/review_frozen_screen.py") for name in names))
             self.assertFalse(any(name.endswith("/tools/custody_worker_owner_action.ps1") for name in names))
             self.assertFalse(any("/tests/" in name for name in names))
-            self.assertFalse(any("/validation/" in name or "/evidence/" in name for name in names))
+            self.assertFalse(any("/validation/" in name and not name.endswith(
+                "/paper-audit-real-evidence-wave/SOURCE_ADJUDICATION_AGGREGATE.json"
+            ) for name in names))
+            self.assertFalse(any("/evidence/" in name for name in names))
             self.assertFalse(any("untracked-sentinel" in name for name in names))
             self.assertFalse(any("untracked-link" in name for name in names))
             self.assertNotIn(outside.read_text(encoding="utf-8"), [
@@ -142,6 +164,9 @@ class ReleasePackagingTests(unittest.TestCase):
             "tools/make_examples.py", "tools/make_release.py",
             "tools/make_timeline_example.py", "tools/qualify_app_wheel.py",
             "tools/write_schema.py",
+        })
+        self.assertEqual(make_release.RELEASE_AGGREGATES, {
+            "validation/paper-audit-real-evidence-wave/SOURCE_ADJUDICATION_AGGREGATE.json",
         })
 
     def test_tracked_file_replaced_by_symlink_is_rejected(self):

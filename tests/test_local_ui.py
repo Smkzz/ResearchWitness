@@ -113,7 +113,9 @@ class LocalUITests(unittest.TestCase):
         self.assertEqual(status, 400)
         self.assertEqual(json.loads(body)["error"], "FILENAME_INVALID")
 
-        status, _, body = self.request("GET", "/%2e%2e/local_ui.py")
+        status, _, body = self.request(
+            "GET", "/%2e%2e/local_ui.py", headers={"X-RW-Token": self.token},
+        )
         self.assertEqual(status, 404)
         self.assertNotIn(b"_send", body)
 

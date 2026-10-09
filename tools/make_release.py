@@ -35,6 +35,9 @@ RELEASE_TOOLS = {
     'tools/make_timeline_example.py', 'tools/qualify_app_wheel.py',
     'tools/write_schema.py',
 }
+RELEASE_AGGREGATES = {
+    'validation/paper-audit-real-evidence-wave/SOURCE_ADJUDICATION_AGGREGATE.json',
+}
 EXCLUDED_PARTS = {'.git', '.pytest_cache', '__pycache__', 'build', 'dist', 'researchwitness.egg-info'}
 EXCLUDED_SUFFIXES = {'.pyc', '.pyo'}
 
@@ -163,6 +166,8 @@ def _tracked_paths() -> list[Path]:
         elif rel.parts[0] in {'docs', 'tools'}:
             if rel.as_posix() not in RELEASE_DOCS | RELEASE_TOOLS:
                 continue
+        elif rel.as_posix() in RELEASE_AGGREGATES:
+            pass
         elif rel.parts[0] not in TOP_DIRS:
             continue
         path = ROOT / rel

@@ -211,7 +211,7 @@ python -m researchwitness paper-audit examples/paper-audit/paper.md \
   --output work/paper-audit
 ```
 
-The repository retains development and historical validation materials for reproducing their original checks. They are not a sealed holdout and do not establish cross-field performance. Generated source archives omit evaluation and evidence records; no such records are needed for the supported local application workflow.
+The repository retains development and historical validation materials for reproducing their original checks. They are not a sealed holdout and do not establish cross-field performance. Generated source archives omit case-level evaluation and evidence records; they include only the reviewed aggregate-only source adjudication summary needed to preserve its integrity commitment.
 
 Start from a UTF-8 text capture of the exact paper version:
 

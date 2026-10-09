@@ -1,6 +1,6 @@
 # ResearchWitness aggregate qualification summary
 
-This public summary reports aggregate engineering and evaluation status. The detailed acceptance assessment is bound by SHA-256 `fcbca02199e3e6f1545dbac63a4a3c1fdd4049746feae7a91d2702f472d284a3`. This hash is an integrity commitment; it does not make the detailed assessment public.
+This public summary reports aggregate engineering and evaluation status. The detailed acceptance assessment is bound by SHA-256 `df5bde9cd98abe63ec552aa18598807fc957619d37cdd2f62e9b1de6881c3edb`. This hash is an integrity commitment; it does not make the detailed assessment public.
 
 ## Candidate
 
@@ -11,10 +11,10 @@ This public summary reports aggregate engineering and evaluation status. The det
 ## Aggregate engineering evidence
 
 - Focused synthetic unittest run: 76 tests, 71 passed, 5 skipped.
-- Reproducible app wheel SHA-256: `d2d8651684d643a5d58c13d922c78f1dde52bda340a8d9932aeddaff5144153f`.
-- Reproducible source archive SHA-256: `cd8e7a70ed3ab34033535648ce2940eba979d58e72c0eb352a211b5f3407a613`.
+- Reproducible app wheel SHA-256: `0e116daa5db2f10b9d61d611d4c72757c6644ee622743467dc08b5bf5c062b28`.
+- Reproducible source archive SHA-256: `6443a8a1753d60fbe3fb20dd3c5966ced29574bb005bf825d29d94a44b0e8552`.
 - Reproducible offline custody-worker package SHA-256: `62931b5e2999d8744bbcd9ca9b6e34b8add4f9d4a4ede56aa79ced6d4f08b72e`.
-- The previous PR tree's CI and CodeQL checks passed. Checks for the updated tree are tracked on PR #12.
+- CI and CodeQL passed on the previous PR tree. The first updated CI run identified two test failures; local fixes are ready for the rerun. CodeQL passed on that first updated candidate.
 - These results use synthetic fixtures and do not establish scientific detection performance.
 
 ## Aggregate scientific gate
