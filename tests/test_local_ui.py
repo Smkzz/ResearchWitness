@@ -113,6 +113,22 @@ class LocalUITests(unittest.TestCase):
         self.assertEqual(status, 400)
         self.assertEqual(json.loads(body)["error"], "FILENAME_INVALID")
 
+    def test_nested_percent_encoded_filenames_fail_closed(self):
+        from researchwitness.local_ui import _safe_filename
+
+        for encoded in (
+            "..%252foutside.md",
+            "..%255coutside.md",
+            "%252e%252e%252foutside.md",
+            "paper%250a.md",
+        ):
+            with self.subTest(encoded=encoded):
+                with self.assertRaisesRegex(LocalUIError, "FILENAME_INVALID"):
+                    _safe_filename(encoded)
+
+        # Literal percentage signs that cannot be decoded as escapes remain valid.
+        self.assertEqual(_safe_filename("100%25%20complete.md")[0], "100% complete.md")
+
     def test_upload_report_duplicate_export_replay_and_delete(self):
         job, duplicate = self.store.submit("sample.md", ".md", TABLE_PAPER,
                                            "synthetic:local-ui", "fixture-v1")

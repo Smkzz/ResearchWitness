@@ -112,6 +112,10 @@ def _safe_filename(encoded: str) -> tuple[str, str]:
         value = unquote_to_bytes(encoded).decode("utf-8", errors="strict")
     except UnicodeError as exc:
         raise LocalUIError("FILENAME_INVALID") from exc
+    # Reject URL escapes left after decoding exactly once. Double-encoded
+    # separators, traversal, or control bytes must not survive as filenames.
+    if re.search(r"%[0-9A-Fa-f]{2}", value):
+        raise LocalUIError("FILENAME_INVALID")
     if (not value or len(value) > 255 or any(ord(ch) < 32 for ch in value)
         or "/" in value or "\\" in value or value in {".", ".."}):
         raise LocalUIError("FILENAME_INVALID")
