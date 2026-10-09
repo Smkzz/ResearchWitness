@@ -221,13 +221,32 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     source_hash.evaluate("node => node.clientWidth"),
                     "the source hash must wrap inside its mobile evidence row",
                 )
-                self.assertLessEqual(
-                    page.evaluate("document.documentElement.scrollWidth"),
-                    page.evaluate("window.innerWidth"),
-                )
                 mobile_screenshot = self.screenshot_dir / "synthetic-results-mobile.png"
                 page.screenshot(path=str(mobile_screenshot), full_page=True)
                 self.assertGreater(mobile_screenshot.stat().st_size, 10_000)
+                overflowing_elements = page.evaluate("""() => [...document.body.querySelectorAll('*')]
+                  .map((node) => {
+                    const rect = node.getBoundingClientRect();
+                    return {
+                      tag: node.tagName,
+                      id: node.id,
+                      className: typeof node.className === 'string' ? node.className : '',
+                      left: Math.round(rect.left),
+                      right: Math.round(rect.right),
+                      width: Math.round(rect.width),
+                      scrollWidth: node.scrollWidth,
+                      clientWidth: node.clientWidth,
+                      text: (node.innerText || '').slice(0, 100),
+                    };
+                  })
+                  .filter((item) => item.width > 0 && (item.left < -1 || item.right > innerWidth + 1))
+                  .sort((left, right) => right.right - left.right)
+                  .slice(0, 12)""")
+                self.assertLessEqual(
+                    page.evaluate("document.documentElement.scrollWidth"),
+                    page.evaluate("window.innerWidth"),
+                    f"mobile viewport overflow elements: {json.dumps(overflowing_elements, sort_keys=True)}",
+                )
 
                 page.evaluate("""() => {
                   const originalFetch = window.fetch.bind(window);
