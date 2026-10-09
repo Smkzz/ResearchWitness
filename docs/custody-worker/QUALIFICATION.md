@@ -18,6 +18,7 @@
 - `node --check researchwitness/webui/app.js`: passed after the UI edits.
 - `python -m unittest discover -s tests -q`: **failed to import 19 test modules** because `pytest` is not installed; unittest reported 76 tests and one skipped among importable modules. No dependency was downloaded or installed.
 - `python -m pytest --version`: unavailable (`No module named pytest`). The full application suite is not qualified.
+- Codex Security's desktop scan could not be started because `start_codex_security_prompt_only_scan` is not exposed by this session. Its desktop workflow requires that start operation; no alternate or headless route was used.
 - No real browser, HTTP server, external source, network request, custodian root, reserved identifier, or private label was accessed. Loopback binding was denied with `PermissionError: [Errno 1] Operation not permitted`; the denial was not retried or routed around.
 
 ## Reproducible custody package
