@@ -1,6 +1,6 @@
 # ResearchWitness engineering qualification — 2026-10-10
 
-**Status: development candidate only. Not a research-preview release, not production-custody qualified, not eligible for reserved evidence or Wave 3.** This completion candidate is PR #12 stacked on denominator-provenance PR #11. The locally qualified sanitized source snapshot is commit `379602e72cc05ad79ba2959a832baf5abbcf27c2`, tree `a1ab414baa959214c02f23a066966a14c809447e`; hosted checks on the forward update remain required.
+**Status: development candidate only. Not a research-preview release, not production-custody qualified, not eligible for reserved evidence or Wave 3.** This completion candidate is PR #12 stacked on denominator-provenance PR #11. The sanitized code/test tree is `c26195093ce2efe9e7199246c17471d794cff07d`; it is qualified locally at commit `f785144ba865fd6374636b6aefcd3640a6994c28` and hosted at PR commit `065fcfa6c5bd57f65d13ba118df4215357a344b4`.
 
 ## Local checks
 
@@ -13,8 +13,8 @@
 
 ## Browser and hosted evidence
 
-- The latest baseline CI [run 38008005323](https://github.com/Smkzz/ResearchWitness/actions/runs/38008005323) and CodeQL [run 38008005400](https://github.com/Smkzz/ResearchWitness/actions/runs/38008005400) passed before the current forward changes. Fresh checks on the public forward commit are required.
-- Baseline hosted Chromium jobs cover the synthetic Markdown workflow, source-linked findings, export/replay/history, retry, deletion, cancellation, keyboard smoke checks, and responsive widths. The current browser regressions additionally check stale duplicate status and displayed/exported byte-range parity for synthetic JATS.
+- Hosted CI [run 38015056711](https://github.com/Smkzz/ResearchWitness/actions/runs/38015056711) and CodeQL [run 38015056745](https://github.com/Smkzz/ResearchWitness/actions/runs/38015056745) passed on the candidate tree. CI passed the Python 3.11–3.13 matrix, release gate, app-wheel qualification, synthetic Windows custody qualification, and Linux/Windows browser jobs.
+- Both browser jobs cover the synthetic Markdown workflow, source-linked findings, export/replay/history, retry, deletion, cancellation, keyboard smoke checks, responsive widths, stale-duplicate status, and displayed/exported byte-range parity for synthetic JATS. The initial browser run failed because a string-based Playwright wait violated the app's strict Content Security Policy; a DOM locator replaced it, and both OS runs now pass. Screenshots were retained but not visually previewed here.
 - The previous Windows and Ubuntu screenshot ZIP digests are retained in the acceptance ledger. They were not visually previewed here. Automated browser/DOM checks do not qualify human screen-reader use or full accessibility conformance.
 
 ## Synthetic JATS performance
@@ -35,4 +35,4 @@ These single-process synthetic measurements do not cover Windows, disk/export, c
 
 ## Remaining qualification gates
 
-The exact forward public commit needs fresh hosted CI, browser, Windows packaging, custody-worker, and CodeQL checks. Release/evaluation also requires human visual and assistive-technology review; a genuinely isolated custodian execution route with independently enforced egress; owner-side compatibility and access qualification; and the frozen source-only positive and 15-work negative evidence minima. Keep PR #12 draft and unmerged.
+The current forward public commit passes hosted CI and CodeQL. Release/evaluation still requires human visual and assistive-technology review; a genuinely isolated custodian execution route with independently enforced egress; owner-side compatibility and access qualification; and the frozen source-only positive and 15-work negative evidence minima. Keep PR #12 draft and unmerged.
