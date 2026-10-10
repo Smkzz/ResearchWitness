@@ -482,9 +482,8 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 page.get_by_role("button", name="Run supported checks").click()
                 duplicate = page.locator("#duplicate-note")
                 duplicate.wait_for(state="visible", timeout=10_000)
-                page.wait_for_function(
-                    "document.body.dataset.rwDuplicateStatusGatePending === '1'",
-                    timeout=10_000,
+                page.locator("body[data-rw-duplicate-status-gate-pending='1']").wait_for(
+                    state="attached", timeout=10_000,
                 )
                 self.assertEqual(duplicate.get_attribute("role"), "status")
                 self.assertEqual(duplicate.get_attribute("aria-live"), "polite")
@@ -497,9 +496,8 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
 
                 page.evaluate("window.__rwArmDuplicateStatusGate()")
                 page.get_by_role("button", name="Replay this exact input").click()
-                page.wait_for_function(
-                    "document.body.dataset.rwDuplicateStatusGatePending === '2'",
-                    timeout=10_000,
+                page.locator("body[data-rw-duplicate-status-gate-pending='2']").wait_for(
+                    state="attached", timeout=10_000,
                 )
                 self.assertTrue(duplicate.is_hidden())
                 self.assertTrue(page.locator("#results-panel").is_hidden())
