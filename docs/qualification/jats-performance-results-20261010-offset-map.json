@@ -1,0 +1,423 @@
+{
+  "benchmark_script_sha256": "1b0a9a182e70add812d6e81a383bb1a90970111ca7e4d0bea67ad43e6d00b127",
+  "budget": {
+    "declared_before_run": "2026-10-10",
+    "limits": {
+      "entity_expansion": {
+        "entity_tokens": 10000,
+        "input_bytes": 1048576,
+        "max_cpu_seconds": 3.0,
+        "max_peak_rss_kib": 196608,
+        "max_wall_seconds": 3.0,
+        "rows": 5000
+      },
+      "large_valid": {
+        "input_bytes": 8388608,
+        "max_cpu_seconds": 5.0,
+        "max_peak_rss_kib": 262144,
+        "max_wall_seconds": 5.0,
+        "rows": 10000
+      },
+      "malformed_depth": {
+        "input_bytes": 1024,
+        "max_cpu_seconds": 0.25,
+        "max_peak_rss_kib": 65536,
+        "max_wall_seconds": 0.25,
+        "rows": 0
+      },
+      "medium_valid": {
+        "input_bytes": 1048576,
+        "max_cpu_seconds": 2.0,
+        "max_peak_rss_kib": 131072,
+        "max_wall_seconds": 2.0,
+        "rows": 5000
+      },
+      "small_valid": {
+        "input_bytes": 20480,
+        "max_cpu_seconds": 0.5,
+        "max_peak_rss_kib": 65536,
+        "max_wall_seconds": 0.5,
+        "rows": 200
+      }
+    },
+    "purpose": "Synthetic, single-process JATS parse plus table-percentage diagnostic, including named-entity source-offset mapping.",
+    "scope_limitations": [
+      "synthetic inputs only",
+      "single-process and single-table",
+      "Linux only",
+      "no disk or export measurements",
+      "no concurrency, startup, shutdown, retry, or cancellation measurements",
+      "does not establish production workload performance"
+    ]
+  },
+  "budget_file": "jats-performance-budget-20261010.json",
+  "budget_sha256": "f7546ea5cde8efb42ee5b5f992249d8b6ee2ac5f3af7ab83da99e77a6df0a053",
+  "cases": {
+    "entity_expansion": {
+      "entity_tokens": 10000,
+      "input_bytes": 1048576,
+      "max_cpu_seconds": 1.874177497,
+      "max_peak_rss_kib": 89764,
+      "max_wall_seconds": 1.8751597270020284,
+      "median_cpu_seconds": 1.823575983,
+      "median_wall_seconds": 1.8236734069650993,
+      "relations": 5000,
+      "rows": 5000,
+      "samples": [
+        {
+          "case": "entity_expansion",
+          "cpu_seconds": 1.766863679,
+          "entity_tokens": 10000,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89764,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.7669555480242707
+        },
+        {
+          "case": "entity_expansion",
+          "cpu_seconds": 1.865233127,
+          "entity_tokens": 10000,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89764,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.8656461000209674
+        },
+        {
+          "case": "entity_expansion",
+          "cpu_seconds": 1.722187399,
+          "entity_tokens": 10000,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89756,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.7223143720184453
+        },
+        {
+          "case": "entity_expansion",
+          "cpu_seconds": 1.823575983,
+          "entity_tokens": 10000,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89764,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.8236734069650993
+        },
+        {
+          "case": "entity_expansion",
+          "cpu_seconds": 1.874177497,
+          "entity_tokens": 10000,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89764,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.8751597270020284
+        }
+      ],
+      "status": "parsed_and_checked",
+      "within_declared_budget": true
+    },
+    "large_valid": {
+      "entity_tokens": 0,
+      "input_bytes": 8388608,
+      "max_cpu_seconds": 4.293908833,
+      "max_peak_rss_kib": 185404,
+      "max_wall_seconds": 4.294416902994271,
+      "median_cpu_seconds": 3.957899513,
+      "median_wall_seconds": 3.9589470120263286,
+      "relations": 10000,
+      "rows": 10000,
+      "samples": [
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.837337876,
+          "entity_tokens": 0,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 185404,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.837578898994252
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 4.293908833,
+          "entity_tokens": 0,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 185400,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 4.294416902994271
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.957899513,
+          "entity_tokens": 0,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 185404,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.9589470120263286
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 4.1673999429999995,
+          "entity_tokens": 0,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 185404,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 4.1687878699740395
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.930607791,
+          "entity_tokens": 0,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 185404,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.9344642820069566
+        }
+      ],
+      "status": "parsed_and_checked",
+      "within_declared_budget": true
+    },
+    "malformed_depth": {
+      "entity_tokens": 0,
+      "input_bytes": 1024,
+      "max_cpu_seconds": 0.0006014010000000014,
+      "max_peak_rss_kib": 15488,
+      "max_wall_seconds": 0.0006076570134609938,
+      "median_cpu_seconds": 0.0005188979999999968,
+      "median_wall_seconds": 0.0005405350239016116,
+      "relations": 0,
+      "rows": 0,
+      "samples": [
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0005043559999999975,
+          "entity_tokens": 0,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15488,
+          "relations": 0,
+          "rows": 0,
+          "status": "rejected_by_configured_nesting_limit",
+          "wall_seconds": 0.0005107710021547973
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0005188979999999968,
+          "entity_tokens": 0,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15488,
+          "relations": 0,
+          "rows": 0,
+          "status": "rejected_by_configured_nesting_limit",
+          "wall_seconds": 0.0005405350239016116
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0006014010000000014,
+          "entity_tokens": 0,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15488,
+          "relations": 0,
+          "rows": 0,
+          "status": "rejected_by_configured_nesting_limit",
+          "wall_seconds": 0.0006076570134609938
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.000516243999999999,
+          "entity_tokens": 0,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15488,
+          "relations": 0,
+          "rows": 0,
+          "status": "rejected_by_configured_nesting_limit",
+          "wall_seconds": 0.0005223180050961673
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0005571649999999984,
+          "entity_tokens": 0,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15488,
+          "relations": 0,
+          "rows": 0,
+          "status": "rejected_by_configured_nesting_limit",
+          "wall_seconds": 0.0005627690115943551
+        }
+      ],
+      "status": "rejected_by_configured_nesting_limit",
+      "within_declared_budget": true
+    },
+    "medium_valid": {
+      "entity_tokens": 0,
+      "input_bytes": 1048576,
+      "max_cpu_seconds": 1.8982832840000001,
+      "max_peak_rss_kib": 89188,
+      "max_wall_seconds": 1.8984661690192297,
+      "median_cpu_seconds": 1.788241305,
+      "median_wall_seconds": 1.788390363974031,
+      "relations": 5000,
+      "rows": 5000,
+      "samples": [
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.687688603,
+          "entity_tokens": 0,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89188,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.6877754689776339
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.809166412,
+          "entity_tokens": 0,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89184,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.8111145989969373
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.8982832840000001,
+          "entity_tokens": 0,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89188,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.8984661690192297
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.788241305,
+          "entity_tokens": 0,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89184,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.788390363974031
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.787167278,
+          "entity_tokens": 0,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 89188,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.78727757796878
+        }
+      ],
+      "status": "parsed_and_checked",
+      "within_declared_budget": true
+    },
+    "small_valid": {
+      "entity_tokens": 0,
+      "input_bytes": 20480,
+      "max_cpu_seconds": 0.06382305099999999,
+      "max_peak_rss_kib": 18560,
+      "max_wall_seconds": 0.06402000394882634,
+      "median_cpu_seconds": 0.062196795000000006,
+      "median_wall_seconds": 0.062199084961321205,
+      "relations": 200,
+      "rows": 200,
+      "samples": [
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.06267912899999999,
+          "entity_tokens": 0,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18432,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.0628524900530465
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.06211760799999999,
+          "entity_tokens": 0,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18560,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.06212165701435879
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.06382305099999999,
+          "entity_tokens": 0,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18560,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.06402000394882634
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.062196795000000006,
+          "entity_tokens": 0,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18432,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.062199084961321205
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.061385524,
+          "entity_tokens": 0,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18560,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.061448461026884615
+        }
+      ],
+      "status": "parsed_and_checked",
+      "within_declared_budget": true
+    }
+  },
+  "limitations": [
+    "synthetic inputs only",
+    "single-process and single-table",
+    "Linux only; no Windows measurements",
+    "no disk or export measurements",
+    "no concurrency, startup, shutdown, retry, or cancellation measurements",
+    "does not establish production workload performance"
+  ],
+  "measured_source_sha256": {
+    "researchwitness/denominator_provenance.py": "84fdd196657063f9e8f4acb93d99f0463297802eaeed08251ae5017f215201d8",
+    "researchwitness/jats.py": "64e56f4e2f6bf786529b274bb59a8b88696b61b53bbb92af03351bf801152537",
+    "researchwitness/table_arithmetic.py": "e3984df72976042db842a8da3bec2dc0b2f1bc8877f4fd11951d4f01c8c5b601"
+  },
+  "platform": "linux",
+  "purpose": "Synthetic single-process JATS parse plus table-percentage diagnostic, including named-entity offset mapping.",
+  "python": "Python 3.12.14"
+}

@@ -7,6 +7,7 @@ source-described scopes, and only then permits percentage arithmetic.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from bisect import bisect_right
 from hashlib import sha256
 import re
 from typing import Any, Iterable, Mapping
@@ -38,7 +39,9 @@ _SCOPE_COMPARISON_FIELDS = (
 
 _DENOMINATOR_TOKEN = re.compile(
     r'(?<![A-Za-z0-9_])[nN]\s*=\s*'
-    r'(?P<value>[+\-−]?\d[\d,.eE+\-−]*(?:[ \u00a0\u202f]\d{3})*)',
+    r'(?P<value>[+\-−]?\d[\d,.eE+\-−]*(?:[ \u00a0\u202f]\d{3})*)'
+    r'(?![A-Za-z0-9_/\u2044\u2215\u2010-\u2015\u2212]'
+    r'|\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*\d)',
 )
 _COUNT_PERCENT_PARENT = re.compile(
     r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*'
@@ -59,6 +62,23 @@ _ANALYSIS_SET = re.compile(
 _POPULATION = re.compile(
     r'\b(?:overall|all\s+(?:participants?|patients?|respondents?|subjects?|individuals?)|'
     r'entire\s+cohort|full\s+cohort|total\s+(?:population|cohort|sample))\b', re.IGNORECASE,
+)
+_OVERALL_LABEL = re.compile(
+    r'\s*(?:overall|all\s+(?:participants?|patients?|respondents?|subjects?|individuals?)|'
+    r'entire\s+cohort|full\s+cohort|total\s+(?:population|cohort|sample))\s*',
+    re.IGNORECASE,
+)
+_CHARACTERISTIC_HEADER = re.compile(
+    r'\b(?:characteristics?|variables?|covariates?|features?|demographics?)\b',
+    re.IGNORECASE,
+)
+_TRANSPARENT_OUTCOME_HEADING = re.compile(
+    r'^\s*(?:(?:primary|secondary|tertiary|main|key|major|minor)\s+){0,2}'
+    r'(?:(?:efficacy|safety|clinical|patient[- ]reported)\s+)?'
+    r'(?:outcomes?|end\s*points?|results?|measures?)'
+    r'(?:\s+(?:measures?|analysis|assessment|evaluation))?'
+    r'(?:\s+[0-9ivxlcdm]+)?\s*$',
+    re.IGNORECASE,
 )
 _UNIT = re.compile(r'\b(participants?|patients?|respondents?|subjects?|individuals?)\b', re.IGNORECASE)
 _TREATMENT = re.compile(
@@ -123,6 +143,27 @@ class ParentCountGroup:
     heading_cell: TableCell
     parent_label_cell: TableCell
     parent_count_cells: tuple[TableCell, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class LabelOnlyGroupContext:
+    """Precomputed active label-only subgroup scope for one data row."""
+
+    heading_row_index: int
+    heading_cell: TableCell
+    applies_until_row: int
+
+
+@dataclass(frozen=True, slots=True)
+class DenominatorTableContext:
+    """Table-wide denominator profile and indexed per-row scope state."""
+
+    label_only_groups_by_row: tuple[LabelOnlyGroupContext | None, ...]
+    subgroup_boundaries_by_row: tuple[SubgroupBoundary | None, ...]
+    parent_count_groups_by_row: tuple[tuple[ParentCountGroup, ...], ...]
+    stratified_partition: bool
+    stratified_parent_header_paths: frozenset[str]
+    stratified_header_columns: frozenset[int]
 
 
 def anchor_dict(anchor: SourceAnchor) -> dict[str, Any]:
@@ -259,45 +300,45 @@ def _row_label(row: TableRow) -> TableCell | None:
     return next((item for item in row.cells if item.column_start == 0), None)
 
 
-def _row_denominator_applies_to_cell(table: Table, cell: TableCell) -> bool:
-    """A row-label n is the aggregate row base, not a replacement for a stratified column base."""
-    denominator_headers = [
+def _row_denominator_applies_to_cell(
+    cell: TableCell,
+    context: DenominatorTableContext,
+) -> bool:
+    """A row-label n is not a replacement for a stratified column base."""
+    if not context.stratified_partition:
+        return True
+    if any(
+        _TREATMENT.search(ref.text) and _AGGREGATE_HEADER.search(ref.text) is None
+        for ref in cell.effective_header_refs
+    ):
+        return False
+    if any(
+        cell.column_identity <= column < cell.column_identity + cell.column_span
+        for column in context.stratified_header_columns
+    ):
+        return False
+    cell_denominator_headers = [
         ref for ref in cell.effective_header_refs if _DENOMINATOR_TOKEN.search(ref.text)
     ]
-    if not denominator_headers:
-        return True
-    if all(_AGGREGATE_HEADER.search(ref.text) is not None for ref in denominator_headers):
-        return True
-
-    table_headers: dict[tuple[str, str], HeaderCellReference] = {}
-    for row in table.rows:
-        for header_cell in row.cells:
-            for ref in header_cell.effective_header_refs:
-                if _DENOMINATOR_TOKEN.search(ref.text):
-                    table_headers[(ref.source_anchor.element_path, ref.text)] = ref
-    aggregate_headers = [
-        ref for ref in table_headers.values() if _AGGREGATE_HEADER.search(ref.text)
-    ]
-    stratified_headers = [
-        ref for ref in table_headers.values() if _AGGREGATE_HEADER.search(ref.text) is None
-    ]
-    # A row-label n spans only the aggregate column when the table explicitly
-    # partitions that aggregate into separately based strata.
-    stratified_partition = bool(aggregate_headers and len(stratified_headers) > 1)
-    return not stratified_partition
+    if cell_denominator_headers:
+        return all(_AGGREGATE_HEADER.search(ref.text) is not None
+                   for ref in cell_denominator_headers)
+    return any(_AGGREGATE_HEADER.search(ref.text) is not None
+               for ref in cell.effective_header_refs)
 
 
 def relationship_scope(
     table: Table,
     row: TableRow,
     cell: TableCell,
+    table_context: DenominatorTableContext,
     subgroup_label: TableCell | None = None,
     linked_footnote_texts: Iterable[tuple[str, SourceAnchor]] = (),
 ) -> RelationshipScope:
     label_cell = _row_label(row)
     fragments = _table_fragments(table) + _header_fragments(cell)
     row_n_applies = label_cell is None or not _DENOMINATOR_TOKEN.search(label_cell.raw_text) \
-        or _row_denominator_applies_to_cell(table, cell)
+        or _row_denominator_applies_to_cell(cell, table_context)
     if label_cell is not None and row_n_applies:
         fragments.append((label_cell.raw_text, label_cell.source_anchor, 'row'))
     fragments.append((cell.raw_text, cell.source_anchor, 'cell'))
@@ -465,11 +506,30 @@ def parent_count_groups(table: Table) -> tuple[ParentCountGroup, ...]:
     the group so complementary rows such as “Not exposed” retain their own base.
     """
     rows = table.rows
+    label_only_by_row = tuple(_is_label_only_group_row(row) for row in rows)
+    ends_group = []
+    for row_index, row in enumerate(rows):
+        label = _row_label(row)
+        label_text = label.raw_text.strip() if label is not None else ''
+        ends_group.append(
+            row.row_group != 'tbody'
+            or label is None
+            or label_only_by_row[row_index] is not None
+            or bool(re.match(r'^(?:not|no|without|excluding|except)\b', label_text, re.IGNORECASE))
+            or label.indentation_level <= 0
+        )
+    next_terminator_after = [len(rows)] * len(rows)
+    nearest_terminator = len(rows)
+    for row_index in range(len(rows) - 1, -1, -1):
+        next_terminator_after[row_index] = nearest_terminator
+        if ends_group[row_index]:
+            nearest_terminator = row_index
+
     groups: list[ParentCountGroup] = []
     for heading_index, heading_row in enumerate(rows):
         if heading_row.row_group != 'tbody':
             continue
-        heading = _is_label_only_group_row(heading_row)
+        heading = label_only_by_row[heading_index]
         if heading is None or heading_index == 0:
             continue
         parent_index = heading_index - 1
@@ -486,24 +546,7 @@ def parent_count_groups(table: Table) -> tuple[ParentCountGroup, ...]:
         if not parent_cells:
             continue
 
-        end = len(rows)
-        for following_index in range(heading_index + 1, len(rows)):
-            following = rows[following_index]
-            if following.row_group != 'tbody':
-                end = following_index
-                break
-            following_label = _row_label(following)
-            if following_label is None:
-                end = following_index
-                break
-            label_text = following_label.raw_text.strip()
-            if (_is_label_only_group_row(following) is not None
-                    or re.match(r'^(?:not|no|without|excluding|except)\b', label_text, re.IGNORECASE)):
-                end = following_index
-                break
-            if following_label.indentation_level <= heading.indentation_level:
-                end = following_index
-                break
+        end = next_terminator_after[heading_index]
         groups.append(ParentCountGroup(
             heading_row_index=heading_index,
             applies_from_row=heading_index + 1,
@@ -515,14 +558,146 @@ def parent_count_groups(table: Table) -> tuple[ParentCountGroup, ...]:
     return tuple(groups[:10_000])
 
 
-def _active_parent_count_groups(
-    groups: tuple[ParentCountGroup, ...],
-    target_row_index: int,
-) -> tuple[ParentCountGroup, ...]:
-    return tuple(
-        item for item in groups
-        if item.applies_from_row <= target_row_index < item.applies_until_row
-    )[-MAX_SCOPE_EVIDENCE:]
+def denominator_table_context(table: Table) -> DenominatorTableContext:
+    """Build denominator scope metadata in one forward table pass.
+
+    Transparent outcome headings keep the current subgroup active. Characteristic
+    headings and overall-population headings stop it. Other label-only rows start
+    a new possible subgroup boundary. Header partition state is also captured
+    once so row-scoped denominator checks do not rescan the whole table for
+    every candidate relationship.
+    """
+    rows = table.rows
+    active_by_row: list[tuple[int, TableCell] | None] = [None] * len(rows)
+    end_by_heading: dict[int, int] = {}
+    table_headers: dict[tuple[str, str], HeaderCellReference] = {}
+    active: tuple[int, TableCell] | None = None
+    for row_index, row in enumerate(rows):
+        for header_cell in row.cells:
+            for ref in header_cell.effective_header_refs:
+                table_headers[(ref.source_anchor.element_path, ref.text)] = ref
+        if row.row_group != 'tbody':
+            if active is not None:
+                end_by_heading[active[0]] = row_index
+            active = None
+            continue
+
+        active_by_row[row_index] = active
+        label = _is_label_only_group_row(row)
+        if label is None:
+            continue
+        text = label.raw_text.strip()
+        if _TRANSPARENT_OUTCOME_HEADING.fullmatch(text):
+            continue
+        if active is not None:
+            end_by_heading[active[0]] = row_index
+        active = None
+        if (not any(_CHARACTERISTIC_HEADER.search(header) for header in label.effective_headers)
+                and not _OVERALL_LABEL.fullmatch(text)):
+            active = (row_index, label)
+    if active is not None:
+        end_by_heading[active[0]] = len(rows)
+
+    label_only_groups_by_row = tuple(
+        None if item is None else LabelOnlyGroupContext(
+            heading_row_index=item[0],
+            heading_cell=item[1],
+            applies_until_row=end_by_heading[item[0]],
+        )
+        for item in active_by_row
+    )
+    denominator_headers = [
+        ref for ref in table_headers.values() if _DENOMINATOR_TOKEN.search(ref.text)
+    ]
+    aggregate_headers = [ref for ref in denominator_headers if _AGGREGATE_HEADER.search(ref.text)]
+    stratified_headers = [
+        ref for ref in denominator_headers if _AGGREGATE_HEADER.search(ref.text) is None
+    ]
+    partition_headers = [
+        ref for ref in table_headers.values()
+        if _AGGREGATE_HEADER.search(ref.text) is None and not _is_generic_header(ref.text)
+    ]
+    arm_headers = [
+        ref for ref in table_headers.values()
+        if _TREATMENT.search(ref.text) and _AGGREGATE_HEADER.search(ref.text) is None
+    ]
+    stratified_partition = (
+        len(stratified_headers) > 1
+        or len(arm_headers) > 1
+        or bool(aggregate_headers and (stratified_headers or arm_headers))
+        or len(partition_headers) > 1
+    )
+    stratified_parent_header_paths: set[str] = set()
+    stratified_header_columns: set[int] = {
+        column
+        for header in partition_headers
+        for column in range(header.column_start, header.column_start + header.column_span)
+    } if stratified_partition else set()
+
+    # Index lower, non-generic header labels by starting column, row and span.
+    # A merged population denominator may cover multiple child columns even
+    # when one child header is blank and therefore absent from
+    # effective_header_refs. A per-parent scan of every header reference is
+    # quadratic on wide, heavily nested tables; this index supports a bounded
+    # column-span scan plus binary search and a suffix minimum-span check.
+    partition_rows_by_start: dict[int, list[tuple[int, int]]] = {}
+    for header in partition_headers:
+        partition_rows_by_start.setdefault(header.column_start, []).append(
+            (header.row_index, header.column_span),
+        )
+    partition_child_index: dict[int, tuple[list[int], list[int]]] = {}
+    for column_start, row_spans in partition_rows_by_start.items():
+        row_spans.sort()
+        header_rows = [row for row, _span in row_spans]
+        suffix_min_spans = [0] * len(row_spans)
+        minimum_span: int | None = None
+        for index in range(len(row_spans) - 1, -1, -1):
+            span = row_spans[index][1]
+            minimum_span = span if minimum_span is None else min(minimum_span, span)
+            suffix_min_spans[index] = minimum_span
+        partition_child_index[column_start] = (header_rows, suffix_min_spans)
+
+    for shared_header in denominator_headers:
+        if shared_header.column_span <= 1:
+            continue
+        parent_start = shared_header.column_start
+        parent_end = parent_start + shared_header.column_span
+        first_child_row = shared_header.row_index + shared_header.row_span
+        has_partition_child = any(
+            (child_index := partition_child_index.get(column_start))
+            and (child_position := bisect_right(child_index[0], first_child_row - 1))
+            < len(child_index[0])
+            and child_index[1][child_position]
+            <= min(shared_header.column_span - 1, parent_end - column_start)
+            for column_start in range(parent_start, parent_end)
+        )
+        if has_partition_child:
+            stratified_parent_header_paths.add(shared_header.source_anchor.element_path)
+            # Include blank siblings in the covered span. A missing child label
+            # cannot establish that the parent's denominator applies there.
+            stratified_header_columns.update(range(parent_start, parent_end))
+
+    boundaries = subgroup_boundaries(table)
+    parent_groups = parent_count_groups(table)
+    subgroup_by_row: list[SubgroupBoundary | None] = [None] * len(rows)
+    for boundary in boundaries:
+        for row_index in range(boundary.applies_from_row, boundary.applies_until_row):
+            subgroup_by_row[row_index] = boundary
+    parent_groups_by_row: list[tuple[ParentCountGroup, ...]] = [()] * len(rows)
+    for parent_group in parent_groups:
+        for row_index in range(parent_group.applies_from_row, parent_group.applies_until_row):
+            parent_groups_by_row[row_index] = (
+                *parent_groups_by_row[row_index], parent_group,
+            )[-MAX_SCOPE_EVIDENCE:]
+
+    return DenominatorTableContext(
+        label_only_groups_by_row=label_only_groups_by_row,
+        subgroup_boundaries_by_row=tuple(subgroup_by_row),
+        parent_count_groups_by_row=tuple(parent_groups_by_row),
+        stratified_partition=stratified_partition,
+        stratified_parent_header_paths=frozenset(stratified_parent_header_paths),
+        stratified_header_columns=frozenset(stratified_header_columns),
+    )
 
 
 def subgroup_boundaries(table: Table) -> tuple[SubgroupBoundary, ...]:
@@ -532,26 +707,33 @@ def subgroup_boundaries(table: Table) -> tuple[SubgroupBoundary, ...]:
         label, cells = _is_denominator_boundary_row(row)
         if label is not None:
             boundaries.append((row_index, label, tuple(cells)))
+    row_ends_scope: list[bool] = []
+    tbody_position_by_index = {
+        source_index: position for position, (source_index, _row) in enumerate(rows)
+    }
+    for _row_index, row in rows:
+        label = _row_label(row)
+        other_values = [item.raw_text.strip() for item in row.cells if item.column_start > 0]
+        row_ends_scope.append(
+            not any(item.raw_text.strip() for item in row.cells)
+            or bool(label is not None and label.raw_text.strip() and not any(other_values))
+        )
+    next_scope_end_after = [len(table.rows)] * len(rows)
+    nearest_scope_end = len(table.rows)
+    for position in range(len(rows) - 1, -1, -1):
+        next_scope_end_after[position] = nearest_scope_end
+        if row_ends_scope[position]:
+            nearest_scope_end = rows[position][0]
+
     result: list[SubgroupBoundary] = []
     for position, (row_index, label, cells) in enumerate(boundaries):
         next_boundary = boundaries[position + 1][0] if position + 1 < len(boundaries) else len(table.rows)
-        end = next_boundary
-        for next_index, next_row in rows:
-            if row_index < next_index < next_boundary:
-                next_label = _row_label(next_row)
-                other_values = [item.raw_text.strip() for item in next_row.cells if item.column_start > 0]
-                if (not any(item.raw_text.strip() for item in next_row.cells)
-                        or (next_label is not None and next_label.raw_text.strip() and not any(other_values))):
-                    end = next_index
-                    break
+        tbody_position = tbody_position_by_index[row_index]
+        first_scope_end = next_scope_end_after[tbody_position]
+        end = min(next_boundary, first_scope_end)
         scope_cells = tuple(cell for cell in row.cells if cell.column_start > 0)
         result.append(SubgroupBoundary(row_index, row_index + 1, end, label, cells, scope_cells))
     return tuple(result[:10_000])
-
-
-def _active_boundary(boundaries: tuple[SubgroupBoundary, ...], row_index: int) -> SubgroupBoundary | None:
-    active = [item for item in boundaries if item.applies_from_row <= row_index < item.applies_until_row]
-    return active[-1] if active else None
 
 
 def _linked_footnotes(
@@ -577,17 +759,19 @@ def _scope_candidates(
     row: TableRow,
     row_index: int,
     subgroup: SubgroupBoundary | None,
-    parent_groups: tuple[ParentCountGroup, ...],
+    active_parent_groups: tuple[ParentCountGroup, ...],
+    label_only_group: LabelOnlyGroupContext | None,
+    table_context: DenominatorTableContext,
     explicit_cell_denominator: str | None = None,
 ) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
-    active_parent_groups = _active_parent_count_groups(parent_groups, row_index)
     subgroup_label = (
         subgroup.label_cell if subgroup is not None else
-        active_parent_groups[-1].heading_cell if active_parent_groups else None
+        active_parent_groups[-1].heading_cell if active_parent_groups else
+        label_only_group.heading_cell if label_only_group is not None else None
     )
     relation = relationship_scope(
-        table, row, cell, subgroup_label,
+        table, row, cell, table_context, subgroup_label,
         ((note.text, note.source_anchor) for note in _linked_footnotes(table, cell, row)),
     )
     row_end = row_index + 1
@@ -628,7 +812,7 @@ def _scope_candidates(
         )
         row_label_applicability = (
             {**applicable_row, 'column_start': 0, 'column_end_exclusive': len(table.columns)}
-            if _row_denominator_applies_to_cell(table, cell)
+            if _row_denominator_applies_to_cell(cell, table_context)
             else {**applicable_row, 'column_start': 0, 'column_end_exclusive': 0}
         )
         candidates.extend(_token_candidates(
@@ -757,6 +941,53 @@ def _scope_candidates(
                 raw_value='',
             ))
 
+    if label_only_group is not None:
+        heading_index = label_only_group.heading_row_index
+        heading_cell = label_only_group.heading_cell
+        group_scope = _scope_from_fragments(
+            _table_fragments(table) + _header_fragments(cell) + [
+                (heading_cell.raw_text, heading_cell.source_anchor, 'subgroup'),
+            ],
+            subgroup_hint=(heading_cell.raw_text, heading_cell.source_anchor),
+        )
+        group_applicability = {
+            'row_start': heading_index + 1,
+            'row_end_exclusive': label_only_group.applies_until_row,
+            'column_start': 0,
+            'column_end_exclusive': len(table.columns),
+            'group_heading_row_index': heading_index,
+        }
+        if _DENOMINATOR_TOKEN.search(heading_cell.raw_text):
+            stratified_label_base = not _row_denominator_applies_to_cell(cell, table_context)
+            candidates.extend(_token_candidates(
+                heading_cell.raw_text, heading_cell.source_anchor,
+                provenance_class='SUBGROUP_ROW_EXPLICIT',
+                structural_source=(
+                    'printed subgroup base with unresolved stratified-column scope'
+                    if stratified_label_base else
+                    'printed base in label-only JATS group heading'
+                ),
+                scope=group_scope,
+                applies_to={**group_applicability,
+                            'column_start': cell.column_identity,
+                            'column_end_exclusive': cell.column_identity + cell.column_span},
+                footnote_linkage=heading_cell.footnote_references,
+                forced_reasons=list(dict.fromkeys([
+                    *(['FOOTNOTE_SCOPE_UNRESOLVED']
+                      if heading_cell.footnote_references or heading_cell.cross_references else []),
+                    *(['DENOMINATOR_SCOPE_UNRESOLVED'] if stratified_label_base else []),
+                ])),
+            ))
+        else:
+            candidates.append(_missing_candidate(
+                anchor=heading_cell.source_anchor,
+                provenance_class='SUBGROUP_ROW_EXPLICIT',
+                structural_source='label-only JATS subgroup heading with no printed base',
+                scope=group_scope,
+                applies_to=group_applicability,
+                raw_value=heading_cell.raw_text,
+            ))
+
     for ref in cell.effective_header_refs:
         if not _DENOMINATOR_TOKEN.search(ref.text):
             continue
@@ -764,6 +995,11 @@ def _scope_candidates(
             _table_fragments(table) + _header_fragments(cell, ref.row_index),
         )
         provenance = 'HEADER_GROUP_EXPLICIT' if ref.column_span > 1 or ref.row_span > 1 else 'COLUMN_HEADER_EXPLICIT'
+        forced_reasons = []
+        if ref.source_anchor.element_path in table_context.stratified_parent_header_paths:
+            forced_reasons.append('DENOMINATOR_SCOPE_UNRESOLVED')
+        if ref.footnote_references or ref.cross_references:
+            forced_reasons.append('FOOTNOTE_SCOPE_UNRESOLVED')
         candidates.extend(_token_candidates(
             ref.text, ref.source_anchor, provenance_class=provenance,
             structural_source='JATS thead cell covering the target column',
@@ -774,8 +1010,7 @@ def _scope_candidates(
                         'header_row_index': ref.row_index,
                         'header_row_span': ref.row_span,
                         'header_column_span': ref.column_span},
-            forced_reasons=(['FOOTNOTE_SCOPE_UNRESOLVED']
-                            if ref.footnote_references or ref.cross_references else []),
+            forced_reasons=forced_reasons,
         ))
 
     for text, anchor in ((table.label, table.label_anchor), (table.caption, table.caption_anchor)):
@@ -858,22 +1093,34 @@ def resolve_denominator(
     row: TableRow,
     cell: TableCell,
     row_index: int,
-    boundaries: tuple[SubgroupBoundary, ...],
-    parent_groups: tuple[ParentCountGroup, ...],
+    table_context: DenominatorTableContext,
     explicit_cell_denominator: str | None = None,
 ) -> dict[str, Any]:
-    subgroup = _active_boundary(boundaries, row_index)
-    active_parent_groups = _active_parent_count_groups(parent_groups, row_index)
+    subgroup = (
+        table_context.subgroup_boundaries_by_row[row_index]
+        if 0 <= row_index < len(table_context.subgroup_boundaries_by_row) else None
+    )
+    active_parent_groups = (
+        table_context.parent_count_groups_by_row[row_index]
+        if 0 <= row_index < len(table_context.parent_count_groups_by_row) else ()
+    )
+    label_only_group = (
+        table_context.label_only_groups_by_row[row_index]
+        if (subgroup is None and not active_parent_groups
+            and 0 <= row_index < len(table_context.label_only_groups_by_row)) else None
+    )
     subgroup_label = (
         subgroup.label_cell if subgroup is not None else
-        active_parent_groups[-1].heading_cell if active_parent_groups else None
+        active_parent_groups[-1].heading_cell if active_parent_groups else
+        label_only_group.heading_cell if label_only_group is not None else None
     )
     candidates = _scope_candidates(
-        table, cell, row, row_index, subgroup, parent_groups, explicit_cell_denominator,
+        table, cell, row, row_index, subgroup, active_parent_groups,
+        label_only_group, table_context, explicit_cell_denominator,
     )
     linked_notes = _linked_footnotes(table, cell, row)
     scope = relationship_scope(
-        table, row, cell, subgroup_label,
+        table, row, cell, table_context, subgroup_label,
         ((note.text, note.source_anchor) for note in linked_notes),
     ).to_dict()
 

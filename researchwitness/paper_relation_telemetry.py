@@ -68,11 +68,26 @@ def terminal_relation(
     source_anchor: Mapping[str, Any],
     status: str,
     reasons: Iterable[str] = (),
+    table_source_anchor: Mapping[str, Any] | None = None,
     **details: Any,
 ) -> dict[str, Any]:
     if status not in RELATION_STATUSES:
         raise ValueError(f'unknown relation terminal status: {status}')
     if contract_version == '1.3':
+        if not isinstance(table_source_anchor, Mapping):
+            raise ValueError('percentage contract 1.3 relations require a source-mapped table anchor')
+        table_source = table_source_anchor.get('source_sha256')
+        table_path = table_source_anchor.get('element_path')
+        relation_source = source_anchor.get('source_sha256')
+        relation_path = source_anchor.get('element_path')
+        if (not isinstance(table_source, str) or table_source != relation_source
+                or not isinstance(table_path, str) or not table_path.startswith('/')
+                or not isinstance(relation_path, str)
+                or not relation_path.startswith(table_path.rstrip('/') + '/')):
+            raise ValueError('relation anchor must belong to the same source table')
+        expected_table_key = sha256((table_source + '\0' + table_path).encode('utf-8')).hexdigest()
+        if table_key != expected_table_key:
+            raise ValueError('table key must bind the source-mapped table anchor')
         provenance = details.get('denominator_provenance')
         scope_resolved = details.get('denominator_scope_resolved')
         if not isinstance(provenance, Mapping) or not isinstance(scope_resolved, bool):
@@ -86,10 +101,18 @@ def terminal_relation(
                 raise ValueError('resolved denominator provenance requires a positive selected value')
             if not isinstance(selected.get('source_anchor'), Mapping):
                 raise ValueError('resolved denominator provenance requires a selected source anchor')
+            selected_anchor = selected['source_anchor']
+            selected_path = selected_anchor.get('element_path')
+            if (selected_anchor.get('source_sha256') != table_source
+                    or not isinstance(selected_path, str)
+                    or not selected_path.startswith(table_path.rstrip('/') + '/')):
+                raise ValueError('selected denominator anchor must belong to the same source table')
             if details.get('denominator_source_anchor') != selected.get('source_anchor'):
                 raise ValueError('denominator anchor must match the selected provenance source')
         elif selected is not None:
             raise ValueError('unresolved denominator provenance cannot contain a selected denominator')
+        elif details.get('denominator_source_anchor') is not None:
+            raise ValueError('unresolved denominator provenance cannot contain a denominator anchor')
         if status in ('ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH'):
             if scope_resolved is not True or not isinstance(selected, Mapping):
                 raise ValueError('arithmetic status requires a uniquely resolved denominator source')

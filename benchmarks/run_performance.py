@@ -122,16 +122,39 @@ def workloads() -> dict[str, tuple[dict, dict, str]]:
     return profiles
 
 
+EXPECTED_RESULT_STATUS = {
+    'scalar_radical_32_terms': 'REFUTED_FOR_FORMALIZATION',
+    'polynomial_8_variables_64_terms': 'REFUTED_FOR_FORMALIZATION',
+    'rational_expression_255_nodes': 'REFUTED_FOR_FORMALIZATION',
+    'finite_map_256_elements': 'REFUTED_FOR_FORMALIZATION',
+    'finite_graph_256_vertices_8192_edges': 'REFUTED_FOR_FORMALIZATION',
+    'finite_pmf_256_states_64_clauses': 'REFUTED_FOR_FORMALIZATION',
+    'modular_system_16_by_16': 'REFUTED_FOR_FORMALIZATION',
+    'finite_field_4_3m_term_evaluations': 'REFUTED_FOR_FORMALIZATION',
+    'finite_field_power_rule_4_3m_term_evaluations': 'REFUTED_FOR_FORMALIZATION',
+}
+
+
 def run(repeats: int = 3) -> dict:
+    if not isinstance(repeats, int) or isinstance(repeats, bool) or repeats < 1:
+        raise ValueError('repeats must be a positive integer')
     results = []
-    for name, (formalization, witness, workload) in workloads().items():
-        check(formalization, witness)  # warm-up and validation outside timing sample
+    profiles = workloads()
+    if set(profiles) != set(EXPECTED_RESULT_STATUS):
+        raise RuntimeError('performance workload and expected-status registries differ')
+    for name, (formalization, witness, workload) in profiles.items():
+        expected_status = EXPECTED_RESULT_STATUS[name]
+        warmup = check(formalization, witness)  # warm-up and validation outside timing sample
+        if not isinstance(warmup, dict) or warmup.get('status') != expected_status:
+            raise RuntimeError(f'checker returned an unexpected warm-up status for workload {name}')
         timings = []
         output = None
         for _ in range(repeats):
             started = time.perf_counter()
             output = check(formalization, witness)
             timings.append((time.perf_counter() - started) * 1000)
+            if not isinstance(output, dict) or output.get('status') != expected_status:
+                raise RuntimeError(f'checker status changed during workload {name}')
         results.append({
             'name': name,
             'workload': workload,
@@ -160,9 +183,15 @@ def run(repeats: int = 3) -> dict:
 
 
 if __name__ == '__main__':
+    def positive_int(value: str) -> int:
+        parsed = int(value)
+        if parsed < 1:
+            raise argparse.ArgumentTypeError('must be a positive integer')
+        return parsed
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', type=Path)
-    parser.add_argument('--repeats', type=int, default=3)
+    parser.add_argument('--repeats', type=positive_int, default=3)
     args = parser.parse_args()
     report = run(args.repeats)
     rendered = json.dumps(report, indent=2) + '\n'

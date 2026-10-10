@@ -2,6 +2,12 @@
 
 ## 0.4.0.dev0 — paper-audit empirical development wave — unreleased
 
+- Added an optional local-first upload interface with local reports, coverage, source-bound replay/export, cancellation, retry, retention limits and explicit local-data deletion. The synthetic browser journey runs in the pinned CI matrix; the interface is not a custody boundary.
+- Added an offline custody-worker v5 source contract, versioned schemas and synthetic evidence store. It remains a development artifact; no reserved evidence or Wave 3 run is qualified.
+- Added package qualification tools for deterministic clean zipapp and wheel builds, with offline synthetic workflow checks. Private Windows custodian installation and rollback remain unqualified.
+- Added exact JATS element byte ranges mapped back through external-DOCTYPE removal and named-entity expansion, with bounded offset-edit tracking. Common weighting terms and malformed denominator prefixes now abstain in the relevant count/percentage screens.
+- Added a visible pre-upload privacy boundary warning, a live announcement for duplicate uploads, and explicit uploaded-source byte-range locations. Hosted browser regression coverage includes a synthetic JATS upload and private export.
+
 - Expanded source-native JATS paper coverage with per-paper, per-detector, per-operand, and per-table accounting; direct-cell ratios; conservative sample-flow and PRISMA prose adapters; crude unadjusted 2×2 odds-ratio checks; and an experimental SD/SE/n screen. Added explicit detector boundaries and report coverage explanations. These checks remain candidate-only and do not establish paper-level errors.
 - Added a post-hoc development replay and aggregate-only source-validation summaries. Public artifacts omit individual source bindings, hashes, arithmetic, and candidate records. The replay is not a holdout; the source-mapped percentage targets use development data, while flow, PRISMA, 2×2, rates, and cross-section discrepancies remain unsupported as correction-backed mechanisms where their strict contracts do not fit.
 - Expanded `paper-audit` with contextual `n`/`N` count screening, Markdown table count/percentage recomputation, and a bounded explicit exclusion-flow arithmetic screen. Every paper-level output remains a human-review candidate; no findings are promoted to paper errors.

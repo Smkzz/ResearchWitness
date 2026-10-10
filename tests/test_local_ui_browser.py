@@ -1,0 +1,718 @@
+"""Real Chromium acceptance tests using only synthetic papers and loopback."""
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import re
+import secrets
+import tempfile
+import threading
+import unittest
+import urllib.parse
+import zipfile
+from pathlib import Path
+from unittest.mock import patch
+
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:  # Optional locally; the dedicated CI browser job installs it.
+    sync_playwright = None
+if sync_playwright is None and os.environ.get("RW_BROWSER_REQUIRED") == "1":
+    raise RuntimeError("the dedicated browser qualification job requires Playwright")
+
+from researchwitness import local_ui
+from researchwitness.local_ui import LocalAuditStore, LocalUIHTTPServer
+from researchwitness.paper_audit import PaperAuditCancelled, run_paper_audit
+
+
+SYNTHETIC_PAPER = (
+    "# Results\n\n"
+    "| Outcome | Group A (n=30) |\n"
+    "| --- | ---: |\n"
+    "| At least 75%, n (%) | 23 (73.3) |\n"
+).encode("utf-8")
+SLOW_PAPER = b"# Synthetic active job\n\nThis run is held at a test-controlled worker barrier.\n"
+COMPLETED_PAPER = SYNTHETIC_PAPER.replace(b"Group A", b"Group B")
+SYNTHETIC_JATS = (
+    b'<article><!-- \xce\xbb -->\n<body><sec><title>Results</title>'
+    b'<p>At baseline, 20 participants were enrolled.</p>'
+    b'<table-wrap id="T1"><label>Table 1</label><caption><title>Outcomes</title></caption>'
+    b'<table><thead><tr><th>Outcome</th><th>All participants (N=20)</th></tr></thead>'
+    b'<tbody><tr><th scope="row">Event, n (%)</th><td>2 (8.0%)</td></tr></tbody>'
+    b'</table></table-wrap></sec></body></article>'
+)
+
+
+def is_same_origin(url: str, expected_origin: str) -> bool:
+    try:
+        actual = urllib.parse.urlsplit(url)
+        expected = urllib.parse.urlsplit(expected_origin)
+        actual_port = actual.port or (443 if actual.scheme == "https" else 80 if actual.scheme == "http" else None)
+        expected_port = expected.port or (443 if expected.scheme == "https" else 80 if expected.scheme == "http" else None)
+    except ValueError:
+        return False
+    return (actual.scheme.casefold(), (actual.hostname or "").casefold(), actual_port) == (
+        expected.scheme.casefold(), (expected.hostname or "").casefold(), expected_port,
+    )
+
+
+def wait_for_result_status(page, expected: str, timeout: int = 10_000) -> None:
+    page.locator("#results-panel:not([hidden])").get_by_text(
+        expected, exact=True,
+    ).wait_for(state="visible", timeout=timeout)
+
+
+@unittest.skipIf(sync_playwright is None, "Playwright is installed only in the browser qualification job")
+class LocalUIBrowserAcceptance(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="rw-local-ui-browser-")
+        self.screenshot_dir = Path(os.environ.get("RW_BROWSER_SCREENSHOT_DIR", self.temporary.name))
+        self.screenshot_dir.mkdir(parents=True, exist_ok=True)
+        self.store = LocalAuditStore(Path(self.temporary.name) / "store")
+        self.server = None
+        self.thread = None
+        self.release_events: list[threading.Event] = []
+        try:
+            self.server = LocalUIHTTPServer(("127.0.0.1", 0), self.store, secrets.token_urlsafe(32))
+        except OSError as exc:
+            self.store.close()
+            self.temporary.cleanup()
+            if os.environ.get("RW_BROWSER_REQUIRED") == "1":
+                raise RuntimeError(f"required browser qualification cannot bind loopback: {exc}") from exc
+            self.skipTest(f"this execution environment denies loopback bind: {exc}")
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
+        self.origin = f"http://127.0.0.1:{self.server.server_port}"
+
+    def tearDown(self):
+        for event in self.release_events:
+            event.set()
+        if self.server is not None:
+            self.server.shutdown()
+            self.server.server_close()
+            self.thread.join(timeout=3)
+        self.store.close()
+        self.temporary.cleanup()
+
+    def make_page(self, browser, *, fail_first_status_for: str | None = None):
+        page = browser.new_page(viewport={"width": 1280, "height": 900}, accept_downloads=True)
+        if fail_first_status_for:
+            target = json.dumps(f"/api/jobs/{fail_first_status_for}")
+            page.add_init_script(f"""(() => {{
+              const target = {target};
+              const originalFetch = window.fetch.bind(window);
+              window.__rwStatusFailureInjected = false;
+              window.fetch = (input, options = {{}}) => {{
+                if (!window.__rwStatusFailureInjected && String(input) === target) {{
+                  window.__rwStatusFailureInjected = true;
+                  return Promise.reject(new TypeError("synthetic one-shot status disconnect"));
+                }}
+                return originalFetch(input, options);
+              }};
+            }})();""")
+        off_origin = []
+        page_errors = []
+        page.on("request", lambda request: off_origin.append(request.url)
+                if not is_same_origin(request.url, self.origin) else None)
+        page.on("pageerror", lambda error: page_errors.append(str(error)))
+        page.goto(self.origin, wait_until="networkidle")
+        return page, off_origin, page_errors
+
+    def test_origin_assertion_checks_scheme_and_port(self):
+        port = urllib.parse.urlsplit(self.origin).port
+        self.assertTrue(is_same_origin(self.origin + "/", self.origin))
+        self.assertFalse(is_same_origin(self.origin.replace("http://", "https://", 1), self.origin))
+        self.assertFalse(is_same_origin(f"http://127.0.0.1:{port + 1}/", self.origin))
+
+    def test_upload_evidence_export_replay_reload_error_retry_and_delete(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            try:
+                page, off_origin, page_errors = self.make_page(browser)
+                self.assertEqual(page.title(), "ResearchWitness · Local paper audit")
+                self.assertTrue(page.locator("#custody-warning").is_visible())
+                self.assertIn("not a custodian security boundary", page.locator("#custody-warning").inner_text())
+                self.assertTrue(page.locator("#paper-file").evaluate("input => input.labels.length === 1"))
+                self.assertEqual(page.locator("#progress-stage").get_attribute("aria-live"), "polite")
+                self.assertEqual(page.locator("#error-note").get_attribute("role"), "alert")
+                self.assertEqual(page.locator("#paper-id").get_attribute("aria-describedby"), "paper-id-help")
+                self.assertEqual(page.locator("#paper-version").get_attribute("aria-describedby"), "paper-version-help")
+                self.assertEqual(page.locator("#duplicate-note").get_attribute("role"), "status")
+                self.assertEqual(page.locator("#duplicate-note").get_attribute("aria-live"), "polite")
+                self.assertTrue(page.locator("h1").is_visible())
+                self.assertGreaterEqual(page.locator("h2").count(), 4)
+                page.keyboard.press("Tab")
+                self.assertEqual(page.evaluate("document.activeElement.className"), "skip-link")
+                page.keyboard.press("Enter")
+                self.assertEqual(urllib.parse.urlparse(page.url).fragment, "main")
+                self.assertEqual(page.evaluate("document.activeElement.id"), "main")
+                self.assertEqual(
+                    page.locator("h1").evaluate("element => getComputedStyle(element).outlineStyle"),
+                    "solid",
+                )
+
+                page.locator("#paper-file").set_input_files({
+                    "name": "synthetic.md", "mimeType": "text/markdown", "buffer": SYNTHETIC_PAPER,
+                })
+                self.assertIn("synthetic.md", page.locator("#selected-file").inner_text())
+                page.locator("#paper-file").focus()
+                for expected_id in ("paper-id", "paper-version", "run-button"):
+                    page.keyboard.press("Tab")
+                    self.assertEqual(page.evaluate("document.activeElement.id"), expected_id)
+                self.assertEqual(
+                    page.locator("#run-button").evaluate("button => getComputedStyle(button).outlineStyle"),
+                    "solid",
+                )
+                page.evaluate("""() => {
+                  const originalFetch = window.fetch.bind(window);
+                  window.__rwUploadCalls = 0;
+                  window.__rwUploadPending = false;
+                  window.__rwReleaseUpload = null;
+                  window.__rwReportPending = false;
+                  window.__rwReleaseReport = null;
+                  window.__rwBlockedInitialReport = false;
+                  window.fetch = async (input, options = {}) => {
+                    if (String(input) === "/api/jobs" && options.method === "POST") {
+                      window.__rwUploadCalls += 1;
+                      window.__rwUploadPending = true;
+                      document.body.dataset.rwUploadPending = "true";
+                      await new Promise(resolve => { window.__rwReleaseUpload = resolve; });
+                    }
+                    if (String(input).startsWith("/api/reports/") && !window.__rwBlockedInitialReport) {
+                      window.__rwBlockedInitialReport = true;
+                      window.__rwReportPending = true;
+                      document.body.dataset.rwReportPending = "true";
+                      await new Promise(resolve => { window.__rwReleaseReport = resolve; });
+                    }
+                    return originalFetch(input, options);
+                  };
+                }""")
+                page.keyboard.press("Enter")
+                page.locator("body[data-rw-upload-pending='true']").wait_for(
+                    state="attached", timeout=10_000,
+                )
+                self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
+                for control in ("#paper-file", "#paper-id", "#paper-version", "#run-button", "#delete-data"):
+                    self.assertTrue(page.locator(control).is_disabled(), control)
+                self.assertEqual(page.evaluate("window.__rwUploadCalls"), 1)
+                drag_state = page.locator("#drop-zone").evaluate("""zone => {
+                  const transfer = new DataTransfer();
+                  transfer.items.add(new File(['busy drop'], 'busy.md', {type: 'text/markdown'}));
+                  const dragover = new DragEvent('dragover', {bubbles: true, cancelable: true, dataTransfer: transfer});
+                  const drop = new DragEvent('drop', {bubbles: true, cancelable: true, dataTransfer: transfer});
+                  zone.dispatchEvent(dragover);
+                  zone.dispatchEvent(drop);
+                  return {dragoverPrevented: dragover.defaultPrevented, dropPrevented: drop.defaultPrevented};
+                }""")
+                self.assertTrue(drag_state["dragoverPrevented"])
+                self.assertTrue(drag_state["dropPrevented"])
+                self.assertIn("synthetic.md", page.locator("#selected-file").inner_text())
+                self.assertEqual(urllib.parse.urlparse(page.url).fragment, "main")
+                page.evaluate("window.__rwReleaseUpload()")
+
+                page.locator("body[data-rw-report-pending='true']").wait_for(
+                    state="attached", timeout=30_000,
+                )
+                self.assertTrue(page.locator("#progress-panel").is_visible())
+                self.assertTrue(page.locator("#results-panel").is_hidden())
+                self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
+                self.assertEqual(page.locator("#progress-stage").inner_text(), "Preparing the saved result")
+                self.assertTrue(page.get_by_role("button", name="Cancel this run").is_disabled())
+                page.evaluate("window.__rwReleaseReport()")
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertIn("23 (73.3)", page.locator("#findings").inner_text())
+                self.assertIn("n=30", page.locator("#findings").inner_text())
+                self.assertIn("0-based source byte range [", page.locator("#findings").inner_text())
+                page.locator("#full-report-details summary").click()
+                report_title = page.frame_locator("#full-report").get_by_role(
+                    "heading", name="ResearchWitness paper screening report",
+                )
+                report_title.wait_for(state="visible", timeout=10_000)
+
+                desktop_screenshot = self.screenshot_dir / "synthetic-results-desktop.png"
+                page.screenshot(path=str(desktop_screenshot), full_page=True)
+                self.assertGreater(desktop_screenshot.stat().st_size, 10_000)
+                page.set_viewport_size({"width": 390, "height": 844})
+                report_title.wait_for(state="visible", timeout=10_000)
+                source_hash = page.locator("#result-summary .plain-list li").filter(
+                    has_text="Source SHA-256",
+                )
+                self.assertEqual(source_hash.count(), 1)
+                self.assertLessEqual(
+                    source_hash.evaluate("node => node.scrollWidth"),
+                    source_hash.evaluate("node => node.clientWidth"),
+                    "the source hash must wrap inside its mobile evidence row",
+                )
+                mobile_screenshot = self.screenshot_dir / "synthetic-results-mobile.png"
+                page.screenshot(path=str(mobile_screenshot), full_page=True)
+                self.assertGreater(mobile_screenshot.stat().st_size, 10_000)
+                mobile_report_screenshot = self.screenshot_dir / "synthetic-full-report-mobile.png"
+                page.locator("#full-report").screenshot(path=str(mobile_report_screenshot))
+                self.assertGreater(mobile_report_screenshot.stat().st_size, 10_000)
+                overflow_diagnostics = page.evaluate("""() => {
+                  const describe = (node) => {
+                    const rect = node.getBoundingClientRect();
+                    const style = getComputedStyle(node);
+                    const pseudo = (name) => {
+                      const value = getComputedStyle(node, name);
+                      return value.content === 'none' || value.content === 'normal' ? null : {
+                        content: value.content.slice(0, 120),
+                        width: value.width,
+                        minWidth: value.minWidth,
+                        position: value.position,
+                        transform: value.transform,
+                      };
+                    };
+                    return {
+                      tag: node.tagName,
+                      id: node.id,
+                      className: typeof node.className === 'string' ? node.className : '',
+                      left: Math.round(rect.left * 10) / 10,
+                      right: Math.round(rect.right * 10) / 10,
+                      width: Math.round(rect.width * 10) / 10,
+                      clientWidth: node.clientWidth,
+                      scrollWidth: node.scrollWidth,
+                      scrollLeft: node.scrollLeft,
+                      overflowX: style.overflowX,
+                      minWidth: style.minWidth,
+                      maxWidth: style.maxWidth,
+                      position: style.position,
+                      display: style.display,
+                      whiteSpace: style.whiteSpace,
+                      transform: style.transform,
+                      before: pseudo('::before'),
+                      after: pseudo('::after'),
+                      text: (node.innerText || '').slice(0, 140),
+                    };
+                  };
+                  const rootNodes = [document.documentElement, document.body];
+                  const descendants = [...document.body.querySelectorAll('*')];
+                  const nodes = [...new Set([...rootNodes, ...descendants])];
+                  return {
+                    viewportWidth: innerWidth,
+                    devicePixelRatio,
+                    document: describe(document.documentElement),
+                    body: describe(document.body),
+                    offenders: nodes.map(describe).filter((item) => item.width > 0 && (
+                      item.left < -1 || item.right > innerWidth + 1 ||
+                      item.scrollWidth > item.clientWidth + 1
+                    )).sort((left, right) =>
+                      (right.scrollWidth - right.clientWidth) -
+                      (left.scrollWidth - left.clientWidth)
+                    ).slice(0, 24),
+                  };
+                }""")
+                self.assertLessEqual(
+                    page.evaluate("document.documentElement.scrollWidth"),
+                    page.evaluate("window.innerWidth"),
+                    f"mobile viewport overflow diagnostics: {json.dumps(overflow_diagnostics, sort_keys=True)}",
+                )
+                for viewport_width in (360, 320):
+                    page.set_viewport_size({"width": viewport_width, "height": 844})
+                    narrow_diagnostics = page.evaluate("""() => ({
+                      documentScrollWidth: document.documentElement.scrollWidth,
+                      bodyScrollWidth: document.body.scrollWidth,
+                      overflowing: [...document.body.querySelectorAll('*')]
+                        .map(node => {
+                          const rect = node.getBoundingClientRect();
+                          return {
+                            tag: node.tagName,
+                            id: node.id,
+                            className: typeof node.className === 'string' ? node.className : '',
+                            left: Math.round(rect.left * 10) / 10,
+                            right: Math.round(rect.right * 10) / 10,
+                            clientWidth: node.clientWidth,
+                            scrollWidth: node.scrollWidth,
+                            text: (node.innerText || '').slice(0, 100),
+                          };
+                        })
+                        .filter(item => item.scrollWidth > item.clientWidth + 1 ||
+                          item.left < -1 || item.right > innerWidth + 1)
+                        .slice(0, 12),
+                    })""")
+                    self.assertLessEqual(
+                        narrow_diagnostics["documentScrollWidth"], viewport_width,
+                        f"{viewport_width}px mobile viewport overflow: "
+                        f"{json.dumps(narrow_diagnostics, sort_keys=True)}",
+                    )
+
+                page.evaluate("""() => {
+                  const originalFetch = window.fetch.bind(window);
+                  window.__rwExportRequestPath = null;
+                  window.fetch = (input, options = {}) => {
+                    const path = String(input);
+                    if (path.startsWith('/api/exports/')) window.__rwExportRequestPath = path;
+                    return originalFetch(input, options);
+                  };
+                }""")
+                with page.expect_download(timeout=20_000) as download_info:
+                    page.get_by_role("button", name="Export source and report").click()
+                download = download_info.value
+                export_path = page.evaluate("window.__rwExportRequestPath")
+                match = re.fullmatch(r"/api/exports/([0-9a-f]{32})\.zip", export_path or "")
+                self.assertIsNotNone(match)
+                self.assertEqual(download.suggested_filename, "researchwitness-report.zip")
+                exported = Path(self.temporary.name) / "export.zip"
+                download.save_as(str(exported))
+                with zipfile.ZipFile(exported) as archive:
+                    self.assertIsNone(archive.testzip())
+                    self.assertEqual(archive.read("source.md"), SYNTHETIC_PAPER)
+                    self.assertIn("report.json", archive.namelist())
+                    self.assertIn("report.html", archive.namelist())
+                    self.assertIn("REPLAY.txt", archive.namelist())
+                    self.assertIn("replay.py", archive.namelist())
+                    self.assertIn("replay-metadata.json", archive.namelist())
+                    report = json.loads(archive.read("report.json"))
+                    self.assertEqual(report["source"]["sha256"], hashlib.sha256(SYNTHETIC_PAPER).hexdigest())
+
+                with page.expect_response(
+                    lambda response: response.request.method == "POST" and "/retry" in response.url,
+                    timeout=20_000,
+                ) as replay_response:
+                    page.evaluate("""() => {
+                      const originalFetch = window.fetch.bind(window);
+                      window.__rwReportGatePending = false;
+                      window.__rwReleaseReportGate = null;
+                      const reportGate = new Promise(resolve => { window.__rwReleaseReportGate = resolve; });
+                      window.fetch = async (input, options = {}) => {
+                        if (!window.__rwReportGatePending && String(input).startsWith('/api/reports/')) {
+                          window.__rwReportGatePending = true;
+                          document.body.dataset.rwReportGatePending = "true";
+                          await reportGate;
+                        }
+                        return originalFetch(input, options);
+                      };
+                    }""")
+                    page.get_by_role("button", name="Replay this exact input").click()
+                # Replay schedules an asynchronous job, so the HTTP response is Accepted.
+                self.assertEqual(replay_response.value.status, 202)
+                replay_payload = replay_response.value.json()
+                self.assertRegex(replay_payload['job']['job_id'], r'^[0-9a-f]{32}$')
+                self.assertIsInstance(replay_payload['duplicate'], bool)
+                page.locator("body[data-rw-report-gate-pending='true']").wait_for(
+                    state="attached", timeout=30_000,
+                )
+                self.assertTrue(page.locator("#progress-panel").is_visible())
+                self.assertEqual(page.locator("#progress-stage").inner_text(), "Preparing the saved result")
+                self.assertTrue(page.locator("#results-panel").is_hidden())
+                self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
+                page.evaluate("window.__rwReleaseReportGate()")
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertEqual(page.evaluate("document.activeElement.id"), "result-status")
+                page.reload(wait_until="networkidle")
+                page.locator("#history-list .history-item button").first.wait_for(timeout=10_000)
+                page.locator("#history-list .history-item button").first.click()
+                wait_for_result_status(page, "Review candidates found")
+                self.assertTrue(page.locator("#progress-panel").is_hidden())
+
+                page.on("dialog", lambda dialog: dialog.accept())
+                page.get_by_role("button", name="Delete all ResearchWitness run data").click()
+                page.get_by_text("No saved runs.", exact=True).wait_for(timeout=10_000)
+
+                # Inject a deterministic local worker failure; the browser still
+                # exercises the actual upload, error state, retry route and UI.
+                with patch.object(local_ui, "run_paper_audit", side_effect=OSError("synthetic failure")):
+                    page.locator("#paper-file").set_input_files({
+                        "name": "synthetic-failure.md", "mimeType": "text/markdown",
+                        "buffer": b"# synthetic failure fixture\n",
+                    })
+                    page.get_by_role("button", name="Run supported checks").click()
+                    wait_for_result_status(page, "Run failed", timeout=20_000)
+                    self.assertFalse(page.get_by_role("button", name="Retry this run").is_hidden())
+                    with page.expect_response(
+                        lambda response: response.request.method == "POST" and "/retry" in response.url,
+                        timeout=20_000,
+                    ) as retry_response:
+                        page.get_by_role("button", name="Retry this run").click()
+                    retry_response = retry_response.value
+                    self.assertEqual(retry_response.status, 202)
+                    previous_job = re.fullmatch(
+                        r"/api/jobs/([0-9a-f]{32})/retry",
+                        urllib.parse.urlsplit(retry_response.url).path,
+                    )
+                    self.assertIsNotNone(previous_job)
+                    retry_job = retry_response.json()["job"]
+                    self.assertNotEqual(retry_job["job_id"], previous_job.group(1))
+                    self.assertIsInstance(retry_response.json()["duplicate"], bool)
+                    wait_for_result_status(page, "Run failed", timeout=20_000)
+
+                self.assertEqual(off_origin, [])
+                self.assertEqual(page_errors, [])
+            finally:
+                browser.close()
+
+    def test_duplicate_submission_uses_an_exposed_live_status(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            try:
+                page, off_origin, page_errors = self.make_page(browser)
+                fixture = {
+                    "name": "synthetic-duplicate.md",
+                    "mimeType": "text/markdown",
+                    "buffer": SYNTHETIC_PAPER,
+                }
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+
+                page.evaluate("""() => {
+                  const originalFetch = window.fetch.bind(window);
+                  window.__rwDuplicateStatusGateCount = 0;
+                  window.__rwDuplicateStatusGates = [];
+                  window.__rwDuplicateStatusGateQueue = [];
+                  window.__rwArmDuplicateStatusGate = () => {
+                    let release;
+                    const promise = new Promise(resolve => { release = resolve; });
+                    const gate = { promise, release };
+                    window.__rwDuplicateStatusGates.push(gate);
+                    window.__rwDuplicateStatusGateQueue.push(gate);
+                  };
+                  window.__rwArmDuplicateStatusGate();
+                  window.fetch = async (input, options = {}) => {
+                    const method = (options.method || 'GET').toUpperCase();
+                    if (method === 'GET' && String(input).match(/^\\/api\\/jobs\\/[0-9a-f]{32}$/)) {
+                      const gate = window.__rwDuplicateStatusGateQueue.shift();
+                      if (gate) {
+                        window.__rwDuplicateStatusGateCount += 1;
+                        document.body.dataset.rwDuplicateStatusGatePending = String(window.__rwDuplicateStatusGateCount);
+                        await gate.promise;
+                      }
+                    }
+                    return originalFetch(input, options);
+                  };
+                }""")
+
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                duplicate = page.locator("#duplicate-note")
+                duplicate.wait_for(state="visible", timeout=10_000)
+                page.locator("body[data-rw-duplicate-status-gate-pending='1']").wait_for(
+                    state="attached", timeout=10_000,
+                )
+                self.assertEqual(duplicate.get_attribute("role"), "status")
+                self.assertEqual(duplicate.get_attribute("aria-live"), "polite")
+                self.assertIsNone(duplicate.evaluate("element => element.closest('#results-panel')"))
+                self.assertIn("exact file and configuration", duplicate.inner_text())
+                self.assertTrue(page.locator("#results-panel").is_hidden())
+                page.evaluate("window.__rwDuplicateStatusGates[0]?.release()")
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_visible())
+
+                page.evaluate("window.__rwArmDuplicateStatusGate()")
+                page.get_by_role("button", name="Replay this exact input").click()
+                page.locator("body[data-rw-duplicate-status-gate-pending='2']").wait_for(
+                    state="attached", timeout=10_000,
+                )
+                self.assertTrue(duplicate.is_hidden())
+                self.assertTrue(page.locator("#results-panel").is_hidden())
+                page.evaluate("window.__rwDuplicateStatusGates[1]?.release()")
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_hidden())
+                self.assertEqual(off_origin, [])
+                self.assertEqual(page_errors, [])
+            finally:
+                browser.close()
+
+    def test_history_selection_clears_a_stale_duplicate_notice(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            try:
+                page, off_origin, page_errors = self.make_page(browser)
+                fixture = {
+                    "name": "synthetic-history.md",
+                    "mimeType": "text/markdown",
+                    "buffer": SYNTHETIC_PAPER,
+                }
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                duplicate = page.locator("#duplicate-note")
+                duplicate.wait_for(state="visible", timeout=10_000)
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_visible())
+
+                page.locator("#history-list button").first.click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_hidden())
+                self.assertEqual(off_origin, [])
+                self.assertEqual(page_errors, [])
+            finally:
+                browser.close()
+
+    def test_jats_source_flow_displays_original_span_and_exports_source(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            try:
+                page, off_origin, page_errors = self.make_page(browser)
+                page.locator("#paper-file").set_input_files({
+                    "name": "synthetic.xml",
+                    "mimeType": "application/xml",
+                    "buffer": SYNTHETIC_JATS,
+                })
+                page.get_by_role("button", name="Run supported checks").click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                findings = page.locator("#findings").inner_text()
+                self.assertIn("All participants (N=20)", findings)
+                self.assertIn("/table-wrap[1]/table[1]/tbody[1]/tr[1]/td[1]", findings)
+                self.assertIn("0-based source byte range [", findings)
+                page.screenshot(
+                    path=str(self.screenshot_dir / "synthetic-jats-results-desktop.png"),
+                    full_page=True,
+                )
+
+                with page.expect_download(timeout=20_000) as download_info:
+                    page.get_by_role("button", name="Export source and report").click()
+                downloaded = Path(self.temporary.name) / "synthetic-jats-export.zip"
+                download_info.value.save_as(str(downloaded))
+                with zipfile.ZipFile(downloaded) as archive:
+                    self.assertIsNone(archive.testzip())
+                    self.assertEqual(archive.read("source.xml"), SYNTHETIC_JATS)
+                    report = json.loads(archive.read("report.json"))
+                source = report["candidate_anomalies"][0]["source_anchors"][-1]
+                self.assertEqual(
+                    SYNTHETIC_JATS[source["start_byte"]:source["end_byte"]],
+                    b"<td>2 (8.0%)</td>",
+                )
+                displayed_range = (
+                    f"0-based source byte range [{source['start_byte']}, "
+                    f"{source['end_byte']})"
+                )
+                self.assertIn(displayed_range, findings)
+                self.assertGreater(source["start_byte"], SYNTHETIC_JATS.index(b"\xce\xbb"))
+                self.assertEqual(off_origin, [])
+                self.assertEqual(page_errors, [])
+            finally:
+                browser.close()
+
+    def test_active_job_keeps_cancel_target_and_locks_history_selection(self):
+        started = threading.Event()
+        release = threading.Event()
+        self.release_events.append(release)
+
+        def controlled_worker(source_path, output_dir, identifier, version, **kwargs):
+            if Path(source_path).read_bytes() == SLOW_PAPER:
+                started.set()
+                while not release.wait(0.025):
+                    if kwargs.get("cancellation_check", lambda: False)():
+                        raise PaperAuditCancelled()
+            return run_paper_audit(source_path, output_dir, identifier, version, **kwargs)
+
+        with patch.object(local_ui, "run_paper_audit", side_effect=controlled_worker):
+            active, _ = self.store.submit("active.md", ".md", SLOW_PAPER, "synthetic:active", "v1")
+            self.assertTrue(started.wait(timeout=10))
+            completed, _ = self.store.submit(
+                "completed.md", ".md", COMPLETED_PAPER, "synthetic:completed", "v1",
+            )
+            completed.future.result(timeout=20)
+            completed_other, _ = self.store.submit(
+                "completed-other.md", ".md", COMPLETED_PAPER.replace(b"Group B", b"Group C"),
+                "synthetic:completed-other", "v1",
+            )
+            completed_other.future.result(timeout=20)
+
+            with sync_playwright() as playwright:
+                browser = playwright.chromium.launch(headless=True)
+                try:
+                    page, off_origin, page_errors = self.make_page(
+                        browser, fail_first_status_for=active.job_id,
+                    )
+                    page.locator("#progress-panel").wait_for(state="visible", timeout=10_000)
+                    page.get_by_role("button", name="Check run status again").wait_for(
+                        state="visible", timeout=10_000,
+                    )
+                    self.assertEqual(page.evaluate("document.activeElement.id"), "status-retry-button")
+                    buttons = page.locator("#history-list .history-item button")
+                    buttons.nth(1).wait_for(state="visible", timeout=10_000)
+                    self.assertGreaterEqual(buttons.count(), 2)
+                    self.assertTrue(all(buttons.nth(index).is_disabled() for index in range(buttons.count())))
+                    self.assertTrue(page.get_by_role("button", name="Delete all ResearchWitness run data").is_disabled())
+                    self.assertTrue(page.locator("#paper-file").is_disabled())
+
+                    cancel_requests = []
+                    page.on("request", lambda request: cancel_requests.append(request.url)
+                            if request.method == "POST" and "/cancel" in request.url else None)
+                    with page.expect_response(
+                        lambda response: response.request.method == "POST"
+                        and "/cancel" in response.url,
+                        timeout=10_000,
+                    ) as cancel_response:
+                        page.get_by_role("button", name="Cancel this run").click()
+                    self.assertEqual(cancel_response.value.status, 200)
+                    release.set()
+                    active.future.result(timeout=20)
+                    with page.expect_response(
+                        lambda response: response.request.method != "POST"
+                        and response.url.endswith(f"/api/jobs/{active.job_id}"),
+                        timeout=10_000,
+                    ) as reconnect_response:
+                        page.get_by_role("button", name="Check run status again").click()
+                    self.assertEqual(reconnect_response.value.status, 200)
+                    wait_for_result_status(page, "Run cancelled", timeout=20_000)
+                    self.assertEqual(page.evaluate("document.activeElement.id"), "result-status")
+                    self.assertFalse(page.locator("#paper-file").is_disabled())
+                    self.assertEqual(len(cancel_requests), 1)
+                    self.assertIn(active.job_id, cancel_requests[0])
+                    self.assertNotIn(completed.job_id, cancel_requests[0])
+
+                    history = page.locator("#history-list .history-item button")
+                    completed_button = page.locator("#history-list .history-item button").filter(
+                        has_text="completed.md",
+                    )
+                    completed_button.wait_for(timeout=10_000)
+                    other_completed_button = page.locator("#history-list .history-item button").filter(
+                        has_text="completed-other.md",
+                    )
+                    page.evaluate(f"""() => {{
+                      const target = "/api/reports/{completed.job_id}";
+                      const originalFetch = window.fetch.bind(window);
+                      window.__rwReportCalls = [];
+                      window.__rwReportPending = false;
+                      window.__rwReleaseReport = null;
+                      window.fetch = async (input, options = {{}}) => {{
+                        const path = String(input);
+                        if (path.startsWith('/api/reports/')) window.__rwReportCalls.push(path);
+                        if (path === target) {{
+                          window.__rwReportPending = true;
+                          document.body.dataset.rwHistoryReportPending = "true";
+                          await new Promise(resolve => {{ window.__rwReleaseReport = resolve; }});
+                        }}
+                        return originalFetch(input, options);
+                      }};
+                    }}""")
+                    completed_button.click()
+                    page.locator("body[data-rw-history-report-pending='true']").wait_for(
+                        state="attached", timeout=10_000,
+                    )
+                    self.assertEqual(page.evaluate("document.activeElement.id"), "progress-title")
+                    self.assertTrue(all(
+                        page.locator("#history-list .history-item button").nth(index).is_disabled()
+                        for index in range(page.locator("#history-list .history-item button").count())
+                    ))
+                    other_completed_button.evaluate(
+                        "button => button.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true}))",
+                    )
+                    self.assertEqual(page.evaluate("window.__rwReportCalls"), [f"/api/reports/{completed.job_id}"])
+                    self.assertTrue(page.locator("#results-panel").is_hidden())
+                    page.evaluate("window.__rwReleaseReport()")
+                    wait_for_result_status(page, "Review candidates found")
+                    self.assertTrue(page.locator("#progress-panel").is_hidden())
+                    self.assertTrue(page.locator("#results-panel").is_visible())
+                    displayed_source = page.locator("#result-summary").inner_text()
+                    self.assertIn(hashlib.sha256(COMPLETED_PAPER).hexdigest(), displayed_source)
+                    self.assertNotIn(
+                        hashlib.sha256(COMPLETED_PAPER.replace(b"Group B", b"Group C")).hexdigest(),
+                        displayed_source,
+                    )
+                    self.assertEqual(page.evaluate("window.__rwReportCalls"), [f"/api/reports/{completed.job_id}"])
+                    self.assertEqual(off_origin, [])
+                    self.assertEqual(page_errors, [])
+                finally:
+                    browser.close()
+
+
+if __name__ == "__main__":
+    unittest.main()

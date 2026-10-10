@@ -111,6 +111,69 @@ def _selected_value(relation: dict[str, Any]) -> str | None:
     return selected.get('value_exact') if isinstance(selected, dict) else None
 
 
+def _negative_source_relation_disposition(
+    locator: dict[str, Any], relation: dict[str, Any] | None, operands_exact: bool,
+) -> str:
+    """Classify a source-confirmed correct relation against the current replay.
+
+    Only an exact operand join that the current contract checks as a match is
+    eligible negative evidence. An abstention, a changed parse, or an unmatched
+    source locator remains visible but cannot increase that count.
+    """
+    if locator.get('arithmetic_correct') is not True:
+        return 'SOURCE_LABEL_NOT_CONFIRMED'
+    if relation is None:
+        return 'UNMATCHED'
+    if not operands_exact:
+        return 'ANCHOR_ONLY_OR_CHANGED_OPERANDS'
+    status = relation.get('status')
+    if status == 'ELIGIBLE_CHECKED_MATCH':
+        return 'ELIGIBLE_CORRECT_NEGATIVE'
+    if status in ('INCOMPLETE', 'UNSUPPORTED'):
+        return 'EXACT_OPERAND_ABSTENTION'
+    if status == 'ELIGIBLE_CHECKED_MISMATCH':
+        return 'EXACT_OPERAND_CHECKED_MISMATCH'
+    return 'EXACT_OPERAND_OTHER_STATUS'
+
+
+def _negative_relation_accounting(
+    disposition_counts: Counter[str], source_labelled_abstentions: int,
+) -> dict[str, Any]:
+    """Build source-label accounting without treating locators as eligible checks."""
+    return {
+        'source_labelled_correct_relations': sum(disposition_counts.values()),
+        'eligible_correct_source_relations': disposition_counts['ELIGIBLE_CORRECT_NEGATIVE'],
+        'exact_operand_abstentions': disposition_counts['EXACT_OPERAND_ABSTENTION'],
+        'exact_operand_checked_mismatches': disposition_counts['EXACT_OPERAND_CHECKED_MISMATCH'],
+        'source_labelled_abstentions': source_labelled_abstentions,
+        'source_anchor_only_or_changed_operand_relations': (
+            disposition_counts['ANCHOR_ONLY_OR_CHANGED_OPERANDS']
+        ),
+        'unmatched_source_relations': disposition_counts['UNMATCHED'],
+        'negative_relation_disposition_counts': dict(sorted(disposition_counts.items())),
+    }
+
+
+def _document_identity_accounting(source_records: list[dict[str, Any]]) -> dict[str, int]:
+    """Separate manifest record count from distinct normalized DOI values.
+
+    DOI equality is a conservative duplicate check, not proof of independent
+    works: alternate identifiers and DOI aliases require separate resolution.
+    """
+    normalized_dois: set[str] = set()
+    for source in source_records:
+        if not isinstance(source, dict):
+            raise ValueError('negative DEVELOPMENT source records must be objects')
+        value = source.get('normalized_doi')
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError('negative DEVELOPMENT source record has no normalized DOI')
+        normalized_dois.add(value.strip().lower())
+    return {
+        'source_records': len(source_records),
+        'distinct_normalized_doi_count': len(normalized_dois),
+    }
+
+
 def _candidate_summary(candidate: dict[str, Any] | None) -> dict[str, Any] | None:
     if candidate is None:
         return None
@@ -148,6 +211,10 @@ def _negative_replay(
             or manifest.get('contract_version') != '1.2'
             or manifest.get('relation_count') != EXPECTED_NEGATIVE_RELATIONS):
         raise ValueError('negative replay manifest does not match the frozen DEVELOPMENT label contract')
+    source_records = manifest.get('source_files', [])
+    if not isinstance(source_records, list):
+        raise ValueError('negative DEVELOPMENT manifest source_files must be a list')
+    document_identity_counts = _document_identity_accounting(source_records)
 
     ledger: list[dict[str, Any]] = []
     report_records: list[dict[str, Any]] = []
@@ -158,6 +225,8 @@ def _negative_replay(
     checked_wrong_denominator_rows: list[dict[str, Any]] = []
     zero_n_wrong_denominator_matches: list[dict[str, Any]] = []
     status_counts: Counter[str] = Counter()
+    disposition_counts: Counter[str] = Counter()
+    abstained_source_relation_count = 0
     table_count = 0
     locator_count = 0
     expected_relation_types = {
@@ -165,10 +234,17 @@ def _negative_replay(
         'jats_cell_ratio_percentage_recomputation': 'DIRECT_N_OVER_N_PERCENTAGE',
     }
 
-    for source in manifest.get('source_files', []):
+    for source in source_records:
         if (source.get('allocation_status') not in ('DEVELOPMENT_DOI_HASH_SPLIT', 'PREEXISTING_DEVELOPMENT')
                 or source.get('split_status') != 'DEVELOPMENT'):
             raise ValueError('refusing to replay a source outside the DEVELOPMENT allocation')
+        source_locators = source.get('relation_locators', [])
+        if (not isinstance(source_locators, list)
+                or any(not isinstance(item, dict) or item.get('arithmetic_correct') is not True
+                       for item in source_locators)):
+            raise ValueError(
+                'negative DEVELOPMENT manifest contains a relation not source-confirmed as arithmetically correct'
+            )
         source_path = Path(source['source_file'])
         raw = source_path.read_bytes()
         source_hash = _sha256(raw)
@@ -204,7 +280,6 @@ def _negative_replay(
                 raise ValueError(f'{source_path.name}: v1.3 JSON/HTML replay differs')
 
         relations = _percentage_relations(report)
-        source_locators = source.get('relation_locators', [])
         relation_pairs = _pair_negative_source_relations(source_locators, relations)
         candidates_by_relation = {
             str(item.get('relation_id')): item
@@ -232,6 +307,8 @@ def _negative_replay(
             join_level = 'EXACT_OPERANDS' if relation is not None and operands_exact else (
                 'SOURCE_ANCHOR_ONLY' if anchor_matches else 'UNMATCHED'
             )
+            disposition = _negative_source_relation_disposition(locator, relation, operands_exact)
+            disposition_counts[disposition] += 1
             if join_level == 'EXACT_OPERANDS':
                 exact_join_count += 1
             elif join_level == 'SOURCE_ANCHOR_ONLY':
@@ -244,6 +321,8 @@ def _negative_replay(
             status = str(relation.get('status')) if relation else 'UNMATCHED'
             if relation is not None:
                 status_counts[status] += 1
+                if status in ('INCOMPLETE', 'UNSUPPORTED'):
+                    abstained_source_relation_count += 1
             selected_value = _selected_value(relation) if relation else None
             displayed_denominator = relation.get('denominator_exact') if relation else None
             expected_denominator = str(locator.get('denominator'))
@@ -268,6 +347,7 @@ def _negative_replay(
                     'arithmetic_correct': locator.get('arithmetic_correct'),
                 },
                 'join_level': join_level,
+                'negative_relation_disposition': disposition,
                 'report_relation_id': relation_id,
                 'report_relation_status': status,
                 'report_operands': {
@@ -339,12 +419,11 @@ def _negative_replay(
             'Skipped relations retain scope values, selected/rejected anchors, applicability, scope-match details, and reasons.'
         ),
         'summary': {
-            'eligible_correct_source_relations': locator_count,
-            'source_documents': len(report_records),
+            **_negative_relation_accounting(disposition_counts, abstained_source_relation_count),
+            **document_identity_counts,
             'source_tables': table_count,
             'exact_operand_joins': exact_join_count,
             'anchor_only_joins': anchor_only_count,
-            'unmatched_source_relations': unmatched_count,
             'source_anchor_join_coverage': exact_join_count + anchor_only_count,
             'candidate_emissions_on_source_labelled_correct_relations': len(false_candidate_rows),
             'candidate_emission_documents': source_document_false_candidates,
@@ -367,6 +446,7 @@ def _negative_replay(
             'This is post-hoc DEVELOPMENT evidence and does not estimate unseen error rates.',
             'The source-first labels remain authoritative; exact operand and anchor-only joins are reported separately.',
             'A denominator arithmetic candidate does not establish that a paper is wrong or affect its conclusions.',
+            'Distinct normalized DOI values do not establish independent works without alias resolution.',
         ],
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)

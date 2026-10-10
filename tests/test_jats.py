@@ -81,6 +81,39 @@ def test_jats_tables_use_source_linked_model_and_exact_percentage_contract(tmp_p
     assert "ResearchWitness has not determined whether this affects the paper's conclusions." in html
 
 
+def test_jats_anchors_bind_exact_original_byte_spans_after_preprocessing():
+    source = (
+        b'\xef\xbb\xbf<?xml version="1.0" encoding="UTF-8"?>'
+        b'<!-- source-mapped prolog --><?fixture status="synthetic"?>'
+        b'<!DOCTYPE article SYSTEM "https://example.invalid/jats.dtd">'
+        b'<article><body><sec><title>Results</title>'
+        b'<p>Before &euro; and &beta; text.</p><named-content content-type="empty"/>'
+        b'<table-wrap id="T&euro;"><label>Table 1</label><caption><title>Outcomes &euro;</title></caption>'
+        b'<table><thead><tr><th>Group (N=20)</th></tr></thead><tbody><tr><td>2 (8.0%)</td>'
+        b'</tr></tbody></table></table-wrap>'
+        b'</sec></body></article>'
+    )
+    document = parse_jats(source)
+
+    paragraph = next(item for item in document.paragraphs if 'Before' in item.text)
+    paragraph_anchor = paragraph.source_anchor
+    assert source[paragraph_anchor.start_byte:paragraph_anchor.end_byte] == b'<p>Before &euro; and &beta; text.</p>'
+    assert paragraph_anchor.source_sha256 == document.source_sha256
+
+    cell_anchor = document.tables[0].rows[-1].cells[0].source_anchor
+    assert source[cell_anchor.start_byte:cell_anchor.end_byte] == b'<td>2 (8.0%)</td>'
+    assert cell_anchor.end_byte > paragraph_anchor.end_byte
+    assert cell_anchor.source_sha256 == document.source_sha256
+
+
+def test_jats_source_offset_edit_limit_fails_closed(monkeypatch):
+    import researchwitness.jats as jats
+
+    monkeypatch.setattr(jats, 'MAX_JATS_OFFSET_EDITS', 0)
+    with pytest.raises(Invalid, match='source-offset mapping limit'):
+        parse_jats(b'<article><p>Known entity: &beta;</p></article>')
+
+
 def test_direct_cell_ratio_is_reported_with_exact_jats_anchor(tmp_path):
     source = _source(
         '<table-wrap id="T-ratio"><label>Table 2</label><caption><title>Disposition</title></caption>'
@@ -468,6 +501,246 @@ def test_body_subgroup_with_missing_column_denominator_does_not_fall_back_to_hea
     assert result['findings'] == []
 
 
+def test_label_only_subgroup_without_a_base_does_not_fall_back_to_population_header():
+    document = parse_jats(_source(
+        '<table-wrap id="label-only-subgroup"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=100)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Women</th><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>4 (20%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['relations'][0]['status'] == 'INCOMPLETE'
+    assert result['relations'][0]['primary_skip_reason'] == 'DENOMINATOR_NOT_EXPLICIT'
+    assert result['relations'][0]['denominator_scope_resolved'] is False
+    assert result['relations'][0]['denominator_provenance']['selected_denominator'] is None
+    assert result['findings'] == []
+
+
+def test_label_only_overall_population_control_can_use_population_header():
+    document = parse_jats(_source(
+        '<table-wrap id="label-only-overall"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=100)</th></tr></thead><tbody>'
+        '<tr><th scope="row">All participants</th><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>20 (20%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MATCH'
+    assert result['relations'][0]['denominator_exact'] == '100'
+    assert result['findings'] == []
+
+
+def test_label_only_outcome_heading_is_not_assumed_to_be_a_subgroup():
+    document = parse_jats(_source(
+        '<table-wrap id="label-only-outcome"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=100)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Primary outcome</th><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>20 (20%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MATCH'
+    assert result['relations'][0]['denominator_exact'] == '100'
+    assert result['findings'] == []
+
+
+@pytest.mark.parametrize(('heading', 'value', 'denominator'), [
+    ('Women (N=20)', '4 (20%)', '20'),
+    ('All participants (N=100)', '20 (20%)', '100'),
+])
+def test_label_only_group_heading_with_printed_base_scopes_following_rows(heading, value, denominator):
+    document = parse_jats(_source(
+        '<table-wrap id="label-only-printed-base"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=100)</th></tr></thead><tbody>'
+        f'<tr><th scope="row">{heading}</th><td></td></tr>'
+        f'<tr><th scope="row">Event</th><td>{value}</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MATCH'
+    assert result['relations'][0]['denominator_exact'] == denominator
+    assert result['relations'][0]['denominator_provenance']['selected_denominator']['structural_source'] == (
+        'printed base in label-only JATS group heading'
+    )
+    assert result['findings'] == []
+
+
+def test_label_only_subgroup_survives_transparent_outcome_heading():
+    document = parse_jats(_source(
+        '<table-wrap id="subgroup-outcome-heading"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=100)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Women (N=20)</th><td></td></tr>'
+        '<tr><th scope="row">Primary outcome</th><td></td></tr>'
+        '<tr><th scope="row">Event 4</th><td>4 (20%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['relations'][0]['status'] == 'ELIGIBLE_CHECKED_MATCH'
+    assert result['relations'][0]['denominator_exact'] == '20'
+    assert result['findings'] == []
+
+
+@pytest.mark.parametrize('heading', ['Group A', 'Comorbidities', 'Prior therapy'])
+def test_common_label_only_subgroup_headings_block_broad_denominator_fallback(heading):
+    document = parse_jats(_source(
+        '<table-wrap id="common-subgroup-heading"><table><thead><tr><th>Outcome</th>'
+        '<th>Participants (N=100)</th></tr></thead><tbody>'
+        f'<tr><th scope="row">{heading}</th><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>20 (20%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert result['relations'][0]['status'] == 'INCOMPLETE'
+    assert result['relations'][0]['denominator_scope_resolved'] is False
+    assert result['relations'][0]['denominator_provenance']['selected_denominator'] is None
+    assert result['findings'] == []
+
+
+def test_printed_subgroup_base_is_unresolved_across_stratified_columns():
+    document = parse_jats(_source(
+        '<table-wrap id="stratified-subgroup-base"><table><thead><tr><th>Outcome</th>'
+        '<th>Treatment (N=60)</th><th>Control (N=40)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Women (N=20)</th><td></td><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>6 (10%)</td><td>2 (5%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert [item['status'] for item in result['relations']] == ['INCOMPLETE', 'INCOMPLETE']
+    assert all(item['denominator_scope_resolved'] is False for item in result['relations'])
+    assert all(item['denominator_provenance']['selected_denominator'] is None
+               for item in result['relations'])
+    assert result['findings'] == []
+
+
+def test_subgroup_base_does_not_flow_into_unbased_treatment_arm_columns():
+    document = parse_jats(_source(
+        '<table-wrap id="unbased-treatment-arms"><table><thead><tr><th>Outcome</th>'
+        '<th>All participants (N=100)</th><th>Treatment</th><th>Control</th></tr></thead><tbody>'
+        '<tr><th scope="row">Women (N=20)</th><td></td><td></td><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>4 (20%)</td><td>4 (20%)</td><td>3 (15%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert [item['status'] for item in result['relations']] == [
+        'ELIGIBLE_CHECKED_MATCH', 'INCOMPLETE', 'INCOMPLETE',
+    ]
+    assert [item.get('denominator_exact') for item in result['relations']] == ['20', None, None]
+    assert [item['denominator_scope_resolved'] for item in result['relations']] == [True, False, False]
+    assert result['findings'] == []
+
+
+@pytest.mark.parametrize('include_subgroup', [False, True])
+@pytest.mark.parametrize('second_arm', ['Control', 'Usual care', ''])
+def test_shared_aggregate_header_spanning_arms_does_not_supply_arm_denominator(
+    include_subgroup, second_arm,
+):
+    subgroup_row = (
+        '<tr><th scope="row">Women (N=20)</th><td></td><td></td></tr>'
+        if include_subgroup else ''
+    )
+    values = '1 (5%)' if include_subgroup else '4 (4%)'
+    document = parse_jats(_source(
+        '<table-wrap id="shared-aggregate-over-arms"><table><thead>'
+        '<tr><th rowspan="2">Outcome</th><th colspan="2">All participants (N=100)</th></tr>'
+        f'<tr><th>Treatment</th><th>{second_arm}</th></tr></thead><tbody>'
+        + subgroup_row
+        + f'<tr><th scope="row">Event</th><td>{values}</td><td>{values}</td></tr>'
+        + '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert [item['status'] for item in result['relations']] == ['INCOMPLETE', 'INCOMPLETE']
+    assert all(item.get('denominator_exact') is None for item in result['relations'])
+    assert all(item['denominator_scope_resolved'] is False for item in result['relations'])
+    assert result['findings'] == []
+
+
+def test_shared_aggregate_header_does_not_flow_to_unlabeled_child_column():
+    document = parse_jats(_source(
+        '<table-wrap id="shared-aggregate-over-unlabeled-child"><table><thead>'
+        '<tr><th rowspan="2">Outcome</th><th colspan="2">All participants (N=100)</th></tr>'
+        '<tr><th>Treatment</th><th></th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>4 (4%)</td><td>3 (3%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert [item['status'] for item in result['relations']] == ['INCOMPLETE', 'INCOMPLETE']
+    assert all(item.get('denominator_exact') is None for item in result['relations'])
+    assert all(item['denominator_scope_resolved'] is False for item in result['relations'])
+    assert result['findings'] == []
+
+
+def test_same_span_child_header_does_not_split_a_shared_population_denominator():
+    document = parse_jats(_source(
+        '<table-wrap id="same-span-child-header"><table><thead>'
+        '<tr><th rowspan="2">Outcome</th><th colspan="2">All participants (N=100)</th></tr>'
+        '<tr><th colspan="2">Incidence</th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>4 (4%)</td><td>3 (3%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert [item['status'] for item in result['relations']] == [
+        'ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MATCH',
+    ]
+    assert [item['denominator_exact'] for item in result['relations']] == ['100', '100']
+
+
+def test_explicit_child_arm_denominators_override_shared_aggregate_header():
+    document = parse_jats(_source(
+        '<table-wrap id="explicit-child-arm-denominators"><table><thead>'
+        '<tr><th rowspan="2">Outcome</th><th colspan="2">All participants (N=100)</th></tr>'
+        '<tr><th>Treatment (N=60)</th><th>Control (N=40)</th></tr></thead><tbody>'
+        '<tr><th scope="row">Event</th><td>6 (10%)</td><td>2 (5%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert [item['status'] for item in result['relations']] == [
+        'ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MATCH',
+    ]
+    assert [item['denominator_exact'] for item in result['relations']] == ['60', '40']
+    assert result['findings'] == []
+
+
+def test_subgroup_base_does_not_apply_to_multiple_unbased_arm_columns_without_aggregate():
+    document = parse_jats(_source(
+        '<table-wrap id="unbased-arms-only"><table><thead><tr><th>Outcome</th>'
+        '<th>Treatment</th><th>Control</th></tr></thead><tbody>'
+        '<tr><th scope="row">Women (N=20)</th><td></td><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>4 (20%)</td><td>3 (15%)</td></tr>'
+        '</tbody></table></table-wrap>'
+    ))
+
+    result = check_structured_table_percentages(document)
+
+    assert [item['status'] for item in result['relations']] == ['INCOMPLETE', 'INCOMPLETE']
+    assert all(item['denominator_scope_resolved'] is False for item in result['relations'])
+    assert result['findings'] == []
+
+
 def test_footnoted_body_subgroup_denominator_stays_incomplete():
     document = parse_jats(_source(
         '<table-wrap id="body-subgroup-footnoted-denominator"><table><thead><tr><th>Outcome</th>'
@@ -656,13 +929,42 @@ def test_footnoted_row_label_scope_suppresses_global_denominator(tmp_path):
     assert 'FOOTNOTE_SCOPE_UNRESOLVED' in result['reasons']
 
 
-@pytest.mark.parametrize('cue', ['weighted estimate', 'adjusted percentage', 'multiple responses allowed', 'missing data excluded'])
+@pytest.mark.parametrize('cue', [
+    'weighted estimate', 'inverse probability weighting', 'post-stratification weights',
+    'reweighted estimate', 'reweighting', 'adjusted percentage', 'adjustment for age',
+    'standardised percentage', 'standardisation method',
+    'standardize percentage', 'standardise percentage',
+    'standardizing estimates', 'standardising estimates',
+    'multiple responses allowed', 'missing data excluded',
+])
 def test_weighted_adjusted_overlap_and_missingness_cues_suppress_candidates(tmp_path, cue):
     source = _simple_table(value='2 (8.0%)', header=f'All (N=20), {cue}')
     _, report, _ = _run_jats(tmp_path, source)
     assert report['candidate_anomalies'] == []
     table_result = next(item for item in report['arithmetic_screens']['structured_table_percentages']['tables'])
     assert table_result['status'] in ('UNSUPPORTED', 'INCOMPLETE')
+
+
+@pytest.mark.parametrize(('header', 'expected_status'), [
+    ('All (N=2O0)', 'NONELIGIBLE'),
+    ('All (N=20x)', 'NONELIGIBLE'),
+    ('All (N=20/30)', 'NONELIGIBLE'),
+    ('All (N=20–30)', 'NONELIGIBLE'),
+    ('All (N=20−30)', 'NONELIGIBLE'),
+    ('All (N=20-30)', 'NONELIGIBLE'),
+    ('All (N=20 participants)', 'ELIGIBLE_CHECKED_MATCH'),
+])
+def test_denominator_token_requires_a_complete_numeric_boundary(tmp_path, header, expected_status):
+    _, report, _ = _run_jats(tmp_path, _simple_table(value='2 (10%)', header=header))
+    result = report['arithmetic_screens']['structured_table_percentages']
+
+    if expected_status == 'NONELIGIBLE':
+        assert result['relations'][0]['status'] in ('INCOMPLETE', 'UNSUPPORTED')
+        assert report['candidate_anomalies'] == []
+        selected = result['relations'][0]['denominator_provenance']['selected_denominator']
+        assert selected is None or selected.get('value_exact') is None
+    else:
+        assert result['relations'][0]['status'] == expected_status
 
 
 def test_cell_local_ratios_remain_eligible_for_explicit_overlapping_thresholds():
@@ -878,6 +1180,25 @@ def test_jats_ignores_external_dtd_without_fetch_and_decodes_known_entities():
     assert document.paragraphs[0].text == 'Alpha α & beta'
 
 
+@pytest.mark.parametrize('source', [
+    b'<article><body><p>Before <!DOCTYPE article SYSTEM "urn:example:dtd"> after</p></body></article>',
+    b'<article note="before <!DOCTYPE article SYSTEM \'urn:example:dtd\'> after"/>',
+])
+def test_jats_rejects_external_doctype_looking_text_outside_the_prolog(source):
+    with pytest.raises(Invalid, match='DTD and entity|malformed'):
+        parse_jats(source)
+
+
+def test_jats_preserves_external_doctype_text_inside_cdata():
+    source = (
+        b'<article><body><p><![CDATA[Before <!DOCTYPE article SYSTEM "urn:example:dtd"> after]]>'
+        b'</p></body></article>'
+    )
+    assert parse_jats(source).paragraphs[0].text == (
+        'Before <!DOCTYPE article SYSTEM "urn:example:dtd"> after'
+    )
+
+
 def test_jats_entity_preparation_leaves_comments_and_cdata_untouched():
     source = b'''<!-- literal <!DOCTYPE article [not markup]> &unknownName; -->
     <article><body><sec><title>Results</title>
@@ -885,6 +1206,18 @@ def test_jats_entity_preparation_leaves_comments_and_cdata_untouched():
     </sec></body></article>'''
     document = parse_jats(source)
     assert document.paragraphs[0].text == 'Before <tag>&publisherSymbol; after'
+
+
+def test_jats_entity_preparation_handles_interleaved_literals_and_external_doctype():
+    source = b'''<?xml version="1.0"?>
+    <!DOCTYPE article SYSTEM "https://invalid.example/jats.dtd">
+    <article><body><p>Alpha &alpha;<!-- &unknownName; -->
+    <![CDATA[&publisherSymbol;]]><?researchwitness ignored="&unknownName;"?> &amp; beta</p>
+    </body></article>'''
+
+    document = parse_jats(source)
+
+    assert document.paragraphs[0].text == 'Alpha α &publisherSymbol; & beta'
 
 
 def test_jats_rejects_unknown_entities_even_with_external_doctype():
@@ -915,6 +1248,87 @@ def test_jats_depth_and_source_size_limits_fail_closed(monkeypatch):
     monkeypatch.setattr(jats, 'MAX_JATS_BYTES', 4)
     with pytest.raises(Invalid, match='32 MiB limit'):
         parse_jats(b'<article/>')
+
+
+def test_jats_cumulative_source_path_budget_fails_closed(monkeypatch):
+    import researchwitness.jats as jats
+
+    monkeypatch.setattr(jats, 'MAX_JATS_PATH_BYTES', 1_024)
+    long_name = 'a' * 120
+    source = (
+        '<article><' + long_name + '>' + '<x/>' * 1_000
+        + '</' + long_name + '></article>'
+    ).encode('ascii')
+
+    with pytest.raises(Invalid, match='source-path byte limit'):
+        parse_jats(source)
+
+
+def test_jats_preprocessor_preserves_plain_markup_and_rejects_unterminated_literals():
+    from researchwitness.jats import _prepare_jats_bytes
+
+    source = b'<article><body><p>Plain XML remains intact.</p></body></article>'
+    assert _prepare_jats_bytes(source) == source
+    assert parse_jats(source).paragraphs[0].text == 'Plain XML remains intact.'
+
+    for opener in (b'<!--', b'<![CDATA[', b'<?'):
+        malformed = b'<article>' + opener * 10_000
+        with pytest.raises(Invalid, match='unterminated'):
+            parse_jats(malformed)
+
+
+def test_jats_attribute_and_prepared_byte_limits_fail_before_parser_allocation(monkeypatch):
+    import researchwitness.jats as jats
+
+    monkeypatch.setattr(jats, 'MAX_JATS_ATTRIBUTES_PER_ELEMENT', 1)
+    with pytest.raises(Invalid, match='attribute-count limit'):
+        parse_jats(b'<article a="1" b="2"/>')
+
+    monkeypatch.setattr(jats, 'MAX_JATS_ATTRIBUTES_PER_ELEMENT', 256)
+    monkeypatch.setattr(jats, 'MAX_JATS_TOTAL_ATTRIBUTES', 1)
+    with pytest.raises(Invalid, match='total attribute-count limit'):
+        parse_jats(b'<article a="1"><body b="2"/></article>')
+
+    monkeypatch.setattr(jats, 'MAX_JATS_TOTAL_ATTRIBUTES', 100_000)
+    monkeypatch.setattr(jats, 'MAX_JATS_ATTRIBUTE_BYTES', 4)
+    with pytest.raises(Invalid, match='attribute-byte limit'):
+        parse_jats(b'<article data="long-value"/>')
+
+    monkeypatch.setattr(jats, 'MAX_JATS_ATTRIBUTE_BYTES', 8 * 1024 * 1024)
+    expanding_entity = b'<article><p>&acE;</p></article>'
+    monkeypatch.setattr(jats, 'MAX_JATS_PREPARED_BYTES', len(expanding_entity) + 4)
+    with pytest.raises(Invalid, match='prepared-byte limit'):
+        parse_jats(expanding_entity)
+
+
+@pytest.mark.parametrize('source', [
+    b'\xff\xfe<\x00a\x00r\x00t\x00i\x00c\x00l\x00e\x00/\x00>\x00',
+    b'\xfe\xff\x00<\x00a\x00r\x00t\x00i\x00c\x00l\x00e\x00/\x00>',
+    b'<\x00a\x00r\x00t\x00i\x00c\x00l\x00e\x00/\x00>\x00',
+    b'\x00<\x00a\x00r\x00t\x00i\x00c\x00l\x00e\x00/\x00>',
+    b'\x00\x00\xfe\xff\x00\x00\x00<\x00\x00\x00a',
+    b'\xff\xfe\x00\x00<\x00\x00\x00a',
+    b'\x00\x00\xff\xfe\x00\x00\x00<\x00\x00\x00a',
+    b'\x00\x00\x00<a\x00\x00\x00r',
+    b'<\x00\x00\x00a\x00\x00\x00r',
+    b'\x00\x00<\x00a',
+    b'\x00<\x00\x00a',
+])
+def test_jats_rejects_utf16_and_utf32_before_byte_level_preflight(source):
+    with pytest.raises(Invalid, match='UTF-16 and UTF-32 encodings are unsupported'):
+        parse_jats(source)
+
+
+def test_jats_attribute_and_prepared_byte_limits_accept_exact_boundary(monkeypatch):
+    import researchwitness.jats as jats
+
+    source = b'<article a="1"/>'
+    monkeypatch.setattr(jats, 'MAX_JATS_ATTRIBUTES_PER_ELEMENT', 1)
+    monkeypatch.setattr(jats, 'MAX_JATS_TOTAL_ATTRIBUTES', 1)
+    monkeypatch.setattr(jats, 'MAX_JATS_ATTRIBUTE_BYTES', len(b'a="1"'))
+    monkeypatch.setattr(jats, 'MAX_JATS_PREPARED_BYTES', len(source))
+
+    assert parse_jats(source).source_sha256
 
 
 def test_malformed_jats_is_a_bounded_report_with_no_detector_candidates(tmp_path):

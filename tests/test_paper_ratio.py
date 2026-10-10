@@ -55,6 +55,39 @@ def test_mismatch_candidate_anchors_the_exact_cell_and_binds_source_hash():
     assert '/table-wrap[1]/table[1]/tbody[1]/tr[1]/td[1]' in anchor['element_path']
 
 
+@pytest.mark.parametrize('value', [
+    '2⁄20 (10%)', '2∕20 (10%)', '2/20–30 (10%)', '2/20 − 30 (10%)',
+    '2／20 (10%)', '2–3/20 (10%)', '2/20 (10–15%)',
+])
+def test_ratio_lookalikes_are_reported_as_skipped_incomplete_relations(value):
+    result = check_jats_cell_ratio_percentages(_document(value))
+
+    assert result['findings'] == []
+    assert result['potential_cells'] == 1
+    assert result['checked_cells'] == 0
+    assert result['skipped_cells'] == 1
+    assert result['scan_complete'] is False
+    assert result['relations'][0]['status'] in ('UNSUPPORTED', 'INCOMPLETE')
+
+
+@pytest.mark.parametrize('cue', [
+    'inverse probability weighting', 'post-stratification weights',
+    'reweighted estimate', 'reweighting', 'adjustment for age',
+    'standardised estimate', 'standardisation method',
+    'standardize estimate', 'standardise estimate',
+    'standardizing estimates', 'standardising estimates',
+])
+def test_weighting_morphology_suppresses_direct_ratio_arithmetic(cue):
+    result = check_jats_cell_ratio_percentages(
+        _document('2/20 (5.0%)', caption=cue),
+    )
+
+    assert result['findings'] == []
+    assert result['relations'][0]['status'] != 'ELIGIBLE_CHECKED_MISMATCH'
+    expected_reason = 'ADJUSTED_RESULT' if ('adjust' in cue or 'standard' in cue) else 'WEIGHTED_RESULT'
+    assert expected_reason in result['tables'][0]['reasons']
+
+
 @pytest.mark.parametrize(('value', 'rounded'), [
     ('15/200 (7.50%)', '7.50'),
     ('1/8 (12.5%)', '12.5'),

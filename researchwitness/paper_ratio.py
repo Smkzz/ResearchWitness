@@ -8,7 +8,10 @@ from typing import Any
 
 from .paper_contracts import PERCENTAGE_CONTRACT_VERSION
 from .paper_document import PaperDocument, SourceAnchor, Table, TableCell
-from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
+from .denominator_provenance import (
+    denominator_table_context,
+    resolve_denominator,
+)
 from .paper_relation_telemetry import relation_id, summarize_relations, terminal_relation
 
 
@@ -17,14 +20,19 @@ CELL_RATIO_PERCENT = re.compile(
     r'\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*%\s*\)'
     r'\s*(?P<marker>[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰])?\s*$'
 )
+_RATIO_INTEGER_SHAPE = r'[0-9][0-9, .\u00a0\u202f]{0,24}'
+_RATIO_RANGE_SHAPE = rf'{_RATIO_INTEGER_SHAPE}(?:\s*[-\u2010-\u2015\u2212]\s*{_RATIO_INTEGER_SHAPE})?'
 CELL_RATIO_SHAPE = re.compile(
-    r'^\s*(?P<count>[0-9][0-9, .\u00a0\u202f]{0,24})\s*/\s*'
-    r'(?P<denominator>[0-9][0-9, .\u00a0\u202f]{0,24})\s*'
-    r'\(\s*(?P<percent>[0-9][0-9, .\u00a0\u202f]{0,24})\s*%\s*\)'
+    rf'^\s*(?P<count>{_RATIO_RANGE_SHAPE})\s*[/\u2044\u2215\uff0f]\s*'
+    rf'(?P<denominator>{_RATIO_RANGE_SHAPE})\s*'
+    rf'\(\s*(?P<percent>{_RATIO_RANGE_SHAPE})\s*%\s*\)'
     r'\s*(?P<marker>[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰])?\s*$'
 )
-_WEIGHTED_CUE = re.compile(r'\bweighted\b', re.IGNORECASE)
-_ADJUSTED_CUE = re.compile(r'\b(?:adjusted|standardized|imputed|model-derived|regression-derived)\b', re.IGNORECASE)
+_WEIGHTED_CUE = re.compile(r'\b(?:re)?weight(?:ed|ing|s)?\b', re.IGNORECASE)
+_ADJUSTED_CUE = re.compile(
+    r'\b(?:adjusted|adjustments?|standardiz(?:e|ed|es|ing|ation)|standardis(?:e|ed|es|ing|ation)|imputed|model-derived|regression-derived)\b',
+    re.IGNORECASE,
+)
 _MISSINGNESS_CUE = re.compile(
     r'\b(?:missing data|missing responses?|available cases?|denominator varies|per row|complete cases?)\b',
     re.IGNORECASE,
@@ -205,8 +213,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
             'status': 'NOT_APPLICABLE',
             'skip_reasons': [],
         }
-        boundaries = subgroup_boundaries(table)
-        parent_groups = parent_count_groups(table)
+        table_context = denominator_table_context(table)
         for row_index, row in enumerate(table.rows):
             if row.row_group != 'tbody':
                 continue
@@ -240,7 +247,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                     except InvalidOperation:
                         relation_reasons.append('MALFORMED_NUMERIC_TOKEN')
                 denominator_resolution = resolve_denominator(
-                    table, row, cell, row_index, boundaries, parent_groups,
+                    table, row, cell, row_index, table_context,
                     explicit_cell_denominator=(
                         exact_match.group('denominator') if exact_match is not None
                         else match.group('denominator')
@@ -273,6 +280,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                         detector_id='jats_cell_ratio_percentage_recomputation', table_key=table_key,
                         contract_version=PERCENTAGE_CONTRACT_VERSION,
                         source_anchor=_anchor_dict(cell.source_anchor),
+                        table_source_anchor=_anchor_dict(table.source_anchor),
                         status='UNSUPPORTED' if unsupported else 'INCOMPLETE',
                         reasons=relation_reasons,
                         denominator_source_anchor=denominator_resolution.get('denominator_source_anchor'),
@@ -335,6 +343,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                     detector_id='jats_cell_ratio_percentage_recomputation', table_key=table_key,
                     contract_version=PERCENTAGE_CONTRACT_VERSION,
                     source_anchor=_anchor_dict(cell.source_anchor),
+                    table_source_anchor=_anchor_dict(table.source_anchor),
                     status='ELIGIBLE_CHECKED_MATCH' if matched else 'ELIGIBLE_CHECKED_MISMATCH',
                     numerator_exact=str(numerator), denominator_exact=str(denominator),
                     denominator_source_anchor=denominator_resolution.get('denominator_source_anchor'),

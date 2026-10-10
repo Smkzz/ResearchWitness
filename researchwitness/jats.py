@@ -1,6 +1,7 @@
 """Bounded, source-aware parsing of JATS XML into the canonical paper model."""
 from __future__ import annotations
 
+from bisect import bisect_right
 from dataclasses import dataclass, field
 from decimal import Decimal
 from hashlib import sha256
@@ -16,9 +17,15 @@ from .paper_document import (
 from .strict import Invalid
 
 MAX_JATS_BYTES = 32 * 1024 * 1024
+MAX_JATS_PREPARED_BYTES = 48 * 1024 * 1024
 MAX_JATS_ELEMENTS = 250_000
 MAX_JATS_DEPTH = 64
 MAX_JATS_TEXT_BYTES = 16 * 1024 * 1024
+MAX_JATS_ATTRIBUTES_PER_ELEMENT = 256
+MAX_JATS_TOTAL_ATTRIBUTES = 100_000
+MAX_JATS_ATTRIBUTE_BYTES = 8 * 1024 * 1024
+MAX_JATS_PATH_BYTES = 64 * 1024 * 1024
+MAX_JATS_OFFSET_EDITS = 100_000
 MAX_TABLE_COLUMNS = 256
 MAX_TABLE_ROWS = 10_000
 MAX_JATS_TABLES = 1_000
@@ -32,12 +39,13 @@ _COUNT_PERCENT = re.compile(
 _NUMBER = re.compile(r'(?<![A-Za-z0-9_])(?P<value>-?[0-9]+(?:\.[0-9]+)?)(?P<unit>\s*%)?(?![A-Za-z0-9_])')
 _DENOMINATOR = re.compile(
     r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})'
-    r'(?![0-9]|[,.]\s*[0-9]|\s+[0-9])'
+    r'(?![A-Za-z0-9_/\u2044\u2215\-\u2010-\u2015\u2212]'
+    r'|[,.]\s*[0-9]|\s+[0-9]|\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*[0-9])'
 )
 _FOOTNOTE_MARK = re.compile(r'[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]$', re.IGNORECASE)
 _UNSAFE_CUES = re.compile(
-    r'\b(?:weighted|adjusted|multiple responses?|overlap(?:ping)?|missing data|available cases?|'
-    r'denominator|excluding|excluded|per row|nonresponse)\b', re.IGNORECASE,
+    r'\b(?:(?:re)?weight(?:ed|ing|s)?|adjust(?:ed|ment|ments)|multiple responses?|overlap(?:ping)?|missing data|available cases?|'
+    r'standardiz(?:e|ed|es|ing|ation)|standardis(?:e|ed|es|ing|ation)|denominator|excluding|excluded|per row|nonresponse)\b', re.IGNORECASE,
 )
 _TIMEPOINT = re.compile(r'\b(?:baseline|follow[ -]?up|week\s+\d+|month\s+\d+|year\s+\d+)\b', re.IGNORECASE)
 _EXTERNAL_DOCTYPE = re.compile(
@@ -47,10 +55,182 @@ _EXTERNAL_DOCTYPE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 _NAMED_ENTITY = re.compile(rb'&([A-Za-z][A-Za-z0-9._:-]*);')
-_XML_LITERAL = re.compile(rb'<!--.*?-->|<!\[CDATA\[.*?\]\]>|<\?.*?\?>', re.DOTALL)
+_XML_LITERALS = ((b'<!--', b'-->'), (b'<![CDATA[', b']]>'), (b'<?', b'?>'))
 
 
-def _prepare_jats_bytes(source: bytes) -> bytes:
+def _require_ascii_compatible_xml(source: bytes) -> None:
+    """Reject UTF-16/32, whose markup cannot be safely preflighted as bytes."""
+    prefix = source[:4]
+    if (prefix.startswith((b'\x00\x00\xfe\xff', b'\xff\xfe\x00\x00',
+                           b'\x00\x00\xff\xfe', b'\xfe\xff', b'\xff\xfe'))
+            or prefix[:2] in (b'\x00<', b'<\x00')
+            or prefix in (b'\x00\x00\x00<', b'<\x00\x00\x00',
+                          b'\x00\x00<\x00', b'\x00<\x00\x00')):
+        raise Invalid('JATS UTF-16 and UTF-32 encodings are unsupported; provide ASCII-compatible XML')
+
+
+def _find_markup_end(source: bytes, start: int, *, declaration: bool = False) -> int:
+    quote = 0
+    bracket_depth = 0
+    index = start + 1
+    while index < len(source):
+        value = source[index]
+        if quote:
+            if value == quote:
+                quote = 0
+        elif value in (ord('"'), ord("'")):
+            quote = value
+        elif declaration and value == ord('['):
+            bracket_depth += 1
+        elif declaration and value == ord(']') and bracket_depth:
+            bracket_depth -= 1
+        elif value == ord('>') and bracket_depth == 0:
+            return index
+        index += 1
+    return -1
+
+
+def _external_doctype_span(source: bytes) -> tuple[int, int] | None:
+    """Return the removable external DOCTYPE span, if the prolog has one."""
+    cursor = 3 if source.startswith(b'\xef\xbb\xbf') else 0
+    doctype_span: tuple[int, int] | None = None
+    while cursor < len(source):
+        while cursor < len(source) and source[cursor] in b' \t\r\n':
+            cursor += 1
+        if source.startswith(b'<!--', cursor):
+            end = source.find(b'-->', cursor + 4)
+            if end < 0:
+                raise Invalid('JATS source contains an unterminated XML comment')
+            cursor = end + 3
+            continue
+        if source.startswith(b'<?', cursor):
+            end = source.find(b'?>', cursor + 2)
+            if end < 0:
+                raise Invalid('JATS source contains an unterminated processing instruction')
+            cursor = end + 2
+            continue
+        if source.startswith(b'<!DOCTYPE', cursor):
+            if doctype_span is not None:
+                raise Invalid('JATS source contains multiple DOCTYPE declarations')
+            end = _find_markup_end(source, cursor, declaration=True)
+            if end < 0:
+                raise Invalid('JATS source contains an unterminated DOCTYPE declaration')
+            declaration = source[cursor:end + 1]
+            if _EXTERNAL_DOCTYPE.fullmatch(declaration) is None:
+                raise Invalid('JATS DTD and entity declarations are unsupported')
+            doctype_span = (cursor, end + 1)
+            cursor = end + 1
+            continue
+        break
+
+    return doctype_span
+
+
+def _strip_external_doctype(source: bytes) -> bytes:
+    """Strip one external DOCTYPE only when it is an actual prolog declaration."""
+    span = _external_doctype_span(source)
+    if span is None:
+        return source
+    start, end = span
+    return source[:start] + source[end:]
+
+
+def _preflight_jats_attributes(source: bytes) -> None:
+    """Bound attributes before Expat materializes attribute dictionaries."""
+    _require_ascii_compatible_xml(source)
+    total_attributes = 0
+    total_attribute_bytes = 0
+    cursor = 0
+    while True:
+        start = source.find(b'<', cursor)
+        if start < 0:
+            return
+        literal = next(((opening, closing) for opening, closing in _XML_LITERALS
+                        if source.startswith(opening, start)), None)
+        if literal is not None:
+            end = source.find(literal[1], start + len(literal[0]))
+            if end < 0:
+                raise Invalid('JATS source contains an unterminated comment, CDATA section, or processing instruction')
+            cursor = end + len(literal[1])
+            continue
+        if source.startswith(b'</', start):
+            end = _find_markup_end(source, start)
+            if end < 0:
+                raise Invalid('JATS source contains an unterminated XML tag')
+            cursor = end + 1
+            continue
+        if source.startswith(b'<!', start):
+            end = _find_markup_end(source, start, declaration=True)
+            if end < 0:
+                raise Invalid('JATS source contains an unterminated XML declaration')
+            cursor = end + 1
+            continue
+        if start + 1 >= len(source) or source[start + 1] in b'?!/':
+            cursor = start + 1
+            continue
+
+        end = _find_markup_end(source, start)
+        if end < 0:
+            raise Invalid('JATS source contains an unterminated XML tag')
+        index = start + 1
+        while index < end and source[index] not in b' \t\r\n/>':
+            index += 1
+        element_attribute_count = 0
+        while index < end:
+            while index < end and source[index] in b' \t\r\n':
+                index += 1
+            if index >= end or source[index] == ord('/'):
+                break
+            attribute_start = index
+            while index < end and source[index] not in b' \t\r\n=/>':
+                index += 1
+            if index == attribute_start:
+                index += 1
+                continue
+            while index < end and source[index] in b' \t\r\n':
+                index += 1
+            if index < end and source[index] == ord('='):
+                index += 1
+                while index < end and source[index] in b' \t\r\n':
+                    index += 1
+                if index < end and source[index] in (ord('"'), ord("'")):
+                    quote = source[index]
+                    index += 1
+                    while index < end and source[index] != quote:
+                        index += 1
+                    if index < end:
+                        index += 1
+                else:
+                    while index < end and source[index] not in b' \t\r\n/>':
+                        index += 1
+
+            element_attribute_count += 1
+            total_attributes += 1
+            total_attribute_bytes += index - attribute_start
+            if element_attribute_count > MAX_JATS_ATTRIBUTES_PER_ELEMENT:
+                raise Invalid('JATS element exceeded the configured attribute-count limit')
+            if total_attributes > MAX_JATS_TOTAL_ATTRIBUTES:
+                raise Invalid('JATS source exceeded the configured total attribute-count limit')
+            if total_attribute_bytes > MAX_JATS_ATTRIBUTE_BYTES:
+                raise Invalid('JATS source exceeded the configured attribute-byte limit')
+        cursor = end + 1
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedJats:
+    data: bytes
+    # Each triple is (prepared offset after an edit, original end, cumulative
+    # original-minus-prepared delta). Parser callbacks are structural token boundaries, so
+    # they never point inside a rewritten entity token.
+    offset_deltas: tuple[tuple[int, int, int], ...]
+
+    def original_offset(self, prepared_offset: int) -> int:
+        index = bisect_right(self.offset_deltas, (prepared_offset, 2**63 - 1, 2**63 - 1)) - 1
+        delta = self.offset_deltas[index][2] if index >= 0 else 0
+        return prepared_offset + delta
+
+
+def _prepare_jats_with_offsets(source: bytes) -> _PreparedJats:
     """Drop external DTD references without loading them and expand known XML names.
 
     JATS publisher captures commonly carry an external DTD declaration and use
@@ -59,29 +239,93 @@ def _prepare_jats_bytes(source: bytes) -> bytes:
     accepted only when the Python HTML5 entity table maps them to Unicode.
     Internal subsets, custom entities, and unknown entity names fail closed.
     """
-    def replace_entity(match: re.Match[bytes]) -> bytes:
-        name = match.group(1).decode('ascii')
-        if name in {'amp', 'lt', 'gt', 'apos', 'quot'}:
-            return match.group(0)
-        value = html5.get(name + ';')
-        if value is None:
-            raise Invalid('JATS source uses an unknown or unsupported named entity')
-        return b''.join(f'&#{ord(character)};'.encode('ascii') for character in value)
+    doctype_span = _external_doctype_span(source)
+    if doctype_span is None:
+        stripped_source = source
+        removed_start = removed_end = None
+        doctype_delta = 0
+    else:
+        removed_start, removed_end = doctype_span
+        stripped_source = source[:removed_start] + source[removed_end:]
+        doctype_delta = removed_end - removed_start
+    _preflight_jats_attributes(stripped_source)
+    prepared = bytearray()
+    prepared_size = 0
+    offset_deltas: list[tuple[int, int, int]] = []
 
-    def prepare_markup_and_text(data: bytes) -> bytes:
-        data = _EXTERNAL_DOCTYPE.sub(b'', data, count=1)
+    if removed_start is not None and removed_end is not None:
+        offset_deltas.append((removed_start, removed_end, doctype_delta))
+
+    def original_position(stripped_position: int) -> int:
+        if removed_start is not None and stripped_position >= removed_start:
+            return stripped_position + doctype_delta
+        return stripped_position
+
+    def append_markup_and_text(data: bytes, source_start: int) -> None:
+        nonlocal prepared_size
         if re.search(rb'<!DOCTYPE\b|<!ENTITY\b', data, re.IGNORECASE):
             raise Invalid('JATS DTD and entity declarations are unsupported')
-        return _NAMED_ENTITY.sub(replace_entity, data)
+        cursor = 0
+        for match in _NAMED_ENTITY.finditer(data):
+            name = match.group(1).decode('ascii')
+            if name in {'amp', 'lt', 'gt', 'apos', 'quot'}:
+                replacement = match.group(0)
+            else:
+                value = html5.get(name + ';')
+                if value is None:
+                    raise Invalid('JATS source uses an unknown or unsupported named entity')
+                replacement = b''.join(f'&#{ord(character)};'.encode('ascii') for character in value)
+            prefix_size = match.start() - cursor
+            added_size = prefix_size + len(replacement)
+            if prepared_size + added_size > MAX_JATS_PREPARED_BYTES:
+                raise Invalid('JATS source exceeded the configured prepared-byte limit')
+            prepared.extend(data[cursor:match.start()])
+            prepared_size += prefix_size
+            prepared.extend(replacement)
+            prepared_size += len(replacement)
+            if replacement != match.group(0):
+                if len(offset_deltas) >= MAX_JATS_OFFSET_EDITS:
+                    raise Invalid('JATS source exceeded the configured source-offset mapping limit')
+                original_end = original_position(source_start + match.end())
+                offset_deltas.append((prepared_size, original_end, original_end - prepared_size))
+            cursor = match.end()
+        suffix_size = len(data) - cursor
+        if prepared_size + suffix_size > MAX_JATS_PREPARED_BYTES:
+            raise Invalid('JATS source exceeded the configured prepared-byte limit')
+        prepared.extend(data[cursor:])
+        prepared_size += suffix_size
 
-    prepared: list[bytes] = []
     cursor = 0
-    for literal in _XML_LITERAL.finditer(source):
-        prepared.append(prepare_markup_and_text(source[cursor:literal.start()]))
-        prepared.append(literal.group(0))
-        cursor = literal.end()
-    prepared.append(prepare_markup_and_text(source[cursor:]))
-    return b''.join(prepared)
+    search_from = 0
+    while True:
+        start = stripped_source.find(b'<', search_from)
+        if start < 0:
+            break
+        literal = next(((opening, closing) for opening, closing in _XML_LITERALS
+                        if stripped_source.startswith(opening, start)), None)
+        if literal is None:
+            search_from = start + 1
+            continue
+        end = stripped_source.find(literal[1], start + len(literal[0]))
+        if end < 0:
+            raise Invalid('JATS source contains an unterminated comment, CDATA section, or processing instruction')
+        append_markup_and_text(stripped_source[cursor:start], cursor)
+        literal_end = end + len(literal[1])
+        literal_size = literal_end - start
+        if prepared_size + literal_size > MAX_JATS_PREPARED_BYTES:
+            raise Invalid('JATS source exceeded the configured prepared-byte limit')
+        prepared.extend(stripped_source[start:literal_end])
+        prepared_size += literal_size
+        cursor = literal_end
+        search_from = literal_end
+    append_markup_and_text(stripped_source[cursor:], cursor)
+    offset_deltas.sort()
+    return _PreparedJats(bytes(prepared), tuple(offset_deltas))
+
+
+def _prepare_jats_bytes(source: bytes) -> bytes:
+    """Compatibility helper for callers that only need parser-ready XML."""
+    return _prepare_jats_with_offsets(source).data
 
 
 @dataclass(slots=True)
@@ -90,6 +334,7 @@ class _Node:
     attributes: dict[str, str]
     source_start: int
     parent: _Node | None = None
+    source_end: int | None = None
     content: list[str | _Node] = field(default_factory=list)
     children: list[_Node] = field(default_factory=list)
     element_path: str = ''
@@ -168,14 +413,16 @@ def _anchor(node: _Node, source_file: str, source_digest: str, quote: str) -> So
         source_format='jats_xml',
         element_path=node.element_path,
         quote=quote[:1000],
-        start_byte=None,
+        start_byte=node.source_start,
+        end_byte=node.source_end,
     )
 
 
 def _build_tree(source: bytes) -> _Node:
     if len(source) > MAX_JATS_BYTES:
         raise Invalid('JATS source exceeded the configured 32 MiB limit')
-    parse_source = _prepare_jats_bytes(source)
+    prepared = _prepare_jats_with_offsets(source)
+    parse_source = prepared.data
     parser = expat.ParserCreate(namespace_separator='}')
     parser.buffer_text = True
     parser.SetParamEntityParsing(expat.XML_PARAM_ENTITY_PARSING_NEVER)
@@ -195,7 +442,10 @@ def _build_tree(source: bytes) -> _Node:
         if len(stack) >= MAX_JATS_DEPTH:
             raise Invalid('JATS source exceeded the configured nesting limit')
         parent = stack[-1] if stack else None
-        node = _Node(_local_name(name), _attribute_map(attrs), parser.CurrentByteIndex, parent)
+        node = _Node(
+            _local_name(name), _attribute_map(attrs),
+            prepared.original_offset(parser.CurrentByteIndex), parent,
+        )
         if parent is None:
             if root is not None:
                 raise Invalid('JATS source has multiple root elements')
@@ -208,7 +458,16 @@ def _build_tree(source: bytes) -> _Node:
     def end(_name: str) -> None:
         if not stack:
             raise Invalid('JATS source has unbalanced elements')
-        stack.pop()
+        node = stack.pop()
+        current = parser.CurrentByteIndex
+        if parse_source.startswith(b'</', current):
+            close_end = parse_source.find(b'>', current + 2)
+            if close_end < 0:
+                raise Invalid('JATS source contains an unterminated closing element')
+            current = close_end + 1
+        elif current <= 0 or parse_source[current - 1:current] != b'>':
+            raise Invalid('JATS source has an unlocatable element boundary')
+        node.source_end = prepared.original_offset(current)
 
     def character(data: str) -> None:
         nonlocal text_bytes
@@ -238,19 +497,20 @@ def _build_tree(source: bytes) -> _Node:
         raise Invalid('JATS source is empty or incomplete')
 
     def assign_paths(root_node: _Node) -> None:
-        todo = [(root_node, '', 1)]
+        root_node.element_path = f'/{root_node.name}[1]'
+        path_bytes = len(root_node.element_path.encode('utf-8'))
+        todo = [root_node]
         while todo:
-            node, parent_path, sibling_index = todo.pop()
-            if parent_path:
-                node.element_path = f'{parent_path}/{node.name}[{sibling_index}]'
-            else:
-                node.element_path = f'/{node.name}[1]'
+            node = todo.pop()
             counts: dict[str, int] = {}
-            children: list[tuple[_Node, str, int]] = []
             for child in node.children:
                 counts[child.name] = counts.get(child.name, 0) + 1
-                children.append((child, node.element_path, counts[child.name]))
-            todo.extend(reversed(children))
+                element_path = f'{node.element_path}/{child.name}[{counts[child.name]}]'
+                path_bytes += len(element_path.encode('utf-8'))
+                if path_bytes > MAX_JATS_PATH_BYTES:
+                    raise Invalid('JATS source exceeded the configured source-path byte limit')
+                child.element_path = element_path
+                todo.append(child)
 
     assign_paths(root)
     return root

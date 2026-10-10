@@ -93,6 +93,16 @@ def test_missing_timepoint_or_weighting_context_is_skipped():
     assert weighted['skip_reasons'][0]['reason'] == 'MODEL_ADJUSTED_WEIGHTED_OR_COMPLEX_CONTEXT'
 
 
+@pytest.mark.parametrize('cue', [
+    'standardize', 'standardise', 'standardizing', 'standardising',
+])
+def test_standardization_morphology_makes_two_by_two_result_unsupported(cue):
+    table = _table(_document(caption=f'{cue} estimates at 30 days'))
+
+    assert table['status'] == 'UNSUPPORTED'
+    assert table['checked_objects'] == 0
+
+
 def test_ci_or_noninteger_count_cells_are_not_parsed():
     ci = _table(_document(values=(*VALUES[:-1], '2.14 (1.10-4.20)')))
     decimal_count = _table(_document(values=(*VALUES[:1], '12.5', *VALUES[2:])))

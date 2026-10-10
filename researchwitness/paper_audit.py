@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol
 
 from .jats import parse_jats
 from .paper_contracts import contract_registry, eligibility, source_capabilities
@@ -58,13 +58,26 @@ UNAVAILABLE_EXTRACTION_STATUSES = (
 COUNT_MARKER = re.compile(
     rb'(?<![A-Za-z0-9_])(?P<marker>[nN])[ \t]{0,32}=[ \t]{0,32}'
     rb'(?P<value>[0-9]{1,9})'
-    rb'(?![0-9]|[,.]\s*[0-9]|/[0-9]|[eE][+-]?[0-9]|\s+[0-9])'
+    rb'(?![0-9]|[,.]\s*[0-9]|[eE][+-]?[0-9]'
+    rb'|(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)+[0-9]'
+    rb'|(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*(?:[/\-]|'
+    rb'\xe2(?:\x80[\x90-\x95]|\x88[\x92\x95]|\x81\x84))'
+    rb'(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*[0-9]|\xe2)'
+)
+COUNT_RANGE_SHAPE = re.compile(
+    rb'(?<![A-Za-z0-9_])[nN][ \t]{0,32}=[ \t]{0,32}[0-9]{1,9}'
+    rb'(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*(?:[/\-]|'
+    rb'\xe2(?:\x80[\x90-\x95]|\x88[\x92\x95]|\x81\x84))'
+    rb'(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*[0-9]'
 )
 MARKDOWN_HEADING = re.compile(rb'^ {0,3}(?P<marks>#{1,6})[ \t]+(?P<title>.*?)[ \t]*#*[ \t]*$')
 TABLE_ROW = re.compile(r'^\s*\|.*\|\s*$')
 TABLE_DENOMINATOR = re.compile(
     r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})'
-    r'(?![0-9]|[,.]\s*[0-9]|\s+[0-9])'
+    r'(?P<marker>[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰])?'
+    r'(?![A-Za-z0-9_]|[,.]\s*[0-9]|\s+[0-9]'
+    r'|\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*[0-9])',
+    re.IGNORECASE,
 )
 TABLE_PERCENTAGE_FOOTNOTE_LABEL = re.compile(
     r'\bn\s*\(%\)\s*(?:[([]\s*)?[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]\s*[)\]]?\s*$', re.IGNORECASE,
@@ -108,6 +121,15 @@ class CandidateDiscoverer(Protocol):
     def discover(
         self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool,
     ) -> dict[str, Any]: ...
+
+
+class PaperAuditCancelled(Exception):
+    """The caller cancelled a bounded paper-audit stage."""
+
+
+def _check_audit_cancel(should_cancel: Callable[[], bool] | None) -> None:
+    if should_cancel is not None and should_cancel():
+        raise PaperAuditCancelled()
 
 
 def _extract_pdf(source_bytes: bytes) -> tuple[bytes, str, str, list[dict[str, Any]], list[str]]:
@@ -203,15 +225,19 @@ class ExplicitCountDiscoverer:
 
     def discover(
         self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool,
+        should_cancel: Callable[[], bool] | None = None,
     ) -> dict[str, Any]:
         assertions: list[dict[str, Any]] = []
         sections: list[dict[str, Any]] = []
         overlong_lines = 0
+        unsupported_range_markers = 0
         truncated = False
         active_section: str | None = None
         line_start = 0
         line_number = 1
         while line_start < len(text_bytes):
+            if line_number % 128 == 1:
+                _check_audit_cancel(should_cancel)
             if line_number > MAX_SCAN_LINES:
                 truncated = True
                 break
@@ -238,6 +264,7 @@ class ExplicitCountDiscoverer:
                 overlong_lines += 1
             else:
                 decoded_line: str | None = None
+                unsupported_range_markers += len(COUNT_RANGE_SHAPE.findall(line))
                 for match in COUNT_MARKER.finditer(line):
                     if len(assertions) >= MAX_COUNT_ASSERTIONS:
                         truncated = True
@@ -425,6 +452,10 @@ class ExplicitCountDiscoverer:
             limitations.append(
                 f'{overlong_lines} line(s) longer than {MAX_SCAN_LINE_BYTES} bytes were not scanned for count markers.'
             )
+        if unsupported_range_markers:
+            limitations.append(
+                f'{unsupported_range_markers} n/N range or fraction marker(s) were not treated as integer count assertions.'
+            )
         if truncated:
             limitations.append('A configured assertion or section limit was reached; scanning may be incomplete.')
         if line_number > MAX_SCAN_LINES:
@@ -444,7 +475,7 @@ class ExplicitCountDiscoverer:
             'possible_scope_differences': scope_differences,
             'table_count_assertions_not_cross_compared': table_assertions_not_compared,
             'sections': sections,
-            'scan_complete': not truncated and overlong_lines == 0,
+            'scan_complete': not truncated and overlong_lines == 0 and unsupported_range_markers == 0,
             'limitations': limitations,
         }
 
@@ -468,6 +499,8 @@ def _markdown_cells(line: str) -> list[tuple[str, int, int]]:
 
 def _has_denominator_footnote(cell: str, match: re.Match[str]) -> bool:
     """Detect a footnote marker attached to an explicit table denominator."""
+    if match.groupdict().get('marker'):
+        return True
     tail = cell[match.end():].lstrip()
     tail = re.sub(r'^[)\]}]+', '', tail).lstrip()
     return re.match(r'[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰](?=$|[\s)\]},.;:])', tail, re.IGNORECASE) is not None
@@ -486,8 +519,18 @@ class TablePercentageDiscoverer:
     """Recompute only explicit count/percentage cells against same-column n/N headers."""
 
     name = 'markdown_table_percentage_recomputation'
+    unsafe_scope_cue = re.compile(
+        r'(?:(?:\b(?:re)?weight(?:ed|ing|s)?|adjust(?:ed|ment|ments)|standardiz(?:e|ed|es|ing|ation)|standardis(?:e|ed|es|ing|ation)|imput(?:ed|ation|ing)|'
+        r'model[- ]derived|regression[- ]derived|multiple responses?|overlap(?:ping)?|'
+        r'missing data|available cases?|complete cases?|nonresponse|denominator varies)\b'
+        r'|(?<![A-Za-z0-9_])[nN]\s*=\s*[0-9]{1,9}\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*[0-9])',
+        re.IGNORECASE,
+    )
 
-    def discover(self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool) -> dict[str, Any]:
+    def discover(
+        self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool,
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> dict[str, Any]:
         findings: list[dict[str, Any]] = []
         scope_differences: list[dict[str, Any]] = []
         checked = 0
@@ -518,7 +561,24 @@ class TablePercentageDiscoverer:
         table_finding_start = 0
         table_checked_start = 0
         table_shape_mismatch = False
+        table_unsafe_context = False
+        table_awaiting_note = False
+
+        def mark_unsafe_scope() -> None:
+            nonlocal table_unsafe_context, checked, coverage_incomplete
+            if table_unsafe_context:
+                return
+            table_unsafe_context = True
+            del findings[table_finding_start:]
+            checked = table_checked_start
+            coverage_incomplete = True
+            limitations.append(
+                'A pipe table with weighting, adjustment, missingness, multiple-response, overlap, or range/fraction denominator cues was skipped because the stated values or scope may not support a simple unweighted proportion.'
+            )
+
         while line_start < len(text_bytes):
+            if line_number % 128 == 1:
+                _check_audit_cancel(should_cancel)
             newline = text_bytes.find(b'\n', line_start)
             line_end = len(text_bytes) if newline < 0 else newline
             raw = text_bytes[line_start:line_end]
@@ -533,17 +593,40 @@ class TablePercentageDiscoverer:
                     table_active = False
                     table_width = None
                     table_shape_mismatch = False
+                    table_unsafe_context = False
+                    table_awaiting_note = False
                     caption = section if section.lower().startswith('table ') else ''
                     column_labels = []
                     denominators = {}
+            if table_awaiting_note and decoded.strip():
+                is_table_note = (
+                    decoded.lstrip().lower().startswith(('note:', 'notes:'))
+                    or re.match(r'^\s*[*†‡§]\s', decoded)
+                )
+                if is_table_note and self.unsafe_scope_cue.search(decoded):
+                    mark_unsafe_scope()
+                table_awaiting_note = False
+                table_active = False
+                table_width = None
+                table_shape_mismatch = False
+                table_unsafe_context = False
+                caption = ''
+                column_labels = []
+                denominators = {}
             if TABLE_ROW.match(decoded):
                 if not table_active:
                     tables_seen += 1
                     table_width = None
                     table_shape_mismatch = False
+                    table_unsafe_context = False
                     table_finding_start = len(findings)
                     table_checked_start = checked
+                    table_awaiting_note = False
+                    if self.unsafe_scope_cue.search(caption):
+                        mark_unsafe_scope()
                 table_active = True
+                if self.unsafe_scope_cue.search(decoded):
+                    mark_unsafe_scope()
                 cells = _markdown_cells(decoded)
                 cells_scanned += len(cells)
                 if cells_scanned > MAX_TABLE_CELLS_SCANNED:
@@ -561,7 +644,7 @@ class TablePercentageDiscoverer:
                     limitations.append(
                         'A pipe table with inconsistent row widths was skipped because its columns could not be aligned safely.'
                     )
-                if not re.fullmatch(r'[\s:|\-]+', decoded) and not table_shape_mismatch:
+                if not re.fullmatch(r'[\s:|\-]+', decoded) and not table_shape_mismatch and not table_unsafe_context:
                     current: dict[int, dict[str, Any]] = {}
                     denominator_row = False
                     for column, (cell, cell_start, cell_end) in enumerate(cells):
@@ -717,9 +800,9 @@ class TablePercentageDiscoverer:
                                     'version before treating this arithmetic difference as an error.'
                                 ),
                             })
-                if not table_shape_mismatch and not column_labels:
+                if not table_shape_mismatch and not table_unsafe_context and not column_labels:
                     column_labels = [TABLE_DENOMINATOR.sub('', cell).strip(' ()') for cell, _, _ in cells]
-                elif not table_shape_mismatch:
+                elif not table_shape_mismatch and not table_unsafe_context:
                     for column, (cell, _, _) in enumerate(cells):
                         if column >= len(column_labels):
                             column_labels.append('')
@@ -729,16 +812,18 @@ class TablePercentageDiscoverer:
                                 column_labels[column] = label
             elif not decoded.strip():
                 if table_active:
-                    table_active = False
-                    table_width = None
-                    table_shape_mismatch = False
-                    caption = ''
-                    column_labels = []
-                    denominators = {}
+                    table_awaiting_note = True
+            elif table_active and (
+                decoded.lstrip().lower().startswith(('note:', 'notes:'))
+                or re.match(r'^\s*[*†‡§]\s', decoded)
+            ):
+                if self.unsafe_scope_cue.search(decoded):
+                    mark_unsafe_scope()
             elif not decoded.lstrip().startswith('#') and table_active:
                 table_active = False
                 table_width = None
                 table_shape_mismatch = False
+                table_unsafe_context = False
                 caption = ''
                 column_labels = []
                 denominators = {}
@@ -809,13 +894,18 @@ class ExplicitExclusionFlowDiscoverer:
 
     name = 'explicit_exclusion_flow_arithmetic_screen'
 
-    def discover(self, text_bytes: bytes, page_map: list[dict[str, Any]]) -> dict[str, Any]:
+    def discover(
+        self, text_bytes: bytes, page_map: list[dict[str, Any]],
+        should_cancel: Callable[[], bool] | None = None,
+    ) -> dict[str, Any]:
         ambiguous_relations: list[dict[str, Any]] = []
         line_start = 0
         line_number = 1
         line_limit = False
         incomplete = False
         while line_start < len(text_bytes):
+            if line_number % 128 == 1:
+                _check_audit_cancel(should_cancel)
             newline = text_bytes.find(b'\n', line_start)
             line_end = len(text_bytes) if newline < 0 else newline
             raw = text_bytes[line_start:line_end]
@@ -912,7 +1002,10 @@ class ExplicitExclusionFlowDiscoverer:
 
 def capabilities() -> list[dict[str, Any]]:
     """List bounded paper checks and keep their interpretation limits explicit."""
-    prose_formats = ['UTF-8 .txt', 'UTF-8 .md', 'UTF-8 .markdown', 'born-digital .pdf with optional pypdf']
+    prose_formats = [
+        'UTF-8 .txt', 'UTF-8 .md', 'UTF-8 .markdown',
+        'born-digital .pdf with optional pypdf when OS worker limits are available',
+    ]
     return [
         {
             'kind': 'explicit_count_marker_conflict_screen',
@@ -921,7 +1014,8 @@ def capabilities() -> list[dict[str, Any]]:
             'patterns': ['n = integer', 'N = integer'],
             'limits': (
                 '32 MiB source; PDF 500 pages, 16 MiB extracted text and 512 KiB/page; '
-                'PDF worker 20-second wall timeout, 15-second CPU and 768 MiB address-space limits where supported; '
+                'PDF worker 20-second wall timeout; pypdf is imported only when the OS applies both a 15-second CPU '
+                'limit and 768 MiB address-space limit, otherwise PDF extraction is unavailable and no detector runs; '
                 '512 count markers; 128 scope differences; 1,000,000 lines; 64 KiB per scanned line; 512 Markdown headings. '
                 'JATS narrative assertions are not scanned until native source anchors are available.'
             ),
@@ -1569,14 +1663,24 @@ def run_paper_audit(
     output_dir: Path | str,
     identifier: str | None = None,
     version: str | None = None,
+    *,
+    progress_callback: Callable[[str], None] | None = None,
+    cancellation_check: Callable[[], bool] | None = None,
 ) -> dict[str, Any]:
     """Create a source-pinned report with per-detector eligibility and limits."""
+    def stage(label: str) -> None:
+        _check_audit_cancel(cancellation_check)
+        if progress_callback is not None:
+            progress_callback(label)
+
+    stage('Reading source bytes')
     path = Path(input_path).absolute()
     source_bytes = Bundle(path.parent).read(path.name, MAX_SOURCE_BYTES)
     suffix = path.suffix.lower()
     source_name = 'source.pdf' if suffix == '.pdf' else 'source' + suffix
     jats_document = None
     jats_model_bytes = None
+    stage('Extracting text and source structure')
     if suffix in ('.xml', '.nxml'):
         try:
             jats_document = parse_jats(source_bytes, source_name)
@@ -1608,11 +1712,18 @@ def run_paper_audit(
     can_scan = extraction_status in ('TEXT_AVAILABLE', 'PARTIAL_TEXT') and jats_document is None
     discoverer: CandidateDiscoverer = ExplicitCountDiscoverer()
     if can_scan:
-        discovery = discoverer.discover(extracted, page_map, suffix in ('.md', '.markdown'))
-        table_screen = TablePercentageDiscoverer().discover(
-            extracted, page_map, suffix in ('.md', '.markdown'),
+        stage('Scanning explicit count statements')
+        discovery = discoverer.discover(
+            extracted, page_map, suffix in ('.md', '.markdown'), cancellation_check,
         )
-        flow_screen = ExplicitExclusionFlowDiscoverer().discover(extracted, page_map)
+        stage('Checking Markdown table percentages')
+        table_screen = TablePercentageDiscoverer().discover(
+            extracted, page_map, suffix in ('.md', '.markdown'), cancellation_check,
+        )
+        stage('Locating explicit exclusion-flow questions')
+        flow_screen = ExplicitExclusionFlowDiscoverer().discover(
+            extracted, page_map, cancellation_check,
+        )
     else:
         discovery = {
             'discoverer': discoverer.name, 'assertions': [], 'candidate_anomalies': [],
@@ -1639,6 +1750,7 @@ def run_paper_audit(
             ],
         }
 
+    stage('Checking structured JATS table percentages')
     structured_table_screen = (
         check_structured_table_percentages(jats_document)
         if jats_document is not None else {
@@ -1649,9 +1761,11 @@ def run_paper_audit(
         }
     )
     if jats_document is not None:
+        stage('Checking structured JATS ratios and summaries')
         ratio_screen = check_jats_cell_ratio_percentages(jats_document)
         statistics_screen = check_jats_sd_se_n_tables(jats_document)
         two_by_two_screen = check_jats_unadjusted_2x2_tables(jats_document)
+        stage('Checking source-mapped flow relationships')
         source_flow_screen, source_flow_coverage = _mapped_sample_flow_screen(jats_document)
         prisma_screen, prisma_coverage = _prisma_synthesis_screen(jats_document)
         paper_coverage = build_paper_coverage(jats_document, [
@@ -2015,6 +2129,7 @@ def run_paper_audit(
         ),
     }
 
+    stage('Writing source copy and reproducible report')
     output = Path(output_dir).absolute()
     require(not output.exists(), 'Paper-audit output directory already exists')
     output.mkdir(parents=True)

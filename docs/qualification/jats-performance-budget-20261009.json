@@ -1,0 +1,11 @@
+{
+  "declared_before_run": "2026-10-09",
+  "purpose": "Synthetic, single-process diagnostic for JATS parse plus table-percentage analysis.",
+  "limits": {
+    "small_valid": {"input_bytes": 20480, "rows": 200, "max_wall_seconds": 0.5, "max_cpu_seconds": 0.5, "max_peak_rss_kib": 65536},
+    "medium_valid": {"input_bytes": 1048576, "rows": 5000, "max_wall_seconds": 2.0, "max_cpu_seconds": 2.0, "max_peak_rss_kib": 131072},
+    "large_valid": {"input_bytes": 8388608, "rows": 10000, "max_wall_seconds": 5.0, "max_cpu_seconds": 5.0, "max_peak_rss_kib": 262144},
+    "malformed_depth": {"input_bytes": 1024, "rows": 0, "max_wall_seconds": 0.25, "max_cpu_seconds": 0.25, "max_peak_rss_kib": 65536}
+  },
+  "scope_limitations": ["synthetic inputs only", "single-process and single-table", "no Windows measurements", "no disk or export measurements", "no concurrency, startup, shutdown, retry, or cancellation measurements", "does not establish production workload performance"]
+}

@@ -257,6 +257,158 @@ def test_percentage_coverage_rejects_altered_per_table_relation_and_counters():
         assert detector['operand_counts']['checked'] is None
 
 
+def test_percentage_coverage_rejects_selected_denominator_moved_to_another_table():
+    import json
+    from dataclasses import asdict
+
+    document = _document(
+        _table('<tr><th scope="row">A</th><td>1 (5%)</td></tr>')
+        + _table('<tr><th scope="row">B</th><td>2 (10%)</td></tr>')
+    )
+    record = json.loads(json.dumps(check_structured_table_percentages(document)))
+    second_header = next(
+        cell for cell in document.tables[1].rows[0].cells if cell.column_start == 1
+    )
+    moved_anchor = asdict(second_header.source_anchor)
+    relation_id_value = record['relations'][0]['relation_id']
+    for relation in record['relations'] + [
+        item for table in record['tables'] for item in table['relations']
+    ]:
+        if relation['relation_id'] == relation_id_value:
+            relation['denominator_source_anchor'] = moved_anchor
+            relation['denominator_provenance']['selected_denominator']['source_anchor'] = moved_anchor
+
+    detector = build_paper_coverage(document, record)['detectors'][0]
+
+    assert detector['percentage_relation_telemetry_complete'] is False
+    assert detector['percentage_relation_telemetry'] is None
+    assert detector['status'] == 'INCOMPLETE'
+
+
+def test_percentage_coverage_rejects_checked_relation_with_deleted_v13_selection():
+    import json
+
+    document = _document(_table('<tr><th scope="row">A</th><td>1 (5%)</td></tr>'))
+    record = json.loads(json.dumps(check_structured_table_percentages(document)))
+    relation_id_value = record['relations'][0]['relation_id']
+    for relation in record['relations'] + [
+        item for table in record['tables'] for item in table['relations']
+    ]:
+        if relation['relation_id'] == relation_id_value:
+            relation['denominator_provenance']['selected_denominator'] = None
+            relation['denominator_provenance']['resolution_status'] = 'UNRESOLVED'
+            relation['denominator_scope_resolved'] = False
+            relation['denominator_source_anchor'] = None
+            relation.pop('denominator_exact', None)
+
+    detector = build_paper_coverage(document, record)['detectors'][0]
+
+    assert detector['percentage_relation_telemetry_complete'] is False
+    assert detector['percentage_relation_telemetry'] is None
+    assert detector['status'] == 'INCOMPLETE'
+    assert detector['operand_counts']['checked'] is None
+
+
+def test_percentage_coverage_rejects_selected_denominator_values_tampered_together():
+    import json
+
+    document = _document(_table('<tr><th scope="row">A</th><td>1 (5%)</td></tr>'))
+    record = json.loads(json.dumps(check_structured_table_percentages(document)))
+    relation_id_value = record['relations'][0]['relation_id']
+    for relation in record['relations'] + [
+        item for table in record['tables'] for item in table['relations']
+    ]:
+        if relation['relation_id'] == relation_id_value:
+            selected = relation['denominator_provenance']['selected_denominator']
+            assert selected['raw_value'] == '20'
+            selected['value_exact'] = '40'
+            relation['denominator_exact'] = '40'
+
+    detector = build_paper_coverage(document, record)['detectors'][0]
+
+    assert detector['percentage_relation_telemetry_complete'] is False
+    assert detector['percentage_relation_telemetry'] is None
+    assert detector['status'] == 'INCOMPLETE'
+    assert detector['operand_counts']['checked'] is None
+
+
+def test_percentage_coverage_rejects_omitted_source_relations_with_recomputed_summaries():
+    import json
+    from researchwitness.paper_relation_telemetry import summarize_relations
+
+    document = _document(
+        _table(
+            '<tr><th scope="row">A</th><td>2 (8.0%)</td></tr>'
+            '<tr><th scope="row">B</th><td>3 (15%)</td></tr>'
+        )
+    )
+    original = check_structured_table_percentages(document)
+    assert [item['status'] for item in original['relations']] == [
+        'ELIGIBLE_CHECKED_MISMATCH', 'ELIGIBLE_CHECKED_MATCH',
+    ]
+
+    for retained_relations, table_status in (
+        ([], 'NOT_APPLICABLE'),
+        ([original['relations'][1]], 'ELIGIBLE'),
+    ):
+        record = json.loads(json.dumps(original))
+        retained_relations = json.loads(json.dumps(retained_relations))
+        summary = summarize_relations(retained_relations)
+        record['relations'] = retained_relations
+        record['relation_telemetry'] = summary
+        record['findings'] = []
+        record['candidate_findings_omitted'] = 0
+        record['checked_cells'] = summary['checked_relations']
+        record['scan_complete'] = True
+        record['limitations'] = list(summary['primary_skip_reason_counts'])
+        table = record['tables'][0]
+        table['relations'] = retained_relations
+        table.update(summary)
+        table['status'] = table_status
+        table['checked_cells'] = summary['checked_relations']
+        table['potential_objects'] = summary['potential_relations']
+        table['potential_cells'] = summary['potential_relations']
+        table['candidate_count'] = 0
+        table['candidate_findings_omitted'] = 0
+        table['reasons'] = list(summary['primary_skip_reason_counts'])
+
+        detector = build_paper_coverage(document, record)['detectors'][0]
+
+        assert detector['percentage_relation_telemetry_complete'] is False
+        assert detector['percentage_relation_telemetry'] is None
+        assert detector['status'] == 'INCOMPLETE'
+        assert detector['operand_counts']['checked'] is None
+
+
+def test_percentage_coverage_rejects_orphan_denominator_anchor_on_unresolved_relation():
+    import json
+    from dataclasses import asdict
+
+    document = _document(
+        '<table-wrap><table><thead><tr><th>Outcome</th><th>Group</th></tr></thead>'
+        '<tbody><tr><th scope="row">A</th><td>1 (5%)</td></tr></tbody></table></table-wrap>'
+        + _table('<tr><th scope="row">B</th><td>2 (10%)</td></tr>')
+    )
+    record = json.loads(json.dumps(check_structured_table_percentages(document)))
+    unresolved_id = record['relations'][0]['relation_id']
+    assert record['relations'][0]['denominator_provenance']['selected_denominator'] is None
+    other_header = next(
+        cell for cell in document.tables[1].rows[0].cells if cell.column_start == 1
+    )
+    other_anchor = asdict(other_header.source_anchor)
+    for relation in record['relations'] + [
+        item for table in record['tables'] for item in table['relations']
+    ]:
+        if relation['relation_id'] == unresolved_id:
+            relation['denominator_source_anchor'] = other_anchor
+
+    detector = build_paper_coverage(document, record)['detectors'][0]
+
+    assert detector['percentage_relation_telemetry_complete'] is False
+    assert detector['percentage_relation_telemetry'] is None
+    assert detector['status'] == 'INCOMPLETE'
+
+
 def test_paper_scoped_coverage_preserves_status_and_unknown_counts():
     document = _document(_table('<tr><th scope="row">A</th><td>1 (5%)</td></tr>'))
     record = {

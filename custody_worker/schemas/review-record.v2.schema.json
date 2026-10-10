@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "review", "checked", "recorded_by", "recorded_at_utc"],
+  "properties": {
+    "schema_version": {"const": "rw-custody-review-record/2"},
+    "review": {"$ref": "review.v3.schema.json"},
+    "checked": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["original_arithmetic", "corrected_arithmetic", "relationship_key"],
+      "properties": {
+        "original_arithmetic": {"type": "object"},
+        "corrected_arithmetic": {"anyOf": [{"type": "object"}, {"type": "null"}]},
+        "relationship_key": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "recorded_by": {"enum": ["rw-custodian", "SYNTHETIC_DEVELOPMENT"]},
+    "recorded_at_utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"}
+  }
+}
