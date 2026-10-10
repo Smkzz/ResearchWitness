@@ -1,44 +1,17 @@
-# ResearchWitness acceptance ledger
+# ResearchWitness engineering evidence ledger
 
-This public ledger contains engineering evidence and approved aggregate results only. It contains no reserve identities, paper/source records, correction targets, evaluation labels, private configuration, or owner-only qualification notes. The private-handoff integrity commitment remains `df5bde9cd98abe63ec552aa18598807fc957619d37cdd2f62e9b1de6881c3edb`.
+## Revision and aggregate checks
 
-## Candidate and hosted checks
+- PR #12 evidence snapshot: head `2c14bcc2ebae8b5d79b8f6a8344cc115c3806364`, tree `7ecc08d22fb6f4572a72b5fbecde2554683f03d2`, parent `dee24f0369382eda030196beb844d7284786302e`.
+- Hosted [CI run 38030108043](https://github.com/Smkzz/ResearchWitness/actions/runs/38030108043) and [CodeQL run 38030108123](https://github.com/Smkzz/ResearchWitness/actions/runs/38030108123) completed successfully on that revision.
+- Python 3.11, 3.12, and 3.13 each reported 837 passed, 7 skipped, and 4 subtests passed. Synthetic conformance: 500/500. Historical MVP fixtures: 3/3. Windows synthetic worker tests: 57 passed. Linux and Windows synthetic browser jobs passed.
 
-- PR #12 is open, draft, unmerged, and unreleased, stacked on PR #11 (denominator-provenance contract v1.3). Current head is `dee24f0369382eda030196beb844d7284786302e`, tree `2af7e9a1d10e530e298659cc214ba301b77bab7b`, parent `2dc2c750ba4e05b105f2131166d6756a890e30e9`. The `dee24f0` commit changes only `CHECKSUMS.sha256`; it repairs a malformed manifest in the prior checksum-only commit. The application and test files are unchanged from that prior head.
-- Hosted CI [run 38029669406](https://github.com/Smkzz/ResearchWitness/actions/runs/38029669406) and CodeQL [run 38029669413](https://github.com/Smkzz/ResearchWitness/actions/runs/38029669413) passed on exact head `dee24f0`. CI passed Python 3.11, 3.12, and 3.13; each run reported 837 passed, 7 skipped, and 4 subtests passed, with 500/500 synthetic conformance cases and 3/3 historical MVP fixtures. The Windows synthetic custody-worker job passed 57 tests. The release gate reported source checksums PASS and a reproducible internal wheel with SHA-256 `19bc404e40d9c9f58e1b166ee84a35a7020b21707870080c65953787ebcc8c9a`. The separate application-wheel qualification reported SHA-256 `1997a8ef1ded29eda291b5f00aaca307c64677ebce8c6cb147a429884258a7dd`; it built two clean wheels byte-identically, passed wheel-content inspection, and passed offline clean-target install and CLI/resource smoke checks.
-- The Linux and Windows Chromium jobs passed their synthetic workflows. Their screenshot artifacts are [Linux ZIP 11662046146](https://github.com/Smkzz/ResearchWitness/actions/runs/38029669406/artifacts/11662046146) (2,032,768 bytes; SHA-256 `d3d487023ca00c36dca98655045c9d4709b64afe24311c08e63dd309baad75e5`) and [Windows ZIP 11662006144](https://github.com/Smkzz/ResearchWitness/actions/runs/38029669406/artifacts/11662006144) (1,098,571 bytes; SHA-256 `3b545a4dae6f256b679e1dde4acdf6cd62334accee217d92282ac367e130fd46`). These temporary artifacts expire 2026-10-11 UTC.
-- I visually inspected the actual Linux and Windows desktop and 390-pixel mobile screenshots. Content and controls remain readable, long source hashes wrap, and the mobile layout shows no horizontal overflow. Chromium's full-page mobile screenshots omit the embedded report iframe even though the test waits for its report heading; a separate mobile iframe capture renders its content, and desktop full-page captures also render it. This is recorded as a screenshot-capture limitation. Screen-reader and independent human accessibility review remain pending; no WCAG conformance claim is made.
+## Artifact integrity commitments
 
-## Exact-source checks and artifacts
-
-- Earlier local qualification on code/test tree `c26195093ce2efe9e7199246c17471d794cff07d` passed 833 tests, 11 skips, and 4 subtests; 500/500 synthetic cases and 3/3 historical MVP fixtures matched. Four loopback tests were denied by the managed sandbox, six Playwright tests were skipped locally and passed in hosted Linux/Windows jobs, and one native-Windows PDF resource-limit test was skipped locally. The later exact-head hosted result is recorded above; its skip count differs because it ran on hosted runners.
-- The included source package was built twice from the same isolated snapshot corresponding to the current packaged inputs. Both builds produced byte-identical outputs: source ZIP SHA-256 `5720eb87d9f86214e984c5bf1eb287ff40e03b3fe9902cecf37a4715b0119db3` (4,947,132 bytes), wheel SHA-256 `ece568df063a8b6a3fbe796bf67527cd38f142b5a53276dfba48172c437cce36` (279,495 bytes), release manifest SHA-256 `a19b967c801c611c6d3b295d5313dbc75d21da22a1950d3b2187cdbda4f0ff88`, and checksum-list SHA-256 `fd05dc69cda54e5c7796997ab62c42f0a179545b31228c988a20eb5dd3ba02e5`. The package includes 152 files and uses source date epoch `1760000000`. These development-version packages remain unpublished.
-- The v5 custody zipapp remains a reproducible synthetic development artifact, not a production installer. Its current qualified SHA-256 is `25b4802c1636fdbe2bd2185eeb2179a38d7fc80b2c4cc56e82d3ca91d913c9d2`; current hosted synthetic qualification passed, but no production installation, migration, activation, or rollback qualification occurred.
-- Five process-isolated Linux/Python 3.12.14 synthetic JATS trials passed their declared budgets for small, medium, large, named-entity, and malformed-depth inputs. Results are in `docs/qualification/jats-performance-results-20261010-offset-map.json`. These measurements do not establish real-paper or production performance.
-
-## Scientific, custody, and security readiness
-
-- Historical public aggregates report zero confirmed untouched eligible correction-backed positives and 363 eligible negative relationships across five DOI document IDs. Five IDs do not establish 15 independent works. The frozen minimum of one untouched eligible positive and at least 50 eligible correct negatives across 15 independent works is not confirmed.
-- No scientific source was acquired in this development environment, no reserved case was run, and Wave 3 was not executed. No historical evidence was changed to fit a candidate.
-- Regression coverage treats NBSP/NNBSP-spaced count ranges/fractions as unsupported/incomplete, recognizes US/UK standardization morphology across relevant detectors, and treats fullwidth-slash and ranged JATS ratio lookalikes as skipped relations. A candidate remains a lead for human review, not proof of a paper error.
-- No technically isolated custodian executor is available here. Effective access, separation of duties, retention/output paths, independent egress enforcement, and protected-store recovery remain unqualified. The existing worker and records must be preserved.
-- A potential repository-object exposure remains under confidential disposition. This public ledger contains no object identifiers or deployment details and does not assert server-side reachability or purge. Keep release blocked pending independent security-owner and platform disposition.
-- CodeQL passed on the exact current head. A Codex Security scan-start capability and confidential GitHub Support channel are not available in this environment; CodeQL and scoped engineering reviews are not a complete security certification.
-- No additional spending, merge, release, public research finding, researcher contact, or Wave 3 execution occurred.
-
-## Ten-category acceptance matrix
-
-| Category | Status | Evidence and remaining gate |
-| --- | --- | --- |
-| Product usefulness | **BLOCKED** | Local-first CLI and synthetic browser workflow work for declared checks. Scientific coverage and independent evaluation remain insufficient for a research preview. |
-| Scientific correctness | **BLOCKED** | Synthetic source-span/arithmetic regressions pass. Untouched-positive and 15-independent-work negative minima are unmet; no Wave 3. |
-| Security | **BLOCKED** | Current CodeQL and scoped reviews pass. Potential repository-object exposure disposition, full authorization/persistence/export review, and independently verified custody boundaries remain pending. |
-| Privacy | **BLOCKED** | No research source entered this environment. Custodian separation, effective access, retention/output controls, and enforced egress are unqualified. |
-| UX and accessibility | **BLOCKED** | Current Linux/Windows browser checks and desktop/mobile visual inspection pass for the tested synthetic flow. Independent human visual and screen-reader review remains pending. |
-| Reliability | **BLOCKED** | Current regression, replay, and synthetic recovery checks pass. Protected-store recovery remains unqualified. |
-| Performance and cost | **NOT_CLAIMED** | Declared synthetic Linux budgets passed with limited scope. No production performance claim; additional spending: EUR 0. |
-| Installation and portability | **BLOCKED** | Current Python 3.11–3.13 CI and Windows application-wheel checks pass. Protected installation and rollback remain unqualified. |
-| Maintainability and reproducibility | **PASS** | Exact-head CI, source checksum validation, synthetic package qualification, and reproducible engineering builds pass within their stated scope. This does not qualify production custody or scientific accuracy. |
-| Documentation and release quality | **BLOCKED** | Scope and current engineering evidence are recorded. The incident, independent science, custody, and human-review gates remain; keep PR draft and unreleased. |
-
-PR #12 remains an engineering candidate, not a qualified research-preview release. Keep it draft and unmerged until the scientific, security, privacy, product, and custody gates pass.
+- Application wheel SHA-256: `1997a8ef1ded29eda291b5f00aaca307c64677ebce8c6cb147a429884258a7dd`.
+- Source archive SHA-256: `5720eb87d9f86214e984c5bf1eb287ff40e03b3fe9902cecf37a4715b0119db3` (4,947,132 bytes).
+- Release manifest SHA-256: `a19b967c801c611c6d3b295d5313dbc75d21da22a1950d3b2187cdbda4f0ff88`.
+- Checksum-list SHA-256: `fd05dc69cda54e5c7796997ab62c42f0a179545b31228c988a20eb5dd3ba02e5`.
+- Synthetic custody zipapp SHA-256: `25b4802c1636fdbe2bd2185eeb2179a38d7fc80b2c4cc56e82d3ca91d913c9d2`.
+- Linux screenshot artifact SHA-256: `d3d487023ca00c36dca98655045c9d4709b64afe24311c08e63dd309baad75e5`. Windows screenshot artifact SHA-256: `3b545a4dae6f256b679e1dde4acdf6cd62334accee217d92282ac367e130fd46`.
+- Two clean package builds produced byte-identical outputs. These development-version and synthetic artifacts are unpublished.
