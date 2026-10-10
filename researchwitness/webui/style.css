@@ -25,6 +25,7 @@ button:focus-visible, input:focus-visible, a:focus-visible, summary:focus-visibl
 button:disabled { cursor: not-allowed; opacity: .58; }
 .skip-link { position: absolute; left: 1rem; top: -5rem; z-index: 5; padding: .65rem 1rem; background: white; }
 .skip-link:focus { top: .5rem; }
+#main:focus-visible h1 { outline: 3px solid var(--focus); outline-offset: 4px; border-radius: 2px; }
 .topbar { min-height: 70px; border-bottom: 1px solid var(--line); background: rgba(255,254,250,.8); display: flex; align-items: center; justify-content: space-between; padding: .7rem max(1.1rem, calc((100vw - 980px)/2)); }
 .brand { display: inline-flex; align-items: center; gap: .65rem; color: var(--ink); text-decoration: none; font-weight: 760; letter-spacing: -.02em; }
 .brand-mark { width: 2.15rem; height: 2.15rem; display: grid; place-items: center; border-radius: 9px; color: white; background: var(--teal); font-size: .75rem; letter-spacing: .02em; }

@@ -10,7 +10,7 @@ ResearchWitness releases are evidence-bearing artifacts. A version bump is not c
 
 ## Qualify
 
-From a clean checkout with development dependencies installed:
+From a full maintainer checkout with development dependencies installed (the generated source archive intentionally excludes the test suite and most development validation files):
 
 ```bash
 python -m pytest -q

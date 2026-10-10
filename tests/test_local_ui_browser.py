@@ -146,6 +146,11 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 self.assertEqual(page.evaluate("document.activeElement.className"), "skip-link")
                 page.keyboard.press("Enter")
                 self.assertEqual(urllib.parse.urlparse(page.url).fragment, "main")
+                self.assertEqual(page.evaluate("document.activeElement.id"), "main")
+                self.assertEqual(
+                    page.locator("h1").evaluate("element => getComputedStyle(element).outlineStyle"),
+                    "solid",
+                )
 
                 page.locator("#paper-file").set_input_files({
                     "name": "synthetic.md", "mimeType": "text/markdown", "buffer": SYNTHETIC_PAPER,
