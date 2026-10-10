@@ -58,13 +58,26 @@ UNAVAILABLE_EXTRACTION_STATUSES = (
 COUNT_MARKER = re.compile(
     rb'(?<![A-Za-z0-9_])(?P<marker>[nN])[ \t]{0,32}=[ \t]{0,32}'
     rb'(?P<value>[0-9]{1,9})'
-    rb'(?![0-9]|[,.]\s*[0-9]|/[0-9]|[eE][+-]?[0-9]|\s+[0-9])'
+    rb'(?![0-9]|[,.]\s*[0-9]|[eE][+-]?[0-9]'
+    rb'|(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)+[0-9]'
+    rb'|(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*(?:[/\-]|'
+    rb'\xe2(?:\x80[\x90-\x95]|\x88[\x92\x95]|\x81\x84))'
+    rb'(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*[0-9]|\xe2)'
+)
+COUNT_RANGE_SHAPE = re.compile(
+    rb'(?<![A-Za-z0-9_])[nN][ \t]{0,32}=[ \t]{0,32}[0-9]{1,9}'
+    rb'(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*(?:[/\-]|'
+    rb'\xe2(?:\x80[\x90-\x95]|\x88[\x92\x95]|\x81\x84))'
+    rb'(?:[ \t]|\xc2\xa0|\xe2\x80\xaf)*[0-9]'
 )
 MARKDOWN_HEADING = re.compile(rb'^ {0,3}(?P<marks>#{1,6})[ \t]+(?P<title>.*?)[ \t]*#*[ \t]*$')
 TABLE_ROW = re.compile(r'^\s*\|.*\|\s*$')
 TABLE_DENOMINATOR = re.compile(
     r'(?<![A-Za-z0-9_])[nN]\s*=\s*(?P<value>[0-9]{1,9})'
-    r'(?![0-9]|[,.]\s*[0-9]|\s+[0-9])'
+    r'(?P<marker>[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰])?'
+    r'(?![A-Za-z0-9_]|[,.]\s*[0-9]|\s+[0-9]'
+    r'|\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*[0-9])',
+    re.IGNORECASE,
 )
 TABLE_PERCENTAGE_FOOTNOTE_LABEL = re.compile(
     r'\bn\s*\(%\)\s*(?:[([]\s*)?[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]\s*[)\]]?\s*$', re.IGNORECASE,
@@ -217,6 +230,7 @@ class ExplicitCountDiscoverer:
         assertions: list[dict[str, Any]] = []
         sections: list[dict[str, Any]] = []
         overlong_lines = 0
+        unsupported_range_markers = 0
         truncated = False
         active_section: str | None = None
         line_start = 0
@@ -250,6 +264,7 @@ class ExplicitCountDiscoverer:
                 overlong_lines += 1
             else:
                 decoded_line: str | None = None
+                unsupported_range_markers += len(COUNT_RANGE_SHAPE.findall(line))
                 for match in COUNT_MARKER.finditer(line):
                     if len(assertions) >= MAX_COUNT_ASSERTIONS:
                         truncated = True
@@ -437,6 +452,10 @@ class ExplicitCountDiscoverer:
             limitations.append(
                 f'{overlong_lines} line(s) longer than {MAX_SCAN_LINE_BYTES} bytes were not scanned for count markers.'
             )
+        if unsupported_range_markers:
+            limitations.append(
+                f'{unsupported_range_markers} n/N range or fraction marker(s) were not treated as integer count assertions.'
+            )
         if truncated:
             limitations.append('A configured assertion or section limit was reached; scanning may be incomplete.')
         if line_number > MAX_SCAN_LINES:
@@ -456,7 +475,7 @@ class ExplicitCountDiscoverer:
             'possible_scope_differences': scope_differences,
             'table_count_assertions_not_cross_compared': table_assertions_not_compared,
             'sections': sections,
-            'scan_complete': not truncated and overlong_lines == 0,
+            'scan_complete': not truncated and overlong_lines == 0 and unsupported_range_markers == 0,
             'limitations': limitations,
         }
 
@@ -480,6 +499,8 @@ def _markdown_cells(line: str) -> list[tuple[str, int, int]]:
 
 def _has_denominator_footnote(cell: str, match: re.Match[str]) -> bool:
     """Detect a footnote marker attached to an explicit table denominator."""
+    if match.groupdict().get('marker'):
+        return True
     tail = cell[match.end():].lstrip()
     tail = re.sub(r'^[)\]}]+', '', tail).lstrip()
     return re.match(r'[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰](?=$|[\s)\]},.;:])', tail, re.IGNORECASE) is not None
@@ -498,6 +519,13 @@ class TablePercentageDiscoverer:
     """Recompute only explicit count/percentage cells against same-column n/N headers."""
 
     name = 'markdown_table_percentage_recomputation'
+    unsafe_scope_cue = re.compile(
+        r'(?:(?:\b(?:re)?weight(?:ed|ing|s)?|adjust(?:ed|ment|ments)|standardiz(?:e|ed|es|ing|ation)|standardis(?:e|ed|es|ing|ation)|imput(?:ed|ation|ing)|'
+        r'model[- ]derived|regression[- ]derived|multiple responses?|overlap(?:ping)?|'
+        r'missing data|available cases?|complete cases?|nonresponse|denominator varies)\b'
+        r'|(?<![A-Za-z0-9_])[nN]\s*=\s*[0-9]{1,9}\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*[0-9])',
+        re.IGNORECASE,
+    )
 
     def discover(
         self, text_bytes: bytes, page_map: list[dict[str, Any]], markdown: bool,
@@ -533,6 +561,21 @@ class TablePercentageDiscoverer:
         table_finding_start = 0
         table_checked_start = 0
         table_shape_mismatch = False
+        table_unsafe_context = False
+        table_awaiting_note = False
+
+        def mark_unsafe_scope() -> None:
+            nonlocal table_unsafe_context, checked, coverage_incomplete
+            if table_unsafe_context:
+                return
+            table_unsafe_context = True
+            del findings[table_finding_start:]
+            checked = table_checked_start
+            coverage_incomplete = True
+            limitations.append(
+                'A pipe table with weighting, adjustment, missingness, multiple-response, overlap, or range/fraction denominator cues was skipped because the stated values or scope may not support a simple unweighted proportion.'
+            )
+
         while line_start < len(text_bytes):
             if line_number % 128 == 1:
                 _check_audit_cancel(should_cancel)
@@ -550,17 +593,40 @@ class TablePercentageDiscoverer:
                     table_active = False
                     table_width = None
                     table_shape_mismatch = False
+                    table_unsafe_context = False
+                    table_awaiting_note = False
                     caption = section if section.lower().startswith('table ') else ''
                     column_labels = []
                     denominators = {}
+            if table_awaiting_note and decoded.strip():
+                is_table_note = (
+                    decoded.lstrip().lower().startswith(('note:', 'notes:'))
+                    or re.match(r'^\s*[*†‡§]\s', decoded)
+                )
+                if is_table_note and self.unsafe_scope_cue.search(decoded):
+                    mark_unsafe_scope()
+                table_awaiting_note = False
+                table_active = False
+                table_width = None
+                table_shape_mismatch = False
+                table_unsafe_context = False
+                caption = ''
+                column_labels = []
+                denominators = {}
             if TABLE_ROW.match(decoded):
                 if not table_active:
                     tables_seen += 1
                     table_width = None
                     table_shape_mismatch = False
+                    table_unsafe_context = False
                     table_finding_start = len(findings)
                     table_checked_start = checked
+                    table_awaiting_note = False
+                    if self.unsafe_scope_cue.search(caption):
+                        mark_unsafe_scope()
                 table_active = True
+                if self.unsafe_scope_cue.search(decoded):
+                    mark_unsafe_scope()
                 cells = _markdown_cells(decoded)
                 cells_scanned += len(cells)
                 if cells_scanned > MAX_TABLE_CELLS_SCANNED:
@@ -578,7 +644,7 @@ class TablePercentageDiscoverer:
                     limitations.append(
                         'A pipe table with inconsistent row widths was skipped because its columns could not be aligned safely.'
                     )
-                if not re.fullmatch(r'[\s:|\-]+', decoded) and not table_shape_mismatch:
+                if not re.fullmatch(r'[\s:|\-]+', decoded) and not table_shape_mismatch and not table_unsafe_context:
                     current: dict[int, dict[str, Any]] = {}
                     denominator_row = False
                     for column, (cell, cell_start, cell_end) in enumerate(cells):
@@ -734,9 +800,9 @@ class TablePercentageDiscoverer:
                                     'version before treating this arithmetic difference as an error.'
                                 ),
                             })
-                if not table_shape_mismatch and not column_labels:
+                if not table_shape_mismatch and not table_unsafe_context and not column_labels:
                     column_labels = [TABLE_DENOMINATOR.sub('', cell).strip(' ()') for cell, _, _ in cells]
-                elif not table_shape_mismatch:
+                elif not table_shape_mismatch and not table_unsafe_context:
                     for column, (cell, _, _) in enumerate(cells):
                         if column >= len(column_labels):
                             column_labels.append('')
@@ -746,16 +812,18 @@ class TablePercentageDiscoverer:
                                 column_labels[column] = label
             elif not decoded.strip():
                 if table_active:
-                    table_active = False
-                    table_width = None
-                    table_shape_mismatch = False
-                    caption = ''
-                    column_labels = []
-                    denominators = {}
+                    table_awaiting_note = True
+            elif table_active and (
+                decoded.lstrip().lower().startswith(('note:', 'notes:'))
+                or re.match(r'^\s*[*†‡§]\s', decoded)
+            ):
+                if self.unsafe_scope_cue.search(decoded):
+                    mark_unsafe_scope()
             elif not decoded.lstrip().startswith('#') and table_active:
                 table_active = False
                 table_width = None
                 table_shape_mismatch = False
+                table_unsafe_context = False
                 caption = ''
                 column_labels = []
                 denominators = {}

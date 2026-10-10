@@ -41,6 +41,13 @@ MAX_TABLE_PERCENTAGE_FINDINGS = 256
 _MISSINGNESS_ROW = re.compile(
     r'\s*(?:missing|not reported|not available|unrecorded)\s*', re.IGNORECASE,
 )
+_BODY_DENOMINATOR_TOKEN = re.compile(
+    r'(?<![A-Za-z0-9_])[nN]\s*=\s*[0-9]{1,9}'
+    r'[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰]?'
+    r'(?![A-Za-z0-9_/\u2044\u2215\-\u2010-\u2015\u2212]'
+    r'|[,.]\s*[0-9]|\s+[0-9]|\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*[0-9])',
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -218,6 +225,25 @@ def _mark_denominator_scope_unresolved_for_category_base(
     ]))
 
 
+def _footnoted_body_denominator_columns(table: Table) -> frozenset[int]:
+    """Index columns with linked, footnoted body-row n/N competing with header bases."""
+    footnote_ids = {note.identifier for note in table.footnotes if note.identifier}
+    if not footnote_ids:
+        return frozenset()
+    columns: set[int] = set()
+    for row in table.rows:
+        if row.row_group != 'tbody':
+            continue
+        for cell in row.cells:
+            linked = (
+                any(identifier in footnote_ids for identifier in cell.footnote_references)
+                or any(identifier in footnote_ids for _kind, identifier in cell.cross_references)
+            )
+            if linked and _BODY_DENOMINATOR_TOKEN.search(cell.raw_text):
+                columns.update(range(cell.column_start, cell.column_start + cell.column_span))
+    return frozenset(columns)
+
+
 def _cell_scope_reasons(
     table: Table,
     row: Any,
@@ -226,6 +252,7 @@ def _cell_scope_reasons(
     match: re.Match[str],
     table_context: DenominatorTableContext,
     row_block_profiles: tuple[_TableRowBlockProfile | None, ...],
+    footnoted_body_denominator_columns: frozenset[int],
 ) -> tuple[list[str], int | None, dict[str, Any], dict[str, Any] | None]:
     reasons: list[str] = []
     if table.structure_status != 'STRUCTURE_RELIABLE':
@@ -245,13 +272,18 @@ def _cell_scope_reasons(
         'FOOTNOTE' in cue or 'CROSS_REFERENCE' in cue for cue in cell.scope_denominator_cues
     ):
         reasons.append('FOOTNOTE_SCOPE_UNRESOLVED')
+    if cell.column_identity in footnoted_body_denominator_columns:
+        reasons.append('FOOTNOTE_SCOPE_UNRESOLVED')
     cue_text = ' '.join((table.label, table.caption, row_label,
                          ' '.join(cell.effective_headers), cell.raw_text))
     for note in table.footnotes:
         cue_text += ' ' + note.text
-    if re.search(r'\bweighted\b', cue_text, re.IGNORECASE):
+    if re.search(r'\b(?:re)?weight(?:ed|ing|s)?\b', cue_text, re.IGNORECASE):
         reasons.append('WEIGHTED_RESULT')
-    if re.search(r'\b(?:adjusted|standardized|model-derived|regression-derived)\b', cue_text, re.IGNORECASE):
+    if re.search(
+        r'\b(?:adjusted|adjustments?|standardiz(?:e|ed|es|ing|ation)|standardis(?:e|ed|es|ing|ation)|model-derived|regression-derived)\b',
+        cue_text, re.IGNORECASE,
+    ):
         reasons.append('ADJUSTED_RESULT')
     if re.search(r'\b(?:missing data|available cases?|complete cases?|nonresponse|denominator varies)\b', cue_text, re.IGNORECASE):
         reasons.append('MISSINGNESS_CHANGES_DENOMINATOR')
@@ -260,6 +292,9 @@ def _cell_scope_reasons(
     resolved = resolve_denominator(
         table, row, cell, row_index, table_context,
     )
+    if cell.column_identity in footnoted_body_denominator_columns:
+        _mark_denominator_scope_unresolved_for_category_base(resolved)
+        reasons.extend(resolved.get('skip_reasons') or [])
     denominator = resolved.get('denominator_exact')
     if _category_block_has_unresolved_base(row_index, cell, denominator, row_block_profiles):
         _mark_denominator_scope_unresolved_for_category_base(resolved)
@@ -300,6 +335,7 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
         table_relations: list[dict[str, Any]] = []
         table_context = denominator_table_context(table)
         row_block_profiles = _table_row_block_profiles(table)
+        footnoted_body_denominator_columns = _footnoted_body_denominator_columns(table)
         for row_index, row in enumerate(table.rows):
             if row.row_group != 'tbody':
                 continue
@@ -309,6 +345,7 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                     continue
                 relation_reasons, denominator, denominator_provenance, denominator_anchor = _cell_scope_reasons(
                     table, row, row_index, cell, match, table_context, row_block_profiles,
+                    footnoted_body_denominator_columns,
                 )
                 exact_match = COUNT_PERCENT.fullmatch(cell.raw_text)
                 count: int | None = None

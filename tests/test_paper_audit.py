@@ -38,6 +38,35 @@ def test_capability_registry_labels_paper_scan_as_candidate_discovery_only():
     assert 'same cohort or scope' in screens[0]['does_not_prove']
 
 
+@pytest.mark.parametrize('token', [
+    b'n=20/30', b'n=20-30', b'n=20\xe2\x80\x9030', b'n=20\xe2\x80\x9330',
+    b'n=20 \xe2\x80\x93 30', b'n=20 \xe2\x88\x92 30',
+    b'n=20 \xe2\x81\x84 30', b'n=20 \xe2\x88\x95 30',
+    'n=20\u00a0–\u00a030'.encode(), 'n=20\u202f–\u202f30'.encode(),
+    'n=20\u00a0⁄\u00a030'.encode(), 'n=20\u202f∕\u202f30'.encode(),
+])
+def test_pdf_count_marker_does_not_take_the_left_number_from_a_range(token):
+    from researchwitness.paper_audit import COUNT_MARKER
+
+    match = COUNT_MARKER.search(token)
+    assert match is None or match.group('value') != b'20'
+
+
+@pytest.mark.parametrize('token', [
+    'N=20 – 30', 'N=20 − 30', 'N=20 ⁄ 30', 'N=20 ∕ 30',
+    'N=20\u00a0–\u00a030', 'N=20\u202f–\u202f30',
+    'N=20\u00a0⁄\u00a030', 'N=20\u202f∕\u202f30',
+])
+def test_unicode_count_ranges_are_skipped_and_mark_scan_incomplete(tmp_path, token):
+    _, report, _ = _run(tmp_path, f'{token}\nN=18\n'.encode('utf-8'))
+
+    assert [item['value_exact'] for item in report['discovery']['assertions']] == ['18']
+    assert report['discovery']['candidate_anomalies'] == []
+    assert report['discovery']['scan_complete'] is False
+    assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
+    assert any('range or fraction marker' in item for item in report['discovery']['limitations'])
+
+
 def _run(tmp_path: Path, content: bytes, suffix: str = '.txt', **kwargs):
     source = tmp_path / ('paper' + suffix)
     source.write_bytes(content)
@@ -85,9 +114,11 @@ def test_same_values_and_other_numeric_forms_do_not_create_conflict(tmp_path):
 
     _, report, _ = _run(tmp_path, content)
 
-    assert report['decision'] == 'NO_CANDIDATES_IN_SUPPORTED_SCAN'
+    assert report['decision'] == 'SCAN_INCOMPLETE_NO_CANDIDATES'
     assert report['candidate_anomalies'] == []
     assert [item['value_exact'] for item in report['discovery']['assertions']] == ['20', '20']
+    assert report['discovery']['scan_complete'] is False
+    assert any('range or fraction marker' in item for item in report['discovery']['limitations'])
 
 
 def test_spaced_thousands_counts_are_not_partially_read_as_distinct_values(tmp_path):
@@ -607,6 +638,71 @@ def test_table_percentages_recompute_with_rounding_and_exact_byte_anchors(tmp_pa
     for finding in findings:
         for anchor in finding['source_anchors']:
             assert content[anchor['start_byte']:anchor['end_byte']].decode('utf-8') == anchor['quote']
+
+
+@pytest.mark.parametrize('denominator', ['20/30', '20-30', '20–30', '20−30'])
+def test_markdown_percentage_tables_do_not_use_the_left_value_of_a_denominator_range(
+    tmp_path, denominator,
+):
+    source_text = (
+        '| Outcome | All participants (N=' + denominator + ') |\n'
+        '| --- | ---: |\n'
+        '| Event, n (%) | 2 (10) |\n'
+    )
+    _, report, _ = _run(tmp_path, source_text.encode('utf-8'), '.md')
+    percentages = report['arithmetic_screens']['table_percentages']
+
+    assert percentages['findings'] == []
+    assert percentages['checked_cells'] == 0
+    assert percentages['scan_complete'] is False
+
+
+@pytest.mark.parametrize('context', [
+    '# Table 1 Inverse probability weighting\n',
+    '| Inverse probability weighting |  |  |\n',
+    'Note: Percentages use post-stratification weights.\n',
+    '# Table 1 Reweighted estimate\n',
+    'Note: Percentages include adjustment for age.\n',
+    '| Outcome | Group 1 (n=30) standardised estimate | Group 2 (n=30) |\n',
+    '# Table 1 Standardising estimates\n',
+    'Note: Percentages use standardizing.\n',
+    '| Outcome | Group 1 (n=30) standardise estimate | Group 2 (n=30) |\n',
+])
+def test_markdown_percentage_tables_with_weighting_context_abstain_and_rollback(tmp_path, context):
+    source_text = (
+        '# Table 1 Outcomes\n'
+        '| Outcome | Group 1 (n=30) | Group 2 (n=30) |\n'
+        '| --- | ---: | ---: |\n'
+        '| Event, n (%) | 23 (70) | 20 (66.7) |\n'
+    )
+    if context.startswith('#'):
+        source_text = context + source_text.split('\n', 1)[1]
+    elif context.startswith('|'):
+        source_text += context
+    else:
+        source_text += context
+
+    _, report, _ = _run(tmp_path, source_text.encode('utf-8'), '.md')
+    percentages = report['arithmetic_screens']['table_percentages']
+    assert percentages['findings'] == []
+    assert percentages['checked_cells'] == 0
+    assert percentages['scan_complete'] is False
+    assert percentages['limitations']
+
+
+def test_markdown_weighted_note_after_blank_line_rolls_back_table_results(tmp_path):
+    source_text = (
+        '| Outcome | Group 1 (n=30) | Group 2 (n=30) |\n'
+        '| --- | ---: | ---: |\n'
+        '| Event, n (%) | 23 (70) | 20 (60) |\n\n'
+        'Note: Percentages use inverse probability weighting.\n'
+    )
+    _, report, _ = _run(tmp_path, source_text.encode('utf-8'), '.md')
+    percentages = report['arithmetic_screens']['table_percentages']
+
+    assert percentages['findings'] == []
+    assert percentages['checked_cells'] == 0
+    assert percentages['scan_complete'] is False
 
 
 @pytest.mark.parametrize(('reported', 'candidate_count'), [('12', 1), ('13', 0)])

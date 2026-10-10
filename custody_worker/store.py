@@ -732,7 +732,6 @@ def _review_validation(raw: object, root: Path,
         "version_lineage_key": (
             document_id, canonical_table, relation["object_locator"],
             relation["scope"], relation["numerator"], relation["denominator"],
-            relation["percentage"], relation["decimals"],
         ),
         "version_key": version_key,
         "table_key": table_key,

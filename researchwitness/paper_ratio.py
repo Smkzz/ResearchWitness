@@ -20,14 +20,19 @@ CELL_RATIO_PERCENT = re.compile(
     r'\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*%\s*\)'
     r'\s*(?P<marker>[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰])?\s*$'
 )
+_RATIO_INTEGER_SHAPE = r'[0-9][0-9, .\u00a0\u202f]{0,24}'
+_RATIO_RANGE_SHAPE = rf'{_RATIO_INTEGER_SHAPE}(?:\s*[-\u2010-\u2015\u2212]\s*{_RATIO_INTEGER_SHAPE})?'
 CELL_RATIO_SHAPE = re.compile(
-    r'^\s*(?P<count>[0-9][0-9, .\u00a0\u202f]{0,24})\s*/\s*'
-    r'(?P<denominator>[0-9][0-9, .\u00a0\u202f]{0,24})\s*'
-    r'\(\s*(?P<percent>[0-9][0-9, .\u00a0\u202f]{0,24})\s*%\s*\)'
+    rf'^\s*(?P<count>{_RATIO_RANGE_SHAPE})\s*[/\u2044\u2215\uff0f]\s*'
+    rf'(?P<denominator>{_RATIO_RANGE_SHAPE})\s*'
+    rf'\(\s*(?P<percent>{_RATIO_RANGE_SHAPE})\s*%\s*\)'
     r'\s*(?P<marker>[a-z*†‡§¹²³⁴⁵⁶⁷⁸⁹⁰])?\s*$'
 )
-_WEIGHTED_CUE = re.compile(r'\bweighted\b', re.IGNORECASE)
-_ADJUSTED_CUE = re.compile(r'\b(?:adjusted|standardized|imputed|model-derived|regression-derived)\b', re.IGNORECASE)
+_WEIGHTED_CUE = re.compile(r'\b(?:re)?weight(?:ed|ing|s)?\b', re.IGNORECASE)
+_ADJUSTED_CUE = re.compile(
+    r'\b(?:adjusted|adjustments?|standardiz(?:e|ed|es|ing|ation)|standardis(?:e|ed|es|ing|ation)|imputed|model-derived|regression-derived)\b',
+    re.IGNORECASE,
+)
 _MISSINGNESS_CUE = re.compile(
     r'\b(?:missing data|missing responses?|available cases?|denominator varies|per row|complete cases?)\b',
     re.IGNORECASE,

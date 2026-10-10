@@ -134,14 +134,17 @@ async function submitFile(force) {
     submissionInFlight = true;
     updateControls();
     setText(document.getElementById("result-status"), "");
+    const duplicateNote = document.getElementById("duplicate-note");
+    duplicateNote.hidden = true;
+    setText(duplicateNote, "");
     setText(document.getElementById("progress-stage"), "Uploading the selected file");
     progressPanel.hidden = false;
     resultsPanel.hidden = true;
     document.getElementById("progress-title").focus();
     const { payload } = await api("/api/jobs", { method: "POST", headers, body: file });
     currentJob = payload.job;
-    document.getElementById("duplicate-note").hidden = !payload.duplicate;
-    if (payload.duplicate) setText(document.getElementById("duplicate-note"), "This exact file and configuration already has a local result. ResearchWitness opened the cached run; use Replay this exact input to run it again.");
+    duplicateNote.hidden = !payload.duplicate;
+    if (payload.duplicate) setText(duplicateNote, "This exact file and configuration already has a local result. ResearchWitness opened the cached run; use Replay this exact input to run it again.");
     const presentation = presentJob(currentJob.job_id, payload.duplicate);
     submissionInFlight = false;
     updateControls();
@@ -157,6 +160,11 @@ async function submitFile(force) {
 
 async function presentJob(jobId, duplicate = false) {
   if (activePollJobId && activePollJobId !== jobId) return;
+  if (!duplicate) {
+    const duplicateNote = document.getElementById("duplicate-note");
+    duplicateNote.hidden = true;
+    setText(duplicateNote, "");
+  }
   const generation = ++pollGeneration;
   activePollJobId = jobId;
   setHistoryBusy(true);
@@ -396,7 +404,11 @@ function renderFindings(findings, scopeQuestions, findingsTotal, scopeQuestionsT
       const location = [];
       if (anchor.element_path) location.push(anchor.element_path);
       if (Number.isFinite(anchor.line_number)) location.push(`line ${anchor.line_number}`);
-      if (Number.isFinite(anchor.start_byte)) location.push(`byte ${anchor.start_byte}`);
+      if (Number.isFinite(anchor.start_byte) && Number.isFinite(anchor.end_byte)) {
+        location.push("0-based source byte range [" + anchor.start_byte + ", " + anchor.end_byte + ")");
+      } else if (Number.isFinite(anchor.start_byte)) {
+        location.push("0-based source byte offset " + anchor.start_byte);
+      }
       const quote = makeElement("blockquote", "evidence-quote", `${anchor.quote || anchor.text || "Source anchor"}${location.length ? ` · ${location.join(" · ")}` : ""}`);
       card.append(quote);
     }
@@ -427,7 +439,11 @@ function renderFindings(findings, scopeQuestions, findingsTotal, scopeQuestionsT
         const location = [];
         if (anchor.element_path) location.push(anchor.element_path);
         if (Number.isFinite(anchor.line_number)) location.push(`line ${anchor.line_number}`);
-        if (Number.isFinite(anchor.start_byte)) location.push(`byte ${anchor.start_byte}`);
+        if (Number.isFinite(anchor.start_byte) && Number.isFinite(anchor.end_byte)) {
+          location.push("0-based source byte range [" + anchor.start_byte + ", " + anchor.end_byte + ")");
+        } else if (Number.isFinite(anchor.start_byte)) {
+          location.push("0-based source byte offset " + anchor.start_byte);
+        }
         card.append(makeElement("blockquote", "evidence-quote", `${anchor.quote || "Source anchor"}${location.length ? ` · ${location.join(" · ")}` : ""}`));
       }
       findingsRoot.append(card);
@@ -451,6 +467,9 @@ document.getElementById("export-button").addEventListener("click", async () => {
 async function retryCurrentJob() {
   if (!currentJob || controlsBusy()) return;
   const jobId = currentJob.job_id;
+  const duplicateNote = document.getElementById("duplicate-note");
+  duplicateNote.hidden = true;
+  setText(duplicateNote, "");
   submissionInFlight = true;
   updateControls();
   setText(document.getElementById("result-status"), "");
@@ -491,6 +510,9 @@ async function refreshHistory() {
         if (controlsBusy()) return;
         currentJob = job;
         setHistoryBusy(true);
+        const duplicateNote = document.getElementById("duplicate-note");
+        duplicateNote.hidden = true;
+        setText(duplicateNote, "");
         if (["QUEUED", "ANALYZING", "CANCELLING"].includes(job.status)) {
           try {
             await presentJob(job.job_id);

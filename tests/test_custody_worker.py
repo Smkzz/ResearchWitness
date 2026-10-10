@@ -693,6 +693,25 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             self.record(second)
         self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 1)
 
+    def test_combined_wording_and_precision_change_across_versions_is_unresolved(self):
+        first_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 6%\n"
+        second_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 5.9% / confirmed\n"
+        first_item, _ = self.source_setup(original=first_text, source_version="v1")
+        second_item, _ = self.source_setup(original=second_text, source_version="v2")
+        first = self.review_object(
+            first_item, None, review_id="review-one", original_text=first_text,
+            original_percent="6%", numerator="7", denominator="N = 118",
+        )
+        second = self.review_object(
+            second_item, None, review_id="review-two", original_text=second_text,
+            original_percent="5.9%", numerator="7", denominator="N = 118",
+        )
+
+        self.record(first)
+        with self.assertRaisesRegex(CustodyError, "SOURCE_ROW_LINEAGE_UNRESOLVED"):
+            self.record(second)
+        self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 1)
+
     def test_table_number_zero_padding_is_a_stable_locator_alias(self):
         first_text = "Table 1 / Group A / main cohort / N = 118 / count 7 / 6%\n"
         first_item, _ = self.source_setup(original=first_text, source_version="v1")

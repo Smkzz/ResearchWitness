@@ -36,6 +36,29 @@ def _table(head: str, body: str, *, caption: str = '', footnotes: str = '', tabl
     )
 
 
+@pytest.mark.parametrize('token', [
+    'N=20/30', 'N=20⁄30', 'N=20∕30', 'N=20-30', 'N=20–30', 'N=20−30',
+])
+def test_denominator_tokens_do_not_accept_a_numeric_prefix_before_ranges(token):
+    match = denominator_provenance._DENOMINATOR_TOKEN.search(token)
+    assert match is None or match.group('value') != '20'
+
+
+@pytest.mark.parametrize('denominator', ['20/30', '20⁄30', '20∕30', '20-30', '20–30', '20−30'])
+def test_range_denominator_does_not_produce_a_partial_eligible_table_match(denominator):
+    result = _table(
+        '<tr><th>Outcome</th><th>All participants (N=' + denominator + ')</th></tr>',
+        '<tr><th scope="row">Event</th><td>2 (10%)</td></tr>',
+        table_id='malformed-denominator-range',
+    )
+
+    assert result['findings'] == []
+    assert result['checked_cells'] == 0
+    assert result['relations'][0]['status'] in ('INCOMPLETE', 'UNSUPPORTED')
+    selected = result['relations'][0]['denominator_provenance']['selected_denominator']
+    assert selected is None or selected.get('value_exact') is None
+
+
 def test_many_row_labels_reuse_linear_table_scope_indexes(monkeypatch):
     row_count = 1_000
     body = ''.join(

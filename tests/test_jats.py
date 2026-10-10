@@ -81,6 +81,39 @@ def test_jats_tables_use_source_linked_model_and_exact_percentage_contract(tmp_p
     assert "ResearchWitness has not determined whether this affects the paper's conclusions." in html
 
 
+def test_jats_anchors_bind_exact_original_byte_spans_after_preprocessing():
+    source = (
+        b'\xef\xbb\xbf<?xml version="1.0" encoding="UTF-8"?>'
+        b'<!-- source-mapped prolog --><?fixture status="synthetic"?>'
+        b'<!DOCTYPE article SYSTEM "https://example.invalid/jats.dtd">'
+        b'<article><body><sec><title>Results</title>'
+        b'<p>Before &euro; and &beta; text.</p><named-content content-type="empty"/>'
+        b'<table-wrap id="T&euro;"><label>Table 1</label><caption><title>Outcomes &euro;</title></caption>'
+        b'<table><thead><tr><th>Group (N=20)</th></tr></thead><tbody><tr><td>2 (8.0%)</td>'
+        b'</tr></tbody></table></table-wrap>'
+        b'</sec></body></article>'
+    )
+    document = parse_jats(source)
+
+    paragraph = next(item for item in document.paragraphs if 'Before' in item.text)
+    paragraph_anchor = paragraph.source_anchor
+    assert source[paragraph_anchor.start_byte:paragraph_anchor.end_byte] == b'<p>Before &euro; and &beta; text.</p>'
+    assert paragraph_anchor.source_sha256 == document.source_sha256
+
+    cell_anchor = document.tables[0].rows[-1].cells[0].source_anchor
+    assert source[cell_anchor.start_byte:cell_anchor.end_byte] == b'<td>2 (8.0%)</td>'
+    assert cell_anchor.end_byte > paragraph_anchor.end_byte
+    assert cell_anchor.source_sha256 == document.source_sha256
+
+
+def test_jats_source_offset_edit_limit_fails_closed(monkeypatch):
+    import researchwitness.jats as jats
+
+    monkeypatch.setattr(jats, 'MAX_JATS_OFFSET_EDITS', 0)
+    with pytest.raises(Invalid, match='source-offset mapping limit'):
+        parse_jats(b'<article><p>Known entity: &beta;</p></article>')
+
+
 def test_direct_cell_ratio_is_reported_with_exact_jats_anchor(tmp_path):
     source = _source(
         '<table-wrap id="T-ratio"><label>Table 2</label><caption><title>Disposition</title></caption>'
@@ -896,13 +929,42 @@ def test_footnoted_row_label_scope_suppresses_global_denominator(tmp_path):
     assert 'FOOTNOTE_SCOPE_UNRESOLVED' in result['reasons']
 
 
-@pytest.mark.parametrize('cue', ['weighted estimate', 'adjusted percentage', 'multiple responses allowed', 'missing data excluded'])
+@pytest.mark.parametrize('cue', [
+    'weighted estimate', 'inverse probability weighting', 'post-stratification weights',
+    'reweighted estimate', 'reweighting', 'adjusted percentage', 'adjustment for age',
+    'standardised percentage', 'standardisation method',
+    'standardize percentage', 'standardise percentage',
+    'standardizing estimates', 'standardising estimates',
+    'multiple responses allowed', 'missing data excluded',
+])
 def test_weighted_adjusted_overlap_and_missingness_cues_suppress_candidates(tmp_path, cue):
     source = _simple_table(value='2 (8.0%)', header=f'All (N=20), {cue}')
     _, report, _ = _run_jats(tmp_path, source)
     assert report['candidate_anomalies'] == []
     table_result = next(item for item in report['arithmetic_screens']['structured_table_percentages']['tables'])
     assert table_result['status'] in ('UNSUPPORTED', 'INCOMPLETE')
+
+
+@pytest.mark.parametrize(('header', 'expected_status'), [
+    ('All (N=2O0)', 'NONELIGIBLE'),
+    ('All (N=20x)', 'NONELIGIBLE'),
+    ('All (N=20/30)', 'NONELIGIBLE'),
+    ('All (N=20–30)', 'NONELIGIBLE'),
+    ('All (N=20−30)', 'NONELIGIBLE'),
+    ('All (N=20-30)', 'NONELIGIBLE'),
+    ('All (N=20 participants)', 'ELIGIBLE_CHECKED_MATCH'),
+])
+def test_denominator_token_requires_a_complete_numeric_boundary(tmp_path, header, expected_status):
+    _, report, _ = _run_jats(tmp_path, _simple_table(value='2 (10%)', header=header))
+    result = report['arithmetic_screens']['structured_table_percentages']
+
+    if expected_status == 'NONELIGIBLE':
+        assert result['relations'][0]['status'] in ('INCOMPLETE', 'UNSUPPORTED')
+        assert report['candidate_anomalies'] == []
+        selected = result['relations'][0]['denominator_provenance']['selected_denominator']
+        assert selected is None or selected.get('value_exact') is None
+    else:
+        assert result['relations'][0]['status'] == expected_status
 
 
 def test_cell_local_ratios_remain_eligible_for_explicit_overlapping_thresholds():

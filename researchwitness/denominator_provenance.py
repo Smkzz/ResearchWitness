@@ -39,7 +39,9 @@ _SCOPE_COMPARISON_FIELDS = (
 
 _DENOMINATOR_TOKEN = re.compile(
     r'(?<![A-Za-z0-9_])[nN]\s*=\s*'
-    r'(?P<value>[+\-−]?\d[\d,.eE+\-−]*(?:[ \u00a0\u202f]\d{3})*)',
+    r'(?P<value>[+\-−]?\d[\d,.eE+\-−]*(?:[ \u00a0\u202f]\d{3})*)'
+    r'(?![A-Za-z0-9_/\u2044\u2215\u2010-\u2015\u2212]'
+    r'|\s*[/\u2044\u2215\-\u2010-\u2015\u2212]\s*\d)',
 )
 _COUNT_PERCENT_PARENT = re.compile(
     r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*'

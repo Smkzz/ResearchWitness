@@ -34,6 +34,14 @@ SYNTHETIC_PAPER = (
 ).encode("utf-8")
 SLOW_PAPER = b"# Synthetic active job\n\nThis run is held at a test-controlled worker barrier.\n"
 COMPLETED_PAPER = SYNTHETIC_PAPER.replace(b"Group A", b"Group B")
+SYNTHETIC_JATS = (
+    b'<article><!-- \xce\xbb -->\n<body><sec><title>Results</title>'
+    b'<p>At baseline, 20 participants were enrolled.</p>'
+    b'<table-wrap id="T1"><label>Table 1</label><caption><title>Outcomes</title></caption>'
+    b'<table><thead><tr><th>Outcome</th><th>All participants (N=20)</th></tr></thead>'
+    b'<tbody><tr><th scope="row">Event, n (%)</th><td>2 (8.0%)</td></tr></tbody>'
+    b'</table></table-wrap></sec></body></article>'
+)
 
 
 def is_same_origin(url: str, expected_origin: str) -> bool:
@@ -123,11 +131,15 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
             try:
                 page, off_origin, page_errors = self.make_page(browser)
                 self.assertEqual(page.title(), "ResearchWitness · Local paper audit")
+                self.assertTrue(page.locator("#custody-warning").is_visible())
+                self.assertIn("not a custodian security boundary", page.locator("#custody-warning").inner_text())
                 self.assertTrue(page.locator("#paper-file").evaluate("input => input.labels.length === 1"))
                 self.assertEqual(page.locator("#progress-stage").get_attribute("aria-live"), "polite")
                 self.assertEqual(page.locator("#error-note").get_attribute("role"), "alert")
                 self.assertEqual(page.locator("#paper-id").get_attribute("aria-describedby"), "paper-id-help")
                 self.assertEqual(page.locator("#paper-version").get_attribute("aria-describedby"), "paper-version-help")
+                self.assertEqual(page.locator("#duplicate-note").get_attribute("role"), "status")
+                self.assertEqual(page.locator("#duplicate-note").get_attribute("aria-live"), "polite")
                 self.assertTrue(page.locator("h1").is_visible())
                 self.assertGreaterEqual(page.locator("h2").count(), 4)
                 page.keyboard.press("Tab")
@@ -206,7 +218,7 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 wait_for_result_status(page, "Review candidates found", timeout=30_000)
                 self.assertIn("23 (73.3)", page.locator("#findings").inner_text())
                 self.assertIn("n=30", page.locator("#findings").inner_text())
-                self.assertIn("line 3 · byte 32", page.locator("#findings").inner_text())
+                self.assertIn("0-based source byte range [", page.locator("#findings").inner_text())
                 page.locator("#full-report-details summary").click()
                 report_title = page.frame_locator("#full-report").get_by_role(
                     "heading", name="ResearchWitness paper screening report",
@@ -420,6 +432,154 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     self.assertIsInstance(retry_response.json()["duplicate"], bool)
                     wait_for_result_status(page, "Run failed", timeout=20_000)
 
+                self.assertEqual(off_origin, [])
+                self.assertEqual(page_errors, [])
+            finally:
+                browser.close()
+
+    def test_duplicate_submission_uses_an_exposed_live_status(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            try:
+                page, off_origin, page_errors = self.make_page(browser)
+                fixture = {
+                    "name": "synthetic-duplicate.md",
+                    "mimeType": "text/markdown",
+                    "buffer": SYNTHETIC_PAPER,
+                }
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+
+                page.evaluate("""() => {
+                  const originalFetch = window.fetch.bind(window);
+                  window.__rwDuplicateStatusGateCount = 0;
+                  window.__rwDuplicateStatusGates = [];
+                  window.__rwDuplicateStatusGateQueue = [];
+                  window.__rwArmDuplicateStatusGate = () => {
+                    let release;
+                    const promise = new Promise(resolve => { release = resolve; });
+                    const gate = { promise, release };
+                    window.__rwDuplicateStatusGates.push(gate);
+                    window.__rwDuplicateStatusGateQueue.push(gate);
+                  };
+                  window.__rwArmDuplicateStatusGate();
+                  window.fetch = async (input, options = {}) => {
+                    const method = (options.method || 'GET').toUpperCase();
+                    if (method === 'GET' && String(input).match(/^\\/api\\/jobs\\/[0-9a-f]{32}$/)) {
+                      const gate = window.__rwDuplicateStatusGateQueue.shift();
+                      if (gate) {
+                        window.__rwDuplicateStatusGateCount += 1;
+                        document.body.dataset.rwDuplicateStatusGatePending = String(window.__rwDuplicateStatusGateCount);
+                        await gate.promise;
+                      }
+                    }
+                    return originalFetch(input, options);
+                  };
+                }""")
+
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                duplicate = page.locator("#duplicate-note")
+                duplicate.wait_for(state="visible", timeout=10_000)
+                page.wait_for_function(
+                    "document.body.dataset.rwDuplicateStatusGatePending === '1'",
+                    timeout=10_000,
+                )
+                self.assertEqual(duplicate.get_attribute("role"), "status")
+                self.assertEqual(duplicate.get_attribute("aria-live"), "polite")
+                self.assertIsNone(duplicate.evaluate("element => element.closest('#results-panel')"))
+                self.assertIn("exact file and configuration", duplicate.inner_text())
+                self.assertTrue(page.locator("#results-panel").is_hidden())
+                page.evaluate("window.__rwDuplicateStatusGates[0]?.release()")
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_visible())
+
+                page.evaluate("window.__rwArmDuplicateStatusGate()")
+                page.get_by_role("button", name="Replay this exact input").click()
+                page.wait_for_function(
+                    "document.body.dataset.rwDuplicateStatusGatePending === '2'",
+                    timeout=10_000,
+                )
+                self.assertTrue(duplicate.is_hidden())
+                self.assertTrue(page.locator("#results-panel").is_hidden())
+                page.evaluate("window.__rwDuplicateStatusGates[1]?.release()")
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_hidden())
+                self.assertEqual(off_origin, [])
+                self.assertEqual(page_errors, [])
+            finally:
+                browser.close()
+
+    def test_history_selection_clears_a_stale_duplicate_notice(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            try:
+                page, off_origin, page_errors = self.make_page(browser)
+                fixture = {
+                    "name": "synthetic-history.md",
+                    "mimeType": "text/markdown",
+                    "buffer": SYNTHETIC_PAPER,
+                }
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+
+                page.locator("#paper-file").set_input_files(fixture)
+                page.get_by_role("button", name="Run supported checks").click()
+                duplicate = page.locator("#duplicate-note")
+                duplicate.wait_for(state="visible", timeout=10_000)
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_visible())
+
+                page.locator("#history-list button").first.click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                self.assertTrue(duplicate.is_hidden())
+                self.assertEqual(off_origin, [])
+                self.assertEqual(page_errors, [])
+            finally:
+                browser.close()
+
+    def test_jats_source_flow_displays_original_span_and_exports_source(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(headless=True)
+            try:
+                page, off_origin, page_errors = self.make_page(browser)
+                page.locator("#paper-file").set_input_files({
+                    "name": "synthetic.xml",
+                    "mimeType": "application/xml",
+                    "buffer": SYNTHETIC_JATS,
+                })
+                page.get_by_role("button", name="Run supported checks").click()
+                wait_for_result_status(page, "Review candidates found", timeout=30_000)
+                findings = page.locator("#findings").inner_text()
+                self.assertIn("All participants (N=20)", findings)
+                self.assertIn("/table-wrap[1]/table[1]/tbody[1]/tr[1]/td[1]", findings)
+                self.assertIn("0-based source byte range [", findings)
+                page.screenshot(
+                    path=str(self.screenshot_dir / "synthetic-jats-results-desktop.png"),
+                    full_page=True,
+                )
+
+                with page.expect_download(timeout=20_000) as download_info:
+                    page.get_by_role("button", name="Export source and report").click()
+                downloaded = Path(self.temporary.name) / "synthetic-jats-export.zip"
+                download_info.value.save_as(str(downloaded))
+                with zipfile.ZipFile(downloaded) as archive:
+                    self.assertIsNone(archive.testzip())
+                    self.assertEqual(archive.read("source.xml"), SYNTHETIC_JATS)
+                    report = json.loads(archive.read("report.json"))
+                source = report["candidate_anomalies"][0]["source_anchors"][-1]
+                self.assertEqual(
+                    SYNTHETIC_JATS[source["start_byte"]:source["end_byte"]],
+                    b"<td>2 (8.0%)</td>",
+                )
+                displayed_range = (
+                    f"0-based source byte range [{source['start_byte']}, "
+                    f"{source['end_byte']})"
+                )
+                self.assertIn(displayed_range, findings)
+                self.assertGreater(source["start_byte"], SYNTHETIC_JATS.index(b"\xce\xbb"))
                 self.assertEqual(off_origin, [])
                 self.assertEqual(page_errors, [])
             finally:
