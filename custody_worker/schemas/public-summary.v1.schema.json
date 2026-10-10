@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "eligible_positive_cases", "eligible_negative_relationships", "independent_negative_documents", "minimum_count_thresholds_met", "inventory_sealed", "integrity_commitment", "meaning"],
+  "properties": {
+    "schema_version": {"const": "rw-custody-public-summary/1"},
+    "eligible_positive_cases": {"enum": ["AT_LEAST_1", "BELOW_1"]},
+    "eligible_negative_relationships": {"enum": ["AT_LEAST_50", "BELOW_50"]},
+    "independent_negative_documents": {"enum": ["AT_LEAST_15", "BELOW_15"]},
+    "minimum_count_thresholds_met": {"type": "boolean"},
+    "inventory_sealed": {"const": true},
+    "integrity_commitment": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "meaning": {"type": "string"}
+  }
+}

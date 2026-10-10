@@ -27,9 +27,11 @@ validate the study's methods or conclusions.
 
 JATS XML is the only input format for the table, sample-flow, synthesis-flow,
 2×2, and summary-statistic source mappers. PDF support is limited to bounded
-text extraction and prose count discovery; table arithmetic is unsupported
-for PDF. Figure captions can be inspected as text, but image contents are not
-read and no OCR is run.
+text extraction and prose count discovery when the operating system can apply
+both worker CPU and memory limits. If either limit is unavailable, extraction
+is marked unsupported and no detector runs; native Windows currently takes
+this fail-closed path. Table arithmetic is unsupported for PDF. Figure captions
+can be inspected as text, but image contents are not read and no OCR is run.
 
 Each paper report includes paper, detector, operand, and table-level coverage.
 It records applicability, eligibility, checked and skipped objects, parser

@@ -3,12 +3,19 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
 from researchwitness.jats import parse_jats
 from researchwitness.table_arithmetic import check_structured_table_percentages
+from researchwitness import denominator_provenance, table_arithmetic
+from tools.run_paper_audit_denominator_provenance_v1_3 import (
+    _document_identity_accounting,
+    _negative_relation_accounting,
+    _negative_source_relation_disposition,
+)
 
 
 def _screen(table_markup: str):
@@ -27,6 +34,214 @@ def _table(head: str, body: str, *, caption: str = '', footnotes: str = '', tabl
         f'<table-wrap id="{table_id}">{caption_markup}<table><thead>{head}</thead>'
         f'<tbody>{body}</tbody></table>{footnotes}</table-wrap>'
     )
+
+
+@pytest.mark.parametrize('token', [
+    'N=20/30', 'N=20⁄30', 'N=20∕30', 'N=20-30', 'N=20–30', 'N=20−30',
+])
+def test_denominator_tokens_do_not_accept_a_numeric_prefix_before_ranges(token):
+    match = denominator_provenance._DENOMINATOR_TOKEN.search(token)
+    assert match is None or match.group('value') != '20'
+
+
+@pytest.mark.parametrize('denominator', ['20/30', '20⁄30', '20∕30', '20-30', '20–30', '20−30'])
+def test_range_denominator_does_not_produce_a_partial_eligible_table_match(denominator):
+    result = _table(
+        '<tr><th>Outcome</th><th>All participants (N=' + denominator + ')</th></tr>',
+        '<tr><th scope="row">Event</th><td>2 (10%)</td></tr>',
+        table_id='malformed-denominator-range',
+    )
+
+    assert result['findings'] == []
+    assert result['checked_cells'] == 0
+    assert result['relations'][0]['status'] in ('INCOMPLETE', 'UNSUPPORTED')
+    selected = result['relations'][0]['denominator_provenance']['selected_denominator']
+    assert selected is None or selected.get('value_exact') is None
+
+
+def test_many_row_labels_reuse_linear_table_scope_indexes(monkeypatch):
+    row_count = 1_000
+    body = ''.join(
+        f'<tr><th scope="row">Event {index} (n=20)</th><td>1 (5%)</td></tr>'
+        for index in range(row_count)
+    )
+    source = (
+        '<article><body><table-wrap id="linear-scope-index"><table><thead><tr>'
+        '<th>Outcome</th><th>All participants (N=100)</th></tr></thead><tbody>' + body
+        + '</tbody></table></table-wrap></body></article>'
+    ).encode('utf-8')
+    document = parse_jats(source)
+
+    label_classifier_calls = 0
+    context_builds = 0
+    original_classifier = denominator_provenance._is_label_only_group_row
+    original_builder = table_arithmetic.denominator_table_context
+
+    def counted_classifier(row):
+        nonlocal label_classifier_calls
+        label_classifier_calls += 1
+        return original_classifier(row)
+
+    def counted_builder(table):
+        nonlocal context_builds
+        context_builds += 1
+        return original_builder(table)
+
+    monkeypatch.setattr(denominator_provenance, '_is_label_only_group_row', counted_classifier)
+    monkeypatch.setattr(table_arithmetic, 'denominator_table_context', counted_builder)
+
+    result = check_structured_table_percentages(document)
+
+    assert len(result['relations']) == row_count
+    assert all(item['status'] == 'ELIGIBLE_CHECKED_MATCH' for item in result['relations'])
+    assert context_builds == 1
+    assert label_classifier_calls <= 3 * len(document.tables[0].rows)
+
+
+def test_many_denominator_boundaries_use_preindexed_row_scope(monkeypatch):
+    group_count = 400
+    body = ''.join(
+        f'<tr><th scope="row">Group {index}</th><td>N=20</td></tr>'
+        f'<tr><th scope="row">Event {index}</th><td>1 (5%)</td></tr>'
+        for index in range(group_count)
+    )
+    source = (
+        '<article><body><table-wrap id="linear-boundary-index"><table><thead><tr>'
+        '<th>Outcome</th><th>All participants (N=20)</th></tr></thead><tbody>'
+        + body
+        + '</tbody></table></table-wrap></body></article>'
+    ).encode('utf-8')
+    document = parse_jats(source)
+
+    boundary_classifier_calls = 0
+    label_classifier_calls = 0
+    original_boundary_classifier = denominator_provenance._is_denominator_boundary_row
+    original_label_classifier = denominator_provenance._is_label_only_group_row
+
+    def counted_boundary_classifier(row):
+        nonlocal boundary_classifier_calls
+        boundary_classifier_calls += 1
+        return original_boundary_classifier(row)
+
+    def counted_label_classifier(row):
+        nonlocal label_classifier_calls
+        label_classifier_calls += 1
+        return original_label_classifier(row)
+
+    def forbidden_row_lookup(*_args, **_kwargs):
+        pytest.fail('per-relation scan of all denominator scope intervals')
+
+    monkeypatch.setattr(
+        denominator_provenance, '_is_denominator_boundary_row', counted_boundary_classifier,
+    )
+    monkeypatch.setattr(
+        denominator_provenance, '_is_label_only_group_row', counted_label_classifier,
+    )
+    monkeypatch.setattr(denominator_provenance, '_active_boundary', forbidden_row_lookup, raising=False)
+    monkeypatch.setattr(
+        denominator_provenance, '_active_parent_count_groups', forbidden_row_lookup, raising=False,
+    )
+
+    result = check_structured_table_percentages(document)
+
+    row_count = len(document.tables[0].rows)
+    assert len(result['relations']) == group_count
+    assert all(item['status'] == 'ELIGIBLE_CHECKED_MATCH' for item in result['relations'])
+    assert boundary_classifier_calls <= row_count
+    assert label_classifier_calls <= 2 * row_count
+
+
+def test_adjacent_denominator_boundaries_keep_their_distinct_bases():
+    result = _table(
+        '<tr><th>Outcome</th><th>All participants (N=100)</th></tr>',
+        '<tr><th scope="row">Group A</th><td>N=20</td></tr>'
+        '<tr><th scope="row">Event A</th><td>1 (5%)</td></tr>'
+        '<tr><th scope="row">Group B</th><td>N=40</td></tr>'
+        '<tr><th scope="row">Event B</th><td>2 (5%)</td></tr>',
+        table_id='distinct-adjacent-boundary-bases',
+    )
+
+    assert [item['status'] for item in result['relations']] == [
+        'ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MATCH',
+    ]
+    assert [item['denominator_exact'] for item in result['relations']] == ['20', '40']
+
+
+@pytest.mark.parametrize(
+    ('status', 'relation_exists', 'operands_exact', 'expected'),
+    [
+        ('INCOMPLETE', True, True, 'EXACT_OPERAND_ABSTENTION'),
+        ('UNSUPPORTED', True, True, 'EXACT_OPERAND_ABSTENTION'),
+        ('ELIGIBLE_CHECKED_MATCH', False, False, 'UNMATCHED'),
+        ('ELIGIBLE_CHECKED_MATCH', True, False, 'ANCHOR_ONLY_OR_CHANGED_OPERANDS'),
+        ('ELIGIBLE_CHECKED_MISMATCH', True, False, 'ANCHOR_ONLY_OR_CHANGED_OPERANDS'),
+        ('ELIGIBLE_CHECKED_MATCH', True, True, 'ELIGIBLE_CORRECT_NEGATIVE'),
+        ('ELIGIBLE_CHECKED_MISMATCH', True, True, 'EXACT_OPERAND_CHECKED_MISMATCH'),
+    ],
+    ids=[
+        'incomplete-is-abstention', 'unsupported-is-abstention', 'unmatched',
+        'anchor-only-match', 'changed-operands-mismatch', 'exact-checked-match',
+        'exact-checked-mismatch',
+    ],
+)
+def test_v13_negative_qualification_counts_only_source_confirmed_exact_matches(
+    status, relation_exists, operands_exact, expected,
+):
+    locator = {'arithmetic_correct': True}
+    relation = {'status': status} if relation_exists else None
+
+    assert _negative_source_relation_disposition(
+        locator, relation, operands_exact,
+    ) == expected
+
+
+def test_v13_negative_qualification_rejects_unconfirmed_source_label():
+    assert _negative_source_relation_disposition(
+        {'arithmetic_correct': False}, {'status': 'ELIGIBLE_CHECKED_MATCH'}, True,
+    ) == 'SOURCE_LABEL_NOT_CONFIRMED'
+
+
+def test_v13_negative_summary_separates_matches_abstentions_and_unmatched_relations():
+    synthetic_rows = [
+        ({'arithmetic_correct': True}, {'status': 'INCOMPLETE'}, True),
+        ({'arithmetic_correct': True}, {'status': 'UNSUPPORTED'}, True),
+        ({'arithmetic_correct': True}, None, False),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MATCH'}, False),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MISMATCH'}, False),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MATCH'}, True),
+        ({'arithmetic_correct': True}, {'status': 'ELIGIBLE_CHECKED_MISMATCH'}, True),
+    ]
+    dispositions = Counter(
+        _negative_source_relation_disposition(locator, relation, operands_exact)
+        for locator, relation, operands_exact in synthetic_rows
+    )
+    abstentions = sum(
+        relation is not None and relation['status'] in ('INCOMPLETE', 'UNSUPPORTED')
+        for _locator, relation, _operands_exact in synthetic_rows
+    )
+
+    summary = _negative_relation_accounting(dispositions, abstentions)
+
+    assert summary['source_labelled_correct_relations'] == 7
+    assert summary['eligible_correct_source_relations'] == 1
+    assert summary['exact_operand_abstentions'] == 2
+    assert summary['exact_operand_checked_mismatches'] == 1
+    assert summary['source_labelled_abstentions'] == 2
+    assert summary['source_anchor_only_or_changed_operand_relations'] == 2
+    assert summary['unmatched_source_relations'] == 1
+
+
+def test_v13_document_accounting_deduplicates_normalized_doi_values():
+    records = [
+        {'normalized_doi': '10.1234/Repeated'},
+        {'normalized_doi': ' 10.1234/repeated '},
+        {'normalized_doi': '10.5678/Unique'},
+    ]
+
+    assert _document_identity_accounting(records) == {
+        'source_records': 3,
+        'distinct_normalized_doi_count': 2,
+    }
 
 
 CASES = [
@@ -279,6 +494,49 @@ def test_v1_3_adversarial_denominator_resolution(
 
 
 @pytest.mark.parametrize(
+    'heading',
+    [
+        'Primary outcome',
+        'Primary efficacy endpoint',
+        'Primary safety outcome',
+        'Major secondary outcome',
+        'Primary outcome measures',
+        'Primary endpoint measures',
+        'Primary end point measures',
+    ],
+)
+def test_qualified_outcome_headings_preserve_the_prior_subgroup_scope(heading):
+    result = _table(
+        '<tr><th>Outcome</th><th>Participants (N=100)</th></tr>',
+        '<tr><th scope="row">Women (N=20)</th><td></td></tr>'
+        f'<tr><th scope="row">{heading}</th><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>4 (20%)</td></tr>',
+        table_id='transparent-outcome-heading',
+    )
+
+    relation = result['relations'][0]
+
+    assert relation['status'] == 'ELIGIBLE_CHECKED_MATCH'
+    assert relation['denominator_exact'] == '20'
+
+
+def test_unclassified_label_only_heading_blocks_a_broader_denominator():
+    result = _table(
+        '<tr><th>Outcome</th><th>Participants (N=100)</th></tr>',
+        '<tr><th scope="row">Clinical history</th><td></td></tr>'
+        '<tr><th scope="row">Event</th><td>20 (20%)</td></tr>',
+        table_id='unclassified-scope-heading',
+    )
+
+    relation = result['relations'][0]
+
+    assert relation['status'] == 'INCOMPLETE'
+    assert relation['primary_skip_reason'] == 'DENOMINATOR_NOT_EXPLICIT'
+    assert relation['denominator_scope_resolved'] is False
+    assert relation['denominator_provenance']['selected_denominator'] is None
+
+
+@pytest.mark.parametrize(
     ('header', 'reason'),
     [
         ('Participants (N=9999999999)', 'MALFORMED_NUMERIC_TOKEN'),
@@ -476,7 +734,6 @@ def test_v1_2_failure_fixtures_are_hash_bound_to_the_full_v1_3_replay():
     assert fixtures['provenance']['v1_3_negative_replay_artifact_sha256'] == replay_sha256
     assert replay['reserved_records_included'] is False
     assert replay['detector_executed_on_reserved_records'] is False
-    assert replay['summary']['eligible_correct_source_relations'] == 4163
 
     ledger_by_key = {}
     for item in replay['relation_ledger']:

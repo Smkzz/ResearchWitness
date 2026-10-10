@@ -90,6 +90,10 @@ def main(argv: list[str] | None = None) -> int:
     command.add_argument('--identifier', default=None, help='DOI, arXiv identifier, or local source identifier')
     command.add_argument('--source-version', default=None, help='Exact version represented by the paper capture')
 
+    command = sub.add_parser('ui', help='Open the local paper-audit interface')
+    command.add_argument('--port', type=int, default=8765, help='Loopback port (default: 8765; use 0 for an available port)')
+    command.add_argument('--no-browser', action='store_true', help='Print the local URL without opening a browser')
+
     command = sub.add_parser('schema')
     command.add_argument('name', choices=('case', 'intake', 'review', 'summary-check', 'paper-audit'))
 
@@ -111,6 +115,11 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     try:
+        if args.command == 'ui':
+            if not 0 <= args.port <= 65535:
+                raise Invalid('UI port must be between 0 and 65535')
+            from .local_ui import serve_ui
+            return serve_ui(port=args.port, open_browser=not args.no_browser)
         if args.command == 'capabilities':
             print(json.dumps({'version': VERSION, 'checkers': capabilities(),
                               'empirical_checks': summary_capabilities(),

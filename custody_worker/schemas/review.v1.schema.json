@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "review_id",
+    "role",
+    "eligibility",
+    "source_sha256",
+    "correction_sha256",
+    "source_version_verified",
+    "numerator",
+    "denominator",
+    "printed_percent",
+    "decimals",
+    "scope",
+    "objections"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "rw-custody-review/1"
+    },
+    "review_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,63}$"
+    },
+    "role": {
+      "enum": [
+        "CORRECTION_POSITIVE",
+        "CORRECT_NEGATIVE_RELATION",
+        "OTHER"
+      ]
+    },
+    "eligibility": {
+      "enum": [
+        "ELIGIBLE",
+        "INELIGIBLE",
+        "UNRESOLVED"
+      ]
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "[0-9a-f]{64}"
+    },
+    "correction_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "[0-9a-f]{64}"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source_version_verified": {
+      "type": "boolean"
+    },
+    "numerator": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000000
+    },
+    "denominator": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000000000
+    },
+    "printed_percent": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,8})(?:\\.[0-9]{1,4})?$"
+    },
+    "decimals": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerator_anchor",
+        "denominator_anchor",
+        "percentage_anchor",
+        "population",
+        "group",
+        "timepoint",
+        "analysis_set",
+        "denominator_explicit",
+        "scope_confirmed"
+      ],
+      "properties": {
+        "numerator_anchor": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "denominator_anchor": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "percentage_anchor": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "population": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "group": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "timepoint": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "analysis_set": {
+          "type": "string",
+          "maxLength": 240
+        },
+        "denominator_explicit": {
+          "type": "boolean"
+        },
+        "scope_confirmed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "objections": {
+      "type": "array",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "maxLength": 240
+      }
+    }
+  }
+}

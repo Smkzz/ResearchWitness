@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "import_batches",
+    "import_files",
+    "source_records",
+    "reviews",
+    "eligible_positive",
+    "eligible_negative",
+    "arithmetic_mismatches",
+    "unresolved",
+    "seal_count",
+    "current_inventory_sealed",
+    "current_seal_commitment",
+    "meaning"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "rw-custody-summary/1"
+    },
+    "import_batches": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "import_files": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source_records": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reviews": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "eligible_positive": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "eligible_negative": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "arithmetic_mismatches": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unresolved": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "seal_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "current_inventory_sealed": {
+      "type": "boolean"
+    },
+    "current_seal_commitment": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "[0-9a-f]{64}"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "meaning": {
+      "type": "string"
+    }
+  }
+}

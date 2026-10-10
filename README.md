@@ -17,11 +17,13 @@ It is intentionally **not** an AI that declares whole papers wrong. A positive r
 
 ## Status
 
-This branch is an **unreleased development candidate**, not a public release. The frozen 15-corrigendum verifier screen remains unchanged: 2/15 mechanisms are fully representable, 2/15 mechanism-only, 1/15 partial, and 10/15 unsupported; only two screen entries have committed runnable fixtures. In the post-hoc paper-audit development replay, 2/16 correction issues meet an active source-mapped contract (4/4 target cells matched); 14 remain unsupported. Seventeen selected controls produced no candidates, but they are not certified error-free, and eight unmatched candidates remain unadjudicated. All 33 reports expose incomplete coverage. These results are not a sealed benchmark. Wave 2 adds active source-mapped JATS sample flow, narrow PRISMA arithmetic, and crude 2×2 odds ratios, but no correction-backed positive yet meets those contracts. Rates remain unsupported and cross-section consistency is helper-only. See the [paper-audit capability boundaries](docs/PAPER_AUDIT_CAPABILITIES.md) and [wave 2 qualification](validation/paper-audit-capability-wave-2/QUALIFICATION.md).
+This branch is an **unreleased development candidate**, not a public release. The frozen 15-corrigendum verifier screen remains unchanged: 2/15 mechanisms are fully representable, 2/15 mechanism-only, 1/15 partial, and 10/15 unsupported; only two screen entries have committed runnable fixtures. In the post-hoc paper-audit development replay, 2/16 correction issues meet an active source-mapped contract (4/4 target cells matched); 14 remain unsupported. Seventeen selected controls produced no candidates, but they are not certified error-free, and eight unmatched candidates remain unadjudicated. All 33 reports expose incomplete coverage. These results are not a sealed benchmark. Wave 2 adds active source-mapped JATS sample flow, narrow PRISMA arithmetic, and crude 2×2 odds ratios, but no correction-backed positive yet meets those contracts. Rates remain unsupported and cross-section consistency is helper-only. See the [paper-audit capability boundaries](docs/PAPER_AUDIT_CAPABILITIES.md) and repository-only validation notes.
+
+The Wave 2 issue and target-cell totals above use that replay's contract and unit of analysis. PR #11's denominator-provenance v1.3 replay uses a separate source-eligibility contract, so its counts are not directly comparable or additive. Neither is untouched reserve evidence; the repository-only acceptance ledger records the frozen evaluation gate separately and is omitted from generated source archives.
 
 Use it to verify **explicit formalization/witness pairs**, not to infer that an entire paper, author, or research program is wrong.
 
-See [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md).
+See [`docs/PAPER_AUDIT_CAPABILITIES.md`](docs/PAPER_AUDIT_CAPABILITIES.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md) for supported checks and their limits. The full repository contains development-only validation history that is not included in source archives.
 
 ## MVP product loop
 
@@ -189,7 +191,21 @@ python -m researchwitness paper-audit paper.pdf \
 
 The command preserves the original input and creates JSON and static HTML reports. For JATS, it writes an additional `paper-document.json` source model with section paths, table-wrap metadata, header rows, spans, footnotes, xrefs, cell identities, figures and source hashes. Count/percentage arithmetic runs only when exact operands and denominator scope are explicit. The JATS prose flow checker requires a single paragraph and explicit disjoint/exhaustive or sequential-removal semantics. The PRISMA checker covers only labelled `records identified - duplicates removed = records screened` prose in review context. The 2×2 checker requires one reliable table row with four integer cells and an explicitly unadjusted, oriented odds ratio. These are narrow source adapters; unsupported shapes are reported as skipped or incomplete. Markdown remains a guarded legacy adapter. All outputs are review candidates. Row/column totals, simple rates, confidence intervals, source-mapped cross-section comparisons, statistical tests beyond the experimental SD/SE/n screen, citations, equations, units, methods, code, figure contents, conclusions, and corrections are not active checks, and the source itself is not authenticated.
 
-Text and Markdown are preserved byte-for-byte and must be UTF-8. JATS parsing never fetches external DTDs; it strips a simple external DTD reference and expands known named entities, while rejecting internal DTD/entity declarations and unknown entities. It applies explicit byte, element, nesting, text, table, row, column, span, and cell limits. PDF extraction uses optional `pypdf` (BSD-3-Clause) in a separate worker, performs no OCR, and may be partial or unavailable. PDF prose has a separate extraction status; PDF table structure is unsupported and no PDF table arithmetic runs. The worker has a 20-second wall timeout, a 15-second CPU limit, and a 768 MiB address-space limit where POSIX limits are supported; it is process isolation, not an OS sandbox. The report records page and extracted-text offsets, not precise PDF layout coordinates. Source identity, version, and authenticity remain unverified. Per-paper, per-detector, per-table coverage and skip reasons are in the report. See [`docs/PAPER_AUDIT_CAPABILITIES.md`](docs/PAPER_AUDIT_CAPABILITIES.md), [`schemas/paper-audit.schema.json`](schemas/paper-audit.schema.json), and the qualification report for exact limits.
+Text and Markdown are preserved byte-for-byte and must be UTF-8. JATS parsing never fetches external DTDs; it strips a simple external DTD reference and expands known named entities, while rejecting internal DTD/entity declarations and unknown entities. It applies explicit byte, element, nesting, text, table, row, column, span, and cell limits. PDF extraction uses optional `pypdf` (BSD-3-Clause) in a separate worker, performs no OCR, and may be partial or unavailable. The worker imports `pypdf` only after the operating system applies both the 15-second CPU and 768 MiB address-space limits; if either limit is unavailable, extraction is marked unsupported and no detector runs. Native Windows currently lacks these limits, so PDF input there is retained in the report but not parsed. PDF prose has a separate extraction status; PDF table structure is unsupported and no PDF table arithmetic runs. The worker also has a 20-second wall timeout; it is process isolation, not an OS sandbox. The report records page and extracted-text offsets, not precise PDF layout coordinates. Source identity, version, and authenticity remain unverified. Per-paper, per-detector, per-table coverage and skip reasons are in the report. See [`docs/PAPER_AUDIT_CAPABILITIES.md`](docs/PAPER_AUDIT_CAPABILITIES.md), [`schemas/paper-audit.schema.json`](schemas/paper-audit.schema.json), and the qualification report for exact limits.
+
+### Local paper-audit interface
+
+For an ordinary local workflow, launch the loopback-only interface:
+
+```bash
+python -m researchwitness ui
+```
+
+It opens a local page where you can select a `.txt`, `.md`, `.markdown`, `.xml`, `.nxml`, or `.pdf` file, run the supported screens, inspect source-linked candidates and coverage, replay the same pinned input, and export the source plus report. `--no-browser` prints the URL without opening it. The server binds to `127.0.0.1`; it makes no source retrieval, model, analytics, or other external requests. An identifier and version label are local report metadata, not authenticated facts.
+
+Evidence locations show 0-based byte ranges as `[start_byte, end_byte)` (`start_byte` included, `end_byte` excluded). Text and Markdown offsets refer to UTF-8 source bytes; JATS offsets map back to the original XML bytes even when an external DTD declaration is removed or a known named entity is expanded for parsing. PDF page offsets refer to extracted-text bytes, not PDF layout coordinates.
+
+The application retains up to ten recent runs in its default local data directory (`%LOCALAPPDATA%` on Windows or the XDG data directory on Linux/macOS), with a 512 MiB store limit; runs remain until deleted or the oldest inactive runs are evicted to satisfy capacity. Use **Delete all ResearchWitness run data** to remove the files created by this interface; exported ZIPs and operating-system backups are outside that deletion. If existing store content cannot be recognized safely, the app stops writes/deletion and reports that manual review is required. The loopback token protects browser requests from cross-origin sites; it is not an OS-user boundary. Any local user or process able to connect to loopback on the same computer may be able to use the interface and its data, so do not use it for confidential material on a shared host. Windows access controls are not independently qualified here. This local interface is not a custodian environment or evidence of scientific validity. A dedicated synthetic Chromium workflow checks the browser journey; other browser/OS combinations remain unqualified.
 
 The [synthetic sample](examples/paper-audit/paper.md) reports `n = 20` at recruitment and `n = 18` after exclusions. The updated screen describes these as a possible study-stage difference instead of an error candidate. Run it to inspect the report:
 
@@ -199,7 +215,7 @@ python -m researchwitness paper-audit examples/paper-audit/paper.md \
   --output work/paper-audit
 ```
 
-The source-pinned development corpus, scoring definitions, per-paper JSON reports, and exact-hash retrieval/runner tools are in [`validation/paper-audit-wave-1/`](validation/paper-audit-wave-1/). The corpus contains four correction-backed positives and five selected negative controls; it has no sealed holdout and does not establish cross-field performance.
+The repository retains development and historical validation materials for reproducing their original checks. They are not a sealed holdout and do not establish cross-field performance. Generated source archives omit case-level evaluation and evidence records; they include only the reviewed aggregate-only source adjudication summary needed to preserve its integrity commitment.
 
 Start from a UTF-8 text capture of the exact paper version:
 
@@ -287,9 +303,9 @@ The earlier `0.2.0` validation notes also describe network-reliability `K3` and 
 
 The historical cases intentionally return `NOT_READY` for contact when a published correction is already known or source alignment remains unresolved.
 
-The previous frozen 15-paper screen is a mechanism-level coverage map, not an end-to-end discovery benchmark. Several corrigenda still require continuous probability/integration, PDE analysis, infinite-index arguments, database semantics, or domain-specific proof logic. See the candidate-specific coverage review under [`validation/verifier-wave/`](validation/verifier-wave/) for which screen entries are executable in this tree.
+The previous frozen 15-paper screen is a mechanism-level coverage map, not an end-to-end discovery benchmark. Several corrigenda still require continuous probability/integration, PDE analysis, infinite-index arguments, database semantics, or domain-specific proof logic. Repository-only historical notes describe which screen entries are executable in this tree.
 
-See [`validation/`](validation/) and [`docs/VALIDATION.md`](docs/VALIDATION.md).
+See [`docs/PAPER_AUDIT_CAPABILITIES.md`](docs/PAPER_AUDIT_CAPABILITIES.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the supported scope and remaining research-validation limits. The full repository contains additional development-only validation history.
 
 ## Contact readiness
 
@@ -357,7 +373,7 @@ Bug reports and bounded deterministic verifier proposals are welcome. Start with
 python -m pip install -e '.[dev]'
 python -m pytest -q
 python benchmarks/run_synthetic.py
-python validation/mvp_real/run_validation.py
+python validation/mvp_real/run_validation.py  # repository checkout only
 python tools/quality_gate.py
 ```
 

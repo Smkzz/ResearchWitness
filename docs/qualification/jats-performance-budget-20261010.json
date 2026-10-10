@@ -1,0 +1,12 @@
+{
+  "declared_before_run": "2026-10-10",
+  "purpose": "Synthetic, single-process JATS parse plus table-percentage diagnostic, including named-entity source-offset mapping.",
+  "limits": {
+    "small_valid": {"input_bytes": 20480, "rows": 200, "max_wall_seconds": 0.5, "max_cpu_seconds": 0.5, "max_peak_rss_kib": 65536},
+    "medium_valid": {"input_bytes": 1048576, "rows": 5000, "max_wall_seconds": 2.0, "max_cpu_seconds": 2.0, "max_peak_rss_kib": 131072},
+    "large_valid": {"input_bytes": 8388608, "rows": 10000, "max_wall_seconds": 5.0, "max_cpu_seconds": 5.0, "max_peak_rss_kib": 262144},
+    "entity_expansion": {"input_bytes": 1048576, "rows": 5000, "entity_tokens": 10000, "max_wall_seconds": 3.0, "max_cpu_seconds": 3.0, "max_peak_rss_kib": 196608},
+    "malformed_depth": {"input_bytes": 1024, "rows": 0, "max_wall_seconds": 0.25, "max_cpu_seconds": 0.25, "max_peak_rss_kib": 65536}
+  },
+  "scope_limitations": ["synthetic inputs only", "single-process and single-table", "Linux only", "no disk or export measurements", "no concurrency, startup, shutdown, retry, or cancellation measurements", "does not establish production workload performance"]
+}

@@ -1,8 +1,8 @@
 """Bounded pypdf extraction worker for the untrusted paper-ingestion front end.
 
 The parent starts this file in a separate interpreter with a wall-clock timeout.
-On POSIX, this worker also applies address-space and CPU limits before importing
-pypdf. It is process isolation, not a full operating-system sandbox.
+This worker also requires address-space and CPU limits before importing pypdf.
+It is process isolation, not a full operating-system sandbox.
 """
 from __future__ import annotations
 
@@ -20,18 +20,18 @@ class WorkerLimit(Exception):
     pass
 
 
-def _limits(memory_bytes: int, cpu_seconds: int) -> None:
+def _limits(memory_bytes: int, cpu_seconds: int) -> bool:
+    """Apply both required process limits, returning False if either is unavailable."""
     try:
         import resource
     except ImportError:
-        return
+        return False
     try:
         resource.setrlimit(resource.RLIMIT_CPU, (cpu_seconds, cpu_seconds))
         resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
-    except (OSError, ValueError):
-        # The parent timeout and source/output bounds still apply where rlimits
-        # are unavailable or rejected by the host.
-        return
+    except (AttributeError, OSError, ValueError):
+        return False
+    return True
 
 
 def _result(
@@ -57,7 +57,12 @@ def main(argv: list[str]) -> int:
         return 0
     source_path = Path(argv[1])
     max_pages, max_page_bytes, max_text_bytes, memory_bytes, cpu_seconds = map(int, argv[2:])
-    _limits(memory_bytes, cpu_seconds)
+    if not _limits(memory_bytes, cpu_seconds):
+        _result('LIMIT_OR_UNSUPPORTED', 'pypdf isolated worker (not run)', [], [
+            'PDF extraction was skipped because the operating system could not apply the required worker CPU and memory limits. '
+            'No detector was run.'
+        ])
+        return 0
     try:
         import pypdf
         from pypdf import PdfReader

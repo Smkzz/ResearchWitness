@@ -43,25 +43,50 @@ def _file_sha256(path: Path) -> str:
     return _sha256(path.read_bytes())
 
 
-def _normalized_element_path(value: Any) -> tuple[tuple[str, int], ...] | None:
-    """Normalize the two equivalent JATS path spellings used by source reviews."""
+def _normalized_element_path(value: Any) -> tuple[tuple[str, int | None, str | None], ...] | None:
+    """Normalize known JATS spellings without discarding element identity.
+
+    An omitted positional predicate and an id predicate are not interchangeable
+    with ``[1]``: the id may select a later sibling. Keep both pieces of identity
+    and fail closed when one path form cannot be joined exactly to another.
+    """
     if not isinstance(value, str) or not value.startswith('/'):
         return None
     path = re.sub(r"\*\[local-name\(\)=['\"]([^'\"]+)['\"]\]", r'\1', value)
-    path = re.sub(r"\[@id=['\"][^'\"]*['\"]\]", '', path)
-    parts: list[tuple[str, int]] = []
+    parts: list[tuple[str, int | None, str | None]] = []
     for component in path.split('/'):
         if not component:
             continue
-        match = re.fullmatch(r'([A-Za-z_][A-Za-z0-9_.:-]*)(?:\[(\d+)\])?', component)
+        match = re.fullmatch(r'([A-Za-z_][A-Za-z0-9_.:-]*)((?:\[[^\]]+\])*)', component)
         if match is None:
             return None
-        parts.append((match.group(1), int(match.group(2) or '1')))
+        position: int | None = None
+        element_id: str | None = None
+        for predicate in re.findall(r'\[([^\]]+)\]', match.group(2)):
+            if re.fullmatch(r'\d+', predicate):
+                if position is not None:
+                    return None
+                position = int(predicate)
+                continue
+            identifier = re.fullmatch(r"@id=['\"]([^'\"]+)['\"]", predicate)
+            if identifier is not None and element_id is None:
+                element_id = identifier.group(1)
+                continue
+            return None
+        parts.append((match.group(1), position, element_id))
     return tuple(parts) if parts else None
 
 
+def _negative_table_ids_match(record: dict[str, Any], locator: dict[str, Any]) -> bool:
+    source_table_id = locator.get('table_id')
+    report_table_id = record.get('table_id')
+    return not (source_table_id is not None or report_table_id is not None) or source_table_id == report_table_id
+
+
 def _negative_locator_matches(record: dict[str, Any], locator: dict[str, Any]) -> bool:
-    """Disambiguate separate relations sharing one paragraph or table-cell anchor."""
+    """Disambiguate relations by exact table identity and operands."""
+    if not _negative_table_ids_match(record, locator):
+        return False
     return (
         record.get('numerator_exact') == str(locator.get('numerator'))
         and record.get('denominator_exact') == str(locator.get('denominator'))
@@ -80,8 +105,8 @@ def _pair_negative_source_relations(
     the report still belongs to that source relation if its parsed operands
     differ; this is how denominator-parsing false candidates are counted.
     """
-    source_groups: dict[tuple[str, tuple[tuple[str, int], ...] | None], list[int]] = defaultdict(list)
-    report_groups: dict[tuple[str, tuple[tuple[str, int], ...] | None], list[dict[str, Any]]] = defaultdict(list)
+    source_groups: dict[tuple[str, tuple[tuple[str, int | None, str | None], ...] | None], list[int]] = defaultdict(list)
+    report_groups: dict[tuple[str, tuple[tuple[str, int | None, str | None], ...] | None], list[dict[str, Any]]] = defaultdict(list)
     for index, locator in enumerate(source_locators):
         source_groups[(str(locator.get('contract_id', '')),
                        _normalized_element_path(locator.get('cell_path')))].append(index)
@@ -104,7 +129,10 @@ def _pair_negative_source_relations(
             else:
                 remaining_sources.append(index)
         if len(remaining_sources) == 1 and len(remaining_reports) == 1:
-            paired[remaining_sources[0]] = (remaining_reports[0], False)
+            index = remaining_sources[0]
+            record = remaining_reports[0]
+            if _negative_table_ids_match(record, source_locators[index]):
+                paired[index] = (record, False)
         for index in remaining_sources:
             paired.setdefault(index, (None, False))
     return [paired.get(index, (None, False)) for index in range(len(source_locators))]
@@ -551,7 +579,7 @@ def _negative_relation_replay(manifest_path: Path, validator: Draft202012Validat
         'jats_cell_ratio_percentage_recomputation': 'DIRECT_N_OVER_N_PERCENTAGE',
     }
 
-    def relation_anchor_path(record: dict[str, Any]) -> tuple[tuple[str, int], ...] | None:
+    def relation_anchor_path(record: dict[str, Any]) -> tuple[tuple[str, int | None, str | None], ...] | None:
         anchor = record.get('source_anchor')
         return _normalized_element_path(anchor.get('element_path')) if isinstance(anchor, dict) else None
 
@@ -592,7 +620,7 @@ def _negative_relation_replay(manifest_path: Path, validator: Draft202012Validat
             screens.get('structured_table_percentages', {}).get('relations', [])
             + screens.get('cell_ratio_percentages', {}).get('relations', [])
         )
-        by_key: dict[tuple[str, tuple[tuple[str, int], ...] | None], list[dict[str, Any]]] = {}
+        by_key: dict[tuple[str, tuple[tuple[str, int | None, str | None], ...] | None], list[dict[str, Any]]] = {}
         for record in relations:
             by_key.setdefault((str(record.get('detector_id')), relation_anchor_path(record)), []).append(record)
         candidates_by_relation = {

@@ -31,7 +31,7 @@ _TIMEPOINT = re.compile(
 )
 _UNSAFE_CONTEXT = re.compile(
     r'\b(?:weighted|adjusted|adjustment|model(?:led|ing)?|regression|cluster(?:ed|ing)?|'
-    r'imput(?:ed|ation)|standardized|propensity|bootstrap|multiple time[ -]?points?|'
+    r'imput(?:ed|ation)|standardiz(?:e|ed|es|ing|ation)|standardis(?:e|ed|es|ing|ation)|propensity|bootstrap|multiple time[ -]?points?|'
     r'repeated[ -]?measures?|missing data|multiple responses?|overlap(?:ping)?)\b',
     re.IGNORECASE,
 )
