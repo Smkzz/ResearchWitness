@@ -10,13 +10,18 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from hashlib import sha256
+import json
 import re
 from typing import Any
 
 from .paper_document import PaperDocument, Table
 from .paper_contracts import PERCENTAGE_CONTRACT_VERSION
-from .paper_ratio import CELL_RATIO_SHAPE
-from .table_arithmetic import COUNT_PERCENT, COUNT_PERCENT_SHAPE
+from .paper_ratio import CELL_RATIO_SHAPE, check_jats_cell_ratio_percentages
+from .table_arithmetic import (
+    COUNT_PERCENT,
+    COUNT_PERCENT_SHAPE,
+    check_structured_table_percentages,
+)
 from .paper_relation_telemetry import relation_id, summarize_relations
 
 
@@ -117,6 +122,48 @@ def _table_reference(table: Table) -> dict[str, str]:
             or len(element_path) > _MAX_PATH_LENGTH):
         raise ValueError('table source element path must be non-empty and within the coverage limit')
     return {'source_sha256': source_sha256, 'element_path': element_path}
+
+
+def _same_json_value(left: Any, right: Any) -> bool:
+    """Compare serialized telemetry with source-derived JSON without bool/int aliasing."""
+    try:
+        return json.dumps(
+            left, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False,
+        ) == json.dumps(
+            right, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False,
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def _source_percentage_relations(
+    document: PaperDocument,
+    detector_id: str,
+) -> dict[str, Mapping[str, Any]] | None:
+    """Recompute v1.3 relations from the canonical parsed source before accepting telemetry."""
+    evaluator = {
+        'table_percentage_recomputation': check_structured_table_percentages,
+        'jats_cell_ratio_percentage_recomputation': check_jats_cell_ratio_percentages,
+    }.get(detector_id)
+    if evaluator is None:
+        return None
+    try:
+        record = evaluator(document)
+        relations = record.get('relations')
+        if not isinstance(relations, (list, tuple)):
+            return None
+        by_id: dict[str, Mapping[str, Any]] = {}
+        for relation in relations:
+            if not isinstance(relation, Mapping):
+                return None
+            relation_identifier = relation.get('relation_id')
+            if not isinstance(relation_identifier, str) or relation_identifier in by_id:
+                return None
+            by_id[relation_identifier] = relation
+        return by_id
+    except Exception:
+        # Invalid or unsupported source models cannot establish telemetry completeness.
+        return None
 
 
 def _table_model_summary(document: PaperDocument) -> dict[str, Any]:
@@ -450,6 +497,12 @@ def _percentage_relation_telemetry_complete(
         else 'DIRECT_N_OVER_N_PERCENTAGE'
     )
     detector_id = _detector_id(record)
+    # Recompute even when the supplied telemetry is empty. Otherwise a caller
+    # can remove every row (or only a mismatch row), adjust the summaries, and
+    # avoid source binding because there is no v1.3 relation left to trigger it.
+    source_relations = _source_percentage_relations(document, detector_id)
+    if source_relations is None:
+        return False
     for table, table_result in relation_table_results:
         relations = table_result.get('relations')
         if not isinstance(relations, (list, tuple)) or any(not isinstance(item, Mapping) for item in relations):
@@ -472,6 +525,55 @@ def _percentage_relation_telemetry_complete(
                     or not isinstance(anchor.get('element_path'), str)
                     or not anchor.get('element_path').startswith(table.source_anchor.element_path + '/')):
                 return False
+            if relation.get('contract_version') == '1.3':
+                provenance = relation.get('denominator_provenance')
+                scope_resolved = relation.get('denominator_scope_resolved')
+                resolution_status = (
+                    provenance.get('resolution_status') if isinstance(provenance, Mapping) else None
+                )
+                if (not isinstance(provenance, Mapping)
+                        or type(scope_resolved) is not bool
+                        or resolution_status not in {'RESOLVED', 'UNRESOLVED', 'AMBIGUOUS'}
+                        or scope_resolved != (resolution_status == 'RESOLVED')):
+                    return False
+                selected = provenance.get('selected_denominator')
+                checked_status = relation.get('status') in (
+                    'ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH',
+                )
+                if checked_status and (not scope_resolved or not isinstance(selected, Mapping)):
+                    return False
+                if scope_resolved:
+                    if not isinstance(selected, Mapping):
+                        return False
+                    selected_value = selected.get('value_exact')
+                    raw_value = selected.get('raw_value')
+                    selected_anchor = selected.get('source_anchor')
+                    selected_path = (
+                        selected_anchor.get('element_path') if isinstance(selected_anchor, Mapping) else None
+                    )
+                    if (not isinstance(selected_value, str) or not selected_value
+                            or not isinstance(raw_value, str)
+                            or not re.fullmatch(r'[0-9]{1,9}', raw_value)
+                            or selected_value != str(int(raw_value))
+                            or not isinstance(selected_anchor, Mapping)
+                            or selected_anchor.get('source_sha256') != document.source_sha256
+                            or relation.get('denominator_source_anchor') != selected_anchor
+                            or not isinstance(selected_path, str)
+                            or not selected_path.startswith(table.source_anchor.element_path.rstrip('/') + '/')):
+                        return False
+                    if (relation.get('status') in ('ELIGIBLE_CHECKED_MATCH', 'ELIGIBLE_CHECKED_MISMATCH')
+                            and relation.get('denominator_exact') != selected_value):
+                        return False
+                elif (selected is not None or relation.get('denominator_source_anchor') is not None
+                      or relation.get('denominator_exact') is not None):
+                    return False
+                if source_relations is not None:
+                    source_relation_id = relation.get('relation_id')
+                    if not isinstance(source_relation_id, str):
+                        return False
+                    source_relation = source_relations.get(source_relation_id)
+                    if source_relation is None or not _same_json_value(relation, source_relation):
+                        return False
             if relation.get('relation_id') != relation_id(
                 _detector_id(record), PERCENTAGE_CONTRACT_VERSION, document.source_sha256,
                 anchor['element_path'],
@@ -549,7 +651,8 @@ def _percentage_relation_telemetry_complete(
             return False
         flattened.extend(relations)
 
-    if list(supplied) != flattened:
+    if (list(supplied) != flattened
+            or [item.get('relation_id') for item in flattened] != list(source_relations)):
         return False
     try:
         computed = summarize_relations(supplied)

@@ -258,8 +258,11 @@ class LocalUITests(unittest.TestCase):
             self.assertEqual(archive.read("source.md"), TABLE_PAPER)
             self.assertIn("report.json", archive.namelist())
             replay = archive.read("REPLAY.txt").decode("utf-8")
-            self.assertIn("--identifier synthetic:local-ui", replay)
+            self.assertIn("python replay.py", replay)
             self.assertIn("not an independent observation", replay)
+            self.assertIn("replay.py", archive.namelist())
+            metadata = json.loads(archive.read("replay-metadata.json"))
+            self.assertEqual(metadata["identifier"], "synthetic:local-ui")
 
         replay_job, _ = self.store.retry(job.job_id)
         self.assertNotEqual(replay_job.job_id, job.job_id)
@@ -300,6 +303,36 @@ class LocalUITests(unittest.TestCase):
         self.assertNotEqual(current_pdf_key, legacy_pdf_key)
         self.assertNotEqual(current_pdf_key, next_pdf_key)
         self.assertEqual(current_text_key, next_text_key)
+
+    def test_export_replay_keeps_user_identifier_as_a_shell_free_argument(self):
+        import runpy
+
+        identifier = "demo & whoami & rem"
+        source_version = "version & whoami"
+        job, _ = self.store.submit("sample.md", ".md", TABLE_PAPER, identifier, source_version)
+        job.future.result(timeout=10)
+        output = self.root / "extracted-export"
+        output.mkdir()
+        with zipfile.ZipFile(BytesIO(self.store.export_zip(job.job_id))) as archive:
+            archive.extractall(output)
+
+        launcher = (output / "replay.py").read_text(encoding="utf-8")
+        self.assertNotIn(identifier, launcher)
+        self.assertIn("shell=False", launcher)
+        metadata = json.loads((output / "replay-metadata.json").read_text(encoding="utf-8"))
+        self.assertEqual(metadata, {
+            "identifier": identifier,
+            "source_filename": "source.md",
+            "source_version": source_version,
+        })
+        with patch("subprocess.run") as run:
+            runpy.run_path(str(output / "replay.py"))
+
+        command = run.call_args.args[0]
+        self.assertEqual(command[command.index("--identifier") + 1], identifier)
+        self.assertEqual(command[command.index("--source-version") + 1], source_version)
+        self.assertFalse(run.call_args.kwargs["shell"])
+        self.assertTrue(run.call_args.kwargs["check"])
 
     def test_export_refuses_a_completed_run_with_a_missing_report_artifact(self):
         job, _ = self.store.submit("sample.md", ".md", TABLE_PAPER,

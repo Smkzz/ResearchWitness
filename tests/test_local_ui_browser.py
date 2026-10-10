@@ -126,6 +126,8 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 self.assertTrue(page.locator("#paper-file").evaluate("input => input.labels.length === 1"))
                 self.assertEqual(page.locator("#progress-stage").get_attribute("aria-live"), "polite")
                 self.assertEqual(page.locator("#error-note").get_attribute("role"), "alert")
+                self.assertEqual(page.locator("#paper-id").get_attribute("aria-describedby"), "paper-id-help")
+                self.assertEqual(page.locator("#paper-version").get_attribute("aria-describedby"), "paper-version-help")
                 self.assertTrue(page.locator("h1").is_visible())
                 self.assertGreaterEqual(page.locator("h2").count(), 4)
                 page.keyboard.press("Tab")
@@ -342,6 +344,8 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     self.assertIn("report.json", archive.namelist())
                     self.assertIn("report.html", archive.namelist())
                     self.assertIn("REPLAY.txt", archive.namelist())
+                    self.assertIn("replay.py", archive.namelist())
+                    self.assertIn("replay-metadata.json", archive.namelist())
                     report = json.loads(archive.read("report.json"))
                     self.assertEqual(report["source"]["sha256"], hashlib.sha256(SYNTHETIC_PAPER).hexdigest())
 
@@ -366,6 +370,9 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     page.get_by_role("button", name="Replay this exact input").click()
                 # Replay schedules an asynchronous job, so the HTTP response is Accepted.
                 self.assertEqual(replay_response.value.status, 202)
+                replay_payload = replay_response.value.json()
+                self.assertRegex(replay_payload['job']['job_id'], r'^[0-9a-f]{32}$')
+                self.assertIsInstance(replay_payload['duplicate'], bool)
                 page.locator("body[data-rw-report-gate-pending='true']").wait_for(
                     state="attached", timeout=30_000,
                 )
@@ -410,6 +417,7 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                     self.assertIsNotNone(previous_job)
                     retry_job = retry_response.json()["job"]
                     self.assertNotEqual(retry_job["job_id"], previous_job.group(1))
+                    self.assertIsInstance(retry_response.json()["duplicate"], bool)
                     wait_for_result_status(page, "Run failed", timeout=20_000)
 
                 self.assertEqual(off_origin, [])

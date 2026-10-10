@@ -8,7 +8,10 @@ from typing import Any
 
 from .paper_contracts import PERCENTAGE_CONTRACT_VERSION
 from .paper_document import PaperDocument, SourceAnchor, Table, TableCell
-from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
+from .denominator_provenance import (
+    denominator_table_context,
+    resolve_denominator,
+)
 from .paper_relation_telemetry import relation_id, summarize_relations, terminal_relation
 
 
@@ -205,8 +208,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
             'status': 'NOT_APPLICABLE',
             'skip_reasons': [],
         }
-        boundaries = subgroup_boundaries(table)
-        parent_groups = parent_count_groups(table)
+        table_context = denominator_table_context(table)
         for row_index, row in enumerate(table.rows):
             if row.row_group != 'tbody':
                 continue
@@ -240,7 +242,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                     except InvalidOperation:
                         relation_reasons.append('MALFORMED_NUMERIC_TOKEN')
                 denominator_resolution = resolve_denominator(
-                    table, row, cell, row_index, boundaries, parent_groups,
+                    table, row, cell, row_index, table_context,
                     explicit_cell_denominator=(
                         exact_match.group('denominator') if exact_match is not None
                         else match.group('denominator')
@@ -273,6 +275,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                         detector_id='jats_cell_ratio_percentage_recomputation', table_key=table_key,
                         contract_version=PERCENTAGE_CONTRACT_VERSION,
                         source_anchor=_anchor_dict(cell.source_anchor),
+                        table_source_anchor=_anchor_dict(table.source_anchor),
                         status='UNSUPPORTED' if unsupported else 'INCOMPLETE',
                         reasons=relation_reasons,
                         denominator_source_anchor=denominator_resolution.get('denominator_source_anchor'),
@@ -335,6 +338,7 @@ def check_jats_cell_ratio_percentages(document: PaperDocument) -> dict[str, Any]
                     detector_id='jats_cell_ratio_percentage_recomputation', table_key=table_key,
                     contract_version=PERCENTAGE_CONTRACT_VERSION,
                     source_anchor=_anchor_dict(cell.source_anchor),
+                    table_source_anchor=_anchor_dict(table.source_anchor),
                     status='ELIGIBLE_CHECKED_MATCH' if matched else 'ELIGIBLE_CHECKED_MISMATCH',
                     numerator_exact=str(numerator), denominator_exact=str(denominator),
                     denominator_source_anchor=denominator_resolution.get('denominator_source_anchor'),

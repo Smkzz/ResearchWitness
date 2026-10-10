@@ -20,7 +20,6 @@ import os
 from pathlib import Path
 import re
 import secrets
-import shlex
 import shutil
 import stat
 import tempfile
@@ -46,6 +45,27 @@ MAX_METADATA_BYTES = 128 * 1024
 MAX_API_REPORT_BYTES = 32 * 1024 * 1024
 MAX_EXPORT_BYTES = 96 * 1024 * 1024
 SUPPORTED_SUFFIXES = {".txt", ".md", ".markdown", ".xml", ".nxml", ".pdf"}
+_REPLAY_LAUNCHER = '''from pathlib import Path
+import json
+import subprocess
+import sys
+
+root = Path(__file__).resolve().parent
+metadata = json.loads((root / "replay-metadata.json").read_text(encoding="utf-8"))
+identifier = metadata.get("identifier")
+source_version = metadata.get("source_version")
+source_name = metadata.get("source_filename")
+allowed_sources = {"source.txt", "source.md", "source.markdown", "source.xml", "source.nxml", "source.pdf"}
+if (not isinstance(identifier, str) or not isinstance(source_version, str)
+        or not isinstance(source_name, str) or source_name not in allowed_sources):
+    raise SystemExit("Replay metadata is invalid")
+command = [
+    sys.executable, "-m", "researchwitness", "paper-audit",
+    str(root / source_name), "--identifier", identifier,
+    "--source-version", source_version, "--output", str(root / "replay-report"),
+]
+subprocess.run(command, cwd=root, shell=False, check=True)
+'''
 JOB_ID_RE = re.compile(r"^[0-9a-f]{32}$", re.ASCII)
 TERMINAL_STATES = {"COMPLETED", "FAILED", "CANCELLED", "INTERRUPTED"}
 ACTIVE_STATES = {"QUEUED", "ANALYZING", "CANCELLING"}
@@ -690,11 +710,15 @@ class LocalAuditStore:
             # still present and readable. Do not silently produce a partial ZIP.
             self.report(job_id)
             output = io.BytesIO()
-            command = (
-                "After extracting this package, replay the source with:\n"
-                + shlex.join(("python", "-m", "researchwitness", "paper-audit", "source" + job.suffix,
-                              "--identifier", job.identifier, "--source-version", job.source_version,
-                              "--output", "replay-report")) + "\n"
+            source_name = "source" + job.suffix
+            replay_metadata = {
+                "identifier": job.identifier,
+                "source_version": job.source_version,
+                "source_filename": source_name,
+            }
+            replay_readme = (
+                "After extracting this package, run `python replay.py` to replay the source.\n"
+                "The launcher passes the identifier and version as data arguments without a shell.\n"
                 "This reruns the local scanner; it is not an independent observation.\n"
             )
             with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
@@ -703,11 +727,14 @@ class LocalAuditStore:
                     if rel in {"report.json", "report.html"} or path.exists():
                         self._validate_report_path(path)
                         archive.writestr(rel, path.read_bytes())
-                source_name = "source" + job.suffix
                 archive.writestr(source_name, self._read_source(
                     run_dir / source_name, job.source_bytes, job.source_sha256,
                 ))
-                archive.writestr("REPLAY.txt", command)
+                archive.writestr("REPLAY.txt", replay_readme)
+                archive.writestr("replay.py", _REPLAY_LAUNCHER)
+                archive.writestr("replay-metadata.json", json.dumps(
+                    replay_metadata, ensure_ascii=False, sort_keys=True, separators=(",", ":"),
+                ) + "\n")
             data = output.getvalue()
             if len(data) > MAX_EXPORT_BYTES:
                 raise LocalUIError("EXPORT_TOO_LARGE", 413)

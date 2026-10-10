@@ -44,13 +44,13 @@
       <div class="form-grid">
         <div class="field">
           <label for="paper-id">Paper identifier <span class="optional">optional</span></label>
-          <input id="paper-id" type="text" maxlength="2000" autocomplete="off" placeholder="For example, a DOI or local label">
-          <small>Used only in your local report. No identifier is sent to a service.</small>
+          <input id="paper-id" type="text" maxlength="2000" autocomplete="off" placeholder="For example, a DOI or local label" aria-describedby="paper-id-help">
+          <small id="paper-id-help">Used only in your local report. No identifier is sent to a service.</small>
         </div>
         <div class="field">
           <label for="paper-version">Uploaded version <span class="optional">optional</span></label>
-          <input id="paper-version" type="text" maxlength="100" autocomplete="off" placeholder="For example, accepted manuscript">
-          <small>This is your label; ResearchWitness does not authenticate the version.</small>
+          <input id="paper-version" type="text" maxlength="100" autocomplete="off" placeholder="For example, accepted manuscript" aria-describedby="paper-version-help">
+          <small id="paper-version-help">This is your label; ResearchWitness does not authenticate the version.</small>
         </div>
       </div>
       <button id="run-button" class="button primary" type="button" disabled>Run supported checks</button>

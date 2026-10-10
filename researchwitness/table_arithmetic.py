@@ -1,6 +1,7 @@
 """Exact arithmetic checks that consume resolved canonical table structure."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from hashlib import sha256
 import re
@@ -9,7 +10,11 @@ from typing import Any
 from .paper_contracts import PERCENTAGE_CONTRACT_VERSION
 from .paper_document import PaperDocument, SourceAnchor, Table, TableCell
 from .paper_relation_telemetry import relation_id, summarize_relations, terminal_relation
-from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
+from .denominator_provenance import (
+    DenominatorTableContext,
+    denominator_table_context,
+    resolve_denominator,
+)
 
 COUNT_PERCENT = re.compile(
     r'^\s*(?P<count>[0-9]{1,9})\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*'
@@ -33,6 +38,81 @@ PERCENT_UNIT_MARKER = re.compile(
     re.IGNORECASE,
 )
 MAX_TABLE_PERCENTAGE_FINDINGS = 256
+_MISSINGNESS_ROW = re.compile(
+    r'\s*(?:missing|not reported|not available|unrecorded)\s*', re.IGNORECASE,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class _TableRowBlockProfile:
+    start_index: int
+    end_index: int
+    has_missingness_row: bool
+    category_values_by_column: dict[int, tuple[tuple[int, Decimal, int], ...]]
+    invalid_columns: frozenset[int]
+
+
+def _table_row_block_profiles(table: Table) -> tuple[_TableRowBlockProfile | None, ...]:
+    """Precompute label-delimited missingness/category evidence once per table."""
+    label_only_rows: list[int] = []
+    for index, row in enumerate(table.rows):
+        if row.row_group != 'tbody':
+            continue
+        label = next((cell for cell in row.cells if cell.column_start == 0), None)
+        if (label is not None and label.raw_text.strip()
+                and all(cell.column_start == 0 or not cell.raw_text.strip() for cell in row.cells)):
+            label_only_rows.append(index)
+
+    boundaries = [-1, *label_only_rows, len(table.rows)]
+    profiles: list[_TableRowBlockProfile | None] = [None] * len(table.rows)
+    for start, end in zip(boundaries, boundaries[1:]):
+        has_missingness = False
+        category_values: dict[int, list[tuple[int, Decimal, int]]] = {}
+        invalid_columns: set[int] = set()
+        for row in table.rows[start + 1:end]:
+            if row.row_group != 'tbody':
+                continue
+            label = next((cell for cell in row.cells if cell.column_start == 0), None)
+            if label is not None and _MISSINGNESS_ROW.fullmatch(label.raw_text):
+                has_missingness = True
+
+            assigned_columns: set[int] = set()
+            for data_cell in row.cells:
+                cell_match = COUNT_PERCENT.fullmatch(data_cell.raw_text)
+                parsed: tuple[int, Decimal, int] | None = None
+                invalid = False
+                if cell_match is not None:
+                    try:
+                        count = int(cell_match.group('count'))
+                        percent = Decimal(cell_match.group('percent'))
+                    except (ValueError, InvalidOperation):
+                        invalid = True
+                    else:
+                        precision = (len(cell_match.group('percent').partition('.')[2])
+                                     if '.' in cell_match.group('percent') else 0)
+                        parsed = (count, percent, precision)
+                column_end = data_cell.column_start + data_cell.column_span
+                for column in range(data_cell.column_start, column_end):
+                    if column in assigned_columns:
+                        continue
+                    assigned_columns.add(column)
+                    if invalid:
+                        invalid_columns.add(column)
+                    elif parsed is not None:
+                        category_values.setdefault(column, []).append(parsed)
+
+        profile = _TableRowBlockProfile(
+            start_index=start,
+            end_index=end,
+            has_missingness_row=has_missingness,
+            category_values_by_column={
+                column: tuple(values) for column, values in category_values.items()
+            },
+            invalid_columns=frozenset(invalid_columns),
+        )
+        for row_index in range(max(start, 0), end):
+            profiles[row_index] = profile
+    return tuple(profiles)
 
 
 def _number_shape_reason(match: re.Match[str]) -> str | None:
@@ -62,37 +142,21 @@ def _as_dict(anchor: SourceAnchor) -> dict[str, Any]:
     }
 
 
-def _block_has_missingness_row(table: Table, row_index: int) -> bool:
-    """Find missing/unknown categories in the same source-labelled row block."""
-    label_only_rows = []
-    for index, row in enumerate(table.rows):
-        if row.row_group != 'tbody':
-            continue
-        label = next((cell for cell in row.cells if cell.column_start == 0), None)
-        if label is None or not label.raw_text.strip():
-            continue
-        if all(cell.column_start == 0 or not cell.raw_text.strip()
-               for cell in row.cells):
-            label_only_rows.append(index)
-    start = max((index for index in label_only_rows if index <= row_index), default=-1)
-    end = min((index for index in label_only_rows if index > row_index), default=len(table.rows))
-    for row in table.rows[start + 1:end]:
-        if row.row_group != 'tbody':
-            continue
-        label = next((cell for cell in row.cells if cell.column_start == 0), None)
-        if label and re.fullmatch(
-            r'\s*(?:missing|not reported|not available|unrecorded)\s*',
-            label.raw_text, re.IGNORECASE,
-        ):
-            return True
-    return False
+def _block_has_missingness_row(
+    row_index: int,
+    profiles: tuple[_TableRowBlockProfile | None, ...],
+) -> bool:
+    """Read missingness state from the table's precomputed row block."""
+    return (0 <= row_index < len(profiles)
+            and profiles[row_index] is not None
+            and profiles[row_index].has_missingness_row)
 
 
 def _category_block_has_unresolved_base(
-    table: Table,
     row_index: int,
     cell: TableCell,
     denominator: int | None,
+    profiles: tuple[_TableRowBlockProfile | None, ...],
 ) -> bool:
     """Fail closed when a source-labelled category block suggests available cases.
 
@@ -101,40 +165,12 @@ def _category_block_has_unresolved_base(
     """
     if denominator is None:
         return False
-    label_only_rows: list[int] = []
-    for index, row in enumerate(table.rows):
-        if row.row_group != 'tbody':
-            continue
-        label = next((item for item in row.cells if item.column_start == 0), None)
-        if label is None or not label.raw_text.strip():
-            continue
-        if all(item.column_start == 0 or not item.raw_text.strip() for item in row.cells):
-            label_only_rows.append(index)
-    start = max((index for index in label_only_rows if index <= row_index), default=-1)
-    if start < 0:
+    profile = profiles[row_index] if 0 <= row_index < len(profiles) else None
+    if profile is None or profile.start_index < 0:
         return False
-    end = min((index for index in label_only_rows if index > row_index), default=len(table.rows))
-
-    category_values: list[tuple[int, Decimal, int]] = []
-    for row in table.rows[start + 1:end]:
-        if row.row_group != 'tbody':
-            continue
-        data_cell = next((
-            item for item in row.cells
-            if item.column_start <= cell.column_identity < item.column_start + item.column_span
-        ), None)
-        if data_cell is None:
-            continue
-        match = COUNT_PERCENT.fullmatch(data_cell.raw_text)
-        if match is None:
-            continue
-        try:
-            count = int(match.group('count'))
-            percent = Decimal(match.group('percent'))
-        except (ValueError, InvalidOperation):
-            return False
-        precision = len(match.group('percent').partition('.')[2]) if '.' in match.group('percent') else 0
-        category_values.append((count, percent, precision))
+    if cell.column_identity in profile.invalid_columns:
+        return False
+    category_values = list(profile.category_values_by_column.get(cell.column_identity, ()))
 
     if len(category_values) < 2:
         return False
@@ -188,8 +224,8 @@ def _cell_scope_reasons(
     row_index: int,
     cell: TableCell,
     match: re.Match[str],
-    boundaries: tuple[Any, ...],
-    parent_groups: tuple[Any, ...],
+    table_context: DenominatorTableContext,
+    row_block_profiles: tuple[_TableRowBlockProfile | None, ...],
 ) -> tuple[list[str], int | None, dict[str, Any], dict[str, Any] | None]:
     reasons: list[str] = []
     if table.structure_status != 'STRUCTURE_RELIABLE':
@@ -219,11 +255,13 @@ def _cell_scope_reasons(
         reasons.append('ADJUSTED_RESULT')
     if re.search(r'\b(?:missing data|available cases?|complete cases?|nonresponse|denominator varies)\b', cue_text, re.IGNORECASE):
         reasons.append('MISSINGNESS_CHANGES_DENOMINATOR')
-    if _block_has_missingness_row(table, row_index):
+    if _block_has_missingness_row(row_index, row_block_profiles):
         reasons.append('MISSINGNESS_CHANGES_DENOMINATOR')
-    resolved = resolve_denominator(table, row, cell, row_index, boundaries, parent_groups)
+    resolved = resolve_denominator(
+        table, row, cell, row_index, table_context,
+    )
     denominator = resolved.get('denominator_exact')
-    if _category_block_has_unresolved_base(table, row_index, cell, denominator):
+    if _category_block_has_unresolved_base(row_index, cell, denominator, row_block_profiles):
         _mark_denominator_scope_unresolved_for_category_base(resolved)
         reasons.append('MISSINGNESS_CHANGES_DENOMINATOR')
     if not resolved['denominator_scope_resolved']:
@@ -260,8 +298,8 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
         table_findings_before = len(findings)
         table_omissions_before = finding_omissions
         table_relations: list[dict[str, Any]] = []
-        boundaries = subgroup_boundaries(table)
-        parent_groups = parent_count_groups(table)
+        table_context = denominator_table_context(table)
+        row_block_profiles = _table_row_block_profiles(table)
         for row_index, row in enumerate(table.rows):
             if row.row_group != 'tbody':
                 continue
@@ -270,7 +308,7 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                 if match is None:
                     continue
                 relation_reasons, denominator, denominator_provenance, denominator_anchor = _cell_scope_reasons(
-                    table, row, row_index, cell, match, boundaries, parent_groups,
+                    table, row, row_index, cell, match, table_context, row_block_profiles,
                 )
                 exact_match = COUNT_PERCENT.fullmatch(cell.raw_text)
                 count: int | None = None
@@ -306,6 +344,7 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                         detector_id='table_percentage_recomputation', table_key=table_key,
                         contract_version=PERCENTAGE_CONTRACT_VERSION,
                         source_anchor=_as_dict(cell.source_anchor),
+                        table_source_anchor=_as_dict(table.source_anchor),
                         status='UNSUPPORTED' if unsupported else 'INCOMPLETE',
                         reasons=relation_reasons,
                         denominator_source_anchor=denominator_anchor,
@@ -332,6 +371,7 @@ def check_structured_table_percentages(document: PaperDocument) -> dict[str, Any
                         detector_id='table_percentage_recomputation', table_key=table_key,
                         contract_version=PERCENTAGE_CONTRACT_VERSION,
                         source_anchor=_as_dict(cell.source_anchor),
+                        table_source_anchor=_as_dict(table.source_anchor),
                         status='ELIGIBLE_CHECKED_MATCH' if is_match else 'ELIGIBLE_CHECKED_MISMATCH',
                         numerator_exact=str(count), denominator_exact=str(denominator),
                         denominator_source_anchor=denominator_anchor,

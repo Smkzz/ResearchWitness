@@ -1,0 +1,317 @@
+{
+  "benchmark_script_sha256": "3d2a2eaedeff6f9de641ea03208e8a9ae60f30d4f22cf9b5acaa93c5d6c42909",
+  "budget": {
+    "declared_before_run": "2026-10-09",
+    "limits": {
+      "large_valid": {
+        "input_bytes": 8388608,
+        "max_cpu_seconds": 5.0,
+        "max_peak_rss_kib": 262144,
+        "max_wall_seconds": 5.0,
+        "rows": 10000
+      },
+      "malformed_depth": {
+        "input_bytes": 1024,
+        "max_cpu_seconds": 0.25,
+        "max_peak_rss_kib": 65536,
+        "max_wall_seconds": 0.25,
+        "rows": 0
+      },
+      "medium_valid": {
+        "input_bytes": 1048576,
+        "max_cpu_seconds": 2.0,
+        "max_peak_rss_kib": 131072,
+        "max_wall_seconds": 2.0,
+        "rows": 5000
+      },
+      "small_valid": {
+        "input_bytes": 20480,
+        "max_cpu_seconds": 0.5,
+        "max_peak_rss_kib": 65536,
+        "max_wall_seconds": 0.5,
+        "rows": 200
+      }
+    },
+    "purpose": "Synthetic, single-process diagnostic for JATS parse plus table-percentage analysis.",
+    "scope_limitations": [
+      "synthetic inputs only",
+      "single-process and single-table",
+      "no Windows measurements",
+      "no disk or export measurements",
+      "no concurrency, startup, shutdown, retry, or cancellation measurements",
+      "does not establish production workload performance"
+    ]
+  },
+  "budget_file": "jats-performance-budget-20261009.json",
+  "budget_sha256": "b02b834b98299f1d37c6fbd9027fe2391e934343e85ddccd5f08274a675f603e",
+  "cases": {
+    "large_valid": {
+      "input_bytes": 8388608,
+      "max_cpu_seconds": 3.967382292,
+      "max_peak_rss_kib": 181792,
+      "max_wall_seconds": 3.9677176360273734,
+      "median_cpu_seconds": 3.722665323,
+      "median_wall_seconds": 3.7230608639656566,
+      "relations": 10000,
+      "rows": 10000,
+      "samples": [
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.722665323,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 181708,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.7230608639656566
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.967382292,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 181724,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.9677176360273734
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.577591049,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 181788,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.579920183052309
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.7644859549999996,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 181792,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.7650273110484704
+        },
+        {
+          "case": "large_valid",
+          "cpu_seconds": 3.710655724,
+          "input_bytes": 8388608,
+          "peak_rss_kib": 181536,
+          "relations": 10000,
+          "rows": 10000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 3.7108598310151137
+        }
+      ],
+      "status": "parsed_and_checked"
+    },
+    "malformed_depth": {
+      "input_bytes": 1024,
+      "max_cpu_seconds": 0.0005181770000000085,
+      "max_peak_rss_kib": 15360,
+      "max_wall_seconds": 0.0005273660062812269,
+      "median_cpu_seconds": 0.0004810930000000019,
+      "median_wall_seconds": 0.0004888680414296687,
+      "relations": 0,
+      "rows": 0,
+      "samples": [
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0004810930000000019,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15360,
+          "relations": 0,
+          "rows": 0,
+          "status": "Invalid:JATS source exceeded the configured nesting limit",
+          "wall_seconds": 0.0004888680414296687
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0005093940000000033,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15360,
+          "relations": 0,
+          "rows": 0,
+          "status": "Invalid:JATS source exceeded the configured nesting limit",
+          "wall_seconds": 0.0005166390328668058
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0005181770000000085,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15360,
+          "relations": 0,
+          "rows": 0,
+          "status": "Invalid:JATS source exceeded the configured nesting limit",
+          "wall_seconds": 0.0005273660062812269
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.00046115299999999887,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15360,
+          "relations": 0,
+          "rows": 0,
+          "status": "Invalid:JATS source exceeded the configured nesting limit",
+          "wall_seconds": 0.00046915700659155846
+        },
+        {
+          "case": "malformed_depth",
+          "cpu_seconds": 0.0004573170000000057,
+          "input_bytes": 1024,
+          "peak_rss_kib": 15360,
+          "relations": 0,
+          "rows": 0,
+          "status": "Invalid:JATS source exceeded the configured nesting limit",
+          "wall_seconds": 0.0004654119838960469
+        }
+      ],
+      "status": "Invalid:JATS source exceeded the configured nesting limit"
+    },
+    "medium_valid": {
+      "input_bytes": 1048576,
+      "max_cpu_seconds": 1.8196550999999999,
+      "max_peak_rss_kib": 87632,
+      "max_wall_seconds": 1.8210560040315613,
+      "median_cpu_seconds": 1.6865468730000002,
+      "median_wall_seconds": 1.687415489985142,
+      "relations": 5000,
+      "rows": 5000,
+      "samples": [
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.630151059,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 87628,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.6314399020047858
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.6865468730000002,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 87628,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.687415489985142
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.8196550999999999,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 87628,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.8210560040315613
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.636703651,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 87632,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.6369307370041497
+        },
+        {
+          "case": "medium_valid",
+          "cpu_seconds": 1.720561859,
+          "input_bytes": 1048576,
+          "peak_rss_kib": 87628,
+          "relations": 5000,
+          "rows": 5000,
+          "status": "parsed_and_checked",
+          "wall_seconds": 1.7206747809541412
+        }
+      ],
+      "status": "parsed_and_checked"
+    },
+    "small_valid": {
+      "input_bytes": 20480,
+      "max_cpu_seconds": 0.06597323599999999,
+      "max_peak_rss_kib": 18304,
+      "max_wall_seconds": 0.06597917899489403,
+      "median_cpu_seconds": 0.059604056999999995,
+      "median_wall_seconds": 0.05960941599914804,
+      "relations": 200,
+      "rows": 200,
+      "samples": [
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.060348387999999996,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18176,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.06045592296868563
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.06597323599999999,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18304,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.06597917899489403
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.05743068899999999,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18304,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.05745784199098125
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.05685270299999999,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18304,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.056859709962736815
+        },
+        {
+          "case": "small_valid",
+          "cpu_seconds": 0.059604056999999995,
+          "input_bytes": 20480,
+          "peak_rss_kib": 18176,
+          "relations": 200,
+          "rows": 200,
+          "status": "parsed_and_checked",
+          "wall_seconds": 0.05960941599914804
+        }
+      ],
+      "status": "parsed_and_checked"
+    }
+  },
+  "limitations": [
+    "synthetic inputs only",
+    "single-process and single-table",
+    "Linux only; no Windows measurements",
+    "no disk or export measurements",
+    "no concurrency, startup, shutdown, retry, or cancellation measurements",
+    "does not establish production workload performance"
+  ],
+  "measured_source_sha256": {
+    "researchwitness/denominator_provenance.py": "463869ad3a9fb87b6ca8741d0881e032c990d08fcb693512e59933abaa9655ed",
+    "researchwitness/jats.py": "da59651954e0d17fcef19fc4b78d311100d1f6bccec2864b1f47541963838eeb",
+    "researchwitness/table_arithmetic.py": "a43634a30e44d548d0b37bd7fc708f12c7a6dfd256023c73dd5565b69f8dba1c"
+  },
+  "platform": "linux",
+  "purpose": "Synthetic single-process JATS parse plus table-percentage diagnostic.",
+  "python": "Python 3.12.14"
+}
