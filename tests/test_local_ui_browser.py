@@ -519,6 +519,15 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
             browser = playwright.chromium.launch(headless=True)
             try:
                 page, off_origin, page_errors = self.make_page(browser)
+                page.emulate_media(reduced_motion="reduce")
+                page.evaluate("""() => {
+                  window.__rwScrollBehaviors = [];
+                  const originalScrollIntoView = Element.prototype.scrollIntoView;
+                  Element.prototype.scrollIntoView = function (options) {
+                    window.__rwScrollBehaviors.push(options?.behavior || "default");
+                    return originalScrollIntoView.call(this, options);
+                  };
+                }""")
                 fixture = {
                     "name": "synthetic-history.md",
                     "mimeType": "text/markdown",
@@ -535,9 +544,15 @@ class LocalUIBrowserAcceptance(unittest.TestCase):
                 wait_for_result_status(page, "Review candidates found", timeout=30_000)
                 self.assertTrue(duplicate.is_visible())
 
-                page.locator("#history-list button").first.click()
+                entry = page.locator("#history-list .history-item").first
+                entry_button = entry.locator("button")
+                created_at = entry.locator("span").inner_text()
+                self.assertTrue(created_at)
+                self.assertIn(created_at, entry_button.get_attribute("aria-label") or "")
+                entry_button.click()
                 wait_for_result_status(page, "Review candidates found", timeout=30_000)
                 self.assertTrue(duplicate.is_hidden())
+                self.assertIn("auto", page.evaluate("window.__rwScrollBehaviors"))
                 self.assertEqual(off_origin, [])
                 self.assertEqual(page_errors, [])
             finally:
