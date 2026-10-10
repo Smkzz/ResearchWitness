@@ -2,8 +2,8 @@
 
 ## Revision and aggregate checks
 
-- PR #12 evidence snapshot: head `2c14bcc2ebae8b5d79b8f6a8344cc115c3806364`, tree `7ecc08d22fb6f4572a72b5fbecde2554683f03d2`, parent `dee24f0369382eda030196beb844d7284786302e`.
-- Hosted [CI run 38030108043](https://github.com/Smkzz/ResearchWitness/actions/runs/38030108043) and [CodeQL run 38030108123](https://github.com/Smkzz/ResearchWitness/actions/runs/38030108123) completed successfully on that revision.
+- PR #12 remained open and draft during the hosted workflow runs below.
+- Hosted [CI run 38030483838](https://github.com/Smkzz/ResearchWitness/actions/runs/38030483838) and [CodeQL run 38030483830](https://github.com/Smkzz/ResearchWitness/actions/runs/38030483830) completed successfully.
 - Python 3.11, 3.12, and 3.13 each reported 837 passed, 7 skipped, and 4 subtests passed. Synthetic conformance: 500/500. Historical MVP fixtures: 3/3. Windows synthetic worker tests: 57 passed. Linux and Windows synthetic browser jobs passed.
 
 ## Artifact integrity commitments
