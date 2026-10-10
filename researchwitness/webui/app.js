@@ -495,6 +495,11 @@ document.getElementById("status-retry-button").addEventListener("click", () => {
   if (activePollJobId) void presentJob(activePollJobId);
 });
 
+function scrollResultsIntoView() {
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+  resultsPanel.scrollIntoView({ behavior, block: "start" });
+}
+
 async function refreshHistory() {
   const root = document.getElementById("history-list");
   try {
@@ -503,8 +508,10 @@ async function refreshHistory() {
     if (!payload.jobs.length) root.append(makeElement("p", "muted", "No saved runs."));
     for (const job of payload.jobs) {
       const row = makeElement("div", "history-item");
+      const createdAt = job.created_at_utc;
       const button = makeElement("button", "", `${job.original_name} · ${job.status.toLowerCase()}`);
       button.type = "button";
+      button.setAttribute("aria-label", `${job.original_name} · ${job.status.toLowerCase()} · ${createdAt}`);
       button.disabled = controlsBusy();
       button.addEventListener("click", async () => {
         if (controlsBusy()) return;
@@ -517,7 +524,7 @@ async function refreshHistory() {
           try {
             await presentJob(job.job_id);
             if (!activePollJobId && !resultsPanel.hidden) {
-              resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+              scrollResultsIntoView();
             }
           } finally {
             if (!activePollJobId && controlsBusy()) setHistoryBusy(false);
@@ -541,11 +548,11 @@ async function refreshHistory() {
           setHistoryBusy(false);
           if (reportLoaded) {
             document.getElementById("result-status").focus();
-            resultsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+            scrollResultsIntoView();
           }
         }
       });
-      row.append(button, makeElement("span", "", job.created_at_utc)); root.append(row);
+      row.append(button, makeElement("span", "", createdAt)); root.append(row);
     }
     const warning = document.getElementById("store-warning");
     if (payload.warning) { setText(warning, `Local history needs review: ${payload.warning}`); warning.hidden = false; }
