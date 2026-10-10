@@ -4,7 +4,7 @@
 
 ## Local checks
 
-- `tools/quality_gate.py` on the sanitized snapshot: **833 passed, 11 skipped, 4 subtests passed**; 500/500 synthetic cases and 3/3 historical MVP cases matched. Static scan, schemas, checksums, compilation, and CLI smoke checks passed. Four loopback tests were skipped because the managed sandbox denied socket binding; six Playwright tests await hosted browser CI; one native-Windows PDF resource-limit test was skipped locally.
+- `tools/quality_gate.py` on the sanitized snapshot: **833 passed, 11 skipped, 4 subtests passed**; 500/500 synthetic cases and 3/3 historical MVP cases matched. Static scan, schemas, checksums, compilation, and CLI smoke checks passed. Four loopback tests were skipped because the managed sandbox denied socket binding; six Playwright tests were skipped locally and passed in hosted Linux/Windows CI; one native-Windows PDF resource-limit test was skipped locally.
 - Python compilation, JavaScript syntax validation, and whitespace/diff checks passed.
 - Focused scientific regressions cover Unicode-spaced count ranges/fractions, weighted or adjusted scope, US/UK standardization forms, JATS ratio lookalikes, source-mapped offsets, and detector abstention.
 - `tools/qualify_app_wheel.py` produced two byte-identical builds and passed clean-target installation plus CLI/resource smoke checks. Qualified wheel SHA-256: `551df5e32c54c0ebbb0e2b9d7d65abc5b19d551cd337aefec7cbe35c1285ac56`.
@@ -35,4 +35,4 @@ These single-process synthetic measurements do not cover Windows, disk/export, c
 
 ## Remaining qualification gates
 
-The current forward public commit passes hosted CI and CodeQL. Release/evaluation still requires human visual and assistive-technology review; a genuinely isolated custodian execution route with independently enforced egress; owner-side compatibility and access qualification; and the frozen source-only positive and 15-work negative evidence minima. Keep PR #12 draft and unmerged.
+The sanitized code/test tree passes hosted CI and CodeQL. Release/evaluation still requires human visual and assistive-technology review; a genuinely isolated custodian execution route with independently enforced egress; owner-side compatibility and access qualification; and the frozen source-only positive and 15-work negative evidence minima. Keep PR #12 draft and unmerged.
