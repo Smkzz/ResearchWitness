@@ -1,0 +1,45 @@
+{
+  "candidates": [],
+  "schema_version": 1,
+  "scope": "developer_exposed_public_source_candidates_only",
+  "searches": [
+    {
+      "failure_code": "MANAGED_PROXY_UNAVAILABLE",
+      "host": "www.ebi.ac.uk",
+      "provider": "europe_pmc",
+      "query": null,
+      "record_count": null,
+      "request_url": null,
+      "response_bytes": null,
+      "response_sha256": null,
+      "retrieved_at_utc": null,
+      "status": "transport_failed_before_http_response"
+    },
+    {
+      "failure_code": "TRANSPORT_UNAVAILABLE",
+      "host": "www.ebi.ac.uk",
+      "provider": "europe_pmc",
+      "query": "(TITLE:correction OR TITLE:erratum OR TITLE:corrigendum) AND (TITLE_ABS:count OR TITLE_ABS:percentage OR TITLE_ABS:\"sample size\" OR TITLE_ABS:denominator OR TITLE_ABS:total)",
+      "record_count": null,
+      "request_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=%28TITLE%3Acorrection+OR+TITLE%3Aerratum+OR+TITLE%3Acorrigendum%29+AND+%28TITLE_ABS%3Acount+OR+TITLE_ABS%3Apercentage+OR+TITLE_ABS%3A%22sample+size%22+OR+TITLE_ABS%3Adenominator+OR+TITLE_ABS%3Atotal%29&format=json&pageSize=25&resultType=core",
+      "response_bytes": null,
+      "response_sha256": null,
+      "retrieved_at_utc": null,
+      "status": "transport_failed_before_http_response"
+    },
+    {
+      "failure_code": "TRANSPORT_UNAVAILABLE",
+      "host": "api.crossref.org",
+      "provider": "crossref",
+      "query": "correction erratum corrigendum count percentage denominator sample size table",
+      "record_count": null,
+      "request_url": "https://api.crossref.org/works?query.bibliographic=correction+erratum+corrigendum+count+percentage+denominator+sample+size+table&rows=25",
+      "response_bytes": null,
+      "response_sha256": null,
+      "retrieved_at_utc": null,
+      "status": "transport_failed_before_http_response"
+    }
+  ],
+  "updated_utc": "2026-10-14T14:05:23Z",
+  "workflow_status": "incomplete"
+}
