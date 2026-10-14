@@ -24,6 +24,18 @@ The collector is a tool outside the trusted `researchwitness` core. It is read-o
 
 Search hits are only metadata leads. An independent reviewer must capture the original and correction versions from a permitted public source, verify the applicable license, record content hashes and stable source anchors, and compare the exact numerical statements and scope. The code's percentage recomputation is only arithmetic at the printed precision; it cannot resolve cohort, denominator, table, or correction scope.
 
+## Offline JATS table aid
+
+For a locally captured UTF-8 JATS XML file, the bounded external tool can scan simple table cells without making network requests:
+
+```bash
+python -m tools.jats_percentage_audit path/to/article.xml
+```
+
+The tool records the supplied file's SHA-256 and byte anchors for table cells and denominator evidence. It evaluates paired `n (%)` cells and explicitly headed count/percent columns, using the contract's half-up rounding rule at the printed precision. It reports an `arithmetic_mismatch_candidate`, never a paper error. It abstains when denominator scope is unclear, including conflicting unscoped denominators, row-specific `n (% n/N)` notation without a reported row denominator, unsupported header spans, a source-stated rounding convention it does not model, or a document/table note about adjusted or weighted percentages that is not mapped to the row. When the table has separate, explicitly headed `n`, `N`, and percent columns, it uses that row's `N` cell and preserves byte evidence for the value or a missing-cell abstention. It bounds XML size and structure and rejects DTD/entity declarations.
+
+This is a development aid outside the trusted core. It supports JATS XML only: it does not parse PDFs or OCR, preserve publisher layout semantics, authenticate the source, or establish scientific error. A source hash commits to the bytes supplied to the tool, not to their origin.
+
 ## Adjudicate a correction-backed positive
 
 For each proposed positive, the reviewer should independently:
@@ -42,6 +54,6 @@ For each proposed negative, independently verify the published version and exact
 
 This registry intentionally has no field that can mark a developer-discovered candidate as a holdout. Independent review of a development candidate may support development or a demonstration set; it does not create an untouched evaluation example. Only the authorized custodian can update the private qualification record. Public reports may carry approved aggregates and integrity commitments, never reserved identifiers, labels, correction targets, or private custody records.
 
-## Current run boundary
+## Source access and failure handling
 
-On 2026-10-14, two Europe PMC metadata attempts failed before an HTTP response: one earlier run reported `MANAGED_PROXY_UNAVAILABLE`, and the current run reported `TRANSPORT_UNAVAILABLE`. A separate Crossref request also failed before an HTTP response with `TRANSPORT_UNAVAILABLE`. No candidate metadata, original article, or correction notice was retrieved. The registry retains all three failures with request URLs where available and leaves result counts unknown; this does not represent a zero-result search. Further source calls stopped after both approved provider routes failed.
+Provider failures and source-access denials are distinct from successful zero-result searches. Treat challenge pages and other non-document responses as access failures, never as research content; preserve source hashes only for complete retrieved documents. Stop after an access denial, and do not use an alternate host, proxy, or route to bypass it. A failed request does not establish that no relevant publication or correction exists.
