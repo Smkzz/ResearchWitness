@@ -36,6 +36,18 @@ The tool records the supplied file's SHA-256 and byte anchors for table cells an
 
 This is a development aid outside the trusted core. It supports JATS XML only: it does not parse PDFs or OCR, preserve publisher layout semantics, authenticate the source, or establish scientific error. A source hash commits to the bytes supplied to the tool, not to their origin.
 
+## Offline PDF table aid
+
+For a local, text-based PDF, the separate bounded tool uses Poppler's `pdftotext` layout output without making network requests:
+
+```bash
+python -m tools.pdf_percentage_audit path/to/article.pdf
+```
+
+The tool requires `pdftotext` on `PATH`. It accepts only a bounded PDF byte stream, limits extracted text, page count, table count, row count, and extraction time, and uses an argument list without a shell. It records the PDF SHA-256, extracted-text SHA-256, table title, page/line, and character offsets within the extracted page text. Those offsets are not byte positions in the PDF. The parser handles simple single-value `count (percent)` rows with a nearby explicit denominator. Where a percent column is not labeled, it infers percentage context only when at least two rows and at least half of the rows match the displayed denominator; all results remain candidates for human review. It abstains on conflicting or row-specific denominators, unmapped table-local adjustment/weight notes, stated rounding conventions, and unsupported layouts. Image-only PDFs and OCR are unsupported. The tool does not ingest methods from a separate article file, so a reviewer must still check article-level weighting and adjustment rules.
+
+This is a development aid outside the trusted core. Text extraction can lose layout meaning, and a hash does not authenticate a file's origin. A mismatch candidate is not proof of a scientific error or correction eligibility.
+
 ## Adjudicate a correction-backed positive
 
 For each proposed positive, the reviewer should independently:
