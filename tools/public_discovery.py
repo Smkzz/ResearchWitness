@@ -6,6 +6,7 @@ whether a candidate is eligible for blinded evaluation.
 """
 from __future__ import annotations
 
+import errno
 from datetime import datetime, timezone
 from hashlib import sha256
 import getpass
@@ -14,6 +15,7 @@ import math
 import os
 from pathlib import Path
 import re
+import socket
 import ssl
 import stat
 import tempfile
@@ -68,14 +70,18 @@ class SourceAccessError(RuntimeError):
 
     def __init__(
         self, host: str, reason: str, status_code: int | None = None,
-        request_url: str | None = None,
+        request_url: str | None = None, transport_error_class: str | None = None,
     ):
         self.host = host
         self.reason = reason
         self.status_code = status_code
         self.request_url = request_url
+        # Fixed, low-sensitivity diagnostic metadata. Raw transport exception
+        # messages can contain proxy details, so they are never copied here.
+        self.transport_error_class = transport_error_class
         status = f" HTTP {status_code}" if status_code is not None else ""
-        super().__init__(f"Public source access failed for {host}{status}: {reason}")
+        diagnostic = f" ({transport_error_class})" if transport_error_class else ""
+        super().__init__(f"Public source access failed for {host}{status}: {reason}{diagnostic}")
 
 
 class InvalidSourceResponse(ValueError):
@@ -247,6 +253,96 @@ def _unlock_rate_file(fd: int) -> None:
     msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
 
 
+_TLS_HANDSHAKE_REASONS = frozenset({
+    "SSLV3_ALERT_HANDSHAKE_FAILURE",
+    "TLSV1_ALERT_HANDSHAKE_FAILURE",
+    "TLSV1_ALERT_PROTOCOL_VERSION",
+    "NO_SHARED_CIPHER",
+    "WRONG_VERSION_NUMBER",
+})
+
+
+def _transport_exception_chain(error: BaseException) -> list[BaseException]:
+    """Return known wrapped exceptions without rendering their messages."""
+    pending: list[BaseException] = [error]
+    result: list[BaseException] = []
+    seen: set[int] = set()
+    while pending:
+        current = pending.pop()
+        if id(current) in seen:
+            continue
+        seen.add(id(current))
+        result.append(current)
+        if isinstance(current, URLError):
+            reason = current.reason
+            if isinstance(reason, BaseException):
+                pending.append(reason)
+        if isinstance(current.__cause__, BaseException):
+            pending.append(current.__cause__)
+        if isinstance(current.__context__, BaseException):
+            pending.append(current.__context__)
+    return result
+
+
+def _classify_transport_error(error: BaseException, *, phase: str) -> str:
+    """Classify only exception shapes that identify a transport failure layer.
+
+    The output is an enum-like constant and intentionally excludes exception
+    text, proxy addresses, credentials, request paths, and authentication data.
+    """
+    chain = _transport_exception_chain(error)
+    if any(isinstance(item, socket.gaierror) for item in chain):
+        return "dns_resolution"
+    if any(isinstance(item, (TimeoutError, socket.timeout)) for item in chain):
+        return "timeout"
+    if any(isinstance(item, ssl.SSLCertVerificationError) for item in chain):
+        return "tls_certificate"
+
+    for item in chain:
+        if not isinstance(item, ssl.SSLError):
+            continue
+        reason = getattr(item, "reason", None)
+        candidates = [reason] if isinstance(reason, str) else []
+        candidates.extend(part for part in item.args if isinstance(part, str))
+        if any(
+            token in candidate.upper()
+            for token in _TLS_HANDSHAKE_REASONS
+            for candidate in candidates
+        ):
+            return "tls_handshake"
+
+    if any(
+        isinstance(item, PermissionError)
+        or isinstance(item, OSError) and item.errno in {errno.EACCES, errno.EPERM}
+        for item in chain
+    ):
+        return "local_socket_permission_denied"
+
+    if any(isinstance(item, ConnectionRefusedError) for item in chain):
+        # The approved-host bypass check has already failed closed and this
+        # request is explicitly routed through the configured proxy.
+        return "proxy_connection" if phase == "opening" else "tcp_connection"
+    network_errnos = {
+        errno.ECONNABORTED,
+        errno.ECONNREFUSED,
+        errno.ECONNRESET,
+        errno.EHOSTUNREACH,
+        errno.ENETUNREACH,
+        errno.EPIPE,
+    }
+    for item in chain:
+        if not isinstance(item, OSError) or item.errno not in network_errnos:
+            continue
+        if item.errno == errno.ECONNREFUSED and phase == "opening":
+            return "proxy_connection"
+        return "tcp_connection"
+    if any(isinstance(item, ssl.SSLError) for item in chain):
+        return "other"
+    if any(isinstance(item, BaseException) for item in chain[1:]):
+        return "other"
+    return "unknown"
+
+
 def _reserve_shared_rate_slot(
     host: str,
     interval_seconds: float,
@@ -326,10 +422,12 @@ def _default_transport(
         HTTPSHandler(context=ssl.create_default_context()),
     )
     request = Request(url, headers=dict(headers), method="GET")
+    phase = "opening"
     try:
         with opener.open(request, timeout=timeout) as response:
             final_url = response.geturl()
             validate_source_url(final_url)
+            phase = "reading_response_body"
             body = response.read(max_bytes + 1)
             return response.status, body, final_url
     except SourceBoundaryError:
@@ -338,8 +436,21 @@ def _default_transport(
         ) from None
     except HTTPError as exc:
         raise SourceAccessError(host, "provider returned an error", exc.code, url) from None
-    except URLError:
-        raise SourceAccessError(host, "managed transport or proxy unavailable", request_url=url) from None
+    except URLError as exc:
+        failure_class = _classify_transport_error(exc, phase=phase)
+        raise SourceAccessError(
+            host, "managed transport or proxy unavailable", request_url=url,
+            transport_error_class=failure_class,
+        ) from None
+    except OSError as exc:
+        # Some urllib handlers propagate socket/SSL errors directly instead
+        # of wrapping them in URLError. Normalize them through the same safe
+        # classifier without preserving their possibly sensitive message.
+        failure_class = _classify_transport_error(exc, phase=phase)
+        raise SourceAccessError(
+            host, "managed transport or proxy unavailable", request_url=url,
+            transport_error_class=failure_class,
+        ) from None
 
 
 class PublicSourceClient:

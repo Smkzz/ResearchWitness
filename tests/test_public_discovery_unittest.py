@@ -5,6 +5,9 @@ import hashlib
 import io
 import json
 import os
+import errno
+import socket
+import ssl
 import stat
 import tempfile
 import unittest
@@ -12,6 +15,7 @@ from contextlib import redirect_stderr
 from copy import deepcopy
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from urllib.error import URLError
 from urllib.request import ProxyHandler, Request
 
 from tools.public_discovery import (
@@ -125,6 +129,50 @@ class PublicDiscoveryTests(unittest.TestCase):
         self.assertEqual((status, body), (200, b"{}"))
         self.assertEqual(final_url, "https://www.ebi.ac.uk/europepmc/search")
 
+    def test_transport_failure_classes_are_safe_and_conservative(self):
+        url = "https://www.ebi.ac.uk/europepmc/search"
+        cases = (
+            (URLError(socket.gaierror(socket.EAI_NONAME, "private resolver detail")), "dns_resolution"),
+            (URLError(ConnectionRefusedError(errno.ECONNREFUSED, "proxy password=secret")), "proxy_connection"),
+            (URLError(PermissionError(errno.EPERM, "private socket policy detail")), "local_socket_permission_denied"),
+            (URLError(ssl.SSLCertVerificationError(1, "private certificate detail")), "tls_certificate"),
+            (URLError(ssl.SSLError(1, "[SSL: TLSV1_ALERT_HANDSHAKE_FAILURE] private detail")), "tls_handshake"),
+            (URLError(TimeoutError("private timeout detail")), "timeout"),
+            (URLError(OSError(errno.EIO, "private transport detail")), "other"),
+            (URLError("opaque private proxy details"), "unknown"),
+        )
+        for failure, expected in cases:
+            with self.subTest(expected=expected):
+                with (
+                    patch("tools.public_discovery.getproxies", return_value={"https": "http://proxy:8080"}),
+                    patch("tools.public_discovery.proxy_bypass", return_value=False),
+                    patch("tools.public_discovery.build_opener") as build_opener,
+                ):
+                    build_opener.return_value.open.side_effect = failure
+                    with self.assertRaises(SourceAccessError) as caught:
+                        _default_transport(url, {"Authorization": "Bearer never-log-this"}, 5, 1000)
+            self.assertEqual(caught.exception.transport_error_class, expected)
+            self.assertIn(expected, str(caught.exception))
+            self.assertNotIn("private", str(caught.exception))
+            self.assertNotIn("secret", str(caught.exception))
+            self.assertNotIn("never-log-this", str(caught.exception))
+
+    def test_response_body_reset_is_a_tcp_failure_not_proxy_connect_failure(self):
+        url = "https://www.ebi.ac.uk/europepmc/search"
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.geturl.return_value = url
+        response.read.side_effect = ConnectionResetError(errno.ECONNRESET, "private socket detail")
+        with (
+            patch("tools.public_discovery.getproxies", return_value={"https": "http://proxy:8080"}),
+            patch("tools.public_discovery.proxy_bypass", return_value=False),
+            patch("tools.public_discovery.build_opener") as build_opener,
+        ):
+            build_opener.return_value.open.return_value = response
+            with self.assertRaises(SourceAccessError) as caught:
+                _default_transport(url, {}, 5, 1000)
+        self.assertEqual(caught.exception.transport_error_class, "tcp_connection")
+
     def test_shared_host_rate_limit_survives_new_client_instances(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             state_path = Path(temp_dir) / "host.lock"
@@ -173,15 +221,20 @@ class PublicDiscoveryTests(unittest.TestCase):
             )
 
     def test_failed_search_record_never_claims_a_response_or_zero_hits(self):
+        error = SourceAccessError(
+            "www.ebi.ac.uk", "managed transport or proxy unavailable",
+            transport_error_class="dns_resolution",
+        )
         record = failed_search_record(
             "europe_pmc",
             "TITLE:correction",
-            SourceAccessError("www.ebi.ac.uk", "managed transport or proxy unavailable"),
+            error,
         )
         self.assertEqual(record["status"], "transport_failed_before_http_response")
         self.assertIsNone(record["response_sha256"])
         self.assertIsNone(record["record_count"])
         self.assertEqual(record["failure_code"], "TRANSPORT_UNAVAILABLE")
+        self.assertNotIn("transport_error_class", record)
 
     def test_http_denials_and_provider_errors_have_distinct_statuses(self):
         denied = failed_search_record(

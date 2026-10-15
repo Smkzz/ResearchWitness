@@ -126,3 +126,10 @@ all frozen versions, manifests, provisional source-linked annotations and
 relationship-level outputs. Full-text research collections stay outside Git.
 The old failed sample is unchanged; any new prospectively selected development
 sample has a separate protocol and detector freeze.
+
+`tools/percentage_math.py` provides additional exact checks for an explicitly
+supplied denominator: the integer numerator range compatible with a printed
+percentage and precision, the inverse compatible-denominator range for a
+count, and the sum of independently rounded component percentages. These
+checks report arithmetic feasibility only; they do not infer that counts are
+unweighted, mutually exclusive, exhaustive, or in the same population scope.
