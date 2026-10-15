@@ -197,7 +197,7 @@ class JATSPercAuditTests(unittest.TestCase):
         self.assertEqual(result["contract_expected_percent"], "3.13")
         self.assertEqual(result["display_precision"], 2)
 
-    def test_abstains_when_rowspan_makes_denominator_column_scope_unclear(self):
+    def test_maps_a_complete_rowspan_and_colspan_header(self):
         data = jats(
             '<table-wrap><table><thead>'
             '<tr><th rowspan="2">Reason</th><th colspan="2">Group, N=50</th></tr>'
@@ -207,8 +207,213 @@ class JATSPercAuditTests(unittest.TestCase):
         )
         results = audit_jats_percentage_tables(data)["results"]
         self.assertEqual(len(results), 2)
-        self.assertTrue(all(item["status"] == "scope_ambiguous" for item in results))
-        self.assertTrue(all(item["reason"] == "unsupported_header_spans" for item in results))
+        self.assertTrue(all(item["status"] == "arithmetic_match" for item in results))
+        self.assertEqual([item["denominator"] for item in results], [50, 50])
+
+    def test_maps_distinct_hierarchical_populations_and_body_row_labels(self):
+        data = jats('<table-wrap><table><thead>'
+            '<tr><th rowspan="2">Category</th><th colspan="2">Arm A (N=40)</th>'
+            '<th>Arm B (N=80)</th></tr><tr><th>n (%)</th><th>n (%)</th><th>n (%)</th></tr>'
+            '</thead><tbody><tr><td rowspan="2">Outcome</td><td>4 (10%)</td><td>2 (5%)</td>'
+            '<td>8 (10%)</td></tr><tr><td>0 (0.00%)</td><td>1 (2.50%)</td><td>1 (1.20%)</td></tr>'
+            '</tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual([r["denominator"] for r in results], [40, 40, 80, 40, 40, 80])
+        self.assertEqual(results[-1]["status"], "arithmetic_mismatch_candidate")
+        for result in results:
+            for source in result["evidence"]["denominator_sources"]:
+                anchor = source["evidence"]
+                self.assertIn(b"N=", data[anchor["byte_start"]:anchor["byte_end"]])
+
+    def test_rejects_ragged_or_overrunning_header_scopes(self):
+        for header in ['<tr><th rowspan="2">Label</th><th>N=40, n (%)</th></tr>',
+                       '<tr><th>Label</th><th>N=40, n (%)</th></tr><tr><th>Label</th></tr>']:
+            with self.subTest(header=header):
+                data = jats('<table-wrap><table><thead>' + header + '</thead><tbody>'
+                    '<tr><td>A</td><td>4 (10%)</td></tr></tbody></table></table-wrap>')
+                result = audit_jats_percentage_tables(data)["results"][0]
+                self.assertEqual(result["reason"], "unsupported_header_spans")
+                self.assertIsNone(result["denominator"])
+
+    def test_cross_tab_subgroup_percentages_require_an_explicit_basis(self):
+        data = jats('<table-wrap><caption><p>Number (%)</p></caption><table><thead><tr>'
+            '<th>Trait</th><th>No. of patients (N=80)</th><th>Arm A (N=30)</th>'
+            '<th>Arm B (N=50)</th></tr></thead><tbody><tr><td>Trait A</td>'
+            '<td>40 (50%)</td><td>12 (15%)</td><td>28 (35%)</td></tr></tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual(results[0]["status"], "arithmetic_match")
+        self.assertEqual([r["reason"] for r in results[1:]], ["cross_tab_denominator_scope_unclear"] * 2)
+        self.assertTrue(all(r["denominator"] is None for r in results[1:]))
+
+    def test_explicit_group_markers_override_table_population_and_reset(self):
+        data = jats('<table-wrap><caption><p>All participants N=100</p></caption><table>'
+            '<thead><tr><th>Trait</th><th>n (%)</th></tr></thead><tbody>'
+            '<tr><td colspan="2">Parents (N=40)</td></tr><tr><td>A</td><td>4 (10%)</td></tr>'
+            '<tr><td colspan="2">Children (N=60)</td></tr><tr><td>B</td><td>6 (10%)</td></tr>'
+            '</tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual([r["denominator"] for r in results], [40, 60])
+        self.assertTrue(all(r["denominator_scope"] == "row_group" for r in results))
+
+    def test_missing_data_returns_an_abstention_and_conditional_calculation(self):
+        data = jats('<table-wrap><table><thead><tr><th>Category</th><th>N=100, n (%)</th>'
+            '</tr></thead><tbody><tr><td colspan="2">Age</td></tr>'
+            '<tr><td>Young</td><td>60 (6%)</td></tr><tr><td>Missing</td><td>1 (&lt;1%)</td></tr>'
+            '<tr><td colspan="2">Region</td></tr><tr><td>North</td><td>50 (50%)</td></tr>'
+            '</tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual(results[0]["reason"], "missing_data_denominator_scope_unclear")
+        self.assertIsNone(results[0]["denominator"])
+        self.assertEqual(results[0]["conditional_calculation"]["denominator"], 100)
+        self.assertFalse(results[0]["conditional_calculation"]["arithmetic_matches"])
+        self.assertEqual(results[-1]["status"], "arithmetic_match")
+
+    def test_zero_missing_and_explicit_cell_ratios_do_not_lose_their_denominator(self):
+        data = jats('<table-wrap><table><thead><tr><th>Trait</th><th>N=100, n (%)</th>'
+            '</tr></thead><tbody><tr><td>A</td><td>0/40 (0.00%)</td></tr>'
+            '<tr><td>B</td><td>0/0 (0.0%)</td></tr><tr><td>Missing</td><td>0 (0%)</td></tr>'
+            '</tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual(results[0]["denominator"], 40)
+        self.assertEqual(results[0]["status"], "arithmetic_match")
+        self.assertEqual(results[1]["reason"], "nonpositive_denominator")
+        self.assertEqual(results[2]["denominator"], 100)
+
+    def test_extracts_labeled_components_with_exact_normalized_spans(self):
+        data = jats('<table-wrap><caption><p>N=40</p></caption><table><tbody>'
+            '<tr><td>A</td><td>P12(30%) C 8(20%)</td></tr></tbody></table></table-wrap>')
+        report = audit_jats_percentage_tables(data)
+        self.assertEqual([r["numerator"] for r in report["results"]], [12, 8])
+        for result in report["results"]:
+            evidence = result["evidence"]
+            self.assertEqual(evidence["cell_quote"][evidence["normalized_character_start"]:
+                evidence["normalized_character_end"]], evidence["relationship_quote"])
+            self.assertIn(evidence["relationship_quote"].encode(), data[evidence["byte_start"]:evidence["byte_end"]])
+            self.assertEqual(result["status"], "arithmetic_match")
+
+    def test_does_not_partially_parse_labeled_components_or_assume_numeric_pairs_are_percentages(self):
+        for cell in ['P12(30%) unexpected C8(20%) trailing',
+                     'P12(30%) P8(20%)', 'P12(30) C8(20)']:
+            with self.subTest(cell=cell):
+                data = jats('<table-wrap><table><tbody><tr><td>A</td><td>' + cell + '</td>'
+                    '</tr></tbody></table></table-wrap>')
+                self.assertEqual(audit_jats_percentage_tables(data)["results"], [])
+        data = jats('<table-wrap><table><thead><tr><th>Trait</th><th>Group (N=40)</th>'
+            '</tr></thead><tbody><tr><td>Category A</td><td>12 (30)</td></tr></tbody></table></table-wrap>')
+        result = audit_jats_percentage_tables(data)["results"][0]
+        self.assertEqual(result["reason"], "percentage_context_not_explicit")
+        self.assertIsNone(result["contract_expected_percent"])
+
+    def test_scopes_adjustment_notes_only_with_valid_explicit_table_references(self):
+        for rid, expected in [('weighted', ['arithmetic_match', 'scope_ambiguous']),
+                              ('missing-id', ['scope_ambiguous', 'scope_ambiguous'])]:
+            with self.subTest(rid=rid):
+                data = jats('<p>Weighted percentages appear in <xref ref-type="table" rid="' + rid + '">Table 2</xref>.</p>'
+                    + ''.join('<table-wrap id="' + tid + '"><caption><p>N=40</p></caption>'
+                    '<table><tbody><tr><td>A</td><td>4 (10%)</td></tr></tbody></table></table-wrap>'
+                    for tid in ['unweighted', 'weighted']))
+                self.assertEqual([r["status"] for r in audit_jats_percentage_tables(data)["results"]], expected)
+
+    def test_round_number_is_not_a_rounding_method_and_layout_expansion_is_bounded(self):
+        data = jats('<table-wrap><caption><p>N=40</p></caption><table><tbody>'
+            '<tr><td>Round 1</td><td>4 (10%)</td></tr></tbody></table></table-wrap>')
+        self.assertEqual(audit_jats_percentage_tables(data)["results"][0]["status"], "arithmetic_match")
+        wide = jats('<table-wrap><table><thead><tr>' + '<th colspan="64">N=40</th>' * 5
+                    + '</tr></thead></table></table-wrap>')
+        with self.assertRaisesRegex(JATSSourceError, "column-count"):
+            audit_jats_percentage_tables(wide)
+
+    def test_a_table_reference_does_not_narrow_a_general_adjustment_rule(self):
+        data = jats('<p>All percentages are weighted. Counts are summarized in '
+            '<xref ref-type="table" rid="t1">Table 1</xref>.</p>'
+            + ''.join('<table-wrap id="' + tid + '"><caption><p>N=40</p></caption>'
+            '<table><tbody><tr><td>A</td><td>4 (9%)</td></tr></tbody></table></table-wrap>'
+            for tid in ['t1', 't2']))
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual([r["reason"] for r in results], ["adjustment_method_scope_not_mapped"] * 2)
+
+    def test_conflicting_row_group_and_column_populations_abstain(self):
+        data = jats('<table-wrap><table><thead><tr><th>Trait</th>'
+            '<th>Male N=20, n (%)</th><th>Female N=20, n (%)</th></tr></thead><tbody>'
+            '<tr><td colspan="3">Subpopulation N=40</td></tr>'
+            '<tr><td>A</td><td>4 (20%)</td><td>4 (20%)</td></tr></tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual([r["reason"] for r in results], ["row_group_column_denominator_conflict"] * 2)
+        self.assertTrue(all(r["denominator"] is None for r in results))
+
+    def test_missing_counts_in_separate_columns_preserve_scope_uncertainty(self):
+        data = jats('<table-wrap><caption><p>N=100</p></caption><table><thead>'
+            '<tr><th>Category</th><th>n</th><th>%</th></tr></thead><tbody>'
+            '<tr><td>A</td><td>60</td><td>60.61</td></tr>'
+            '<tr><td>Missing</td><td>1</td><td>1.00</td></tr></tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual([r["reason"] for r in results], ["missing_data_denominator_scope_unclear"] * 2)
+        self.assertTrue(all(r["denominator"] is None for r in results))
+
+    def test_explicit_round_down_or_up_conventions_still_abstain(self):
+        for note in ['We round down percentages to integers.', 'We round up values.',
+                     'We round percentages to integers.']:
+            with self.subTest(note=note):
+                data = jats('<table-wrap><caption><p>N=6</p></caption><table><tbody>'
+                    '<tr><td>A</td><td>1 (16%)</td></tr></tbody></table>'
+                    '<table-wrap-foot><p>' + note + '</p></table-wrap-foot></table-wrap>')
+                self.assertEqual(audit_jats_percentage_tables(data)["results"][0]["status"], "rounding_ambiguous")
+
+    def test_conditional_calculation_cannot_override_a_conflicting_row_population(self):
+        data = jats('<table-wrap><caption><p>N=100</p></caption><table><tbody>'
+            '<tr><td>A N=80</td><td>60 (75%)</td></tr>'
+            '<tr><td>Missing</td><td>1 (1%)</td></tr></tbody></table></table-wrap>')
+        result = audit_jats_percentage_tables(data)["results"][0]
+        self.assertEqual(result["reason"], "row_level_denominator_scope_unclear")
+        self.assertNotIn("conditional_calculation", result)
+
+    def test_long_table_identifiers_keep_their_adjustment_scope(self):
+        tid = 't' * 150
+        data = jats('<p>Weighted percentages appear in <xref ref-type="table" rid="' + tid + '">Table 1</xref>.</p>'
+            '<table-wrap id="' + tid + '"><caption><p>N=40</p></caption><table><tbody>'
+            '<tr><td>A</td><td>4 (9%)</td></tr></tbody></table></table-wrap>')
+        self.assertEqual(audit_jats_percentage_tables(data)["results"][0]["reason"], "adjustment_method_scope_not_mapped")
+
+    def test_inherited_rowspan_labels_preserve_denominator_conflicts(self):
+        data = jats('<table-wrap><caption><p>N=100</p></caption><table><thead>'
+            '<tr><th>Group</th><th>n (%)</th></tr></thead><tbody>'
+            '<tr><td rowspan="2">Parents N=40</td><td>4 (10%)</td></tr>'
+            '<tr><td>8 (20%)</td></tr></tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)['results']
+        self.assertEqual([r['reason'] for r in results], ['row_level_denominator_scope_unclear'] * 2)
+        self.assertTrue(all(r['denominator'] is None for r in results))
+        self.assertIn('Parents N=40', results[1]['evidence']['row_context'])
+        inherited = results[1]['evidence']['denominator_sources'][-1]['evidence']
+        self.assertEqual(data[inherited['byte_start']:inherited['byte_end']], b'<td rowspan="2">Parents N=40</td>')
+
+    def test_inherited_numeric_rowspans_remain_unsupported(self):
+        data = jats('<table-wrap><caption><p>N=100</p></caption><table><tbody>'
+            '<tr><td>A</td><td rowspan="2">4 (4%)</td><td>5 (5%)</td></tr>'
+            '<tr><td>B</td><td>6 (6%)</td></tr></tbody></table></table-wrap>')
+        results = audit_jats_percentage_tables(data)['results']
+        self.assertEqual([r['reason'] for r in results], ['unsupported_data_cell_spans'] * 3)
+
+    def test_group_size_does_not_override_explicit_table_percentage_basis(self):
+        data = jats('<table-wrap><caption><p>All percentages use the full cohort denominator N=100, including subgroup rows.</p></caption>'
+            '<table><tbody><tr><td colspan="2">Parents N=40</td></tr>'
+            '<tr><td>A</td><td>4 (4%)</td></tr></tbody></table></table-wrap>')
+        result = audit_jats_percentage_tables(data)['results'][0]
+        self.assertEqual(result['reason'], 'conflicting_explicit_table_percentage_basis')
+        self.assertIsNone(result['denominator'])
+        self.assertNotIn('conditional_calculation', result)
+
+    def test_generic_population_caption_still_allows_explicit_group_N(self):
+        data = jats('<table-wrap><caption><p>Population N=100.</p></caption><table><tbody>'
+            '<tr><td colspan="2">Parents N=40, n (%)</td></tr>'
+            '<tr><td>A</td><td>4 (10%)</td></tr></tbody></table></table-wrap>')
+        result = audit_jats_percentage_tables(data)['results'][0]
+        self.assertEqual(result['status'], 'arithmetic_match')
+        self.assertEqual(result['denominator'], 40)
+
+    def test_decimal_N_does_not_become_integer_denominator(self):
+        data = jats('<table-wrap><caption><p>N=40.5</p></caption><table><tbody>'
+            '<tr><td>A</td><td>4 (10%)</td></tr></tbody></table></table-wrap>')
+        self.assertEqual(audit_jats_percentage_tables(data)['results'][0]['reason'], 'no_explicit_denominator')
 
     def test_abstains_without_any_denominator_evidence(self):
         data = jats(
@@ -316,7 +521,8 @@ class JATSPercAuditTests(unittest.TestCase):
                 audit_jats_percentage_tables(data)
 
     def test_rejects_pdf_and_html_challenge_bytes_as_non_jats(self):
-        for data in (b"%PDF-1.7\n", b"<!doctype html><html><title>Challenge</title></html>"):
+        for data in (b"%PDF-1.7\n", b"<!doctype html><html><title>Challenge</title></html>",
+                     b"<html><title>Challenge</title></html>", b"<response>Not an article</response>"):
             with self.subTest(prefix=data[:8]), self.assertRaises(JATSSourceError):
                 audit_jats_percentage_tables(data)
 

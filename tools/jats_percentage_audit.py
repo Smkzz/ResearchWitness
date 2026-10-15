@@ -17,6 +17,7 @@ from typing import Any, Iterable
 from xml.parsers import expat
 
 from tools.public_discovery import percentage_recalculation
+from tools.offline_files import read_regular
 
 MAX_SOURCE_BYTES = 8 * 1024 * 1024
 MAX_XML_NODES = 100_000
@@ -27,6 +28,9 @@ MAX_CELLS = 100_000
 MAX_RESULTS = 1_000
 MAX_ADJUSTMENT_NOTES = 8
 MAX_EVIDENCE_TEXT = 500
+MAX_LAYOUT_COLUMNS = 256
+MAX_LAYOUT_SLOTS = MAX_CELLS
+MAX_CELL_COMPONENTS = 8
 
 _INTEGER_TOKEN = r"(?:[0-9]{1,3}(?:,[0-9]{3}){1,2}|[0-9]{1,9})"
 _COUNT_PERCENT_RE = re.compile(
@@ -43,24 +47,39 @@ _PERCENT_ONLY_RE = re.compile(
 )
 _COUNT_ONLY_RE = re.compile(rf"^\s*(?P<count>{_INTEGER_TOKEN})\s*$")
 _DENOMINATOR_RE = re.compile(
-    rf"(?<![A-Za-z0-9])(?:n|N)\s*[=:]\s*(?P<value>{_INTEGER_TOKEN})(?![0-9,])"
+    rf"(?<![A-Za-z0-9])(?:n|N)\s*[=:]\s*(?P<value>{_INTEGER_TOKEN})(?![0-9]|[,.][0-9])"
 )
 _HEADER_CUE_RE = re.compile(
     r"\b(?:parameter|variable|characteristic|value|count|number|percent(?:age)?)\b",
     re.IGNORECASE,
 )
 _PERCENT_CONTEXT_RE = re.compile(
-    r"\bn\s*\(\s*%|\(\s*%\s*\)|\bpercent(?:age)?\b", re.IGNORECASE
+    r"\bn\s*\(\s*%|\(\s*%\s*\)|\bpercent(?:age)?s?\b", re.IGNORECASE
+)
+_EXPLICIT_PERCENT_BASIS_RE = re.compile(
+    r"\bpercent(?:age)?s?\b.{0,100}\b(?:denominator|based on|full cohort|entire cohort)\b|"
+    r"\b(?:denominator|full cohort|entire cohort)\b.{0,100}\bpercent(?:age)?s?\b",
+    re.IGNORECASE,
 )
 _ROW_GROUP_PERCENT_RE = re.compile(r"\bn\s*\(\s*%", re.IGNORECASE)
 _ROW_SPECIFIC_RATIO_RE = re.compile(
     r"\bn\s*\(\s*%\s*[^)]*\bn\s*/\s*n\b", re.IGNORECASE
 )
-_ROUNDING_NOTE_RE = re.compile(r"\b(?:round(?:ed|ing)?|truncat(?:e|ed|ion))\b", re.IGNORECASE)
+_ROUNDING_NOTE_RE = re.compile(
+    r"\b(?:rounded|rounding|round\s+(?:to|up|down|off|(?:all\s+)?percent(?:age)?s?)|truncat(?:e|ed|ion))\b",
+    re.IGNORECASE,
+)
+_CONTINUOUS_RE = re.compile(r"\b(?:mean|median|SD|IQR|standard deviation)\b", re.IGNORECASE)
+_MISSING_RE = re.compile(r"^(?:missing|unknown|not available|not reported|not known)\b", re.IGNORECASE)
+_COMPONENT_RE = re.compile(
+    rf"(?P<label>[A-Za-z][A-Za-z _:.-]{{0,39}}?)\s*"
+    rf"(?P<numeric>(?P<count>{_INTEGER_TOKEN})\s*\(\s*"
+    r"(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*%\s*\))"
+)
 _ADJUSTMENT_NOTE_RE = re.compile(
     r"(?:\b(?:adjusted|weighted|standardized|standardised)\b.{0,120}"
-    r"\b(?:percent(?:age)?|frequenc(?:y|ies)|proportion|rate)\b|"
-    r"\b(?:percent(?:age)?|frequenc(?:y|ies)|proportion|rate)\b.{0,120}"
+    r"\b(?:percent(?:age)?s?|frequenc(?:y|ies)|proportions?|rates?)\b|"
+    r"\b(?:percent(?:age)?s?|frequenc(?:y|ies)|proportions?|rates?)\b.{0,120}"
     r"\b(?:adjusted|weighted|standardized|standardised)\b)",
     re.IGNORECASE,
 )
@@ -167,6 +186,8 @@ def _parse_jats(data: bytes) -> _Node:
         raise JATSSourceError("Input is not well-formed JATS XML") from exc
     if stack or len(roots) != 1:
         raise JATSSourceError("JATS XML must have one complete document root")
+    if _local_name(roots[0].tag) != "article":
+        raise JATSSourceError("JATS input must have an article root")
     return roots[0]
 
 
@@ -213,25 +234,104 @@ def _span(node: _Node, attribute: str) -> int | None:
     return parsed if 1 <= parsed <= 64 else None
 
 
-def _header_columns(header_rows: list[_Node]) -> tuple[dict[int, list[_Node]], bool, bool]:
-    columns: dict[int, list[_Node]] = {}
-    unsupported = False
-    has_denominator = False
-    for row in header_rows:
+def _layout_rows(rows: list[_Node], *, header: bool = False):
+    """Map explicit spans without guessing missing cells or allocating an unbounded grid."""
+    grid: dict[tuple[int, int], _Node] = {}
+    layouts: list[tuple[list[int], bool]] = []
+    malformed = False
+    for row_index, row in enumerate(rows):
         column = 0
+        positions: list[int] = []
+        supported = True
         for cell in _cells(row):
-            has_denominator |= bool(_DENOMINATOR_RE.search(_text(cell)))
-            colspan = _span(cell, "colspan")
-            rowspan = _span(cell, "rowspan")
-            if colspan is None:
-                unsupported = True
-                colspan = 1
-            if rowspan is None or rowspan != 1:
-                unsupported = True
-            for index in range(column, column + colspan):
-                columns.setdefault(index, []).append(cell)
+            while (row_index, column) in grid:
+                column += 1
+            positions.append(column)
+            colspan, rowspan = _span(cell, "colspan"), _span(cell, "rowspan")
+            if column + (colspan or 1) > MAX_LAYOUT_COLUMNS:
+                raise JATSSourceError("JATS table exceeds the column-count limit")
+            if (colspan is None or rowspan is None or row_index + (rowspan or 1) > len(rows)):
+                malformed = True
+                supported = False
+                colspan = rowspan = 1
+            assert colspan is not None and rowspan is not None
+            text = _text(cell)
+            numeric = bool(_COUNT_PERCENT_RE.fullmatch(text) or _COUNT_RATIO_PERCENT_RE.fullmatch(text)
+                           or _PERCENT_ONLY_RE.fullmatch(text))
+            if not header and numeric and (colspan != 1 or rowspan != 1):
+                supported = False
+            for r in range(row_index, row_index + rowspan):
+                for c in range(column, column + colspan):
+                    if (r, c) in grid:
+                        malformed = True
+                        supported = False
+                    grid[r, c] = cell
+                    if len(grid) > MAX_LAYOUT_SLOTS:
+                        raise JATSSourceError("JATS table exceeds the expanded-layout limit")
             column += colspan
+        layouts.append((positions, supported))
+    width = max((c + 1 for _r, c in grid), default=0)
+    if header and any((r, c) not in grid for r in range(len(rows)) for c in range(width)):
+        malformed = True
+    return grid, layouts, malformed
+
+
+def _header_columns(header_rows: list[_Node]) -> tuple[dict[int, list[_Node]], bool, bool]:
+    grid, _layouts, unsupported = _layout_rows(header_rows, header=True)
+    columns: dict[int, list[_Node]] = {}
+    for (row, column), cell in sorted(grid.items()):
+        if not any(existing is cell for existing in columns.setdefault(column, [])):
+            columns[column].append(cell)
+    has_denominator = any(_DENOMINATOR_RE.search(_text(c)) for row in header_rows for c in _cells(row))
     return columns, unsupported, has_denominator
+
+
+def _fragments(text: str) -> list[dict[str, Any] | None]:
+    """Recognize a bounded list of explicitly labeled percentages in one cell."""
+    matches = []
+    for match in _COMPONENT_RE.finditer(text):
+        matches.append(match)
+        if len(matches) > MAX_CELL_COMPONENTS:
+            return [None]
+    if not 2 <= len(matches) <= MAX_CELL_COMPONENTS:
+        return [None]
+    end = 0
+    for match in matches:
+        if text[end:match.start()].strip(" ;,|\t\r\n"):
+            return [None]
+        end = match.end()
+    if text[end:].strip(" ;,|\t\r\n") or len({m.group("label").strip() for m in matches}) != len(matches):
+        return [None]
+    return [{"numeric_quote": m.group("numeric"), "label": m.group("label").strip(),
+             "character_start": m.start(), "character_end": m.end()} for m in matches]
+
+
+def _group_marker(row: _Node) -> tuple[str, _Node] | None:
+    cells = _cells(row)
+    nonempty = [(cell, _text(cell)) for cell in cells if _text(cell)]
+    if len(nonempty) != 1:
+        return None
+    cell, text = nonempty[0]
+    if _COUNT_PERCENT_RE.fullmatch(text) or _COUNT_RATIO_PERCENT_RE.fullmatch(text) or _PERCENT_ONLY_RE.fullmatch(text):
+        return None
+    if len(cells) > 1 or (_span(cell, "colspan") or 1) > 1 or _DENOMINATOR_RE.search(text) or _ROW_GROUP_PERCENT_RE.search(text):
+        return text, cell
+    return None
+
+
+def _adjustment_targets(node: _Node, wrapper_ids: set[str | None]) -> set[str]:
+    """Only a narrow, exhaustive table-specific statement can narrow document scope."""
+    refs = [xref for xref in _descendants(node, "xref") if _attribute(xref, "ref-type") == "table"]
+    if len(refs) != 1:
+        return set()
+    targets = set((_attribute(refs[0], "rid") or "").split())
+    if len(targets) != 1 or not targets.issubset(wrapper_ids):
+        return set()
+    reference = re.escape(_text(refs[0]))
+    statement = (r"(?:The\s+)?(?:weighted|adjusted|standardized|standardised)\s+percentages?\s+"
+                 r"(?:appear|are\s+(?:shown|reported|presented|used))\s+(?:only\s+)?in\s+"
+                 + reference + r"\s*[.]?")
+    return targets if re.fullmatch(statement, _text(node), re.IGNORECASE) else set()
 
 
 def _evidence(node: _Node, role: str, quote: str) -> dict[str, Any]:
@@ -302,17 +402,22 @@ def _candidate_from_cell(
     header_columns: dict[int, list[_Node]],
     header_layout_unsupported: bool,
     data_cell_layout_unsupported: bool,
-    unsupported_header_has_denominator: bool,
     global_facts: list[dict[str, Any]],
     table_percentage_context: bool,
     row_group_context: tuple[str, _Node] | None,
     row_specific_denominator_context: bool,
     adjustment_notes: list[dict[str, Any]],
     rounding_note: str | None,
+    fragment: dict[str, Any] | None = None,
+    missing_scope_note: _Node | None = None,
+    total_header_facts: list[dict[str, Any]] | None = None,
+    inherited_row_labels: list[_Node] | None = None,
+    explicit_table_percentage_basis: bool = False,
 ) -> dict[str, Any] | None:
     cell_quote = _text(cell)
-    count_ratio = _COUNT_RATIO_PERCENT_RE.fullmatch(cell_quote)
-    combined = _COUNT_PERCENT_RE.fullmatch(cell_quote)
+    parse_quote = fragment["numeric_quote"] if fragment else cell_quote
+    count_ratio = _COUNT_RATIO_PERCENT_RE.fullmatch(parse_quote)
+    combined = _COUNT_PERCENT_RE.fullmatch(parse_quote)
     ratio_denominator: int | None = None
     if count_ratio:
         count_text = count_ratio.group("count")
@@ -403,11 +508,9 @@ def _candidate_from_cell(
         or bool(_PERCENT_CONTEXT_RE.search(" ".join(header_texts)))
         or any(text.strip() == "%" for text in header_texts)
     )
-    if not percentage_context:
-        return None
-
     header_facts = _denominator_facts(("column_header", node) for node in header_nodes)
     row_label_nodes = [node for index, node in enumerate(cells) if index != cell_index]
+    row_label_nodes.extend(inherited_row_labels or [])
     row_facts = _denominator_facts(("row_context", node) for node in row_label_nodes)
     group_facts = (
         _denominator_facts([("row_group_context", row_group_context[1])])
@@ -415,6 +518,13 @@ def _candidate_from_cell(
     )
     header_values = _unique_values(header_facts)
     global_values = _unique_values(global_facts)
+    group_values = _unique_values(group_facts)
+    type_ambiguous = not percentage_context
+    if type_ambiguous and (
+        not combined or not header_facts
+        or _CONTINUOUS_RE.search(" ".join(header_texts + [_text(n) for n in row_label_nodes]))
+    ):
+        return None
 
     denominator: int | None = None
     denominator_scope: str | None = None
@@ -422,16 +532,20 @@ def _candidate_from_cell(
     if ratio_denominator is not None:
         denominator = ratio_denominator
         denominator_scope = "cell_ratio"
-    elif unsupported_header_has_denominator or (
-        header_layout_unsupported
-        and (header_facts or not has_percent_symbol or row_explicit_denominator is not None)
-    ):
+    elif header_layout_unsupported:
         ambiguity = "unsupported_header_spans"
     elif data_cell_layout_unsupported:
         ambiguity = "unsupported_data_cell_spans"
     elif row_explicit_denominator is not None:
         denominator = row_explicit_denominator
         denominator_scope = "row_denominator_column"
+    elif group_values and header_values and group_values != header_values:
+        ambiguity = "row_group_column_denominator_conflict"
+    elif len(group_values) == 1:
+        denominator = next(iter(group_values))
+        denominator_scope = "row_group"
+    elif len(group_values) > 1:
+        ambiguity = "conflicting_row_group_denominators"
     elif len(header_values) > 1:
         ambiguity = "conflicting_column_denominators"
     elif header_values:
@@ -445,6 +559,12 @@ def _candidate_from_cell(
     else:
         ambiguity = "no_explicit_denominator"
 
+    if (explicit_table_percentage_basis and global_values and denominator is not None
+            and global_values != {denominator}):
+        ambiguity = "conflicting_explicit_table_percentage_basis"
+        denominator = None
+        denominator_scope = None
+
     if ratio_denominator is None and (
         (row_specific_denominator_context or row_denominator_missing)
         and row_explicit_denominator is None
@@ -456,14 +576,45 @@ def _candidate_from_cell(
         ambiguity = "adjustment_method_scope_not_mapped"
         denominator = None
         denominator_scope = None
+    if (ratio_denominator is None and row_explicit_denominator is None
+            and header_values and total_header_facts
+            and header_values != _unique_values(total_header_facts)):
+        ambiguity = "cross_tab_denominator_scope_unclear"
+        denominator = None
+        denominator_scope = None
     if ratio_denominator is None and row_facts:
         row_values = _unique_values(row_facts)
         if len(row_values) > 1 or denominator is None or row_values != {denominator}:
-            ambiguity = "row_level_denominator_scope_unclear"
+            if ambiguity is None:
+                ambiguity = "row_level_denominator_scope_unclear"
+            denominator = None
+            denominator_scope = None
     if ratio_denominator is None and group_facts:
-        group_values = _unique_values(group_facts)
         if len(group_values) > 1 or denominator is None or group_values != {denominator}:
-            ambiguity = "row_group_denominator_scope_unclear"
+            if ambiguity is None:
+                ambiguity = "row_group_denominator_scope_unclear"
+            denominator = None
+            denominator_scope = None
+    if type_ambiguous:
+        ambiguity = "percentage_context_not_explicit"
+        denominator = None
+        denominator_scope = None
+    conditional_calculation = None
+    if (missing_scope_note is not None and ratio_denominator is None
+            and row_explicit_denominator is None and ambiguity is None):
+        if denominator is not None and not rounding_note:
+            try:
+                conditional_calculation = percentage_recalculation(
+                    int(count_text.replace(",", "")), denominator, percent_text,
+                    len(percent_text.partition(".")[2]),
+                )
+                conditional_calculation["denominator"] = denominator
+                conditional_calculation["assumption"] = "displayed_denominator_applies_to_missing_data_group"
+            except ValueError:
+                pass
+        ambiguity = "missing_data_denominator_scope_unclear"
+        denominator = None
+        denominator_scope = None
 
     evidence = {
         "source_sha256": source_sha256,
@@ -478,7 +629,16 @@ def _candidate_from_cell(
         "row_context": " | ".join(_text(node) for node in row_label_nodes)[:MAX_EVIDENCE_TEXT],
         "column_headers": [text[:MAX_EVIDENCE_TEXT] for text in header_texts],
         "denominator_sources": header_facts + global_facts + group_facts + row_facts,
+        "normalized_character_start": fragment["character_start"] if fragment else 0,
+        "normalized_character_end": fragment["character_end"] if fragment else len(cell_quote),
     }
+    if fragment:
+        evidence["component_label"] = fragment["label"]
+        evidence["relationship_quote"] = cell_quote[fragment["character_start"]:fragment["character_end"]]
+    if missing_scope_note is not None:
+        evidence["missing_data_scope_note"] = _evidence(missing_scope_note, "missing_data_row", _text(missing_scope_note))
+    if total_header_facts:
+        evidence["cross_tab_total_sources"] = total_header_facts
     if ratio_denominator is not None:
         evidence["denominator_sources"].append({
             "value": ratio_denominator,
@@ -513,6 +673,8 @@ def _candidate_from_cell(
         "display_precision": len(percent_text.partition(".")[2]),
         "evidence": evidence,
     }
+    if conditional_calculation is not None:
+        result["conditional_calculation"] = conditional_calculation
     if ambiguity:
         return result
     if denominator is None:
@@ -554,19 +716,27 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
     if len(wrappers) > MAX_TABLES:
         raise JATSSourceError("JATS source exceeds the table-count limit")
 
-    adjustment_notes: list[dict[str, Any]] = []
+    adjustment_notes: list[tuple[dict[str, Any], set[str]]] = []
+    wrapper_ids = {_attribute(w, "id") for w in wrappers if _attribute(w, "id")}
+    method_scope_overflow = False
 
     def scan_methods(node: _Node, inside_table: bool = False) -> None:
+        nonlocal method_scope_overflow
         inside_table = inside_table or _local_name(node.tag) == "table-wrap"
         if not inside_table and _local_name(node.tag) == "p":
             quote = _text(node)
             if _ADJUSTMENT_NOTE_RE.search(quote):
-                adjustment_notes.append(_evidence(node, "document_method", quote))
+                targets = _adjustment_targets(node, wrapper_ids)
+                if len(adjustment_notes) < MAX_ADJUSTMENT_NOTES:
+                    note = _evidence(node, "document_method", quote)
+                    note["target_table_ids"] = sorted(targets)
+                    adjustment_notes.append((note, targets))
+                else:
+                    method_scope_overflow = True
         for child in node.children:
             scan_methods(child, inside_table)
 
     scan_methods(root)
-    adjustment_notes = adjustment_notes[:MAX_ADJUSTMENT_NOTES]
 
     results: list[dict[str, Any]] = []
     rows_seen = cells_seen = tables_inspected = 0
@@ -581,7 +751,8 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
             tables_inspected += 1
             if tables_inspected > MAX_TABLES:
                 raise JATSSourceError("JATS source exceeds the table-count limit")
-            table_id = (_attribute(wrapper, "id") or f"table-{tables_inspected}")[:100]
+            raw_table_id = _attribute(wrapper, "id") or f"table-{tables_inspected}"
+            table_id = raw_table_id[:100]
             global_nodes: list[tuple[str, _Node]] = []
             if label_node is not None:
                 global_nodes.append(("table_label", label_node))
@@ -608,8 +779,10 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
                 )
                 if has_header_shape or has_unmarked_header:
                     header_rows = [all_rows[0]]
-            header_columns, header_layout_unsupported, header_has_denominator = _header_columns(header_rows)
-            unsupported_header_has_denominator = header_layout_unsupported and header_has_denominator
+            header_columns, header_layout_unsupported, _header_has_denominator = _header_columns(header_rows)
+            total_header_nodes = {id(node): node for nodes in header_columns.values() for node in nodes
+                                  if re.search(r"\b(?:no\.? of patients|number of patients|total(?: patients| participants| population)?|all participants)\b", _text(node), re.IGNORECASE)}
+            total_header_facts = _denominator_facts(("total_population_header", node) for node in total_header_nodes.values())
             table_context = " ".join(
                 [_text(node) for _role, node in global_nodes]
                 + [_text(cell) for row in header_rows for cell in _cells(row)]
@@ -632,7 +805,8 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
                 ]
                 if rounding_match else None
             )
-            table_adjustment_notes = list(adjustment_notes)
+            table_adjustment_notes = [note for note, targets in adjustment_notes
+                                      if method_scope_overflow or not targets or raw_table_id in targets]
             for role, node in global_nodes:
                 quote = _text(node)
                 if _ADJUSTMENT_NOTE_RE.search(quote):
@@ -661,23 +835,55 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
                 header_ids = {id(row) for row in header_rows}
                 body_rows = [row for row in all_rows if id(row) not in header_ids]
 
+            body_grid, body_layouts, body_layout_malformed = _layout_rows(body_rows)
+            grid_nodes_by_row: dict[int, dict[int, _Node]] = {}
+            for (r, _c), node in body_grid.items():
+                grid_nodes_by_row.setdefault(r, {})[id(node)] = node
+            explicit_table_percentage_basis = any(
+                _EXPLICIT_PERCENT_BASIS_RE.search(_text(n)) for _role, n in global_nodes)
+            group_for_row: list[tuple[int, tuple[str, _Node] | None]] = []
+            group_number = 0
             row_group_context: tuple[str, _Node] | None = None
+            missing_by_group: dict[tuple[int, int], _Node] = {}
+            for row, (positions, _supported) in zip(body_rows, body_layouts):
+                marker = _group_marker(row)
+                if marker:
+                    group_number += 1
+                    row_group_context = marker
+                group_for_row.append((group_number, row_group_context))
+                cells = _cells(row)
+                if any(_MISSING_RE.search(_text(cell)) for cell in cells):
+                    for index, cell in enumerate(cells):
+                        count = re.match(rf"^\s*(?P<count>{_INTEGER_TOKEN})\s*(?:/[^()]+)?\s*\(", _text(cell))
+                        if count and int(count.group("count").replace(",", "")) > 0:
+                            missing_by_group[(group_number, positions[index])] = row
+                        column = positions[index]
+                        headers = " ".join(_text(n) for n in header_columns.get(column, []))
+                        if index > 0 and re.search(r"%|percent", headers, re.IGNORECASE):
+                            previous_headers = header_columns.get(positions[index - 1], [])
+                            count_index = index - 1
+                            if index > 1 and _is_denominator_header(previous_headers):
+                                count_index = index - 2
+                            if _is_count_header(header_columns.get(positions[count_index], [])):
+                                count_only = _COUNT_ONLY_RE.fullmatch(_text(cells[count_index]))
+                                if count_only and int(count_only.group("count").replace(",", "")) > 0:
+                                    missing_by_group[(group_number, column)] = row
+
             for row_index, row in enumerate(body_rows, start=1):
                 rows_seen += 1
                 if rows_seen > MAX_ROWS:
                     raise JATSSourceError("JATS source exceeds the row-count limit")
                 cells = _cells(row)
-                nonempty_cells = [(cell, _text(cell)) for cell in cells if _text(cell)]
-                is_group_marker = (
-                    len(nonempty_cells) == 1
-                    and not _COUNT_PERCENT_RE.fullmatch(nonempty_cells[0][1])
-                    and not _PERCENT_ONLY_RE.fullmatch(nonempty_cells[0][1])
-                    and bool(_ROW_GROUP_PERCENT_RE.search(nonempty_cells[0][1]))
-                )
-                if is_group_marker:
-                    row_group_context = (nonempty_cells[0][1], nonempty_cells[0][0])
+                group_number, row_group_context = group_for_row[row_index - 1]
+                if _group_marker(row):
                     continue
-                positions, positions_supported = _cell_column_positions(cells)
+                positions, positions_supported = body_layouts[row_index - 1]
+                own_ids = {id(cell) for cell in cells}
+                inherited = {identity: node for identity, node in grid_nodes_by_row.get(row_index - 1, {}).items()
+                             if identity not in own_ids}
+                inherited_numeric = any(
+                    _COUNT_PERCENT_RE.fullmatch(_text(node)) or _COUNT_RATIO_PERCENT_RE.fullmatch(_text(node))
+                    or _PERCENT_ONLY_RE.fullmatch(_text(node)) for node in inherited.values())
                 for cell_index, cell in enumerate(cells):
                     cells_seen += 1
                     if cells_seen > MAX_CELLS:
@@ -694,34 +900,42 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
                             and _ROW_SPECIFIC_RATIO_RE.search(row_group_context[0])
                         )
                     )
-                    candidate = _candidate_from_cell(
-                        source_sha256=source_sha256,
-                        table_id=table_id,
-                        table_index=tables_inspected,
-                        row_index=row_index,
-                        cell_index=cell_index,
-                        column=column,
-                        cell=cell,
-                        cells=cells,
-                        header_columns=header_columns,
-                        header_layout_unsupported=header_layout_unsupported,
-                        data_cell_layout_unsupported=not positions_supported,
-                        unsupported_header_has_denominator=unsupported_header_has_denominator,
-                        global_facts=global_facts,
-                        table_percentage_context=table_percentage_context,
-                        row_group_context=row_group_context,
-                        row_specific_denominator_context=row_specific_denominator_context,
-                        adjustment_notes=table_adjustment_notes,
-                        rounding_note=rounding_note,
-                    )
-                    if candidate is not None:
-                        results.append(candidate)
-                        if len(results) > MAX_RESULTS:
-                            raise JATSSourceError("JATS source exceeds the result-count limit")
+                    for fragment in _fragments(_text(cell)):
+                        candidate = _candidate_from_cell(
+                            source_sha256=source_sha256,
+                            table_id=table_id,
+                            table_index=tables_inspected,
+                            row_index=row_index,
+                            cell_index=cell_index,
+                            column=column,
+                            cell=cell,
+                            cells=cells,
+                            header_columns=header_columns,
+                            header_layout_unsupported=header_layout_unsupported,
+                            data_cell_layout_unsupported=not positions_supported or body_layout_malformed or inherited_numeric,
+                            global_facts=global_facts,
+                            table_percentage_context=table_percentage_context,
+                            row_group_context=row_group_context,
+                            row_specific_denominator_context=row_specific_denominator_context,
+                            adjustment_notes=table_adjustment_notes,
+                            rounding_note=rounding_note,
+                            fragment=fragment,
+                            missing_scope_note=missing_by_group.get((group_number, column)),
+                            total_header_facts=total_header_facts,
+                            inherited_row_labels=list(inherited.values()),
+                            explicit_table_percentage_basis=explicit_table_percentage_basis,
+                        )
+                        if candidate is not None:
+                            results.append(candidate)
+                            if len(results) > MAX_RESULTS:
+                                raise JATSSourceError("JATS source exceeds the result-count limit")
 
     return {
         "source_format": "JATS XML",
         "source_sha256": source_sha256,
+        "extracted_text_sha256": hashlib.sha256(_text(root).encode("utf-8")).hexdigest(),
+        "extraction_profile": "jats-normalized-text-v1",
+        "method_scope_overflow": method_scope_overflow,
         "tables_inspected": tables_inspected,
         "percentage_cells_reviewed": len(results),
         "results": results,
@@ -739,10 +953,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("jats_xml", help="one local UTF-8 JATS XML file")
     args = parser.parse_args(argv)
     try:
-        with Path(args.jats_xml).open("rb") as source:
-            data = source.read(MAX_SOURCE_BYTES + 1)
+        data = read_regular(Path(args.jats_xml), MAX_SOURCE_BYTES)
         report = audit_jats_percentage_tables(data)
-    except (OSError, JATSSourceError) as exc:
+    except (OSError, ValueError) as exc:
         print(f"JATS audit failed: {exc}", file=sys.stderr)
         return 2
     json.dump(report, sys.stdout, ensure_ascii=False, sort_keys=True, indent=2)

@@ -26,6 +26,10 @@ Search hits are only metadata leads. An independent reviewer must capture the or
 
 ## Offline JATS table aid
 
+For a cohesive JSON and Markdown workflow, use the
+[offline research audit and comparison CLI](OFFLINE_RESEARCH_AUDIT.md). It
+preserves structured abstentions and source-bound benchmark outcomes.
+
 For a locally captured UTF-8 JATS XML file, the bounded external tool can scan simple table cells without making network requests:
 
 ```bash

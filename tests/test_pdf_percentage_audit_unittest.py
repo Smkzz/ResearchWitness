@@ -17,6 +17,7 @@ from tools.pdf_percentage_audit import (
     audit_pdf_percentage_tables,
     parse_pdf_layout_text,
 )
+from tools.pdf_sandbox_smoke import synthetic_pdf, smoke_checks
 
 
 def layout(body: str) -> str:
@@ -198,6 +199,77 @@ class PDFPercentageAuditTests(unittest.TestCase):
                         with self.assertRaisesRegex(PDFSourceError, "container cleanup"):
                             _extract_layout_text(b"%PDF-1.7 synthetic bytes")
 
+    def test_output_overflow_invalid_encoding_extractor_failure_and_missing_cleanup_id_fail_closed(self):
+        configured = 'sha256:' + 'a' * 64
+        for payload, returncode, cid, limit, expected in [
+            (b'x' * 33, 0, True, 32, '2 MiB limit'),
+            (b'\xff', 0, True, 32, 'UTF-8'),
+            (b'', 1, True, 32, 'could not extract'),
+            *[(b'', code, True, 32, f'unclassified exit code {code}') for code in [2, 3, 99, 125, 126, 127, 137, 143]],
+            (b'text', 0, False, 32, 'container ID')]:
+            with self.subTest(expected=expected):
+                child = mock.Mock(); child.stdout = io.BytesIO(payload)
+                child.wait.return_value = returncode; child.poll.return_value = returncode
+                def start(command, **kwargs):
+                    if cid:
+                        Path(command[command.index('--cidfile') + 1]).write_text('a' * 64)
+                    return child
+                with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True), \
+                     mock.patch('tools.pdf_percentage_audit.shutil.which', return_value='/usr/bin/docker'), \
+                     mock.patch('tools.pdf_percentage_audit.MAX_LAYOUT_TEXT_BYTES', limit), \
+                     mock.patch('tools.pdf_percentage_audit.subprocess.run', side_effect=[
+                         self.seccomp_info_result(), mock.Mock(returncode=0, stdout=configured),
+                         mock.Mock(returncode=0, stdout='{"Env":null,"Entrypoint":null,"Volumes":null}'),
+                         mock.Mock(returncode=0, stdout='')]), \
+                     mock.patch('tools.pdf_percentage_audit.subprocess.Popen', side_effect=start):
+                    with self.assertRaisesRegex(PDFSourceError, expected):
+                        _extract_layout_text(b'%PDF-1.7 synthetic')
+
+    def test_pdf_smoke_fixture_is_deterministic_and_unavailable_runtime_stops_once(self):
+        pdf = synthetic_pdf(['Table 1', 'A 4 (10%)'])
+        self.assertEqual(pdf, synthetic_pdf(['Table 1', 'A 4 (10%)']))
+        self.assertTrue(pdf.startswith(b'%PDF-1.4'))
+        xref = int(pdf.split(b'startxref\n')[1].splitlines()[0])
+        self.assertEqual(pdf[xref:xref + 4], b'xref')
+        with mock.patch('tools.pdf_sandbox_smoke._extract_layout_text', side_effect=PDFSourceError('runtime unavailable')) as audit:
+            result = smoke_checks()
+        self.assertEqual(audit.call_count, 1)
+        self.assertFalse(result['sandbox_qualified'])
+        self.assertEqual(result['status'], 'blocked_or_failed')
+
+    def test_pdf_smoke_does_not_count_infrastructure_failures_as_expected_rejections(self):
+        normal = 'Table 1: Synthetic\nCount (%) N=40\nA 4 (10.0)\nB 4 (11.0)\f'
+        for reason in ['Could not confirm isolated Poppler container cleanup',
+                       "Docker's built-in default seccomp profile is unavailable"]:
+            with self.subTest(reason=reason), mock.patch('tools.pdf_sandbox_smoke._extract_layout_text',
+                    side_effect=[normal, PDFSourceError(reason)]) as audit:
+                result = smoke_checks()
+                self.assertEqual(audit.call_count, 2)
+                self.assertEqual(result['status'], 'blocked_or_failed')
+                self.assertFalse(result['results'][1]['passed'])
+        with mock.patch('tools.pdf_sandbox_smoke._extract_layout_text', side_effect=[normal,
+                PDFSourceError('Isolated Poppler could not extract this PDF'),
+                PDFSourceError('PDF has no extractable text; OCR is not supported')]):
+            result = smoke_checks()
+        self.assertEqual(result['status'], 'smoke_passed_not_qualified')
+        self.assertFalse(result['sandbox_qualified'])
+
+    def test_pdf_smoke_checks_operands_hashes_counts_and_extracted_anchors(self):
+        from tools.pdf_sandbox_smoke import normal_report_matches
+        import copy
+        data = synthetic_pdf(['Table 1: Synthetic', 'Count (%) N=40', 'A 4 (10.0)', 'B 4 (11.0)'])
+        text = 'Table 1: Synthetic\nCount (%) N=40\nA 4 (10.0)\nB 4 (11.0)\f'
+        report = parse_pdf_layout_text(text, hashlib.sha256(data).hexdigest())
+        self.assertTrue(normal_report_matches(report, data, text))
+        for field in ['numerator', 'hash', 'count', 'anchor']:
+            bad = copy.deepcopy(report)
+            if field == 'numerator': bad['results'][0]['numerator'] = 99
+            if field == 'hash': bad['source_sha256'] = '0' * 64
+            if field == 'count': bad['tables_inspected'] = 2
+            if field == 'anchor': bad['results'][0]['evidence']['page_text_char_start'] = 0
+            with self.subTest(field=field):
+                self.assertFalse(normal_report_matches(bad, data, text))
+
     def test_infers_percent_context_from_repeated_count_denominator_matches(self):
         text = layout(
             """Table 1: Reasons for study completion
@@ -243,10 +315,17 @@ Category A    2 (20.00)"""
         result = parse_pdf_layout_text(text, "a" * 64)["results"][0]
         self.assertEqual(result["status"], "arithmetic_mismatch_candidate")
         self.assertEqual(result["contract_expected_percent"], "10.00")
+        self.assertEqual(result["exact_ratio_percent"], "200/20")
         self.assertEqual(
             result["evidence"]["percentage_context_basis"],
             "explicit_percent_header_or_symbol",
         )
+
+    def test_repeating_percentage_preserves_an_exact_fraction(self):
+        text = layout("Table 1: Summary\nCount and percentage (N=3)\nCategory A    1 (33.33%)")
+        result = parse_pdf_layout_text(text, "a" * 64)["results"][0]
+        self.assertEqual(result["status"], "arithmetic_match")
+        self.assertEqual(result["exact_ratio_percent"], "100/3")
 
     def test_abstains_when_unmarked_parenthetical_values_are_not_corroborated(self):
         text = layout(

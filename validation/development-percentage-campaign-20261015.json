@@ -1,0 +1,195 @@
+{
+  "baseline_historical": "5d251c8f1961521c700183b52f54e2fcb02dfbea",
+  "baseline_pr_head": "430ea9521733850ef581cae4861e7450f059bae6",
+  "exposure": "development",
+  "historical_sample": {
+    "annotation_count": 423,
+    "document_count": 13,
+    "original_protocol_status": "minimum failed; no preserved qualification for required JATS OS isolation",
+    "regression_gate": "FAIL: one PR-baseline candidate now abstains for missing denominator scope; conditional arithmetic retained; no gate weakened",
+    "runs": [
+      {
+        "abstentions_by_reason": {
+          "invalid_or_unsupported_ratio": 7,
+          "no_explicit_denominator": 110,
+          "unsupported_header_spans": 102
+        },
+        "detector_files": {
+          "tools/jats_percentage_audit.py": "d64956a03e5cbf8c8f8120e7140b18eb582b5170a91403ae6b3d79fac818d2f6",
+          "tools/public_discovery.py": "043c09d13364ebac6aadb0924b1384510420ac4af46f76e06f5de27cd6d62ccb"
+        },
+        "label": "historical",
+        "metrics": {
+          "abstentions": 219,
+          "annotated_relationships_surfaced": 239,
+          "arithmetic_matches": 20,
+          "candidate_false_positives_against_annotations": 0,
+          "conditional_mismatch_candidates": 0,
+          "extraction_failures": 5,
+          "incorrect_denominator_assignments": 6,
+          "matched_reference_discrepancies": 0,
+          "mismatch_candidates": 0,
+          "missed_reference_discrepancies": 16,
+          "parsed_denominator_disagreements": 13,
+          "parsed_documents": 8,
+          "relationships_detected": 239,
+          "source_anchor_failures": 0,
+          "tables_inspected": 34,
+          "unresolved_denominator_disagreements": 1,
+          "unresolved_mismatch_candidates": 0,
+          "unreviewed_mismatch_candidates": 0
+        }
+      },
+      {
+        "abstentions_by_reason": {
+          "no_explicit_denominator": 110,
+          "unsupported_header_spans": 102
+        },
+        "detector_files": {
+          "tools/jats_percentage_audit.py": "5db796dce0abc7ab2b68354a85ee7b37b45ef0c3f939124e82e8ff5d3bb63e98",
+          "tools/public_discovery.py": "043c09d13364ebac6aadb0924b1384510420ac4af46f76e06f5de27cd6d62ccb"
+        },
+        "label": "pr-baseline",
+        "metrics": {
+          "abstentions": 212,
+          "annotated_relationships_surfaced": 392,
+          "arithmetic_matches": 176,
+          "candidate_false_positives_against_annotations": 0,
+          "conditional_mismatch_candidates": 0,
+          "extraction_failures": 5,
+          "incorrect_denominator_assignments": 0,
+          "matched_reference_discrepancies": 1,
+          "mismatch_candidates": 4,
+          "missed_reference_discrepancies": 15,
+          "parsed_denominator_disagreements": 3,
+          "parsed_documents": 8,
+          "relationships_detected": 392,
+          "source_anchor_failures": 0,
+          "tables_inspected": 34,
+          "unresolved_denominator_disagreements": 3,
+          "unresolved_mismatch_candidates": 4,
+          "unreviewed_mismatch_candidates": 0
+        }
+      },
+      {
+        "abstentions_by_reason": {
+          "cross_tab_denominator_scope_unclear": 68,
+          "missing_data_denominator_scope_unclear": 26,
+          "no_explicit_denominator": 120,
+          "percentage_context_not_explicit": 1
+        },
+        "detector_files": {
+          "tools/audit_contracts.py": "9f73200f9c1e3f8a16be2101e0361428f9071e5201c2f257caf8f8b16c6e9b58",
+          "tools/jats_percentage_audit.py": "9ff783da7d6ea5a2a59efb5e8f3eed374f1db2319e9e29a0c221fbba2dda167e",
+          "tools/offline_files.py": "a5332776bd607887f125b5052253fdd678c43d4a379485d89323b9af3c38cbe9",
+          "tools/pdf_percentage_audit.py": "26ee14ffc067be96f19b35e6961ab35077f8a268c1854bf597b78b0824649428",
+          "tools/percentage_benchmark.py": "5d19ffa8f1d76f91bcc727065def6c33022f04562ba671ee0a560fa0272cac7e",
+          "tools/public_discovery.py": "043c09d13364ebac6aadb0924b1384510420ac4af46f76e06f5de27cd6d62ccb",
+          "tools/research_audit.py": "47fa9d6f6767e2f0a989de6c8ba553d5a60af755f7a0758d7c8b9e0e3c440ea2"
+        },
+        "label": "revised-final",
+        "metrics": {
+          "abstentions": 215,
+          "annotated_relationships_surfaced": 423,
+          "arithmetic_matches": 205,
+          "candidate_false_positives_against_annotations": 0,
+          "conditional_mismatch_candidates": 4,
+          "extraction_failures": 5,
+          "incorrect_denominator_assignments": 0,
+          "matched_reference_discrepancies": 3,
+          "mismatch_candidates": 3,
+          "missed_reference_discrepancies": 13,
+          "parsed_denominator_disagreements": 0,
+          "parsed_documents": 8,
+          "relationships_detected": 423,
+          "source_anchor_failures": 0,
+          "tables_inspected": 34,
+          "unresolved_denominator_disagreements": 0,
+          "unresolved_mismatch_candidates": 3,
+          "unreviewed_mismatch_candidates": 0
+        }
+      }
+    ]
+  },
+  "integrity_commitments": {
+    "correction_metadata_ledger": "e2713205a88e6f35d6f1046bcfaa1bfaaf4121f7bf39a599206af62410afe6cc",
+    "new_candidate_registry": "44612f5a5a45bd12b7616b714792b8ee8cdf3e9788fb9f74d4368c383a605672",
+    "new_detector_freeze": "9a46f0f8301dbbf2338b72d76f65f8b19c0135a7ff2a0ac552a4d577b61c9964",
+    "new_protocol": "4b36d73cd55ae514d2a656af7ecc23e76c27abd4318e914e9739fce3884455c4",
+    "new_sample_manifest": "0e504c9f1ed42eea818b70569e2f9c1a6cae667d45ec0b507c6303125d51c0f2",
+    "old_owner_archive": "71b7f8df399ebeea123bf46ab4cb89d7d6836cb4465b8e3abd7ef984355084a5",
+    "original_replay_annotations": "32e600f0445acb3307f564ec74391aa22300ec07cc5272553a655cd6a4fa89e7",
+    "original_replay_comparison": "026f48b67422a4e82122a232fbf3e0646f594ff83fb2c10de883fa69203aa45f"
+  },
+  "limitations": [
+    "New sample is prospectively selected development evidence with a frozen detector; no tuning after acquisition.",
+    "Model source review is not independent human scientific adjudication.",
+    "All surfaced anchors were checked; complete gold annotations and total recall denominator are unavailable.",
+    "Three source licenses were withheld conservatively by URL check; no retrospective eligibility repair.",
+    "Finite work-family screen cannot exclude all unnamed shared data or private reserved overlap.",
+    "Full texts and detailed case findings are excluded from the public repository."
+  ],
+  "new_development_sample": {
+    "custodian_accepted_negatives": 0,
+    "detector_relationship_bearing_documents": 11,
+    "development_experiment_status": "COMPLETED_DESCRIPTIVE_RUN_WITH_LIMITATIONS",
+    "development_sample_minimum": "MET: 18 safely parsed, 11 detector relationship-bearing, 13 source-located numerical works; work-family status provisional",
+    "frozen_detector_outcomes": {
+      "abstention_scope_or_type_unresolved": 408,
+      "arithmetic_match_source_context_reviewed": 175,
+      "supported_arithmetic_candidate": 5,
+      "unresolved_rounding_balancing": 2
+    },
+    "frozen_detector_relationships": 590,
+    "human_scientific_review": "NOT_RUN",
+    "independent_generalization_qualification": "NOT_ESTABLISHED",
+    "independent_precision_recall_justified": false,
+    "layout_features": {
+      "tables_with_colspan": 29,
+      "tables_with_rowspan": 26
+    },
+    "manual_additional_outcomes": {
+      "arithmetic_match_source_context_reviewed": 82,
+      "supported_missed_arithmetic_candidate": 2
+    },
+    "manual_additional_relationships": 84,
+    "primary_attempted": 30,
+    "registered": 42,
+    "safely_parsed_eligible_documents": 18,
+    "scientific_errors_established": 0,
+    "source_anchor_failures": [],
+    "source_located_numerical_documents": 13,
+    "status_counts": {
+      "analyzed": 18,
+      "license_unresolved": 3,
+      "not_requested": 12,
+      "parser_refusal": 9
+    },
+    "strata_among_analyzed": [
+      "clinical_trials",
+      "diagnostic_prediction",
+      "observational_population",
+      "other_original"
+    ],
+    "tables_inspected": 51,
+    "untouched_positives": 0
+  },
+  "post_freeze_changes": {
+    "smoke_preparation": "Added and independently model-reviewed; never represents smoke extraction as sandbox qualification.",
+    "tools/pdf_percentage_audit.py": {
+      "change": "Non-input Poppler/Docker exit codes remain distinct from malformed-PDF input rejection. Synthetic regression tested after frozen JATS sample.",
+      "delivery_source_sha256": "c9f97b551ea6eb42123980027727a27ac98d7d826c742d35edee014ac131f724",
+      "experiment_source_sha256": "26ee14ffc067be96f19b35e6961ab35077f8a268c1854bf597b78b0824649428",
+      "scientific_effect": "No PDF executed in either real sample; JATS detector/arithmetic bytes unchanged. Frozen snapshots/reports retained."
+    }
+  },
+  "qualification": {
+    "comet_t": "UNRESOLVED; official corrected value established, handoff PDF origin/adjustment unverified; request unsent",
+    "custodian_accepted_negatives": 0,
+    "independent_precision_recall": "NOT_JUSTIFIED",
+    "pdf_sandbox": "BLOCKED: previous managed-socket denial and unreviewed image provenance; no real qualification",
+    "protected_evaluation": "NOT_RUN",
+    "untouched_positives": 0
+  },
+  "schema_version": 1
+}

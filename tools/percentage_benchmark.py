@@ -1,0 +1,459 @@
+"""Offline, source-bound comparison of supplied development percentage reports.
+
+This module reads only explicit manifest paths. It never fetches sources, runs a
+historical executable, or promotes arithmetic annotations to scientific truth.
+"""
+from __future__ import annotations
+
+from collections import Counter, defaultdict
+import hashlib
+import json
+from pathlib import Path
+import re
+from typing import Any
+
+from tools.audit_contracts import validate
+from tools.offline_files import read_regular
+from tools.jats_percentage_audit import MAX_SOURCE_BYTES, JATSSourceError, _parse_jats, _text, _DENOMINATOR_RE, _fragments
+from tools.public_discovery import percentage_recalculation
+
+MAX_JSON_BYTES = 16 * 1024 * 1024
+MAX_ANNOTATIONS = 20000
+MAX_SOURCE_SET_BYTES = 32 * 1024 * 1024
+COMPUTED = {"arithmetic_match", "arithmetic_mismatch_candidate"}
+INTEGER = r"(?:[0-9]{1,3}(?:,[0-9]{3}){1,2}|[0-9]{1,9})"
+PAIR = re.compile(rf"(?<![\w.,+\-−±/])(?P<n>{INTEGER})(?:\s*/\s*(?P<d>{INTEGER}))?\s*\(\s*(?P<p>[0-9]{{1,3}}(?:\.[0-9]{{1,6}})?)\s*%?\s*\)")
+
+
+def digest(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def pairs_in_span(text: str, start: int, end: int) -> list[re.Match]:
+    pairs = list(PAIR.finditer(text[start:end]))
+    if pairs:
+        return pairs
+    # Compact labels such as P12 (...) C4 (...) require the same exhaustive,
+    # bounded component grammar as extraction, never a numeric-token suffix.
+    pairs = []
+    for fragment in _fragments(text):
+        if fragment and start <= fragment["character_start"] and fragment["character_end"] <= end:
+            pair = PAIR.fullmatch(fragment["numeric_quote"])
+            if pair is not None:
+                pairs.append(pair)
+    return pairs
+
+
+def load_json(path: Path) -> Any:
+    return parse_json(read_regular(path, MAX_JSON_BYTES), path)
+
+
+def parse_json(data: bytes, path: Path) -> Any:
+    try:
+        return json.loads(data)
+    except (ValueError, RecursionError) as exc:
+        raise ValueError(f"Invalid benchmark JSON: {path.name}") from exc
+
+
+def confined(root: Path, relative: str) -> Path:
+    rel = Path(relative)
+    if rel.is_absolute() or ".." in rel.parts or "\\" in relative:
+        raise ValueError("Manifest paths must be relative and confined to their manifest directory")
+    path = (root / rel).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError("Manifest path escapes its evidence directory")
+    return path
+
+
+def node_map(data: bytes) -> dict[tuple[int, int], Any]:
+    root = _parse_jats(data)
+    nodes = {}
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        nodes[(node.byte_start, node.byte_end)] = node
+        stack.extend(reversed(node.children))
+    return nodes
+
+
+def check_anchor(anchor: dict[str, Any], nodes: dict[tuple[int, int], Any]) -> str | None:
+    start, end = anchor.get("byte_start"), anchor.get("byte_end")
+    if type(start) is not int or type(end) is not int or start < 0 or end <= start:
+        return "invalid source byte range"
+    node = nodes.get((start, end))
+    if node is None:
+        return "anchor does not identify an exact source element"
+    quote = anchor.get("quote", anchor.get("cell_quote"))
+    text = _text(node)
+    truncated = anchor.get("quote_truncated", anchor.get("cell_quote_truncated", False))
+    if not isinstance(quote, str) or (not text.startswith(quote) if truncated else quote != text):
+        return "anchor quote differs from normalized source text"
+    cs = anchor.get("character_start", anchor.get("normalized_character_start"))
+    ce = anchor.get("character_end", anchor.get("normalized_character_end"))
+    if cs is not None or ce is not None:
+        if type(cs) is not int or type(ce) is not int or not 0 <= cs < ce <= len(text):
+            return "normalized character range is invalid"
+        if "relationship_quote" in anchor and anchor["relationship_quote"] != text[cs:ce]:
+            return "component quote differs from its normalized source span"
+    return None
+
+
+def evidence_errors(value: Any, nodes: dict[tuple[int, int], Any], source_hash: str) -> list[str]:
+    errors: list[str] = []
+    stack = [value]
+    visited = 0
+    while stack:
+        item = stack.pop()
+        visited += 1
+        if visited > 100000:
+            raise ValueError("Detector evidence exceeds the structural limit")
+        if isinstance(item, dict):
+            if "source_sha256" in item and item["source_sha256"] != source_hash:
+                raise ValueError("Detector evidence refers to a different source version")
+            if "byte_start" in item or "byte_end" in item:
+                error = check_anchor(item, nodes)
+                if error:
+                    errors.append(error)
+            stack.extend(item.values())
+        elif isinstance(item, list):
+            stack.extend(item)
+    return errors
+
+
+def _annotation_key(relation: dict[str, Any]):
+    a = relation["anchor"]
+    return a["byte_start"], a["byte_end"], relation["numerator"], relation["reported_percent"]
+
+
+def _result_key(relation: dict[str, Any]):
+    e = relation["evidence"]
+    return e["byte_start"], e["byte_end"], relation["numerator"], relation["reported_percent"]
+
+
+def validate_annotations(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any]], str]:
+    annotation_bytes = read_regular(path, MAX_JSON_BYTES)
+    annotation = parse_json(annotation_bytes, path)
+    validate(annotation, "percentage-annotations.v1.schema.json")
+    docs, ids = {}, set()
+    total = 0
+    source_bytes = 0
+    for doc in annotation["documents"]:
+        document_id = doc["document_id"]
+        if document_id in docs or not document_id or not doc["work_family_id"]:
+            raise ValueError("Duplicate/empty document or work-family identifier")
+        source_path = confined(path.parent, doc["source"]["path"])
+        source = read_regular(source_path, MAX_SOURCE_BYTES)
+        if len(source) > MAX_SOURCE_BYTES or digest(source) != doc["source"]["sha256"]:
+            raise ValueError(f"Source version/hash mismatch: {document_id}")
+        source_bytes += len(source)
+        if source_bytes > MAX_SOURCE_SET_BYTES:
+            raise ValueError("Benchmark source set exceeds the 32 MiB aggregate limit")
+        try:
+            nodes = node_map(source)
+        except JATSSourceError as exc:
+            if doc["relationships"]:
+                raise ValueError(f"Annotated source cannot be parsed safely: {document_id}: {exc}") from exc
+            nodes = {}
+        source_identities = set()
+        for relation in doc["relationships"]:
+            total += 1
+            if total > MAX_ANNOTATIONS:
+                raise ValueError("Benchmark exceeds the 20,000-annotation limit")
+            identity = relation["relationship_id"]
+            if identity in ids:
+                raise ValueError(f"Duplicate relationship identifier: {identity}")
+            ids.add(identity)
+            source_identity = (*_annotation_key(relation), relation["anchor"].get("character_start"), relation["anchor"].get("character_end"))
+            if source_identity in source_identities:
+                raise ValueError("Duplicate annotated source relationship")
+            source_identities.add(source_identity)
+            error = check_anchor(relation["anchor"], nodes)
+            if error:
+                raise ValueError(f"Invalid annotation anchor {identity}: {error}")
+            anchor = relation["anchor"]
+            text = _text(nodes[(anchor["byte_start"], anchor["byte_end"])])
+            pairs = [m for m in pairs_in_span(text, anchor.get("character_start", 0), anchor.get("character_end", len(text)))
+                     if int(m.group("n").replace(",", "")) == relation["numerator"]
+                     and m.group("p") == relation["reported_percent"]]
+            if len(pairs) != 1:
+                raise ValueError(f"Annotation numeric tokens are ambiguous or differ from the source: {identity}")
+            for denominator_anchor in relation["denominator_evidence"]:
+                error = check_anchor(denominator_anchor, nodes)
+                if error:
+                    raise ValueError(f"Invalid denominator evidence {identity}: {error}")
+            if relation["scope_status"].startswith("explicit") and not relation["denominator_evidence"]:
+                raise ValueError(f"Explicit denominator lacks source evidence: {identity}")
+            denominator = relation["denominator"]
+            embedded = pairs[0].group("d")
+            if embedded is not None and int(embedded.replace(",", "")) != denominator:
+                raise ValueError(f"Annotation denominator disagrees with embedded n/N: {identity}")
+            if relation["scope_status"].startswith("explicit"):
+                evidence_values = set()
+                for a in relation["denominator_evidence"]:
+                    evidence_text = _text(nodes[(a["byte_start"], a["byte_end"])])
+                    evidence_values.update(int(m.group("value").replace(",", "")) for m in _DENOMINATOR_RE.finditer(evidence_text))
+                    evidence_values.update(int(m.group("d").replace(",", "")) for m in PAIR.finditer(evidence_text) if m.group("d"))
+                    if re.fullmatch(INTEGER, evidence_text):
+                        evidence_values.add(int(evidence_text.replace(",", "")))
+                if denominator is None or denominator not in evidence_values:
+                    raise ValueError(f"Explicit annotation denominator differs from source evidence: {identity}")
+            if denominator is not None:
+                arithmetic = percentage_recalculation(relation["numerator"], denominator,
+                    relation["reported_percent"], relation["precision"])
+                expected = "arithmetic_match" if arithmetic["arithmetic_matches"] else "arithmetic_mismatch_candidate"
+                if expected != relation["arithmetic_status"]:
+                    raise ValueError(f"Annotation arithmetic disagrees with its declared operands: {identity}")
+        docs[document_id] = {"document": doc, "nodes": nodes}
+    return annotation, docs, digest(annotation_bytes)
+
+
+def taxonomy(reason: str | None, *, missing: bool = False, wrong: bool = False) -> str:
+    if wrong:
+        return "incorrect_denominator_attribution"
+    if missing:
+        return "relationship_not_identified"
+    if reason and ("spans" in reason or "layout" in reason):
+        return "unsupported_table_structure"
+    if reason and "adjustment" in reason:
+        return "weighted_or_adjusted_percentage_handling"
+    if reason and "rounding" in reason:
+        return "rounding_interpretation"
+    if reason == "percentage_context_not_explicit":
+        return "unsupported_scientific_relationship_type"
+    return "ambiguous_denominator_scope" if reason else "supported_relationship"
+
+
+def compare_runs(annotation_path: Path, run_paths: list[Path]) -> dict[str, Any]:
+    annotation, docs, annotation_hash = validate_annotations(annotation_path)
+    if not 1 <= len(run_paths) <= 10:
+        raise ValueError("Provide between one and ten detector runs")
+    if sum(len(doc["relationships"]) for doc in annotation["documents"]) * len(run_paths) > 50000:
+        raise ValueError("Comparison exceeds the 50,000-outcome limit")
+    output_runs, labels = [], set()
+    for run_path in run_paths:
+        run = load_json(run_path)
+        validate(run, "percentage-run.v1.schema.json")
+        if run["label"] in labels:
+            raise ValueError("Duplicate run label")
+        labels.add(run["label"])
+        records = {r["document_id"]: r for r in run["documents"]}
+        if len(records) != len(run["documents"]) or set(records) != set(docs):
+            raise ValueError("Run documents must match the annotation source set exactly")
+        metrics: Counter[str] = Counter({key: 0 for key in (
+            "parsed_documents", "extraction_failures", "tables_inspected", "relationships_detected",
+            "annotated_relationships_surfaced", "arithmetic_matches", "mismatch_candidates", "abstentions",
+            "incorrect_denominator_assignments", "parsed_denominator_disagreements", "unresolved_denominator_disagreements",
+            "source_anchor_failures", "missed_reference_discrepancies", "matched_reference_discrepancies",
+            "candidate_false_positives_against_annotations", "unreviewed_mismatch_candidates",
+            "conditional_mismatch_candidates", "unresolved_mismatch_candidates")})
+        reasons, causes = Counter(), Counter()
+        outcomes, document_results, unannotated = [], [], []
+        for document_id in sorted(docs):
+            doc, nodes = docs[document_id]["document"], docs[document_id]["nodes"]
+            record = records[document_id]
+            if record["source_sha256"] != doc["source"]["sha256"]:
+                raise ValueError(f"Run source version mismatch: {document_id}")
+            if record["status"] == "extraction_failed":
+                if record["report_path"] is not None or record["report_sha256"] is not None or not record["reason"]:
+                    raise ValueError("An extraction failure must have a reason and no fabricated report")
+                metrics["extraction_failures"] += 1
+                document_results.append({"document_id": document_id, "source_sha256": record["source_sha256"],
+                    "status": "extraction_failed", "reason": record["reason"], "relationships_detected": 0})
+                results = []
+            else:
+                if not record["report_path"] or not record["report_sha256"] or record["reason"] is not None:
+                    raise ValueError("A successful extraction needs an integrity-committed report")
+                report_path = confined(run_path.parent, record["report_path"])
+                report_bytes = read_regular(report_path, MAX_JSON_BYTES)
+                if len(report_bytes) > MAX_JSON_BYTES or digest(report_bytes) != record["report_sha256"]:
+                    raise ValueError(f"Detector report hash mismatch: {document_id}")
+                report = parse_json(report_bytes, report_path)
+                if report.get("schema_version") == "research-audit.v1":
+                    validate(report, "research-audit.v1.schema.json")
+                    if (report["document"]["document_id"] != document_id
+                            or report["document"]["input_format"] != "jats"
+                            or report["processing"]["status"] != "completed"
+                            or report["processing"]["reason"] is not None
+                            or report["processing"]["relationships_detected"] != len(report["findings"])):
+                        raise ValueError("Audit processing identity/status/count contradicts analyzed manifest record")
+                    if report["detector_files"] != run["detector_files"]:
+                        raise ValueError("Audit detector identity contradicts run manifest")
+                    source_hash = report["document"]["source_sha256"]
+                    tables = report["processing"]["tables_inspected"]
+                    results = [item["relationship"] for item in report["findings"]]
+                else:
+                    source_hash, tables, results = report.get("source_sha256"), report.get("tables_inspected"), report.get("results")
+                    if report.get("percentage_cells_reviewed") != len(results or []):
+                        raise ValueError("Detector report relationship count is inconsistent")
+                if source_hash != record["source_sha256"]:
+                    raise ValueError(f"Detector report source version mismatch: {document_id}")
+                if type(tables) is not int or not 0 <= tables <= 512 or not isinstance(results, list) or len(results) > 1000:
+                    raise ValueError("Invalid or unbounded detector report")
+                metrics["parsed_documents"] += 1
+                metrics["tables_inspected"] += tables
+                document_results.append({"document_id": document_id, "source_sha256": source_hash,
+                    "status": "analyzed", "tables_inspected": tables, "relationships_detected": len(results)})
+            indexed: dict[tuple, list[tuple[int, dict[str, Any], list[str]]]] = defaultdict(list)
+            seen_outputs = set()
+            for index, relation in enumerate(results):
+                if not isinstance(relation, dict) or type(relation.get("numerator")) is not int or not isinstance(relation.get("reported_percent"), str):
+                    raise ValueError("Invalid detector relationship")
+                errors = evidence_errors(relation.get("evidence"), nodes, record["source_sha256"])
+                if relation.get("status") not in {"arithmetic_match", "arithmetic_mismatch_candidate", "scope_ambiguous", "rounding_ambiguous"}:
+                    raise ValueError("Unknown detector relationship status")
+                denominator = relation.get("denominator")
+                if denominator is not None and type(denominator) is not int:
+                    raise ValueError("Detector denominator must be an integer or null")
+                if relation.get("status") in COMPUTED:
+                    arithmetic = percentage_recalculation(relation["numerator"], denominator,
+                        relation["reported_percent"], relation.get("display_precision"))
+                    expected_status = "arithmetic_match" if arithmetic["arithmetic_matches"] else "arithmetic_mismatch_candidate"
+                    if (relation["status"] != expected_status
+                            or relation.get("contract_expected_percent") != arithmetic["rounded_percent"]
+                            or relation.get("exact_ratio_percent") != arithmetic["exact_ratio_percent"]):
+                        raise ValueError("Detector arithmetic is inconsistent with its declared operands")
+                evidence = relation.get("evidence", {})
+                source_node = nodes.get((evidence.get("byte_start"), evidence.get("byte_end")))
+                if source_node is not None:
+                    text = _text(source_node)
+                    tokens = [m for m in pairs_in_span(text, evidence.get("normalized_character_start", 0), evidence.get("normalized_character_end", len(text))) if int(m.group("n").replace(",", "")) == relation["numerator"] and m.group("p") == relation["reported_percent"]]
+                    if not tokens and "count_evidence" in evidence:
+                        count_quote = evidence["count_evidence"].get("quote", "").replace(",", "").strip()
+                        tokens = [True] if (count_quote.isdigit() and int(count_quote) == relation["numerator"]
+                            and text.strip().rstrip("%").strip() == relation["reported_percent"]) else []
+                    if len(tokens) != 1:
+                        errors.append("detector numeric tokens do not identify one source relationship")
+                metrics["source_anchor_failures"] += len(errors)
+                try:
+                    key = _result_key(relation)
+                except (KeyError, TypeError) as exc:
+                    raise ValueError("Detector relationship is missing source-anchor fields") from exc
+                evidence = relation["evidence"]
+                full_key = (*key, evidence.get("normalized_character_start"), evidence.get("normalized_character_end"))
+                if full_key in seen_outputs:
+                    raise ValueError("Duplicate detector relationship")
+                seen_outputs.add(full_key)
+                indexed[key].append((index, relation, errors))
+                metrics["relationships_detected"] += 1
+                status = relation.get("status")
+                if status == "arithmetic_match":
+                    metrics["arithmetic_matches"] += 1
+                elif status == "arithmetic_mismatch_candidate":
+                    metrics["mismatch_candidates"] += 1
+                else:
+                    metrics["abstentions"] += 1
+                    reasons[str(relation.get("reason"))] += 1
+                if relation.get("conditional_calculation", {}).get("arithmetic_matches") is False:
+                    metrics["conditional_mismatch_candidates"] += 1
+            consumed = set()
+            for reference in doc["relationships"]:
+                choices = indexed.get(_annotation_key(reference), [])
+                if len(choices) > 1:
+                    a = reference["anchor"]
+                    choices = [choice for choice in choices if
+                        choice[1]["evidence"].get("normalized_character_start") == a.get("character_start")
+                        and choice[1]["evidence"].get("normalized_character_end") == a.get("character_end")]
+                selected = choices[0] if len(choices) == 1 and choices[0][0] not in consumed else None
+                relation = selected[1] if selected else None
+                if selected:
+                    consumed.add(selected[0])
+                trusted_span = selected is not None and not selected[2]
+                if trusted_span:
+                    metrics["annotated_relationships_surfaced"] += 1
+                observed_denominator = relation.get("denominator") if relation else None
+                different_denominator = observed_denominator is not None and observed_denominator != reference["denominator"]
+                unresolved_scope = reference["scope_status"] in {"derived_unresolved", "unknown"}
+                computed = trusted_span and relation.get("status") in COMPUTED
+                if different_denominator:
+                    metrics["parsed_denominator_disagreements"] += 1
+                    if unresolved_scope:
+                        metrics["unresolved_denominator_disagreements"] += 1
+                    elif computed:
+                        metrics["incorrect_denominator_assignments"] += 1
+                reference_discrepancy = reference["arithmetic_status"] == "arithmetic_mismatch_candidate"
+                mismatch = trusted_span and relation.get("status") == "arithmetic_mismatch_candidate"
+                credited_mismatch = bool(mismatch and not different_denominator and not unresolved_scope
+                                         and observed_denominator is not None)
+                if reference_discrepancy and credited_mismatch:
+                    metrics["matched_reference_discrepancies"] += 1
+                    if reference["review_outcome"] in {"unresolved_scope", "unresolved_rounding"}:
+                        metrics["unresolved_mismatch_candidates"] += 1
+                elif reference_discrepancy:
+                    metrics["missed_reference_discrepancies"] += 1
+                elif mismatch:
+                    if unresolved_scope:
+                        metrics["unresolved_mismatch_candidates"] += 1
+                    else:
+                        metrics["candidate_false_positives_against_annotations"] += 1
+                reason = relation.get("reason") if relation else "not_emitted"
+                cause = ("source_extraction_failure" if record["status"] == "extraction_failed" else
+                    taxonomy(reason, missing=not trusted_span, wrong=bool(different_denominator and not unresolved_scope)))
+                causes[cause] += 1
+                outcomes.append({"relationship_id": reference["relationship_id"], "document_id": document_id,
+                    "work_family_id": doc["work_family_id"], "source_sha256": record["source_sha256"],
+                    "reference_scope": reference["scope_status"], "reference_arithmetic": reference["arithmetic_status"],
+                    "reference_review_outcome": reference["review_outcome"],
+                    "status": relation.get("status") if relation else "not_emitted", "reason": reason,
+                    "source_anchor_valid": trusted_span, "expected_denominator": reference["denominator"],
+                    "reference_discrepancy_detected": bool(reference_discrepancy and credited_mismatch),
+                    "observed_denominator": observed_denominator, "taxonomy": cause,
+                    "conditional_calculation": relation.get("conditional_calculation") if relation else None})
+            for index, relation in enumerate(results):
+                if index not in consumed:
+                    if relation.get("status") == "arithmetic_mismatch_candidate":
+                        metrics["unreviewed_mismatch_candidates"] += 1
+                    unannotated.append({"document_id": document_id, "status": relation.get("status"),
+                        "reason": relation.get("reason"), "numerator": relation.get("numerator"),
+                        "reported_percent": relation.get("reported_percent"), "evidence": relation.get("evidence")})
+        output_runs.append({"label": run["label"], "detector_revision": run["detector_revision"],
+            "detector_files": run["detector_files"], "metrics": dict(sorted(metrics.items())),
+            "abstentions_by_reason": dict(sorted(reasons.items())), "error_taxonomy": dict(sorted(causes.items())),
+            "documents": document_results, "relationships": outcomes, "unannotated_outputs": unannotated})
+    report = {"schema_version": "research-benchmark.v1", "exposure": "development",
+        "annotation_sha256": annotation_hash, "document_count": len(docs),
+        "work_family_count": len({doc["document"]["work_family_id"] for doc in docs.values()}),
+        "annotation_count": sum(len(doc["document"]["relationships"]) for doc in docs.values()),
+        "runs": output_runs,
+        "limitations": ["Developer-exposed benchmark; no untouched holdout or custodian acceptance evidence.",
+            "Arithmetic reference labels and denominator mappings are supplied annotations, not independent scientific adjudication.",
+            "Unresolved rounding and derived denominator scopes remain unresolved even when arithmetic matches.",
+            "Work-family identifiers are supplied review metadata; unnamed shared datasets can remain undetected.",
+            "No independent precision or recall estimate or end-to-end scientific error detection claim is supported."]}
+    validate(report, "research-benchmark.v1.schema.json")
+    return report
+
+
+def regression_failures(report: dict[str, Any]) -> list[str]:
+    failures = []
+    for before, after in zip(report["runs"], report["runs"][1:]):
+        a, b = before["metrics"], after["metrics"]
+        if b["annotated_relationships_surfaced"] < a["annotated_relationships_surfaced"]:
+            failures.append(f"{after['label']} loses annotated extraction coverage")
+        before_hits = {r["relationship_id"] for r in before["relationships"] if r["reference_discrepancy_detected"]}
+        after_hits = {r["relationship_id"] for r in after["relationships"] if r["reference_discrepancy_detected"]}
+        if before_hits - after_hits:
+            failures.append(f"{after['label']} loses {len(before_hits - after_hits)} source-bound discrepancy candidates; review any deliberate scope abstention")
+        for key in ("incorrect_denominator_assignments", "source_anchor_failures", "candidate_false_positives_against_annotations"):
+            if b[key] > a[key]:
+                failures.append(f"{after['label']} increases {key}")
+    return failures
+
+
+def comparison_markdown(report: dict[str, Any]) -> str:
+    from tools.research_audit import safe_text
+    lines = ["# Development percentage comparison", "",
+        f"Annotation SHA-256: `{report['annotation_sha256']}`.",
+        f"Documents: {report['document_count']}; supplied work families: {report['work_family_count']}; annotated relationships: {report['annotation_count']}.", "",
+        "| Metric | " + " | ".join(safe_text(run["label"]) for run in report["runs"]) + " |",
+        "|---|" + "---:|" * len(report["runs"])]
+    for key in report["runs"][0]["metrics"]:
+        lines.append("| " + safe_text(key) + " | " + " | ".join(str(run["metrics"][key]) for run in report["runs"]) + " |")
+    for run in report["runs"]:
+        lines += ["", f"## {safe_text(run['label'])}", "", f"Detector revision: {safe_text(run['detector_revision'])}.", "",
+                  "Abstentions by reason: " + safe_text(json.dumps(run["abstentions_by_reason"], sort_keys=True)), "",
+                  "| Relationship | Status | Expected / observed denominator | Reason / taxonomy |", "|---|---|---|---|"]
+        for row in run["relationships"]:
+            if row["status"] != "arithmetic_match" or row["observed_denominator"] != row["expected_denominator"]:
+                lines.append(f"| {safe_text(row['relationship_id'])} | {safe_text(row['status'])} | {row['expected_denominator']} / {row['observed_denominator']} | {safe_text(row['reason'])}; {safe_text(row['taxonomy'])} |")
+    lines += ["", *["- " + safe_text(item) for item in report["limitations"]], ""]
+    return "\n".join(lines)

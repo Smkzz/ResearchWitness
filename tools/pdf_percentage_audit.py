@@ -20,6 +20,7 @@ from threading import Event, Thread
 from typing import Any
 
 from tools.public_discovery import percentage_recalculation
+from tools.offline_files import read_regular
 
 MAX_PDF_BYTES = 8 * 1024 * 1024
 MAX_LAYOUT_TEXT_BYTES = 2 * 1024 * 1024
@@ -268,8 +269,14 @@ def _extract_layout_text(data: bytes) -> str:
                     raise PDFSourceError("Isolated Poppler output stream did not close")
                 if exceeded_limit.is_set():
                     raise PDFSourceError("Isolated Poppler output exceeds the 2 MiB limit")
-                if return_code != 0:
+                if return_code == 1:
                     raise PDFSourceError("Isolated Poppler could not extract this PDF")
+                if return_code != 0:
+                    # Only Poppler's documented input-open rejection is a
+                    # source-specific negative fixture outcome. Docker reserved
+                    # exits, signals/OOM, output errors and general errors must
+                    # not masquerade as successful malformed-input coverage.
+                    raise PDFSourceError(f"Isolated Poppler failed with unclassified exit code {return_code}")
             finally:
                 if process.poll() is None:
                     process.kill()
@@ -548,7 +555,7 @@ def parse_pdf_layout_text(layout_text: str, source_sha256: str) -> dict[str, Any
                         arithmetic["rounded_percent"] if arithmetic is not None else None
                     ),
                     "exact_ratio_percent": (
-                        arithmetic["unrounded_decimal_percent"] if arithmetic is not None else None
+                        arithmetic["exact_ratio_percent"] if arithmetic is not None else None
                     ),
                     "display_precision": len(row["reported"].partition(".")[2]),
                     "evidence": evidence,
@@ -588,10 +595,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("pdf", help="one local text-based PDF file")
     args = parser.parse_args(argv)
     try:
-        with Path(args.pdf).open("rb") as source:
-            data = source.read(MAX_PDF_BYTES + 1)
+        data = read_regular(Path(args.pdf), MAX_PDF_BYTES)
         report = audit_pdf_percentage_tables(data)
-    except (OSError, PDFSourceError) as exc:
+    except (OSError, ValueError) as exc:
         print(f"PDF audit failed: {exc}", file=sys.stderr)
         return 2
     json.dump(report, sys.stdout, ensure_ascii=False, sort_keys=True, indent=2)
