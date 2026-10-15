@@ -2,11 +2,18 @@
 from __future__ import annotations
 
 import hashlib
+import io
+import os
+from pathlib import Path
+import subprocess
 import unittest
+from unittest import mock
 
 from tools.pdf_percentage_audit import (
     MAX_PDF_BYTES,
     PDFSourceError,
+    SANDBOX_IMAGE_ENV,
+    _extract_layout_text,
     audit_pdf_percentage_tables,
     parse_pdf_layout_text,
 )
@@ -17,6 +24,180 @@ def layout(body: str) -> str:
 
 
 class PDFPercentageAuditTests(unittest.TestCase):
+    @staticmethod
+    def seccomp_info_result(options='["name=seccomp,profile=builtin"]'):
+        return mock.Mock(returncode=0, stdout=options)
+
+    def test_extraction_fails_closed_without_a_pinned_sandbox_image(self):
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with mock.patch("tools.pdf_percentage_audit.shutil.which") as which:
+                with self.assertRaisesRegex(PDFSourceError, "SHA-256-pinned"):
+                    _extract_layout_text(b"%PDF-1.7\n")
+        which.assert_not_called()
+
+    def test_extraction_fails_closed_when_docker_is_unavailable(self):
+        with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: "sha256:" + "a" * 64}, clear=True):
+            with mock.patch("tools.pdf_percentage_audit.shutil.which", return_value=None):
+                with self.assertRaisesRegex(PDFSourceError, "Docker is required"):
+                    _extract_layout_text(b"%PDF-1.7\n")
+
+    def test_extraction_rejects_a_sandbox_image_id_mismatch(self):
+        configured = "sha256:" + "a" * 64
+        with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True):
+            with mock.patch("tools.pdf_percentage_audit.shutil.which", return_value="/usr/bin/docker"):
+                with mock.patch(
+                    "tools.pdf_percentage_audit.subprocess.run",
+                    side_effect=[
+                        self.seccomp_info_result(),
+                        mock.Mock(returncode=0, stdout="sha256:" + "b" * 64 + "\n"),
+                    ],
+                ):
+                    with mock.patch("tools.pdf_percentage_audit.subprocess.Popen") as popen:
+                        with self.assertRaisesRegex(PDFSourceError, "unavailable or unverified"):
+                            _extract_layout_text(b"%PDF-1.7\n")
+        popen.assert_not_called()
+
+    def test_extraction_fails_closed_without_the_docker_builtin_seccomp_profile(self):
+        configured = "sha256:" + "a" * 64
+        with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True):
+            with mock.patch("tools.pdf_percentage_audit.shutil.which", return_value="/usr/bin/docker"):
+                with mock.patch(
+                    "tools.pdf_percentage_audit.subprocess.run",
+                    return_value=self.seccomp_info_result('["name=seccomp,profile=unconfined"]'),
+                ):
+                    with mock.patch("tools.pdf_percentage_audit.subprocess.Popen") as popen:
+                        with self.assertRaisesRegex(PDFSourceError, "built-in default seccomp"):
+                            _extract_layout_text(b"%PDF-1.7\n")
+        popen.assert_not_called()
+
+    def test_extraction_rejects_image_baked_environment_entrypoint_or_volumes(self):
+        configured = "sha256:" + "a" * 64
+        bad_configs = (
+            '{"Env":["APP_MODE=test"],"Entrypoint":null,"Volumes":null}',
+            '{"Env":null,"Entrypoint":["/bin/sh"],"Volumes":null}',
+            '{"Env":null,"Entrypoint":null,"Volumes":{"/data":{}}}',
+        )
+        for bad_config in bad_configs:
+            with self.subTest(bad_config=bad_config):
+                with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True):
+                    with mock.patch("tools.pdf_percentage_audit.shutil.which", return_value="/usr/bin/docker"):
+                        with mock.patch(
+                            "tools.pdf_percentage_audit.subprocess.run",
+                            side_effect=[
+                                self.seccomp_info_result(),
+                                mock.Mock(returncode=0, stdout=configured + "\n"),
+                                mock.Mock(returncode=0, stdout=bad_config),
+                            ],
+                        ):
+                            with mock.patch("tools.pdf_percentage_audit.subprocess.Popen") as popen:
+                                with self.assertRaisesRegex(PDFSourceError, "no baked environment"):
+                                    _extract_layout_text(b"%PDF-1.7\n")
+                popen.assert_not_called()
+
+    def test_extraction_uses_network_disabled_credential_free_container(self):
+        configured = "sha256:" + "a" * 64
+        extracted = b"Table 1: Example\nCount (%)\nCategory 1 (100.00)\n"
+        child = mock.Mock()
+        child.stdout = io.BytesIO(extracted)
+        child.wait.return_value = 0
+
+        def popen_side_effect(command, **kwargs):
+            self.assertEqual(kwargs["stdin"].read(), b"%PDF-1.7 synthetic bytes")
+            self.assertEqual(kwargs["env"], {"PATH": os.defpath, "LANG": "C", "LC_ALL": "C"})
+            self.assertIn("--network", command)
+            self.assertEqual(command[command.index("--network") + 1], "none")
+            self.assertIn("--read-only", command)
+            self.assertIn("--cap-drop", command)
+            self.assertEqual(command[command.index("--cap-drop") + 1], "ALL")
+            self.assertIn("--pids-limit", command)
+            self.assertIn("--memory", command)
+            self.assertIn("HTTP_PROXY=", command)
+            self.assertIn("HTTPS_PROXY=", command)
+            self.assertIn("ALL_PROXY=", command)
+            self.assertIn("no-new-privileges:true", command)
+            self.assertNotIn("seccomp=unconfined", command)
+            self.assertIn("--cidfile", command)
+            Path(command[command.index("--cidfile") + 1]).write_text("a" * 64, encoding="ascii")
+            self.assertNotIn("--rm", command)
+            self.assertFalse(any(arg in {"-v", "--volume", "--mount"} for arg in command))
+            return child
+
+        with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True):
+            with mock.patch("tools.pdf_percentage_audit.shutil.which", return_value="/usr/bin/docker"):
+                with mock.patch(
+                    "tools.pdf_percentage_audit.subprocess.run",
+                    side_effect=[
+                        self.seccomp_info_result(),
+                        mock.Mock(returncode=0, stdout=configured + "\n"),
+                        mock.Mock(
+                            returncode=0,
+                            stdout='{"Env":null,"Entrypoint":null,"Volumes":null}',
+                        ),
+                        mock.Mock(returncode=0, stdout=""),
+                    ],
+                ):
+                    with mock.patch(
+                        "tools.pdf_percentage_audit.subprocess.Popen",
+                        side_effect=popen_side_effect,
+                    ):
+                        self.assertEqual(
+                            _extract_layout_text(b"%PDF-1.7 synthetic bytes"),
+                            extracted.decode("utf-8"),
+                        )
+
+    def test_timeout_removes_verified_container_id_after_killing_docker_client(self):
+        configured = "sha256:" + "a" * 64
+        child = mock.Mock()
+        child.stdout = io.BytesIO(b"")
+        child.wait.side_effect = [subprocess.TimeoutExpired("docker run", 20), 137]
+        child.poll.return_value = 137
+
+        def start_child(command, **kwargs):
+            Path(command[command.index("--cidfile") + 1]).write_text("b" * 64, encoding="ascii")
+            return child
+
+        with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True):
+            with mock.patch("tools.pdf_percentage_audit.shutil.which", return_value="/usr/bin/docker"):
+                with mock.patch(
+                    "tools.pdf_percentage_audit.subprocess.run",
+                    side_effect=[
+                        self.seccomp_info_result(),
+                        mock.Mock(returncode=0, stdout=configured + "\n"),
+                        mock.Mock(returncode=0, stdout='{"Env":null,"Entrypoint":null,"Volumes":null}'),
+                        mock.Mock(returncode=0, stdout=""),
+                    ],
+                ) as docker_run:
+                    with mock.patch("tools.pdf_percentage_audit.subprocess.Popen", side_effect=start_child) as popen:
+                        with self.assertRaisesRegex(PDFSourceError, "20-second extraction limit"):
+                            _extract_layout_text(b"%PDF-1.7 synthetic bytes")
+        child.kill.assert_called_once()
+        cleanup_command = docker_run.call_args_list[-1].args[0]
+        self.assertEqual(cleanup_command[-4:], ["container", "rm", "--force", "b" * 64])
+
+    def test_cleanup_failure_fails_closed_after_pdf_extraction(self):
+        configured = "sha256:" + "a" * 64
+        child = mock.Mock()
+        child.stdout = io.BytesIO(b"Table 1: Example\nCount (%)\nCategory 1 (100.00)\n")
+        child.wait.return_value = 0
+
+        def start_child(command, **kwargs):
+            Path(command[command.index("--cidfile") + 1]).write_text("c" * 64, encoding="ascii")
+            return child
+        with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True):
+            with mock.patch("tools.pdf_percentage_audit.shutil.which", return_value="/usr/bin/docker"):
+                with mock.patch(
+                    "tools.pdf_percentage_audit.subprocess.run",
+                    side_effect=[
+                        self.seccomp_info_result(),
+                        mock.Mock(returncode=0, stdout=configured + "\n"),
+                        mock.Mock(returncode=0, stdout='{"Env":null,"Entrypoint":null,"Volumes":null}'),
+                        mock.Mock(returncode=1, stderr="permission denied"),
+                    ],
+                ):
+                    with mock.patch("tools.pdf_percentage_audit.subprocess.Popen", side_effect=start_child):
+                        with self.assertRaisesRegex(PDFSourceError, "container cleanup"):
+                            _extract_layout_text(b"%PDF-1.7 synthetic bytes")
+
     def test_infers_percent_context_from_repeated_count_denominator_matches(self):
         text = layout(
             """Table 1: Reasons for study completion

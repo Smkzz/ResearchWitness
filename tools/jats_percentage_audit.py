@@ -28,15 +28,23 @@ MAX_RESULTS = 1_000
 MAX_ADJUSTMENT_NOTES = 8
 MAX_EVIDENCE_TEXT = 500
 
+_INTEGER_TOKEN = r"(?:[0-9]{1,3}(?:,[0-9]{3}){1,2}|[0-9]{1,9})"
 _COUNT_PERCENT_RE = re.compile(
-    r"^\s*(?P<count>[0-9]{1,9})\s*\(\s*"
+    rf"^\s*(?P<count>{_INTEGER_TOKEN})\s*\(\s*"
     r"(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*(?P<symbol>%?)\s*\)\s*$"
+)
+_COUNT_RATIO_PERCENT_RE = re.compile(
+    rf"^\s*(?P<count>{_INTEGER_TOKEN})\s*/\s*(?P<denominator>{_INTEGER_TOKEN})"
+    r"\s*\(\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*(?P<symbol>%?)\s*\)"
+    r"\s*(?:[*#†‡]+)?\s*$"
 )
 _PERCENT_ONLY_RE = re.compile(
     r"^\s*(?P<percent>[0-9]{1,3}(?:\.[0-9]{1,6})?)\s*%?\s*$"
 )
-_COUNT_ONLY_RE = re.compile(r"^\s*(?P<count>[0-9]{1,9})\s*$")
-_DENOMINATOR_RE = re.compile(r"(?<![A-Za-z0-9])(?:n|N)\s*[=:]\s*([0-9]{1,9})(?![0-9])")
+_COUNT_ONLY_RE = re.compile(rf"^\s*(?P<count>{_INTEGER_TOKEN})\s*$")
+_DENOMINATOR_RE = re.compile(
+    rf"(?<![A-Za-z0-9])(?:n|N)\s*[=:]\s*(?P<value>{_INTEGER_TOKEN})(?![0-9,])"
+)
 _HEADER_CUE_RE = re.compile(
     r"\b(?:parameter|variable|characteristic|value|count|number|percent(?:age)?)\b",
     re.IGNORECASE,
@@ -241,7 +249,10 @@ def _denominator_facts(nodes: Iterable[tuple[str, _Node]]) -> list[dict[str, Any
     for role, node in nodes:
         quote = _text(node)
         for match in _DENOMINATOR_RE.finditer(quote):
-            facts.append({"value": int(match.group(1)), "evidence": _evidence(node, role, quote)})
+            facts.append({
+                "value": int(match.group("value").replace(",", "")),
+                "evidence": _evidence(node, role, quote),
+            })
     return facts
 
 
@@ -300,8 +311,16 @@ def _candidate_from_cell(
     rounding_note: str | None,
 ) -> dict[str, Any] | None:
     cell_quote = _text(cell)
+    count_ratio = _COUNT_RATIO_PERCENT_RE.fullmatch(cell_quote)
     combined = _COUNT_PERCENT_RE.fullmatch(cell_quote)
-    if combined:
+    ratio_denominator: int | None = None
+    if count_ratio:
+        count_text = count_ratio.group("count")
+        percent_text = count_ratio.group("percent")
+        has_percent_symbol = bool(count_ratio.group("symbol"))
+        ratio_denominator = int(count_ratio.group("denominator").replace(",", ""))
+        count_evidence: dict[str, Any] | None = None
+    elif combined:
         count_text = combined.group("count")
         percent_text = combined.group("percent")
         has_percent_symbol = bool(combined.group("symbol"))
@@ -318,7 +337,7 @@ def _candidate_from_cell(
     row_denominator_header_evidence: list[dict[str, Any]] = []
     row_denominator_cell_evidence: dict[str, Any] | None = None
     row_denominator_missing = False
-    if not combined:
+    if not combined and not count_ratio:
         # Separate count and percent columns are considered only when their
         # headers name each role; all other layouts abstain instead of guessing.
         percent_only = _PERCENT_ONLY_RE.fullmatch(cell_quote)
@@ -357,7 +376,9 @@ def _candidate_from_cell(
                     previous, "row_denominator_cell", _text(previous)
                 )
                 if denominator_match:
-                    row_explicit_denominator = int(denominator_match.group("count"))
+                    row_explicit_denominator = int(
+                        denominator_match.group("count").replace(",", "")
+                    )
                     row_denominator_evidence = row_denominator_cell_evidence
                 else:
                     row_denominator_missing = True
@@ -398,7 +419,10 @@ def _candidate_from_cell(
     denominator: int | None = None
     denominator_scope: str | None = None
     ambiguity: str | None = None
-    if unsupported_header_has_denominator or (
+    if ratio_denominator is not None:
+        denominator = ratio_denominator
+        denominator_scope = "cell_ratio"
+    elif unsupported_header_has_denominator or (
         header_layout_unsupported
         and (header_facts or not has_percent_symbol or row_explicit_denominator is not None)
     ):
@@ -421,7 +445,7 @@ def _candidate_from_cell(
     else:
         ambiguity = "no_explicit_denominator"
 
-    if (
+    if ratio_denominator is None and (
         (row_specific_denominator_context or row_denominator_missing)
         and row_explicit_denominator is None
     ):
@@ -432,11 +456,11 @@ def _candidate_from_cell(
         ambiguity = "adjustment_method_scope_not_mapped"
         denominator = None
         denominator_scope = None
-    if row_facts:
+    if ratio_denominator is None and row_facts:
         row_values = _unique_values(row_facts)
         if len(row_values) > 1 or denominator is None or row_values != {denominator}:
             ambiguity = "row_level_denominator_scope_unclear"
-    if group_facts:
+    if ratio_denominator is None and group_facts:
         group_values = _unique_values(group_facts)
         if len(group_values) > 1 or denominator is None or group_values != {denominator}:
             ambiguity = "row_group_denominator_scope_unclear"
@@ -455,6 +479,11 @@ def _candidate_from_cell(
         "column_headers": [text[:MAX_EVIDENCE_TEXT] for text in header_texts],
         "denominator_sources": header_facts + global_facts + group_facts + row_facts,
     }
+    if ratio_denominator is not None:
+        evidence["denominator_sources"].append({
+            "value": ratio_denominator,
+            "evidence": _evidence(cell, "cell_ratio_denominator", cell_quote),
+        })
     if row_denominator_evidence is not None:
         evidence["denominator_sources"].append({
             "value": row_explicit_denominator,
@@ -475,7 +504,7 @@ def _candidate_from_cell(
     result: dict[str, Any] = {
         "status": "scope_ambiguous",
         "reason": ambiguity,
-        "numerator": int(count_text),
+        "numerator": int(count_text.replace(",", "")),
         "denominator": denominator,
         "denominator_scope": denominator_scope,
         "reported_percent": percent_text,
@@ -498,7 +527,7 @@ def _candidate_from_cell(
         return result
     try:
         arithmetic = percentage_recalculation(
-            int(count_text),
+            int(count_text.replace(",", "")),
             denominator,
             percent_text,
             len(percent_text.partition(".")[2]),

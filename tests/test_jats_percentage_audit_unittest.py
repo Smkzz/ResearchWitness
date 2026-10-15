@@ -68,6 +68,53 @@ class JATSPercAuditTests(unittest.TestCase):
             ["column_header"] * 4,
         )
 
+    def test_reads_grouped_counts_and_denominators_without_truncating_at_commas(self):
+        data = jats(
+            '<table-wrap><caption><p>Analysis set N=304,997.</p></caption><table>'
+            '<thead><tr><th>Reason</th><th>n (%)</th></tr></thead><tbody>'
+            '<tr><td>Reason A</td><td>7,362 (2.4)</td></tr></tbody>'
+            '</table></table-wrap>'
+        )
+        result = audit_jats_percentage_tables(data)["results"][0]
+        self.assertEqual(result["status"], "arithmetic_match")
+        self.assertEqual(result["numerator"], 7362)
+        self.assertEqual(result["denominator"], 304997)
+        self.assertEqual(result["exact_ratio_percent"], "736200/304997")
+
+    def test_uses_explicit_n_over_n_ratio_in_a_cell(self):
+        data = jats(
+            '<table-wrap><caption><p>Population N=120.</p></caption><table>'
+            '<thead><tr><th>Characteristic</th><th>n/N (%)</th></tr></thead><tbody>'
+            '<tr><td>Female</td><td>1,100/2,000 (54.9%) #</td></tr></tbody>'
+            '</table></table-wrap>'
+        )
+        result = audit_jats_percentage_tables(data)["results"][0]
+        self.assertEqual(result["status"], "arithmetic_mismatch_candidate")
+        self.assertEqual(result["numerator"], 1100)
+        self.assertEqual(result["denominator"], 2000)
+        self.assertEqual(result["denominator_scope"], "cell_ratio")
+        self.assertEqual(result["contract_expected_percent"], "55.0")
+        denominator = result["evidence"]["denominator_sources"][-1]
+        self.assertEqual(denominator["value"], 2000)
+        self.assertEqual(denominator["evidence"]["role"], "cell_ratio_denominator")
+        self.assertEqual(
+            data[denominator["evidence"]["byte_start"]:denominator["evidence"]["byte_end"]],
+            b"<td>1,100/2,000 (54.9%) #</td>",
+        )
+
+    def test_rejects_malformed_thousands_grouping_in_count_and_denominator(self):
+        data = jats(
+            '<table-wrap><caption><p>Analysis set N=304,99.</p></caption><table>'
+            '<thead><tr><th>Reason</th><th>n (%)</th></tr></thead><tbody>'
+            '<tr><td>Reason A</td><td>7,362 (2.4)</td></tr>'
+            '<tr><td>Reason B</td><td>7,36 (2.4)</td></tr></tbody>'
+            '</table></table-wrap>'
+        )
+        report = audit_jats_percentage_tables(data)
+        self.assertEqual(len(report["results"]), 1)
+        self.assertEqual(report["results"][0]["reason"], "no_explicit_denominator")
+        self.assertEqual(report["results"][0]["numerator"], 7362)
+
     def test_abstains_when_row_group_marks_per_row_n_over_n_denominators(self):
         data = jats(
             '<table-wrap><caption><p>Analysis set (N=100).</p></caption><table><tbody>'

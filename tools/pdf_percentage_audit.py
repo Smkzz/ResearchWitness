@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -27,6 +28,9 @@ MAX_TABLES = 200
 MAX_RESULTS = 1_000
 MAX_EVIDENCE_TEXT = 500
 EXTRACTION_TIMEOUT_SECONDS = 20
+SANDBOX_IMAGE_ENV = "RESEARCHWITNESS_PDF_SANDBOX_IMAGE"
+SANDBOX_MEMORY = "512m"
+SANDBOX_TMPFS = "32m"
 
 _PDF_SIGNATURE = b"%PDF-"
 _SOURCE_HASH_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -61,73 +65,228 @@ class PDFSourceError(ValueError):
     """The PDF is unsupported, malformed for extraction, or outside limits."""
 
 
-def _extract_layout_text(data: bytes) -> str:
-    executable = shutil.which("pdftotext")
-    if executable is None:
-        raise PDFSourceError("Poppler pdftotext is required for PDF extraction")
+def _remove_sandbox_container(
+    docker_prefix: list[str], docker_env: dict[str, str], container_id_file: Path
+) -> None:
+    try:
+        container_id = container_id_file.read_text(encoding="ascii").strip()
+    except (OSError, UnicodeDecodeError) as exc:
+        raise PDFSourceError("Could not verify isolated Poppler container ID for cleanup") from exc
+    if not re.fullmatch(r"[0-9a-f]{64}", container_id):
+        raise PDFSourceError("Could not verify isolated Poppler container ID for cleanup")
+    try:
+        result = subprocess.run(
+            [*docker_prefix, "container", "rm", "--force", container_id],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+            env=docker_env,
+            shell=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise PDFSourceError("Could not confirm isolated Poppler container cleanup") from exc
+    stderr = str(result.stderr or "").lower()
+    if result.returncode != 0 and "no such container" not in stderr:
+        raise PDFSourceError("Could not confirm isolated Poppler container cleanup")
 
-    output = bytearray()
-    exceeded_limit = Event()
-    with tempfile.TemporaryFile() as pdf_input:
-        pdf_input.write(data)
-        pdf_input.seek(0)
+
+def _extract_layout_text(data: bytes) -> str:
+    image = os.environ.get(SANDBOX_IMAGE_ENV, "")
+    if not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
+        raise PDFSourceError(
+            "PDF extraction requires a locally provisioned, SHA-256-pinned "
+            "Poppler sandbox image"
+        )
+
+    docker = shutil.which("docker")
+    if docker is None:
+        raise PDFSourceError("Docker is required for isolated PDF extraction")
+
+    # Do not load credentials, proxy settings, contexts, or proxy configuration
+    # from the calling user's Docker client configuration.  The only host API
+    # endpoint accepted by this runner is the local Unix socket.
+    docker_env = {"PATH": os.defpath, "LANG": "C", "LC_ALL": "C"}
+    with tempfile.TemporaryDirectory(prefix="researchwitness-docker-config-") as config_dir:
+        docker_prefix = [
+            docker,
+            "--host", "unix:///var/run/docker.sock",
+            "--config", config_dir,
+        ]
         try:
-            process = subprocess.Popen(
-                [executable, "-layout", "-enc", "UTF-8", "-", "-"],
-                stdin=pdf_input,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
+            security_check = subprocess.run(
+                [*docker_prefix, "info", "--format", "{{json .SecurityOptions}}"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+                env=docker_env,
                 shell=False,
             )
-        except OSError as exc:
-            raise PDFSourceError("Could not start pdftotext") from exc
-        assert process.stdout is not None
+            security_options = (
+                json.loads(security_check.stdout)
+                if security_check.returncode == 0
+                else None
+            )
+        except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as exc:
+            raise PDFSourceError("Could not verify Docker's default seccomp profile") from exc
+        if (
+            not isinstance(security_options, list)
+            or "name=seccomp,profile=builtin" not in security_options
+        ):
+            raise PDFSourceError("Docker's built-in default seccomp profile is unavailable")
 
-        def drain_stdout() -> None:
-            while True:
-                remaining = MAX_LAYOUT_TEXT_BYTES + 1 - len(output)
-                if remaining <= 0:
-                    exceeded_limit.set()
-                    process.kill()
-                    return
-                chunk = process.stdout.read(min(64 * 1024, remaining))
-                if not chunk:
-                    return
-                output.extend(chunk)
-                if len(output) > MAX_LAYOUT_TEXT_BYTES:
-                    exceeded_limit.set()
-                    process.kill()
-                    return
-
-        reader = Thread(target=drain_stdout, daemon=True)
-        reader.start()
         try:
-            return_code = process.wait(timeout=EXTRACTION_TIMEOUT_SECONDS)
-        except subprocess.TimeoutExpired as exc:
-            process.kill()
-            process.wait()
-            reader.join(timeout=2)
-            process.stdout.close()
-            raise PDFSourceError("pdftotext exceeded the 20-second extraction limit") from exc
-        reader.join(timeout=2)
-        if reader.is_alive():
-            process.kill()
-            process.wait()
-            process.stdout.close()
-            raise PDFSourceError("pdftotext output stream did not close")
-        process.stdout.close()
-        if exceeded_limit.is_set():
-            raise PDFSourceError("pdftotext output exceeds the 2 MiB limit")
-        if return_code != 0:
-            raise PDFSourceError("pdftotext could not extract this PDF")
+            image_check = subprocess.run(
+                [*docker_prefix, "image", "inspect", image, "--format", "{{.Id}}"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+                env=docker_env,
+                shell=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise PDFSourceError("Could not verify the isolated Poppler sandbox image") from exc
+        if image_check.returncode != 0 or image_check.stdout.strip() != image:
+            raise PDFSourceError("The configured Poppler sandbox image is unavailable or unverified")
+        try:
+            config_check = subprocess.run(
+                [*docker_prefix, "image", "inspect", image, "--format", "{{json .Config}}"],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+                env=docker_env,
+                shell=False,
+            )
+            image_config = json.loads(config_check.stdout) if config_check.returncode == 0 else None
+        except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as exc:
+            raise PDFSourceError("Could not verify the isolated Poppler sandbox image configuration") from exc
+        if (
+            not isinstance(image_config, dict)
+            or image_config.get("Env") not in (None, [])
+            or image_config.get("Entrypoint") not in (None, [])
+            or image_config.get("Volumes") not in (None, {})
+        ):
+            raise PDFSourceError(
+                "The Poppler sandbox image must have no baked environment, entrypoint, or volumes"
+            )
 
-    try:
-        text = bytes(output).decode("utf-8")
-    except UnicodeDecodeError as exc:
-        raise PDFSourceError("pdftotext did not return UTF-8 text") from exc
-    if not text.strip():
-        raise PDFSourceError("PDF has no extractable text; OCR is not supported")
-    return text
+        container_id_file = Path(config_dir) / "container-id"
+        command = [
+            *docker_prefix,
+            "run", "--pull=never", "--interactive", "--cidfile", str(container_id_file),
+            "--network", "none",
+            "--read-only",
+            "--user", "65534:65534",
+            "--cap-drop", "ALL",
+            "--security-opt", "no-new-privileges:true",
+            "--memory", SANDBOX_MEMORY,
+            "--memory-swap", SANDBOX_MEMORY,
+            "--cpus", "1",
+            "--pids-limit", "8",
+            "--ulimit", "cpu=20:20",
+            "--ulimit", "fsize=2097152:2097152",
+            "--ulimit", "nofile=64:64",
+            "--ulimit", "core=0:0",
+            "--tmpfs", f"/tmp:rw,nosuid,nodev,noexec,size={SANDBOX_TMPFS},mode=1777",
+            "--env", "PATH=/usr/bin:/bin",
+            "--env", "LANG=C",
+            "--env", "LC_ALL=C",
+            "--env", "HOME=/tmp",
+            "--env", "TMPDIR=/tmp",
+            "--workdir", "/tmp",
+            "--env", "HTTP_PROXY=",
+            "--env", "HTTPS_PROXY=",
+            "--env", "ALL_PROXY=",
+            "--env", "NO_PROXY=",
+            "--env", "FTP_PROXY=",
+            "--env", "http_proxy=",
+            "--env", "https_proxy=",
+            "--env", "all_proxy=",
+            "--env", "no_proxy=",
+            "--env", "ftp_proxy=",
+            image,
+            "/usr/bin/pdftotext", "-layout", "-enc", "UTF-8", "-", "-",
+        ]
+
+        output = bytearray()
+        exceeded_limit = Event()
+        with tempfile.TemporaryFile() as pdf_input:
+            pdf_input.write(data)
+            pdf_input.seek(0)
+            try:
+                process = subprocess.Popen(
+                    command,
+                    stdin=pdf_input,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                    shell=False,
+                    env=docker_env,
+                )
+            except OSError as exc:
+                raise PDFSourceError("Could not start the isolated Poppler sandbox") from exc
+            reader: Thread | None = None
+            try:
+                if process.stdout is None:
+                    raise PDFSourceError("Isolated Poppler output pipe was unavailable")
+
+                def drain_stdout() -> None:
+                    assert process.stdout is not None
+                    while True:
+                        remaining = MAX_LAYOUT_TEXT_BYTES + 1 - len(output)
+                        if remaining <= 0:
+                            exceeded_limit.set()
+                            process.kill()
+                            return
+                        chunk = process.stdout.read(min(64 * 1024, remaining))
+                        if not chunk:
+                            return
+                        output.extend(chunk)
+                        if len(output) > MAX_LAYOUT_TEXT_BYTES:
+                            exceeded_limit.set()
+                            process.kill()
+                            return
+
+                reader = Thread(target=drain_stdout, daemon=True)
+                reader.start()
+                try:
+                    return_code = process.wait(timeout=EXTRACTION_TIMEOUT_SECONDS)
+                except subprocess.TimeoutExpired as exc:
+                    process.kill()
+                    process.wait()
+                    reader.join(timeout=2)
+                    process.stdout.close()
+                    raise PDFSourceError(
+                        "Isolated Poppler exceeded the 20-second extraction limit"
+                    ) from exc
+                reader.join(timeout=2)
+                if reader.is_alive():
+                    process.kill()
+                    process.wait()
+                    raise PDFSourceError("Isolated Poppler output stream did not close")
+                if exceeded_limit.is_set():
+                    raise PDFSourceError("Isolated Poppler output exceeds the 2 MiB limit")
+                if return_code != 0:
+                    raise PDFSourceError("Isolated Poppler could not extract this PDF")
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait()
+                if process.stdout is not None:
+                    process.stdout.close()
+                if reader is not None and reader.is_alive():
+                    reader.join(timeout=2)
+                _remove_sandbox_container(docker_prefix, docker_env, container_id_file)
+
+        try:
+            text = bytes(output).decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise PDFSourceError("Isolated Poppler did not return UTF-8 text") from exc
+        if not text.strip():
+            raise PDFSourceError("PDF has no extractable text; OCR is not supported")
+        return text
 
 
 def _line_records(page_text: str) -> list[tuple[str, int, int]]:
