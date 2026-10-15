@@ -76,3 +76,8 @@ This registry intentionally has no field that can mark a developer-discovered ca
 ## Source access and failure handling
 
 Provider failures and source-access denials are distinct from successful zero-result searches. Treat challenge pages and other non-document responses as access failures, never as research content; preserve source hashes only for complete retrieved documents. Stop after an access denial, and do not use an alternate host, proxy, or route to bypass it. A failed request does not establish that no relevant publication or correction exists.
+
+For a transport failure, the discovery CLI's stderr JSON includes the fixed
+`transport_error_class` diagnostic when the transport layer can be classified.
+This field is operational output only: it is not added to the public candidate
+registry, and raw exception or proxy details are not emitted.

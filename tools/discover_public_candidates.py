@@ -94,6 +94,7 @@ def main(argv: list[str] | None = None) -> int:
             "status": failed["status"],
             "host": exc.host,
             "status_code": exc.status_code,
+            "transport_error_class": exc.transport_error_class,
             "reason": exc.reason,
             "retry": False,
             "registry_written": str(args.output),

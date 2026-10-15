@@ -587,6 +587,33 @@ class PublicDiscoveryTests(unittest.TestCase):
         self.assertEqual(registry["candidates"], [])
         self.assertIn('"status": "invalid_response"', stderr.getvalue())
 
+    def test_cli_reports_safe_transport_class_without_adding_it_to_registry(self):
+        failure = SourceAccessError(
+            "www.ebi.ac.uk", "managed transport or proxy unavailable",
+            transport_error_class="local_socket_permission_denied",
+        )
+        failure.__cause__ = OSError("synthetic-private-transport-detail")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output = Path(temp_dir) / "candidate-registry.json"
+            stderr = io.StringIO()
+            with (
+                patch("tools.discover_public_candidates.PublicSourceClient", return_value=object()),
+                patch("tools.discover_public_candidates.search_europe_pmc", side_effect=failure),
+                redirect_stderr(stderr),
+            ):
+                result = discovery_cli_main([
+                    "discover", "--provider", "europe-pmc", "--query", "example",
+                    "--output", str(output),
+                ])
+            registry = json.loads(output.read_text(encoding="utf-8"))
+        validate_registry_document(registry)
+        diagnostic = stderr.getvalue()
+        self.assertEqual(result, 2)
+        self.assertIn('"transport_error_class": "local_socket_permission_denied"', diagnostic)
+        self.assertNotIn("synthetic-private-transport-detail", diagnostic)
+        self.assertNotIn("transport_error_class", registry["searches"][0])
+        self.assertEqual(registry["searches"][0]["status"], "transport_failed_before_http_response")
+
     def test_registry_rejects_holdout_relabeling_and_unapproved_fields(self):
         payload = {"resultList": {"result": [{
             "title": "Correction: Example counts", "doi": "10.1234/example",
