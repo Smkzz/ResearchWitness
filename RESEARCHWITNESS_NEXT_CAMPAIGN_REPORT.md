@@ -3,11 +3,11 @@
 **As of:** 2026-10-15  
 **Repository:** `Smkzz/ResearchWitness`  
 **Pull request:** [#13](https://github.com/Smkzz/ResearchWitness/pull/13), open and draft  
-**Implementation freeze:** `090ff4f964a36e7cbdc280f46839e308dd7183e0`  
-**Parent PR head:** `68bd0e3391e5052e227ea2e48e139857a0dbc581`  
-**JATS detector SHA-256:** `cec53951e3f82ae2f6cf073a6fa8b24afa69cb62a35aa74afcdef7fd270c8478`
+**Reviewed code commit:** `bd13eacf379f77a52133e9059b4d9a7a42a0a895`  
+**Parent PR head:** `4e2cdee52fbf109d50ed7e9bef62e6073daa81a5`  
+**JATS detector SHA-256:** `3d93b3f90ac17a84f51af28bb8a705db34aacba6fd7b5548559f666478cc6320`
 
-This report contains sanitized aggregate results only. Full text, source IDs, per-relationship evidence, and detailed candidate states remain outside Git in the owner-review package. The report and protocol additions are documentation; the code/test freeze above is the implementation under review.
+This report contains sanitized aggregate results and integrity commitments only. Full text, source IDs, per-relationship evidence, and detailed candidate states remain outside Git in the owner-review package. The reviewed code commit above includes the final detector safeguards described here; this report/checkpoint may be committed separately and can advance the PR head.
 
 ## Work completed
 
@@ -15,6 +15,8 @@ This report contains sanitized aggregate results only. Full text, source IDs, pe
 - Integrated both source spans into Markdown audit output and validated evidence anchors nested inside conditional calculations.
 - Added regressions for grouped zero-count denominators, exact group-label matching, unrelated and conflicting groups, the context limit, integrated abstention reporting, and invalid nested anchors.
 - Replayed historical, live-PR, and improved JATS implementations against the same source-bound annotation set; generated a deterministic JSON/Markdown relationship comparison and passed `--require-no-regression`.
+- A read-only independent model diff review found three actionable issues in conditional group matching, semantic anchor validation, and nested-paragraph scan cost. The fixes now reject specific unmatched headers and negated/generic labels, validate article/table roles and sample-size linkage, and scan each outside-table paragraph subtree once.
+- Replayed the reviewed detector on the same exposed v1 sample. It preserved relationship-level metrics while reducing conditional mismatch calculations from 16 to 4; the remaining four depend on the explicitly hypothetical displayed-denominator assumption for missing data.
 - Ran the offline audit CLI against a hash-checked public JATS source. It emitted schema-valid JSON and Markdown and stated that the hash did not authenticate provenance.
 - Preserved, without rerunning after detector changes, the separate prospectively registered v2 development experiment already recorded in the PR’s sanitized aggregate ledger.
 
@@ -26,11 +28,14 @@ The owner-review archive SHA-256 `71b7f8df399ebeea123bf46ab4cb89d7d6836cb4465b8e
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Frozen historical (`5d251c8`) | 8 / 5 | 34 | 239 | 20 | 0 | 219 | 6 | 16 | 0 |
 | Live PR head (`68bd0e3`) | 8 / 5 | 34 | 423 | 205 | 3 | 215 | 0 | 13 | 4 |
-| Improved implementation (`090ff4f`) | 8 / 5 | 34 | 423 | 205 | 3 | 215 | 0 | 13 | 16 |
+| Pre-review implementation (`090ff4f`) | 8 / 5 | 34 | 423 | 205 | 3 | 215 | 0 | 13 | 16 |
+| Reviewed implementation (`bd13eac`) | 8 / 5 | 34 | 423 | 205 | 3 | 215 | 0 | 13 | 4 |
 
 The six historical incorrect denominators were comma-group truncations in zero-count cells (`205,488` and `304,997` source populations). The active PR and improved replay assign none incorrectly. Regression tests cover both grouped values.
 
-The new implementation does not increase extraction coverage, arithmetic matches, or mismatch candidates over the live PR. It adds 12 conditional calculations from matching article-text group sizes; none becomes an asserted denominator or finding. The three currently surfaced mismatch candidates all remain unresolved for rounding or denominator scope. Thirteen supplied discrepancy-reference relationships remain missed. All 423 source anchors validate; there are zero anchor failures and zero additional mismatch candidates against the supplied annotations. These figures do not estimate precision or scientific-error detection.
+The reviewed implementation does not change extraction coverage, arithmetic matches, ordinary mismatch candidates, abstentions, or missed discrepancy references from the pre-review implementation. It removes 12 false conditional mismatch calculations caused by caption fallback across a specific unmatched group header or weak label matching. Eight article-group calculations remain, with distinct source-linked group and table evidence; four additional calculations remain conditional missing-data checks. All 423 source anchors validate; there are zero anchor failures and zero candidate false positives against the supplied annotations. These developer-exposed results do not estimate precision or scientific-error detection.
+
+The post-review private run manifest SHA-256 is `fa6294ff5e56f6ef68ea573a079f19a7c23c39716c5932294a96d52026258c9a`; its comparison JSON and Markdown commitments are `f4b6c1dbfe71317e195c52c8382d181a8043482df842ef66e40afd77f9f264da` and `b2dd823b190b04c1c15f23163d3050ab2baca82ca088553847032bc770da65c6`. The detailed outputs remain in the separate owner-review package.
 
 ## Separate prospectively selected v2 development experiment
 
@@ -58,7 +63,7 @@ The new group-context implementation was **not** run on this v2 sample after its
 ## Error and candidate interpretation
 
 - **Corrected in prior PR work:** the six historical grouped-count denominator truncations are absent in the active PR.
-- **Improved in this commit:** exact, conflicting, unrelated, and over-limit article group context is treated conservatively; conditional evidence spans are validated end-to-end.
+- **Improved in this commit:** unmatched specific column groups no longer inherit a different group from a caption; negated and generic label matches are rejected; article/table evidence role, sample-size agreement, and conditional arithmetic are validated. Nested paragraphs are scanned without repeated recursive text reconstruction.
 - **Still missed or unresolved:** the new feature did not reduce the 13 misses in the old source sample. Separate v2 source review found two candidates missed by its frozen detector. Both are development-exposed, not confirmed scientific errors.
 - **No established false positives:** none against the old supplied annotations; human review of the v2 candidate set was not run. Neither result supports a precision estimate.
 - **No scientific error established:** arithmetic candidates stay separate from source attribution, correction corroboration, scientific impact, and independent human adjudication.
@@ -79,19 +84,18 @@ The old v1 sample’s required JATS OS isolation was not established, and its fi
 
 - Real PDF extraction remains **BLOCKED**. Access to `/var/run/docker.sock` returned `operation not permitted`; required reviewed Poppler image provenance is unavailable. No PDF was run in Docker or directly on the host.
 - Manual review of the patch found no credentials, custody records, reserved identities, licensed full text, or detailed candidate labels. The repository release-file selector was unchanged; checksums were regenerated using that selector. Ignored Python/pytest caches and build metadata were excluded; no other untracked files were present in selected release directories.
-- Local focused suites passed: JATS 53; integrated audit 24; PDF guard 24; public-source discovery 29 (130 total). Contract validation, compilation, `git diff --check`, and the offline relationship-comparison regression gate passed.
-- Full `python -m tools.quality_gate` passed in the isolated `/tmp/rw-campaign-venv` on Python 3.12.14 with pytest 9.1.1: 454 tests, 85 subtests, 500/500 synthetic cases, 3/3 existing historical replays, source checksums, schema/frozen-screen checks, trusted-core scan, reproducible wheel, install smoke, and CLI checks. Wheel SHA-256: `73796d50071caa47c8abf3c7d36085ba451507fc39241e0aeace8d1f186320b5`. The default runtime lacks pytest; no dependency was added to the project.
-- Exact implementation commit `090ff4f` passed hosted [CI run 38723877424](https://github.com/Smkzz/ResearchWitness/actions/runs/38723877424): Release gate and Python 3.11, 3.12, and 3.13 jobs succeeded. [CodeQL run 38723877423](https://github.com/Smkzz/ResearchWitness/actions/runs/38723877423) also succeeded. This is automated analysis, not independent human review; a formal Codex Security scan was not available.
+- Focused JATS and integrated audit tests passed: 80 total. Full `python -m tools.quality_gate` passed in the isolated `/tmp/rw-campaign-venv` on Python 3.12.14 with pytest 9.1.1: 457 tests, 87 subtests, 500/500 synthetic cases, 3/3 existing historical replays, source checksums, schema/frozen-screen checks, trusted-core scan, reproducible wheel, install smoke, and CLI checks. Wheel SHA-256: `73796d50071caa47c8abf3c7d36085ba451507fc39241e0aeace8d1f186320b5`. Contract validation and `git diff --check` passed. No dependency was added to the project.
+- Exact code commit `bd13eacf379f77a52133e9059b4d9a7a42a0a895` passed hosted [CI run 38727434145](https://github.com/Smkzz/ResearchWitness/actions/runs/38727434145): Release gate and Python 3.11–3.13 jobs succeeded. [CodeQL run 38727434167](https://github.com/Smkzz/ResearchWitness/actions/runs/38727434167) also succeeded. CodeQL is automated analysis. The independent review was model-generated, not human scientific adjudication or a formal Codex Security scan; the Codex Security scan workflow capability was unavailable.
 - The PR remains draft. No merge, release, contact, custody access, reserved-paper run, or Wave 3 occurred.
 
 ## Qualification answers
 
-1. **Real relationship coverage improved?** Yes between the historical detector and active PR (239 to 423 surfaced on the old supplied annotations). This commit adds no further relationships. The separate frozen v2 run surfaced 590; it is descriptive and not a complete gold set.
+1. **Real relationship coverage improved?** Yes between the historical detector and active PR (239 to 423 surfaced on the old supplied annotations). The reviewed fixes preserve 423 surfaced relationships. The separate frozen v2 run surfaced 590; it is descriptive and not a complete gold set.
 2. **Known denominator errors corrected?** Yes: six historically, zero in active and improved replays; regression cases cover grouped zero-count denominators.
-3. **Previously missed discrepancies found?** Current PR candidates match three old supplied reference relationships versus zero historically, all unresolved. The separate v2 partial census found two missed arithmetic candidates, but the new implementation was not run on that sample and neither candidate is independently confirmed.
-4. **Improvements introduce false positives?** None against old supplied annotations; human adjudication of v2 candidates was not run, so general false-positive performance is unknown.
-5. **Evidence source-traceable?** All tested old-sample anchors validated. Source hashes establish byte continuity, not publisher origin, license, or reviewer independence.
-6. **Improvement demonstrated on real development documents?** Yes for the existing detector across the old and prospectively selected v2 samples. The specific group-context change is replayed only on the old exposed sample; no improvement is claimed on v2.
+3. **Previously missed discrepancies found?** Current PR candidates match three old supplied reference relationships versus zero historically, all unresolved. The separate v2 partial census found two missed arithmetic candidates, but the reviewed implementation was not run on that sample and neither candidate is independently confirmed.
+4. **Improvements introduce false positives?** None against old supplied annotations. Review removed 12 false conditional mismatches; human adjudication of v2 candidates was not run, so general false-positive performance is unknown.
+5. **Evidence source-traceable?** All 423 old-sample anchors validate, and the reviewed conditional group links now require article/table role, label, and sample-size agreement. Source hashes establish byte continuity, not publisher origin, license, or reviewer independence.
+6. **Improvement demonstrated on real development documents?** The reviewed fix was replayed on the old exposed sample and removed unsupported group-linked calculations without changing surfaced relationships. It was not run on the frozen v2 sample; no independent generalization claim is made.
 7. **New preregistered evaluation completed?** The separate v2 development experiment completed its preregistered descriptive run. Protected independent evaluation did not run.
 8. **Minimum sample met?** v2 development minima were met; old v1 remained below its minimum of ten analyzable documents. Protected v1.3 requirements remain unmet.
 9. **Independent work-family overlap controlled?** Screened conservatively, but not proven; unnamed shared datasets can remain undetected.
@@ -99,7 +103,7 @@ The old v1 sample’s required JATS OS isolation was not established, and its fi
 11. **PDF sandbox qualified by real execution?** No; Docker access and image provenance block it.
 12. **Untrusted inputs processed within the PDF trust boundary?** No PDF was processed. JATS declaration refusals remained in place.
 13. **Source/provenance assumptions verified?** Partially. Recorded public retrieval and hashes exist; source-origin authentication, some license links, work-family independence, and COMET-T’s calculation remain limited.
-14. **Tests and release gates pass?** Yes. The full local gate passes in the isolated venv; hosted release gate, CI matrix, and CodeQL pass for implementation commit `090ff4f`.
+14. **Tests and release gates pass?** Yes for reviewed code commit `bd13eac`: the full local gate plus hosted release qualification, Python 3.11–3.13 matrix, and CodeQL all pass. A later report-only commit may advance the PR head.
 15. **Code committed on GitHub?** Yes, on draft PR #13. No merge or release occurred.
 16. **Independently scientifically qualified?** No. The protected custodian acceptance criteria remain unchanged and unmet; no protected evidence was accessed or evaluated.
 
