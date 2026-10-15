@@ -81,6 +81,81 @@ class JATSPercAuditTests(unittest.TestCase):
         self.assertEqual(result["denominator"], 304997)
         self.assertEqual(result["exact_ratio_percent"], "736200/304997")
 
+    def test_zero_counts_keep_comma_grouped_column_denominators(self):
+        data = jats(
+            '<table-wrap><table><thead><tr><th></th>'
+            '<th colspan="1">North site (N=205,488), n (%)</th>'
+            '<th colspan="1">South site (N=304,997), n (%)</th></tr></thead><tbody>'
+            '<tr><td>Outcome absent</td><td>0 (0.0)</td><td>0 (0.00)</td></tr>'
+            '</tbody></table></table-wrap>'
+        )
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual([(r["numerator"], r["denominator"], r["status"]) for r in results], [
+            (0, 205488, "arithmetic_match"), (0, 304997, "arithmetic_match"),
+        ])
+        self.assertEqual([r["exact_ratio_percent"] for r in results], ["0/205488", "0/304997"])
+
+    def test_article_group_size_is_conditional_and_source_anchored(self):
+        data = jats(
+            '<p>Participants were assigned to the control group (n=48) and '
+            'the intervention group (n=41).</p>'
+            '<table-wrap><caption><p>Answer distribution in Interventional Group</p></caption>'
+            '<table><thead><tr><th>Outcome</th><th>n (%)</th></tr></thead><tbody>'
+            '<tr><td>Correct</td><td>38 (85.4%)</td></tr>'
+            '<tr><td>Incorrect</td><td>3 (14.6%)</td></tr>'
+            '</tbody></table></table-wrap>'
+        )
+        results = audit_jats_percentage_tables(data)["results"]
+        self.assertEqual([r["status"] for r in results], ["scope_ambiguous", "scope_ambiguous"])
+        self.assertEqual([r["denominator"] for r in results], [None, None])
+        self.assertEqual([r["conditional_calculation"]["denominator"] for r in results], [41, 41])
+        self.assertEqual([r["conditional_calculation"]["rounded_percent"] for r in results], ["92.7", "7.3"])
+        self.assertTrue(all(not r["conditional_calculation"]["arithmetic_matches"] for r in results))
+        first = results[0]["conditional_calculation"]["evidence"]
+        for anchor in (first["group_population"], first["table_population_context"]):
+            source = data[anchor["byte_start"]:anchor["byte_end"]]
+            self.assertTrue(source.startswith(b"<p>") or source.startswith(b"<caption>"))
+            self.assertIn(anchor["quote"].encode(), source)
+
+    def test_article_group_size_does_not_cross_groups_or_conflicting_values(self):
+        unrelated = jats(
+            '<p>Control group (n=48); intervention group (n=41).</p>'
+            '<table-wrap><caption><p>Comparator group outcomes</p></caption><table>'
+            '<thead><tr><th>Outcome</th><th>n (%)</th></tr></thead><tbody>'
+            '<tr><td>Response</td><td>8 (16.7%)</td></tr></tbody></table></table-wrap>'
+        )
+        unrelated_result = audit_jats_percentage_tables(unrelated)["results"][0]
+        self.assertIsNone(unrelated_result.get("conditional_calculation"))
+        self.assertIsNone(unrelated_result["denominator"])
+
+        conflicting = jats(
+            '<p>Intervention group (n=41) at enrollment.</p>'
+            '<p>Intervention group (n=39) completed follow-up.</p>'
+            '<table-wrap><caption><p>Intervention Group outcomes</p></caption><table>'
+            '<thead><tr><th>Outcome</th><th>n (%)</th></tr></thead><tbody>'
+            '<tr><td>Response</td><td>38 (85.4%)</td></tr></tbody></table></table-wrap>'
+        )
+        conflicting_result = audit_jats_percentage_tables(conflicting)["results"][0]
+        self.assertIsNone(conflicting_result.get("conditional_calculation"))
+        self.assertEqual(
+            [item["value"] for item in conflicting_result["evidence"]["article_group_population_conflicts"]],
+            [41, 39],
+        )
+
+    def test_article_group_population_scan_fails_closed_at_its_limit(self):
+        statements = "".join("<p>Intervention group (n=41).</p>" for _ in range(65))
+        data = jats(
+            statements
+            + '<table-wrap><caption><p>Intervention Group outcomes</p></caption><table>'
+            + '<thead><tr><th>Outcome</th><th>n (%)</th></tr></thead><tbody>'
+            + '<tr><td>Response</td><td>38 (85.4%)</td></tr></tbody>'
+            + '</table></table-wrap>'
+        )
+        result = audit_jats_percentage_tables(data)["results"][0]
+        self.assertIsNone(result.get("conditional_calculation"))
+        self.assertIsNone(result["denominator"])
+        self.assertEqual(result["status"], "scope_ambiguous")
+
     def test_uses_explicit_n_over_n_ratio_in_a_cell(self):
         data = jats(
             '<table-wrap><caption><p>Population N=120.</p></caption><table>'

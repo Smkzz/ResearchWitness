@@ -84,6 +84,22 @@ class ResearchAuditTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate(elevated, 'research-audit.v1.schema.json')
 
+    def test_integrated_report_explains_conditional_group_population_mapping(self):
+        source = (b'<article><body><p>Intervention group (n=41) was allocated.</p>'
+            b'<table-wrap><caption><p>Interventional Group outcomes</p></caption><table>'
+            b'<thead><tr><th>Outcome</th><th>n (%)</th></tr></thead><tbody>'
+            b'<tr><td>Response</td><td>38 (85.4%)</td></tr></tbody></table></table-wrap>'
+            b'</body></article>')
+        report = audit_document(source, document_id='synthetic-group', input_format='jats')
+        self.assertEqual(report['summary']['mismatch_candidates'], 0)
+        self.assertEqual(report['summary']['conditional_mismatches'], 1)
+        self.assertIsNone(report['findings'][0]['relationship']['denominator'])
+        self.assertEqual(report['findings'][0]['state'], 'extracted_evidence')
+        markdown = audit_markdown(report)
+        self.assertIn('Intervention group', markdown)
+        self.assertIn('Interventional Group outcomes', markdown)
+        self.assertIn('Conditional scope link', markdown)
+
     def test_hash_or_provenance_claims_cannot_silently_authenticate_a_source(self):
         for kwargs in [{'expected_sha256': '0' * 64},
                        {'provenance_status': 'owner_hash_verified_handoff'},
@@ -171,6 +187,29 @@ class ResearchAuditTests(unittest.TestCase):
         comparison = compare_runs(self.annotation_path, [baseline, revised])
         self.assertEqual(comparison['runs'][1]['metrics']['incorrect_denominator_assignments'], 1)
         self.assertTrue(regression_failures(comparison))
+
+    def test_nested_conditional_population_anchors_are_validated(self):
+        baseline = self.run_manifest('baseline')
+        tree = _parse_jats(self.data)
+        caption = next(_descendants(tree, 'caption'))
+        anchor = {'byte_start': caption.byte_start, 'byte_end': caption.byte_end,
+            'quote': _text(caption), 'quote_truncated': False}
+        candidate = copy.deepcopy(self.report)
+        candidate['results'][0]['conditional_calculation'] = {
+            'denominator': 40, 'assumption': 'test-only conditional scope',
+            'arithmetic_matches': True, 'evidence': {
+                'group_population': copy.deepcopy(anchor),
+                'table_population_context': copy.deepcopy(anchor),
+            },
+        }
+        revised = self.run_manifest('conditional', candidate)
+        comparison = compare_runs(self.annotation_path, [revised])
+        self.assertEqual(comparison['runs'][0]['metrics']['source_anchor_failures'], 0)
+
+        candidate['results'][0]['conditional_calculation']['evidence']['group_population']['quote'] = 'not source text'
+        revised = self.run_manifest('conditional-bad-anchor', candidate)
+        comparison = compare_runs(self.annotation_path, [revised])
+        self.assertGreater(comparison['runs'][0]['metrics']['source_anchor_failures'], 0)
 
     def test_new_false_candidate_and_anchor_failure_are_visible(self):
         baseline = self.run_manifest('baseline')

@@ -497,7 +497,10 @@ def compare_runs(annotation_path: Path, run_paths: list[Path]) -> dict[str, Any]
             for index, relation in enumerate(results):
                 if not isinstance(relation, dict) or type(relation.get("numerator")) is not int or not isinstance(relation.get("reported_percent"), str):
                     raise ValueError("Invalid detector relationship")
-                errors = evidence_errors(relation.get("evidence"), nodes, record["source_sha256"])
+                # Validate every nested evidence span, including conditional
+                # population links that are intentionally not denominator
+                # assignments.
+                errors = evidence_errors(relation, nodes, record["source_sha256"])
                 if relation.get("status") not in {"arithmetic_match", "arithmetic_mismatch_candidate", "scope_ambiguous", "rounding_ambiguous"}:
                     raise ValueError("Unknown detector relationship status")
                 denominator = relation.get("denominator")

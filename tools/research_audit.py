@@ -143,6 +143,16 @@ def audit_markdown(report: dict[str, Any]) -> str:
             conditional = r["conditional_calculation"]
             calculation += (f". Conditional on {conditional['assumption']}: {r['numerator']} / {conditional['denominator']} × 100 "
                             f"rounds to {conditional['rounded_percent']}%")
+            context = conditional.get("evidence", {})
+            group_anchor = context.get("group_population")
+            table_anchor = context.get("table_population_context")
+            if group_anchor and table_anchor:
+                calculation += (
+                    f". Conditional scope link: article text {group_anchor['quote']!r} "
+                    f"at XML bytes [{group_anchor['byte_start']}, {group_anchor['byte_end']}) "
+                    f"matches table context {table_anchor['quote']!r} "
+                    f"at XML bytes [{table_anchor['byte_start']}, {table_anchor['byte_end']})"
+                )
         lines.append(f"| {safe_text(finding['finding_id'])} | {safe_text(quote)}; {safe_text(anchor)} | {safe_text(calculation)} | {safe_text(r['status'])}: {safe_text(r.get('reason') or '')} |")
     lines += ["", "## Review requirements", "", "Resolve denominator scope, source version, weighting/adjustment, rounding conventions, and extraction fidelity before any scientific conclusion.", ""]
     lines += [f"- {safe_text(item)}" for item in report["limitations"]]

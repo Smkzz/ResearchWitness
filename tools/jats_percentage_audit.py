@@ -31,6 +31,7 @@ MAX_EVIDENCE_TEXT = 500
 MAX_LAYOUT_COLUMNS = 256
 MAX_LAYOUT_SLOTS = MAX_CELLS
 MAX_CELL_COMPONENTS = 8
+MAX_ARTICLE_GROUP_POPULATIONS = 64
 
 _INTEGER_TOKEN = r"(?:[0-9]{1,3}(?:,[0-9]{3}){1,2}|[0-9]{1,9})"
 _COUNT_PERCENT_RE = re.compile(
@@ -48,6 +49,11 @@ _PERCENT_ONLY_RE = re.compile(
 _COUNT_ONLY_RE = re.compile(rf"^\s*(?P<count>{_INTEGER_TOKEN})\s*$")
 _DENOMINATOR_RE = re.compile(
     rf"(?<![A-Za-z0-9])(?:n|N)\s*[=:]\s*(?P<value>{_INTEGER_TOKEN})(?![0-9]|[,.][0-9])"
+)
+_GROUP_POPULATION_RE = re.compile(
+    rf"(?P<label>(?:[A-Za-z][A-Za-z0-9'’_-]*\s+){{0,3}}(?:group|arm))"
+    rf"\s*\(\s*(?:n|N)\s*[=:]\s*(?P<value>{_INTEGER_TOKEN})\s*\)",
+    re.IGNORECASE,
 )
 _HEADER_CUE_RE = re.compile(
     r"\b(?:parameter|variable|characteristic|value|count|number|frequency|percent(?:age)?)\b|"
@@ -355,6 +361,92 @@ def _evidence(node: _Node, role: str, quote: str) -> dict[str, Any]:
     }
 
 
+def _population_label_words(value: str) -> tuple[str, ...]:
+    """Normalize a short named study group without guessing synonyms."""
+    ignored = {"a", "an", "and", "for", "in", "of", "the", "to"}
+    words = []
+    for word in re.findall(r"[a-z0-9]+", value.casefold()):
+        if word in ignored:
+            continue
+        # JATS sources commonly alternate "intervention" and
+        # "interventional" for the same arm. No other stemming is applied.
+        words.append("intervention" if word == "interventional" else word)
+    return tuple(words)
+
+
+def _article_group_populations(root: _Node) -> dict[tuple[str, ...], list[dict[str, Any]]]:
+    """Collect exact, source-anchored group n statements outside table markup.
+
+    These statements are available only as conditional arithmetic context. A
+    table must name the same group, and the value never becomes an asserted
+    denominator: article-level allocation can differ from a table's analysis
+    population after missingness or follow-up.
+    """
+    populations: dict[tuple[str, ...], list[dict[str, Any]]] = {}
+    seen = 0
+
+    def walk(node: _Node, inside_table: bool = False) -> None:
+        nonlocal seen
+        inside_table = inside_table or _local_name(node.tag) == "table-wrap"
+        if not inside_table and _local_name(node.tag) == "p":
+            quote = _text(node)
+            for match in _GROUP_POPULATION_RE.finditer(quote):
+                seen += 1
+                if seen > MAX_ARTICLE_GROUP_POPULATIONS:
+                    populations.clear()
+                    return
+                label = _population_label_words(match.group("label"))
+                if not label:
+                    continue
+                populations.setdefault(label, []).append({
+                    "value": int(match.group("value").replace(",", "")),
+                    "label": " ".join(label),
+                    "evidence": _evidence(node, "article_group_population", quote),
+                })
+        for child in node.children:
+            walk(child, inside_table)
+            if seen > MAX_ARTICLE_GROUP_POPULATIONS:
+                return
+
+    body_nodes = list(_descendants(root, "body"))
+    for body in body_nodes or [root]:
+        walk(body)
+    return populations
+
+
+def _group_population_match(
+    populations: dict[tuple[str, ...], list[dict[str, Any]]],
+    header_nodes: list[_Node],
+    table_context_nodes: list[_Node],
+) -> dict[str, Any] | None:
+    """Map a table or column's explicit group label to one article n statement."""
+    def matches(nodes: list[_Node]) -> list[tuple[tuple[str, ...], list[dict[str, Any]], _Node]]:
+        found = []
+        for label, facts in populations.items():
+            if not label:
+                continue
+            for node in nodes:
+                context = _population_label_words(_text(node))
+                width = len(label)
+                if any(context[start:start + width] == label
+                       for start in range(max(0, len(context) - width + 1))):
+                    found.append((label, facts, node))
+                    break
+        return found
+
+    # A per-column label is narrower than a table title and takes priority.
+    found = matches(header_nodes) or matches(table_context_nodes)
+    if len(found) != 1:
+        return None
+    label, facts, table_node = found[0]
+    values = {fact["value"] for fact in facts}
+    if len(values) != 1:
+        return {"status": "conflicting", "label": " ".join(label),
+                "facts": facts, "table_node": table_node}
+    return {"status": "matched", "label": " ".join(label),
+            "value": next(iter(values)), "fact": facts[0], "table_node": table_node}
+
+
 def _denominator_facts(nodes: Iterable[tuple[str, _Node]]) -> list[dict[str, Any]]:
     facts: list[dict[str, Any]] = []
     for role, node in nodes:
@@ -441,6 +533,8 @@ def _candidate_from_cell(
     total_header_facts: list[dict[str, Any]] | None = None,
     inherited_row_labels: list[_Node] | None = None,
     explicit_table_percentage_basis: bool = False,
+    article_group_populations: dict[tuple[str, ...], list[dict[str, Any]]] | None = None,
+    table_population_context_nodes: list[_Node] | None = None,
 ) -> dict[str, Any] | None:
     cell_quote = _text(cell)
     parse_quote = fragment["numeric_quote"] if fragment else cell_quote
@@ -652,6 +746,32 @@ def _candidate_from_cell(
         denominator = None
         denominator_scope = None
 
+    population_match = _group_population_match(
+        article_group_populations or {}, header_nodes,
+        table_population_context_nodes or [],
+    )
+    if (conditional_calculation is None and denominator is None
+            and ambiguity == "no_explicit_denominator"
+            and population_match and population_match["status"] == "matched"
+            and not rounding_note):
+        try:
+            conditional_calculation = percentage_recalculation(
+                int(count_text.replace(",", "")), population_match["value"], percent_text,
+                len(percent_text.partition(".")[2]),
+            )
+            conditional_calculation["denominator"] = population_match["value"]
+            conditional_calculation["assumption"] = "matched_article_group_sample_size_may_apply_to_table"
+            conditional_calculation["population_group"] = population_match["label"]
+            conditional_calculation["evidence"] = {
+                "group_population": population_match["fact"]["evidence"],
+                "table_population_context": _evidence(
+                    population_match["table_node"], "table_population_group_context",
+                    _text(population_match["table_node"]),
+                ),
+            }
+        except ValueError:
+            pass
+
     evidence = {
         "source_sha256": source_sha256,
         "table_id": table_id,
@@ -675,6 +795,11 @@ def _candidate_from_cell(
         evidence["missing_data_scope_note"] = _evidence(missing_scope_note, "missing_data_row", _text(missing_scope_note))
     if total_header_facts:
         evidence["cross_tab_total_sources"] = total_header_facts
+    if population_match and population_match["status"] == "conflicting":
+        evidence["article_group_population_conflicts"] = [
+            {"value": fact["value"], "evidence": fact["evidence"]}
+            for fact in population_match["facts"]
+        ]
     if ratio_denominator is not None:
         evidence["denominator_sources"].append({
             "value": ratio_denominator,
@@ -752,6 +877,7 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
     if len(wrappers) > MAX_TABLES:
         raise JATSSourceError("JATS source exceeds the table-count limit")
 
+    article_group_populations = _article_group_populations(root)
     adjustment_notes: list[tuple[dict[str, Any], set[str]]] = []
     wrapper_ids = {_attribute(w, "id") for w in wrappers if _attribute(w, "id")}
     method_scope_overflow = False
@@ -994,6 +1120,10 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
                             total_header_facts=total_header_facts,
                             inherited_row_labels=list(inherited.values()),
                             explicit_table_percentage_basis=explicit_table_percentage_basis,
+                            article_group_populations=article_group_populations,
+                            table_population_context_nodes=[
+                                node for node in (label_node, caption_node) if node is not None
+                            ],
                         )
                         if candidate is not None:
                             results.append(candidate)

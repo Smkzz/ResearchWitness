@@ -52,6 +52,12 @@ data can invalidate denominator inheritance: the report may show an explicitly
 conditional calculation, while withholding the asserted denominator and final
 arithmetic decision. It never derives complete-case populations silently.
 Subgroup versus total population conventions can similarly remain unresolved.
+When a table caption or column names a group that has one explicit article-text
+`group (n=...)` declaration, the report may show a second conditional
+calculation with exact anchors to both the group-size paragraph and the table
+label. This is not an asserted table denominator: attrition, missingness, or a
+follow-up analysis set can change the applicable population, so the automatic
+status remains an abstention until the link is independently resolved.
 
 JSON conforms to `schemas/research-audit.v1.schema.json`. Every automatic
 finding is `unreviewed`, with scientific error `not_established`. States separate
