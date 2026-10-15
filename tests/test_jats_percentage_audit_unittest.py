@@ -3,10 +3,14 @@ from __future__ import annotations
 
 import hashlib
 import unittest
+from unittest import mock
 
 from tools.jats_percentage_audit import (
     JATSSourceError,
+    _article_group_populations,
+    _parse_jats,
     audit_jats_percentage_tables,
+    _text,
 )
 
 
@@ -141,6 +145,43 @@ class JATSPercAuditTests(unittest.TestCase):
             [item["value"] for item in conflicting_result["evidence"]["article_group_population_conflicts"]],
             [41, 39],
         )
+
+    def test_unmatched_specific_header_vetoes_caption_population_fallback(self):
+        data = jats(
+            '<p>Intervention group (n=41).</p>'
+            '<table-wrap><caption><p>Intervention and Control group outcomes</p></caption><table>'
+            '<thead><tr><th>Outcome</th><th>Control group n (%)</th></tr></thead><tbody>'
+            '<tr><td>Response</td><td>8 (16.7%)</td></tr></tbody>'
+            '</table></table-wrap>'
+        )
+        result = audit_jats_percentage_tables(data)["results"][0]
+        self.assertEqual(result["reason"], "no_explicit_denominator")
+        self.assertIsNone(result["denominator"])
+        self.assertNotIn("conditional_calculation", result)
+
+    def test_group_label_matching_rejects_negated_and_generic_substrings(self):
+        for article_text, caption in [
+            ("Control group (n=48).", "Non-control group outcomes"),
+            ("The group (n=48).", "Intervention group outcomes"),
+        ]:
+            with self.subTest(article_text=article_text, caption=caption):
+                data = jats(
+                    f'<p>{article_text}</p><table-wrap><caption><p>{caption}</p></caption><table>'
+                    '<thead><tr><th>Outcome</th><th>n (%)</th></tr></thead><tbody>'
+                    '<tr><td>Response</td><td>8 (16.7%)</td></tr></tbody>'
+                    '</table></table-wrap>'
+                )
+                result = audit_jats_percentage_tables(data)["results"][0]
+                self.assertNotIn("conditional_calculation", result)
+
+    def test_nested_article_paragraphs_are_text_scanned_once(self):
+        depth = 80
+        data = jats("<p>" * depth + "Intervention group (n=41)." + "</p>" * depth)
+        root = _parse_jats(data)
+        with mock.patch("tools.jats_percentage_audit._text", wraps=_text) as text_call:
+            populations = _article_group_populations(root)
+        self.assertEqual(populations[("intervention", "group")][0]["value"], 41)
+        self.assertLessEqual(text_call.call_count, depth + 2)
 
     def test_article_group_population_scan_fails_closed_at_its_limit(self):
         statements = "".join("<p>Intervention group (n=41).</p>" for _ in range(65))

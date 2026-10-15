@@ -16,7 +16,8 @@ from tools.audit_contracts import validate
 from tools.offline_files import read_regular
 from tools.jats_percentage_audit import (
     MAX_SOURCE_BYTES, JATSSourceError, _parse_jats, _text, _DENOMINATOR_RE,
-    _fragments, _descendants, _cells, _attribute,
+    _fragments, _descendants, _cells, _attribute, _GROUP_POPULATION_RE,
+    _population_label_words, _population_label_occurs,
 )
 from tools.public_discovery import percentage_recalculation
 
@@ -121,6 +122,84 @@ def check_anchor(anchor: dict[str, Any], nodes: dict[tuple[int, int], Any]) -> s
     return None
 
 
+def _inside_table_wrap(node: Any) -> bool:
+    current = node
+    while current is not None:
+        if current.tag.rsplit("}", 1)[-1].lower() == "table-wrap":
+            return True
+        current = current.parent
+    return False
+
+
+def _conditional_population_link_errors(
+    relation: dict[str, Any], nodes: dict[tuple[int, int], Any]
+) -> list[str]:
+    calculation = relation.get("conditional_calculation")
+    if not isinstance(calculation, dict):
+        return ["conditional calculation is not an object"]
+    evidence = calculation.get("evidence")
+    has_population_link = (
+        "population_group" in calculation
+        or calculation.get("assumption") == "matched_article_group_sample_size_may_apply_to_table"
+        or (isinstance(evidence, dict)
+            and ("group_population" in evidence or "table_population_context" in evidence))
+    )
+    # Missing-data calculations use their own row-scope evidence and do not
+    # claim an article-level group-size link.
+    if not has_population_link:
+        return []
+    if not isinstance(evidence, dict):
+        return ["conditional population evidence is missing"]
+    group_anchor = evidence.get("group_population")
+    table_anchor = evidence.get("table_population_context")
+    if not isinstance(group_anchor, dict) or not isinstance(table_anchor, dict):
+        return ["conditional population anchors are missing"]
+    errors: list[str] = []
+    if group_anchor.get("role") != "article_group_population":
+        errors.append("group population anchor has the wrong evidence role")
+    if table_anchor.get("role") != "table_population_group_context":
+        errors.append("table population anchor has the wrong evidence role")
+    group_node = nodes.get((group_anchor.get("byte_start"), group_anchor.get("byte_end")))
+    table_node = nodes.get((table_anchor.get("byte_start"), table_anchor.get("byte_end")))
+    if group_node is None or group_node.tag.rsplit("}", 1)[-1].lower() != "p" or _inside_table_wrap(group_node):
+        errors.append("group population evidence is not an article paragraph outside a table")
+    if table_node is None or not _inside_table_wrap(table_node):
+        errors.append("table population evidence is not inside a table wrapper")
+    if group_anchor.get("byte_start") == table_anchor.get("byte_start") and group_anchor.get("byte_end") == table_anchor.get("byte_end"):
+        errors.append("article and table population anchors must identify distinct elements")
+
+    population_group = calculation.get("population_group")
+    label = _population_label_words(population_group) if isinstance(population_group, str) else ()
+    denominator = calculation.get("denominator")
+    if not label or type(denominator) is not int or denominator <= 0:
+        errors.append("conditional population label or denominator is invalid")
+    if group_node is not None and label and type(denominator) is int:
+        found = any(
+            _population_label_words(match.group("label")) == label
+            and int(match.group("value").replace(",", "")) == denominator
+            for match in _GROUP_POPULATION_RE.finditer(_text(group_node))
+        )
+        if not found:
+            errors.append("article population paragraph does not establish the linked group and denominator")
+    if table_node is not None and label and not _population_label_occurs(label, _text(table_node)):
+        errors.append("table context does not identify the linked population group")
+
+    if type(denominator) is int and denominator > 0:
+        try:
+            expected = percentage_recalculation(
+                relation.get("numerator"), denominator, relation.get("reported_percent"),
+                relation.get("display_precision"),
+            )
+        except (TypeError, ValueError):
+            errors.append("conditional arithmetic operands are invalid")
+        else:
+            for key in ("arithmetic_matches", "rounded_percent", "exact_ratio_percent"):
+                if calculation.get(key) != expected[key]:
+                    errors.append("conditional arithmetic disagrees with its declared operands")
+                    break
+    return errors
+
+
 def evidence_errors(value: Any, nodes: dict[tuple[int, int], Any], source_hash: str) -> list[str]:
     errors: list[str] = []
     stack = [value]
@@ -140,6 +219,8 @@ def evidence_errors(value: Any, nodes: dict[tuple[int, int], Any], source_hash: 
             stack.extend(item.values())
         elif isinstance(item, list):
             stack.extend(item)
+    if isinstance(value, dict) and "conditional_calculation" in value:
+        errors.extend(_conditional_population_link_errors(value, nodes))
     return errors
 
 
@@ -545,7 +626,8 @@ def compare_runs(annotation_path: Path, run_paths: list[Path]) -> dict[str, Any]
                 else:
                     metrics["abstentions"] += 1
                     reasons[str(relation.get("reason"))] += 1
-                if relation.get("conditional_calculation", {}).get("arithmetic_matches") is False:
+                if (not errors
+                        and relation.get("conditional_calculation", {}).get("arithmetic_matches") is False):
                     metrics["conditional_mismatch_candidates"] += 1
             consumed = set()
             for reference in doc["relationships"]:

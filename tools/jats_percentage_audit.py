@@ -55,6 +55,15 @@ _GROUP_POPULATION_RE = re.compile(
     rf"\s*\(\s*(?:n|N)\s*[=:]\s*(?P<value>{_INTEGER_TOKEN})\s*\)",
     re.IGNORECASE,
 )
+_GENERIC_GROUP_CONTEXT_HEADER_WORDS = frozenset({
+    "arm", "arms", "category", "categories", "characteristic", "characteristics",
+    "count", "counts", "frequency", "frequencies", "measure", "measures", "n",
+    "no", "number", "numbers", "outcome", "outcomes", "parameter", "parameters",
+    "participant", "participants", "patient", "patients", "percent", "percentage",
+    "percentages", "response", "responses", "subject", "subjects", "value", "values",
+    "variable", "variables",
+})
+_GROUP_LABEL_NEGATORS = frozenset({"anti", "never", "no", "non", "not", "unlike", "without"})
 _HEADER_CUE_RE = re.compile(
     r"\b(?:parameter|variable|characteristic|value|count|number|frequency|percent(?:age)?)\b|"
     r"\bno(?:\.|\b)",
@@ -120,6 +129,7 @@ class _Node:
     byte_end: int = 0
     parts: list[str | "_Node"] = field(default_factory=list)
     children: list["_Node"] = field(default_factory=list)
+    parent: "_Node | None" = field(default=None, repr=False)
 
 
 def _local_name(name: str) -> str:
@@ -169,7 +179,10 @@ def _parse_jats(data: bytes) -> _Node:
         if len(stack) >= MAX_XML_DEPTH:
             raise JATSSourceError("JATS XML exceeds the nesting-depth limit")
         start_index = parser.CurrentByteIndex
-        node = _Node(name, dict(attrs), start_index, _tag_end(data, start_index))
+        node = _Node(
+            name, dict(attrs), start_index, _tag_end(data, start_index),
+            parent=stack[-1] if stack else None,
+        )
         if stack:
             stack[-1].children.append(node)
             stack[-1].parts.append(node)
@@ -374,6 +387,22 @@ def _population_label_words(value: str) -> tuple[str, ...]:
     return tuple(words)
 
 
+def _population_label_occurs(label: tuple[str, ...], context: str) -> bool:
+    """Find a complete group phrase without matching a negated longer label."""
+    words = _population_label_words(context)
+    width = len(label)
+    for start in range(max(0, len(words) - width + 1)):
+        if words[start:start + width] != label:
+            continue
+        # Reject phrases such as "non-control group" and "not the control
+        # group" when the registered label is only "control group".
+        prefix = words[max(0, start - 3):start]
+        if any(word in _GROUP_LABEL_NEGATORS for word in prefix):
+            continue
+        return True
+    return False
+
+
 def _article_group_populations(root: _Node) -> dict[tuple[str, ...], list[dict[str, Any]]]:
     """Collect exact, source-anchored group n statements outside table markup.
 
@@ -388,7 +417,9 @@ def _article_group_populations(root: _Node) -> dict[tuple[str, ...], list[dict[s
     def walk(node: _Node, inside_table: bool = False) -> None:
         nonlocal seen
         inside_table = inside_table or _local_name(node.tag) == "table-wrap"
-        if not inside_table and _local_name(node.tag) == "p":
+        if _local_name(node.tag) == "p":
+            if inside_table:
+                return
             quote = _text(node)
             for match in _GROUP_POPULATION_RE.finditer(quote):
                 seen += 1
@@ -396,13 +427,16 @@ def _article_group_populations(root: _Node) -> dict[tuple[str, ...], list[dict[s
                     populations.clear()
                     return
                 label = _population_label_words(match.group("label"))
-                if not label:
+                if not label or not any(word not in {"group", "arm"} for word in label):
                     continue
                 populations.setdefault(label, []).append({
                     "value": int(match.group("value").replace(",", "")),
                     "label": " ".join(label),
                     "evidence": _evidence(node, "article_group_population", quote),
                 })
+            # _text already walked the full paragraph subtree. Returning here
+            # prevents nested paragraphs from rebuilding and rescanning it.
+            return
         for child in node.children:
             walk(child, inside_table)
             if seen > MAX_ARTICLE_GROUP_POPULATIONS:
@@ -426,16 +460,24 @@ def _group_population_match(
             if not label:
                 continue
             for node in nodes:
-                context = _population_label_words(_text(node))
-                width = len(label)
-                if any(context[start:start + width] == label
-                       for start in range(max(0, len(context) - width + 1))):
+                if _population_label_occurs(label, _text(node)):
                     found.append((label, facts, node))
                     break
         return found
 
     # A per-column label is narrower than a table title and takes priority.
-    found = matches(header_nodes) or matches(table_context_nodes)
+    found = matches(header_nodes)
+    if not found:
+        header_words = {
+            word for node in header_nodes
+            for word in _population_label_words(_text(node))
+            if word not in {"a", "an", "and", "for", "in", "of", "the", "to"}
+        }
+        # A caption can identify the population only when the column headers
+        # are generic. A specific but unmatched header (for example Control)
+        # vetoes fallback from a caption mentioning Intervention.
+        if header_words <= _GENERIC_GROUP_CONTEXT_HEADER_WORDS:
+            found = matches(table_context_nodes)
     if len(found) != 1:
         return None
     label, facts, table_node = found[0]
