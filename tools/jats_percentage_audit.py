@@ -50,7 +50,8 @@ _DENOMINATOR_RE = re.compile(
     rf"(?<![A-Za-z0-9])(?:n|N)\s*[=:]\s*(?P<value>{_INTEGER_TOKEN})(?![0-9]|[,.][0-9])"
 )
 _HEADER_CUE_RE = re.compile(
-    r"\b(?:parameter|variable|characteristic|value|count|number|percent(?:age)?)\b",
+    r"\b(?:parameter|variable|characteristic|value|count|number|frequency|percent(?:age)?)\b|"
+    r"\bno(?:\.|\b)",
     re.IGNORECASE,
 )
 _PERCENT_CONTEXT_RE = re.compile(
@@ -59,6 +60,16 @@ _PERCENT_CONTEXT_RE = re.compile(
 _EXPLICIT_PERCENT_BASIS_RE = re.compile(
     r"\bpercent(?:age)?s?\b.{0,100}\b(?:denominator|based on|full cohort|entire cohort)\b|"
     r"\b(?:denominator|full cohort|entire cohort)\b.{0,100}\bpercent(?:age)?s?\b",
+    re.IGNORECASE,
+)
+_EXPLICIT_PERCENT_OF_TOTAL_RE = re.compile(
+    r"\bof\s+(?:the\s+)?(?:total|all)\s+[A-Za-z][A-Za-z0-9 /_-]{0,80}"
+    r"\(\s*%\s*\)",
+    re.IGNORECASE,
+)
+_FULL_WIDTH_TOTAL_ROW_RE = re.compile(
+    rf"^\s*(?:(?:grand|overall)\s+)?total\s*[:=\-]?\s*"
+    rf"(?P<count>{_INTEGER_TOKEN})\s*\(\s*100(?:\.0+)?\s*%\s*\)\s*$",
     re.IGNORECASE,
 )
 _ROW_GROUP_PERCENT_RE = re.compile(r"\bn\s*\(\s*%", re.IGNORECASE)
@@ -374,11 +385,28 @@ def _cell_column_positions(cells: list[_Node]) -> tuple[list[int], bool]:
 
 
 def _is_count_header(nodes: list[_Node]) -> bool:
-    return any(
-        _text(node).strip() == "n"
-        or re.search(r"\b(?:count|number)\b", _text(node), re.IGNORECASE)
-        for node in nodes
-    )
+    for node in nodes:
+        text = _text(node).strip()
+        if text == "n" or text.casefold() in {"no", "no.", "frequency", "frequencies"}:
+            return True
+        if re.search(r"\b(?:count|number|frequency)\b", text, re.IGNORECASE):
+            return True
+        # Uppercase N is a count only when its header spells out that role.
+        # A bare N remains a denominator cue in _is_denominator_header.
+        if re.fullmatch(
+            r"N\s*(?:\(\s*(?:count|numerator|frequency)\s*\)|"
+            r"[,:\-]\s*(?:count|numerator|frequency))",
+            text,
+            re.IGNORECASE,
+        ):
+            return True
+        if re.fullmatch(
+            r"N\s+of\s+(?:patients|participants|subjects|cases|admissions|respondents)",
+            text,
+            re.IGNORECASE,
+        ):
+            return True
+    return False
 
 
 def _is_denominator_header(nodes: list[_Node]) -> bool:
@@ -555,7 +583,15 @@ def _candidate_from_cell(
         ambiguity = "multiple_unscoped_table_denominators"
     elif global_values:
         denominator = next(iter(global_values))
-        denominator_scope = "table_caption_or_footnote"
+        denominator_scope = (
+            "table_total_row"
+            if any(
+                fact["value"] == denominator
+                and fact["evidence"]["role"] == "table_total_row"
+                for fact in global_facts
+            )
+            else "table_caption_or_footnote"
+        )
     else:
         ambiguity = "no_explicit_denominator"
 
@@ -828,6 +864,11 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
                 if len(table_adjustment_notes) >= MAX_ADJUSTMENT_NOTES:
                     break
 
+            explicit_table_percentage_basis = bool(
+                _EXPLICIT_PERCENT_BASIS_RE.search(table_context)
+                or _EXPLICIT_PERCENT_OF_TOTAL_RE.search(table_context)
+            )
+
             body_sections = list(_descendants(table, "tbody"))
             if body_sections:
                 body_rows = [row for section in body_sections for row in _descendants(section, "tr")]
@@ -835,12 +876,41 @@ def audit_jats_percentage_tables(data: bytes) -> dict[str, Any]:
                 header_ids = {id(row) for row in header_rows}
                 body_rows = [row for row in all_rows if id(row) not in header_ids]
 
+            # A table-wide total can supply an explicitly reported denominator
+            # only when the table itself says its percentages are of the total
+            # population and one full-width row states Total N (100%). A bare
+            # total, a subgroup total, or a total row without that scope cue is
+            # never inherited by the data rows.
+            header_ids = {id(row) for row in header_rows}
+            total_row_candidates: list[tuple[_Node, _Node, int]] = []
+            if explicit_table_percentage_basis and table_percentage_context and header_columns:
+                header_width = max(header_columns) + 1
+                for candidate_row in all_rows:
+                    if id(candidate_row) in header_ids:
+                        continue
+                    candidate_cells = _cells(candidate_row)
+                    if len(candidate_cells) != 1:
+                        continue
+                    total_cell = candidate_cells[0]
+                    if _span(total_cell, "colspan") != header_width:
+                        continue
+                    total_match = _FULL_WIDTH_TOTAL_ROW_RE.fullmatch(_text(total_cell))
+                    if total_match:
+                        total_row_candidates.append((candidate_row, total_cell, int(
+                            total_match.group("count").replace(",", "")
+                        )))
+            if len(total_row_candidates) == 1:
+                total_row, total_cell, total_value = total_row_candidates[0]
+                global_facts.append({
+                    "value": total_value,
+                    "evidence": _evidence(total_cell, "table_total_row", _text(total_cell)),
+                })
+                body_rows = [row for row in body_rows if id(row) != id(total_row)]
+
             body_grid, body_layouts, body_layout_malformed = _layout_rows(body_rows)
             grid_nodes_by_row: dict[int, dict[int, _Node]] = {}
             for (r, _c), node in body_grid.items():
                 grid_nodes_by_row.setdefault(r, {})[id(node)] = node
-            explicit_table_percentage_basis = any(
-                _EXPLICIT_PERCENT_BASIS_RE.search(_text(n)) for _role, n in global_nodes)
             group_for_row: list[tuple[int, tuple[str, _Node] | None]] = []
             group_number = 0
             row_group_context: tuple[str, _Node] | None = None

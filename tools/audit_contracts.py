@@ -42,6 +42,78 @@ def schema_documents() -> dict[str, dict[str, Any]]:
             "source": source,
             "relationships": {"type": "array", "maxItems": 5000, "items": relationship},
         })}})
+    anchor_v2 = obj({
+        "byte_start": COUNT, "byte_end": COUNT, "quote": TEXT,
+        "character_start": COUNT, "character_end": COUNT, "span_quote": TEXT,
+    })
+    denominator_evidence_v2 = obj({
+        "kind": {"enum": ["cell_ratio", "row_denominator_column", "column_header",
+            "row_group", "caption", "footnote", "table_total_row", "reviewer_mapped"]},
+        "value": COUNT,
+        "anchor": anchor_v2,
+    })
+    alternative_v2 = obj({
+        "hypothesis_id": {"type": "string", "minLength": 1, "maxLength": 100},
+        "statement": TEXT,
+        "status": {"enum": ["supported", "unsupported", "unresolved", "rejected"]},
+        "evidence": {"type": "array", "maxItems": 8, "items": anchor_v2},
+    })
+    source_v2 = obj({"path": TEXT, "sha256": SHA, "url": TEXT, "provenance_status": TEXT,
+        "license": TEXT, "version_label": TEXT, "retrieved_at_utc": TEXT})
+    related_source_v2 = obj({
+        "source_id": {"type": "string", "minLength": 1, "maxLength": 100},
+        "relationship": {"enum": ["correction", "supplement", "version", "other"]},
+        "source": source_v2,
+    })
+    correction_evidence_v2 = obj({
+        "source_id": {"type": "string", "minLength": 1, "maxLength": 100},
+        "statement": TEXT,
+        "anchor": anchor_v2,
+    })
+    relationship_v2 = obj({
+        "relationship_id": {"type": "string", "minLength": 1, "maxLength": 250},
+        "table_id": {"type": "string", "minLength": 1, "maxLength": 100},
+        "row_index": {"type": "integer", "minimum": 1, "maximum": 20000},
+        "numerator_cell_index": {"type": "integer", "minimum": 0, "maximum": 255},
+        "percentage_cell_index": {"type": "integer", "minimum": 0, "maximum": 255},
+        "component_group_id": {"type": "string", "maxLength": 250},
+        "component_index": {"type": "integer", "minimum": 0, "maximum": 7},
+        "component_count": {"type": "integer", "minimum": 1, "maximum": 8},
+        "component_label": TEXT,
+        "numerator": COUNT,
+        "denominator": {"anyOf": [COUNT, {"type": "null"}]},
+        "denominator_basis": {"enum": ["cell_ratio", "row_denominator_column", "column_header",
+            "row_group", "caption_or_footnote", "table_total_row", "reviewer_mapped",
+            "derived_unresolved", "not_reported"]},
+        "reported_percent": PERCENT,
+        "precision": {"type": "integer", "minimum": 0, "maximum": 6},
+        "scope_status": {"enum": ["explicit_cell", "explicit_header", "explicit_table",
+            "explicit_row_group", "reviewer_mapped", "derived_unresolved", "unknown"]},
+        "scope_linkage_status": {"enum": ["explicit_same_population", "reviewer_mapped", "unresolved"]},
+        "population_scope": TEXT,
+        "arithmetic_status": {"enum": ["arithmetic_match", "arithmetic_mismatch_candidate", "not_computed"]},
+        "review_outcome": {"enum": ["arithmetic_only", "unresolved_rounding", "unresolved_scope", "correction_corroborated"]},
+        "scope_rationale": TEXT,
+        "numerator_anchor": anchor_v2,
+        "percentage_anchor": anchor_v2,
+        # Compatibility alias used by the v1 comparison key. Its byte element
+        # matches percentage_anchor; its character span may cover one component.
+        "anchor": anchor_v2,
+        "denominator_evidence": {"type": "array", "maxItems": 16, "items": denominator_evidence_v2},
+        "scope_evidence": {"type": "array", "maxItems": 8, "items": anchor_v2},
+        "alternative_interpretations": {"type": "array", "maxItems": 16, "items": alternative_v2},
+        "correction_evidence": {"type": "array", "maxItems": 8, "items": correction_evidence_v2},
+    })
+    annotations_v2 = obj({"schema_version": {"const": 2}, "exposure": {"const": "development"},
+        "annotation_provenance": TEXT,
+        "documents": {"type": "array", "minItems": 1, "maxItems": 100, "items": obj({
+            "document_id": TEXT, "work_family_id": TEXT, "independence_status": TEXT,
+            "annotation_authority": {"enum": ["developer", "independent_human", "custodian"]},
+            "reviewer_status": {"enum": ["unreviewed", "model_reviewed", "human_adjudicated", "custodian_accepted"]},
+            "source": source_v2,
+            "related_sources": {"type": "array", "maxItems": 10, "items": related_source_v2},
+            "relationships": {"type": "array", "maxItems": 5000, "items": relationship_v2},
+        })}})
     run = obj({"schema_version": {"const": 1}, "label": TEXT, "detector_revision": TEXT,
         "detector_files": {"type": "object", "minProperties": 1, "maxProperties": 10, "additionalProperties": SHA},
         "documents": {"type": "array", "minItems": 1, "maxItems": 100, "items": obj({
@@ -92,6 +164,7 @@ def schema_documents() -> dict[str, dict[str, Any]]:
             })}, "limitations": {"type": "array", "items": TEXT, "maxItems": 30}})
     return {"research-audit.v1.schema.json": audit,
             "percentage-annotations.v1.schema.json": annotations,
+            "percentage-annotations.v2.schema.json": annotations_v2,
             "percentage-run.v1.schema.json": run,
             "research-benchmark.v1.schema.json": comparison}
 

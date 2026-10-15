@@ -14,7 +14,10 @@ from typing import Any
 
 from tools.audit_contracts import validate
 from tools.offline_files import read_regular
-from tools.jats_percentage_audit import MAX_SOURCE_BYTES, JATSSourceError, _parse_jats, _text, _DENOMINATOR_RE, _fragments
+from tools.jats_percentage_audit import (
+    MAX_SOURCE_BYTES, JATSSourceError, _parse_jats, _text, _DENOMINATOR_RE,
+    _fragments, _descendants, _cells, _attribute,
+)
 from tools.public_discovery import percentage_recalculation
 
 MAX_JSON_BYTES = 16 * 1024 * 1024
@@ -76,6 +79,26 @@ def node_map(data: bytes) -> dict[tuple[int, int], Any]:
     return nodes
 
 
+def table_cell_context_map(data: bytes) -> dict[tuple[int, int], dict[str, Any]]:
+    """Map exact JATS cell nodes to stable table/row/source-cell identities."""
+    root = _parse_jats(data)
+    output: dict[tuple[int, int], dict[str, Any]] = {}
+    table_number = 0
+    for wrapper in _descendants(root, "table-wrap"):
+        raw_id = _attribute(wrapper, "id")
+        for table in _descendants(wrapper, "table"):
+            table_number += 1
+            table_id = (raw_id or f"table-{table_number}")[:100]
+            for row_index, row in enumerate(_descendants(table, "tr"), start=1):
+                for cell_index, cell in enumerate(_cells(row)):
+                    output[(cell.byte_start, cell.byte_end)] = {
+                        "table_id": table_id,
+                        "row_index": row_index,
+                        "cell_index": cell_index,
+                    }
+    return output
+
+
 def check_anchor(anchor: dict[str, Any], nodes: dict[tuple[int, int], Any]) -> str | None:
     start, end = anchor.get("byte_start"), anchor.get("byte_end")
     if type(start) is not int or type(end) is not int or start < 0 or end <= start:
@@ -133,7 +156,13 @@ def _result_key(relation: dict[str, Any]):
 def validate_annotations(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any]], str]:
     annotation_bytes = read_regular(path, MAX_JSON_BYTES)
     annotation = parse_json(annotation_bytes, path)
-    validate(annotation, "percentage-annotations.v1.schema.json")
+    schema_name = (
+        "percentage-annotations.v2.schema.json"
+        if isinstance(annotation, dict) and annotation.get("schema_version") == 2
+        else "percentage-annotations.v1.schema.json"
+    )
+    validate(annotation, schema_name)
+    is_v2 = annotation["schema_version"] == 2
     docs, ids = {}, set()
     total = 0
     source_bytes = 0
@@ -150,10 +179,30 @@ def validate_annotations(path: Path) -> tuple[dict[str, Any], dict[str, dict[str
             raise ValueError("Benchmark source set exceeds the 32 MiB aggregate limit")
         try:
             nodes = node_map(source)
+            cell_contexts = table_cell_context_map(source) if is_v2 else {}
         except JATSSourceError as exc:
             if doc["relationships"]:
                 raise ValueError(f"Annotated source cannot be parsed safely: {document_id}: {exc}") from exc
             nodes = {}
+            cell_contexts = {}
+        related_sources: dict[str, dict[str, Any]] = {}
+        if is_v2:
+            for related in doc["related_sources"]:
+                source_id = related["source_id"]
+                if source_id in related_sources:
+                    raise ValueError(f"Duplicate related-source identifier: {source_id}")
+                related_path = confined(path.parent, related["source"]["path"])
+                related_data = read_regular(related_path, MAX_SOURCE_BYTES)
+                if digest(related_data) != related["source"]["sha256"]:
+                    raise ValueError(f"Related source version/hash mismatch: {source_id}")
+                source_bytes += len(related_data)
+                if source_bytes > MAX_SOURCE_SET_BYTES:
+                    raise ValueError("Benchmark source set exceeds the 32 MiB aggregate limit")
+                try:
+                    related_nodes = node_map(related_data)
+                except JATSSourceError as exc:
+                    raise ValueError(f"Related evidence source cannot be parsed safely: {source_id}: {exc}") from exc
+                related_sources[source_id] = {"record": related, "nodes": related_nodes}
         source_identities = set()
         for relation in doc["relationships"]:
             total += 1
@@ -172,31 +221,181 @@ def validate_annotations(path: Path) -> tuple[dict[str, Any], dict[str, dict[str
                 raise ValueError(f"Invalid annotation anchor {identity}: {error}")
             anchor = relation["anchor"]
             text = _text(nodes[(anchor["byte_start"], anchor["byte_end"])])
-            pairs = [m for m in pairs_in_span(text, anchor.get("character_start", 0), anchor.get("character_end", len(text)))
-                     if int(m.group("n").replace(",", "")) == relation["numerator"]
-                     and m.group("p") == relation["reported_percent"]]
-            if len(pairs) != 1:
-                raise ValueError(f"Annotation numeric tokens are ambiguous or differ from the source: {identity}")
-            for denominator_anchor in relation["denominator_evidence"]:
-                error = check_anchor(denominator_anchor, nodes)
-                if error:
-                    raise ValueError(f"Invalid denominator evidence {identity}: {error}")
-            if relation["scope_status"].startswith("explicit") and not relation["denominator_evidence"]:
-                raise ValueError(f"Explicit denominator lacks source evidence: {identity}")
-            denominator = relation["denominator"]
-            embedded = pairs[0].group("d")
-            if embedded is not None and int(embedded.replace(",", "")) != denominator:
-                raise ValueError(f"Annotation denominator disagrees with embedded n/N: {identity}")
-            if relation["scope_status"].startswith("explicit"):
+            if is_v2:
+                percent_anchor = relation["percentage_anchor"]
+                if (relation["anchor"]["byte_start"] != percent_anchor["byte_start"]
+                        or relation["anchor"]["byte_end"] != percent_anchor["byte_end"]
+                        or relation["anchor"]["quote"] != percent_anchor["quote"]):
+                    raise ValueError(f"Compatibility anchor does not identify the percentage source cell: {identity}")
+                main_anchor = relation["anchor"]
+                main_text = _text(nodes[(main_anchor["byte_start"], main_anchor["byte_end"])])
+                main_start, main_end = main_anchor["character_start"], main_anchor["character_end"]
+                if (main_anchor["span_quote"] != main_text[main_start:main_end]
+                        or not (main_start <= percent_anchor["character_start"]
+                                < percent_anchor["character_end"] <= main_end)):
+                    raise ValueError(f"Compatibility anchor does not cover the relationship span: {identity}")
+                span_values = {}
+                for role in ("numerator_anchor", "percentage_anchor"):
+                    a = relation[role]
+                    error = check_anchor(a, nodes)
+                    if error:
+                        raise ValueError(f"Invalid {role} for {identity}: {error}")
+                    node_text = _text(nodes[(a["byte_start"], a["byte_end"])])
+                    start, end = a["character_start"], a["character_end"]
+                    span = node_text[start:end]
+                    if a["span_quote"] != span:
+                        raise ValueError(f"{role} span quote differs from source: {identity}")
+                    span_values[role] = span
+                numerator_anchor = relation["numerator_anchor"]
+                if (numerator_anchor["byte_start"] == main_anchor["byte_start"]
+                        and numerator_anchor["byte_end"] == main_anchor["byte_end"]
+                        and not (main_start <= numerator_anchor["character_start"]
+                                 < numerator_anchor["character_end"] <= main_end)):
+                    raise ValueError(f"Relationship span does not cover its numerator token: {identity}")
+                try:
+                    numerator_value = int(span_values["numerator_anchor"].replace(",", ""))
+                except ValueError as exc:
+                    raise ValueError(f"Numerator anchor is not an integer token: {identity}") from exc
+                if (not re.fullmatch(INTEGER, span_values["numerator_anchor"])
+                        or numerator_value != relation["numerator"]):
+                    raise ValueError(f"Numerator anchor differs from declared count: {identity}")
+                percent_span = span_values["percentage_anchor"].rstrip("%").strip()
+                if percent_span != relation["reported_percent"]:
+                    raise ValueError(f"Percentage anchor differs from declared percentage: {identity}")
+                contexts = []
+                for role, index_key in (("numerator_anchor", "numerator_cell_index"),
+                                        ("percentage_anchor", "percentage_cell_index")):
+                    a = relation[role]
+                    context = cell_contexts.get((a["byte_start"], a["byte_end"]))
+                    if context is None:
+                        raise ValueError(f"{role} does not identify a table cell: {identity}")
+                    if context["cell_index"] != relation[index_key]:
+                        raise ValueError(f"{role} cell index differs from source: {identity}")
+                    contexts.append(context)
+                if any(c["table_id"] != relation["table_id"] for c in contexts):
+                    raise ValueError(f"Relationship table identifier differs from source: {identity}")
+                if any(c["row_index"] != relation["row_index"] for c in contexts):
+                    raise ValueError(f"Relationship row identity differs from source: {identity}")
+                if relation["component_index"] >= relation["component_count"]:
+                    raise ValueError(f"Component index is outside its declared group: {identity}")
+                if relation["component_count"] > 1 and not relation["component_group_id"]:
+                    raise ValueError(f"Multiple cell components require a group identity: {identity}")
+                for a in relation["scope_evidence"]:
+                    error = check_anchor(a, nodes)
+                    if error:
+                        raise ValueError(f"Invalid population-scope evidence {identity}: {error}")
+                if relation["scope_linkage_status"] == "explicit_same_population" and not relation["scope_evidence"]:
+                    raise ValueError(f"Explicit population linkage lacks source evidence: {identity}")
+                for alternative in relation["alternative_interpretations"]:
+                    for a in alternative["evidence"]:
+                        error = check_anchor(a, nodes)
+                        if error:
+                            raise ValueError(f"Invalid alternative-interpretation evidence {identity}: {error}")
+                for item in relation["correction_evidence"]:
+                    related = related_sources.get(item["source_id"])
+                    if related is None or related["record"]["relationship"] != "correction":
+                        raise ValueError(f"Correction evidence does not name a registered correction source: {identity}")
+                    a = item["anchor"]
+                    error = check_anchor(a, related["nodes"])
+                    if error:
+                        raise ValueError(f"Invalid correction evidence {identity}: {error}")
+                    correction_text = _text(related["nodes"][(a["byte_start"], a["byte_end"])])
+                    if a["span_quote"] != correction_text[a["character_start"]:a["character_end"]]:
+                        raise ValueError(f"Correction evidence span differs from source: {identity}")
+                if relation["review_outcome"] == "correction_corroborated" and not relation["correction_evidence"]:
+                    raise ValueError(f"Correction-corroborated status lacks source evidence: {identity}")
+
+                denominator = relation["denominator"]
+                basis = relation["denominator_basis"]
+                explicit_bases = {"cell_ratio", "row_denominator_column", "column_header",
+                                  "row_group", "caption_or_footnote", "table_total_row", "reviewer_mapped"}
+                if basis in explicit_bases and denominator is None:
+                    raise ValueError(f"Explicit denominator basis lacks a denominator: {identity}")
+                if basis in {"derived_unresolved", "not_reported"} and denominator is not None:
+                    raise ValueError(f"Unresolved denominator must not be credited as explicit: {identity}")
+                if basis == "derived_unresolved" and relation["scope_status"] != "derived_unresolved":
+                    raise ValueError(f"Derived denominator basis and scope status contradict: {identity}")
+                if basis == "not_reported" and relation["scope_status"] != "unknown":
+                    raise ValueError(f"Unreported denominator requires unknown scope status: {identity}")
+                permitted_evidence_kinds = {
+                    "cell_ratio": {"cell_ratio"},
+                    "row_denominator_column": {"row_denominator_column"},
+                    "column_header": {"column_header"},
+                    "row_group": {"row_group"},
+                    "caption_or_footnote": {"caption", "footnote"},
+                    "table_total_row": {"table_total_row"},
+                    "reviewer_mapped": {"reviewer_mapped"},
+                }
+                if basis in permitted_evidence_kinds and any(
+                    item["kind"] not in permitted_evidence_kinds[basis]
+                    for item in relation["denominator_evidence"]
+                ):
+                    raise ValueError(f"Denominator evidence kind contradicts its declared basis: {identity}")
                 evidence_values = set()
-                for a in relation["denominator_evidence"]:
+                for item in relation["denominator_evidence"]:
+                    a = item["anchor"]
+                    error = check_anchor(a, nodes)
+                    if error:
+                        raise ValueError(f"Invalid denominator evidence {identity}: {error}")
                     evidence_text = _text(nodes[(a["byte_start"], a["byte_end"])])
-                    evidence_values.update(int(m.group("value").replace(",", "")) for m in _DENOMINATOR_RE.finditer(evidence_text))
-                    evidence_values.update(int(m.group("d").replace(",", "")) for m in PAIR.finditer(evidence_text) if m.group("d"))
+                    value = item["value"]
+                    anchored_values = {int(m.group("value").replace(",", ""))
+                                       for m in _DENOMINATOR_RE.finditer(evidence_text)}
+                    anchored_values.update(int(m.group("d").replace(",", ""))
+                                           for m in PAIR.finditer(evidence_text) if m.group("d"))
                     if re.fullmatch(INTEGER, evidence_text):
-                        evidence_values.add(int(evidence_text.replace(",", "")))
-                if denominator is None or denominator not in evidence_values:
-                    raise ValueError(f"Explicit annotation denominator differs from source evidence: {identity}")
+                        anchored_values.add(int(evidence_text.replace(",", "")))
+                    total_match = re.fullmatch(
+                        rf"\s*(?:(?:Grand|Overall)\s+)?Total\s*[:=\-]?\s*({INTEGER})"
+                        r"\s*\(\s*100(?:\.0+)?\s*%\s*\)\s*", evidence_text, re.IGNORECASE)
+                    if total_match:
+                        anchored_values.add(int(total_match.group(1).replace(",", "")))
+                    if value not in anchored_values:
+                        raise ValueError(f"Denominator evidence value is absent from source: {identity}")
+                    evidence_values.add(value)
+                if basis in explicit_bases and (not relation["denominator_evidence"]
+                                                 or denominator not in evidence_values):
+                    raise ValueError(f"Explicit annotation denominator differs from evidence: {identity}")
+                if basis in {"derived_unresolved", "not_reported"} and relation["denominator_evidence"]:
+                    raise ValueError(f"Unresolved denominator cannot carry explicit denominator evidence: {identity}")
+                if relation["scope_linkage_status"] == "unresolved":
+                    if relation["arithmetic_status"] != "not_computed":
+                        raise ValueError(f"Unresolved population scope cannot carry computed arithmetic: {identity}")
+                elif denominator is None:
+                    if relation["arithmetic_status"] != "not_computed":
+                        raise ValueError(f"Missing denominator cannot carry computed arithmetic: {identity}")
+                else:
+                    arithmetic = percentage_recalculation(relation["numerator"], denominator,
+                        relation["reported_percent"], relation["precision"])
+                    expected = "arithmetic_match" if arithmetic["arithmetic_matches"] else "arithmetic_mismatch_candidate"
+                    if relation["arithmetic_status"] != expected:
+                        raise ValueError(f"Annotation arithmetic disagrees with its declared operands: {identity}")
+            else:
+                pairs = [m for m in pairs_in_span(text, anchor.get("character_start", 0), anchor.get("character_end", len(text)))
+                         if int(m.group("n").replace(",", "")) == relation["numerator"]
+                         and m.group("p") == relation["reported_percent"]]
+                if len(pairs) != 1:
+                    raise ValueError(f"Annotation numeric tokens are ambiguous or differ from the source: {identity}")
+                for denominator_anchor in relation["denominator_evidence"]:
+                    error = check_anchor(denominator_anchor, nodes)
+                    if error:
+                        raise ValueError(f"Invalid denominator evidence {identity}: {error}")
+                if relation["scope_status"].startswith("explicit") and not relation["denominator_evidence"]:
+                    raise ValueError(f"Explicit denominator lacks source evidence: {identity}")
+                denominator = relation["denominator"]
+                embedded = pairs[0].group("d")
+                if embedded is not None and int(embedded.replace(",", "")) != denominator:
+                    raise ValueError(f"Annotation denominator disagrees with embedded n/N: {identity}")
+                if relation["scope_status"].startswith("explicit"):
+                    evidence_values = set()
+                    for a in relation["denominator_evidence"]:
+                        evidence_text = _text(nodes[(a["byte_start"], a["byte_end"])])
+                        evidence_values.update(int(m.group("value").replace(",", "")) for m in _DENOMINATOR_RE.finditer(evidence_text))
+                        evidence_values.update(int(m.group("d").replace(",", "")) for m in PAIR.finditer(evidence_text) if m.group("d"))
+                        if re.fullmatch(INTEGER, evidence_text):
+                            evidence_values.add(int(evidence_text.replace(",", "")))
+                    if denominator is None or denominator not in evidence_values:
+                        raise ValueError(f"Explicit annotation denominator differs from source evidence: {identity}")
             if denominator is not None:
                 arithmetic = percentage_recalculation(relation["numerator"], denominator,
                     relation["reported_percent"], relation["precision"])

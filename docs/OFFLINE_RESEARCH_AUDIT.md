@@ -31,7 +31,11 @@ Do not feed it protected custody or reserved evaluation sources.
 ## What is evaluated
 
 - Paired count/percent cells, explicit `n/N (%)`, and explicitly headed `n`,
-  `N` and percent columns, with valid comma-grouped integers.
+  `No.`, `Frequency`, qualified `N (count)` and percent columns, with valid
+  comma-grouped integers. A bare uppercase `N` is never treated as a numerator.
+- A single full-width `Total N (100%)` row can supply a denominator only when
+  the table heading explicitly says percentages are of the total population.
+  Ambiguous, repeated, subgroup or unscoped totals remain abstentions.
 - Complete hierarchical header grids and nonnumeric body labels with spans.
   Inherited row-label evidence survives rowspans. Numeric data spans and
   malformed layouts abstain.
@@ -74,11 +78,20 @@ python -m tools.research_audit compare \
 ```
 
 The local annotation and run schemas are
-`percentage-annotations.v1.schema.json` and `percentage-run.v1.schema.json`.
+`percentage-annotations.v1.schema.json`, `percentage-annotations.v2.schema.json`
+and `percentage-run.v1.schema.json`. The comparison still reads v1. V2 records
+independent count and percentage anchors, component spans, table/row/cell
+identity, work-family identity, source version and retrieval metadata,
+population scope, denominator basis, alternative interpretations, and reviewer
+authority/status. Related correction sources carry their own hashes and exact
+anchors; a `correction_corroborated` label is rejected without a registered
+correction source and matching evidence span. Hashes commit to supplied bytes;
+they do not authenticate a source's origin or a reviewer's independence.
 Sources/reports are confined relative to their manifests. Source versions,
 report hashes, exact XML anchors, count/percent tokens, explicit denominator
 evidence and arithmetic are validated. Duplicate identifiers/source facts,
-special files and inconsistent integrated-audit identity/status are rejected.
+special files, contradictory annotations and inconsistent integrated-audit
+identity/status are rejected.
 Legacy raw aid reports are supported with externally supplied detector hashes;
 those hashes are commitments, not proof that a particular executable produced
 the report. The harness never runs arbitrary historical code.

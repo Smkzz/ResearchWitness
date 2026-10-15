@@ -512,6 +512,104 @@ class JATSPercAuditTests(unittest.TestCase):
         missing_cell = result["evidence"]["row_denominator_cell"]
         self.assertEqual(data[missing_cell["byte_start"]:missing_cell["byte_end"]], b"<td></td>")
 
+    def test_recognizes_no_columns_and_one_explicit_full_width_table_total(self):
+        data = jats(
+            '<table-wrap id="total-row-scope"><table>'
+            '<thead><tr><th colspan="6">Ward distribution of total admissions (%)</th></tr>'
+            '<tr><th>Ward</th><th>No.</th><th>%</th>'
+            '<th>Ward</th><th>No.</th><th>%</th></tr></thead><tbody>'
+            '<tr><td>Ward A</td><td>542</td><td>5.63</td>'
+            '<td>Ward B</td><td>205</td><td>4.13</td></tr>'
+            '<tr><td>Ward C</td><td>6913</td><td>90.24</td>'
+            '<td>Ward D</td><td>1</td><td>0.01</td></tr>'
+            '<tr><td colspan="6">Total 7661 (100%)</td></tr>'
+            '</tbody></table></table-wrap>'
+        )
+        report = audit_jats_percentage_tables(data)
+        self.assertEqual(report["tables_inspected"], 1)
+        self.assertEqual(len(report["results"]), 4)
+        by_count = {result["numerator"]: result for result in report["results"]}
+        self.assertEqual(
+            {count: by_count[count]["status"] for count in (542, 205, 6913, 1)},
+            {
+                542: "arithmetic_mismatch_candidate",
+                205: "arithmetic_mismatch_candidate",
+                6913: "arithmetic_match",
+                1: "arithmetic_match",
+            },
+        )
+        self.assertEqual(by_count[542]["denominator"], 7661)
+        self.assertEqual(by_count[542]["contract_expected_percent"], "7.07")
+        self.assertEqual(by_count[205]["contract_expected_percent"], "2.68")
+        self.assertEqual(by_count[542]["denominator_scope"], "table_total_row")
+        source = by_count[542]["evidence"]
+        count_anchor = source["count_evidence"]
+        self.assertEqual(data[count_anchor["byte_start"]:count_anchor["byte_end"]], b"<td>542</td>")
+        total_anchor = next(
+            fact["evidence"] for fact in source["denominator_sources"]
+            if fact["evidence"]["role"] == "table_total_row"
+        )
+        self.assertEqual(
+            data[total_anchor["byte_start"]:total_anchor["byte_end"]],
+            b'<td colspan="6">Total 7661 (100%)</td>',
+        )
+
+    def test_frequency_and_explicitly_qualified_uppercase_n_are_count_headers(self):
+        cases = (
+            ('<th>Frequency</th><th>Percent</th>', "5", "5.00", 100),
+            ('<th>N (count)</th><th>%</th>', "3", "15.00", 20),
+        )
+        for headers, numerator, printed, denominator in cases:
+            with self.subTest(headers=headers):
+                data = jats(
+                    f'<table-wrap><caption><p>Analysis population N={denominator}.</p></caption>'
+                    f'<table><thead><tr><th>Category</th>{headers}</tr></thead>'
+                    f'<tbody><tr><td>Category A</td><td>{numerator}</td>'
+                    f'<td>{printed}</td></tr></tbody></table></table-wrap>'
+                )
+                results = audit_jats_percentage_tables(data)["results"]
+                self.assertEqual(len(results), 1)
+                self.assertEqual(results[0]["status"], "arithmetic_match")
+                self.assertEqual(results[0]["numerator"], int(numerator))
+                self.assertEqual(results[0]["denominator"], denominator)
+
+    def test_bare_uppercase_n_is_not_promoted_to_a_numerator(self):
+        data = jats(
+            '<table-wrap><table><thead><tr><th>Category</th><th>N</th><th>%</th></tr></thead>'
+            '<tbody><tr><td>Category A</td><td>5</td><td>50.00</td></tr></tbody>'
+            '</table></table-wrap>'
+        )
+        self.assertEqual(audit_jats_percentage_tables(data)["results"], [])
+
+    def test_footer_total_is_not_a_denominator_without_explicit_total_percentage_scope(self):
+        data = jats(
+            '<table-wrap><table><thead><tr><th colspan="3">Ward counts and percentages</th></tr>'
+            '<tr><th>Ward</th><th>No.</th><th>%</th></tr></thead><tbody>'
+            '<tr><td>Ward A</td><td>5</td><td>50.00</td></tr>'
+            '<tr><td>Ward B</td><td>5</td><td>50.00</td></tr>'
+            '<tr><td colspan="3">Total 10 (100%)</td></tr>'
+            '</tbody></table></table-wrap>'
+        )
+        report = audit_jats_percentage_tables(data)
+        data_rows = [item for item in report["results"] if item["numerator"] == 5]
+        self.assertEqual(len(data_rows), 2)
+        self.assertTrue(all(item["denominator"] is None for item in data_rows))
+        self.assertTrue(all(item["status"] == "scope_ambiguous" for item in data_rows))
+
+    def test_multiple_full_width_totals_do_not_choose_a_denominator(self):
+        data = jats(
+            '<table-wrap><table><thead><tr><th colspan="3">Percent of total admissions (%)</th></tr>'
+            '<tr><th>Ward</th><th>No.</th><th>%</th></tr></thead><tbody>'
+            '<tr><td>Ward A</td><td>5</td><td>50.00</td></tr>'
+            '<tr><td colspan="3">Total 10 (100%)</td></tr>'
+            '<tr><td colspan="3">Total 20 (100%)</td></tr>'
+            '</tbody></table></table-wrap>'
+        )
+        report = audit_jats_percentage_tables(data)
+        candidate = next(item for item in report["results"] if item["numerator"] == 5)
+        self.assertEqual(candidate["status"], "scope_ambiguous")
+        self.assertIsNone(candidate["denominator"])
+
     def test_rejects_doctype_entities_and_malformed_xml(self):
         for data in (
             b'<!DOCTYPE article [<!ENTITY x "expanded">]><article><body>&x;</body></article>',
