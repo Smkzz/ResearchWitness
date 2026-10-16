@@ -7,6 +7,7 @@ ResearchWitness releases are evidence-bearing artifacts. A version bump is not c
 1. Update `CHANGELOG.md`, `README.md`, `CITATION.cff`, and package version metadata.
 2. Regenerate schemas / generated fixtures when their source changes.
 3. Ensure validation cases contain only redistributable or synthetic text, never publisher PDFs or private evidence.
+4. Stage every intended release file with Git before regenerating checksums. The source inventory uses Git-indexed files only; ignored and untracked files are never packaged, unstaged changes to selected files fail closed, and selected symlinks are rejected.
 
 ## Qualify
 

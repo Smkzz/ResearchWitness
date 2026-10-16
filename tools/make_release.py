@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -36,13 +37,27 @@ def sha256_file(path: Path) -> str:
 
 def included_files(include_checksums: bool = True) -> list[Path]:
     files: list[Path] = []
-    for path in ROOT.rglob('*'):
-        if not path.is_file():
+    indexed = subprocess.run(
+        ['git', 'ls-files', '--stage', '-z'],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+    ).stdout
+    unstaged = set(subprocess.run(
+        ['git', 'diff', '--name-only', '-z'],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+    ).stdout.split(b'\0'))
+    for entry in indexed.split(b'\0'):
+        if not entry:
             continue
-        rel = path.relative_to(ROOT)
+        metadata, raw_path = entry.split(b'\t', 1)
+        mode, _object_id, stage = metadata.split()
+        rel = Path(os.fsdecode(raw_path))
         if any(part in EXCLUDED_PARTS for part in rel.parts):
             continue
-        if path.suffix in EXCLUDED_SUFFIXES or path.name == '.coverage':
+        if rel.suffix in EXCLUDED_SUFFIXES or rel.name == '.coverage':
             continue
         if rel.as_posix() in EXCLUDED_REL_PATHS:
             continue
@@ -53,6 +68,26 @@ def included_files(include_checksums: bool = True) -> list[Path]:
             continue
         if not include_checksums and rel.as_posix() == 'CHECKSUMS.sha256':
             continue
+        if raw_path in unstaged and rel.as_posix() != 'CHECKSUMS.sha256':
+            raise RuntimeError(f'Refusing to package unstaged changes: {rel.as_posix()}')
+        if stage != b'0':
+            raise RuntimeError(f'Cannot package an unmerged Git index entry: {rel.as_posix()}')
+        if mode == b'120000':
+            raise RuntimeError(f'Refusing to package a symbolic link: {rel.as_posix()}')
+        if mode not in {b'100644', b'100755'}:
+            raise RuntimeError(f'Refusing non-regular indexed release file: {rel.as_posix()}')
+        path = ROOT / rel
+        current = ROOT
+        for part in rel.parts:
+            current = current / part
+            if current.is_symlink():
+                raise RuntimeError(f'Refusing a release path through a symbolic link: {rel.as_posix()}')
+        try:
+            file_stat = path.stat()
+        except FileNotFoundError as exc:
+            raise RuntimeError(f'Missing indexed release file: {rel.as_posix()}') from exc
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise RuntimeError(f'Refusing non-regular release file: {rel.as_posix()}')
         files.append(path)
     return sorted(files, key=lambda p: p.relative_to(ROOT).as_posix())
 
