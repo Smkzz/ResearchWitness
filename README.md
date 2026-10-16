@@ -383,6 +383,9 @@ python tools/quality_gate.py
 ```
 
 The verifier has no runtime dependencies outside Python's standard library.
+The current evidence-backed engineering assessment is in
+[`docs/OSS_QUALITY_FINAL.md`](docs/OSS_QUALITY_FINAL.md), with the detailed
+Q1–Q10 findings in [`docs/OSS_QUALITY_AUDIT.md`](docs/OSS_QUALITY_AUDIT.md).
 
 ## Current product boundary
 
