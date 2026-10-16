@@ -4,7 +4,7 @@
 **Validated implementation:** `93efdf4cdf20085a7fd914d3ce647c646ab6fe0a`  
 **Implementation tree:** `fc38026bb2ce5e6b8cb5fea0d301b5b60f3a68a5`  
 **PR #13:** [open, draft, unmerged](https://github.com/Smkzz/ResearchWitness/pull/13)  
-**Decision:** `OSS_QUALITY_NOT_YET_10_OF_10` — nine categories pass; Q9 retains the human maintainer review gate.
+**Decision:** `OSS_QUALITY_10_OF_10_VERIFIED` — all ten internal engineering categories PASS under the owner's 2026-10-16 acceptance of disclosed AI-assisted technical review. This is not independent human approval, release authorization, or scientific validation.
 
 ## What is now complete
 
@@ -50,7 +50,7 @@ awaits an ACL guard; real PDF extraction awaits separate image/runtime qualifica
 | Q6 Dependencies and supply chain | PASS, resolved snapshot | Actual Security views; 14-distribution advisory review; shipped license/notice review; pinned Actions and least-privilege workflows. |
 | Q7 Documentation | PASS | Installed-core/source-tool distinction and platform/qualification limits are explicit. |
 | Q8 File/evidence hygiene | PASS | Release inventory excludes private task/build/cache state; no protected custody or reserved evaluation accessed. |
-| Q9 GitHub governance and maintainer review | BLOCKED: HUMAN REVIEW | Metadata and effective protection are complete. The original human maintainer criterion remains unsatisfied by AI review. |
+| Q9 GitHub governance and maintainer review | PASS — owner-accepted AI review | Metadata and active main protection verified. The owner explicitly accepted the disclosed AI technical review instead of requiring a second human reviewer for this internal gate. No independent human review is claimed. |
 | Q10 Reproducibility | PASS | Exact-head release gate, source checksums and ZIP regression, two matching wheels, offline install, synthetic 500/500 and historical replay. |
 
 [CI run 38891822471](https://github.com/Smkzz/ResearchWitness/actions/runs/38891822471)
@@ -62,18 +62,28 @@ and the dependency job passed. Heavy local dispatch was deferred because the
 authorized memory preflight could not obtain telemetry; hosted jobs supplied
 the comprehensive validation.
 
-## Remaining action
+## Owner decision and completion
 
-A human maintainer must review the final PR #13 source and the
-[recorded integration decision](OSS_MAINTAINER_REVIEW.md). This AI-assisted
-delegated review is not independent human approval. Leave
-[issue #14](https://github.com/Smkzz/ResearchWitness/issues/14) open until that
-criterion is fulfilled. No merge or release is authorized by this report.
+On 2026-10-16, the repository owner expressly accepted the disclosed
+AI-assisted technical assessment as sufficient for the project's own Q9
+review requirement. An additional human reviewer is therefore **not required
+for this internal engineering-quality standard**. This is a deliberate
+owner-approved review-policy revision, not a false claim that an independent
+human review occurred. Exact post-documentation checks are referenced in
+[issue #14](https://github.com/Smkzz/ResearchWitness/issues/14).
 
-Recommended eventual order: review #13 independently first; reconcile the six
+**All ten internal OSS engineering categories PASS for the reviewed PR #13
+scope.** The result applies to the verified commit, not to future changes,
+an external certification, a full scientific validation, or an assurance
+that unknown vulnerabilities do not exist.
+
+No merge, release, scientific Wave 3, real PDF sandbox qualification, or
+protected-custody operation is authorized by this acceptance.
+
+Recommended eventual order: integrate AI-reviewed #13 only with separate owner authorization; reconcile the six
 shared files with #6; then #6–#11 in ancestry order; give #12 its own custody-worker
 security review. #5 is an ancestor/superseded snapshot of #6 and remains open
-pending human disposition. No PR was merged, closed, retargeted or force-pushed.
+pending owner-approved disposition. No PR was merged, closed, retargeted or force-pushed.
 
 This document binds the implementation validation above. The final documentation
 commit, its exact-head checks and readbacks are recorded in issue #14 to avoid a
