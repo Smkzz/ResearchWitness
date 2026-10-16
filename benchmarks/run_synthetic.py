@@ -11,11 +11,12 @@ import sys
 import tempfile
 import time
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from researchwitness import evaluate, Invalid
-from researchwitness.checkers import check
-from researchwitness.capsule import core_digest
-from researchwitness.strict import digest
-from tools.make_examples import base_case, write_case
+# Direct script execution inserts the repository root before loading local modules.
+from researchwitness import evaluate, Invalid  # noqa: E402
+from researchwitness.checkers import check  # noqa: E402
+from researchwitness.capsule import core_digest  # noqa: E402
+from researchwitness.strict import digest  # noqa: E402
+from tools.make_examples import base_case, write_case  # noqa: E402
 
 SEED = 20261004
 
@@ -42,9 +43,12 @@ def run(out: Path) -> dict:
             spec={'kind':'polynomial_upper_bound','domain':domain,'terms':terms,'upper_bound':str(value+F(sign,1000))}
             actual=check(spec,witness)['status']
             record(group,i,expected,actual,{'spec':spec,'witness':witness})
-        bad=deepcopy(witness); bad['point']['x']='6'
-        try: actual=check(spec,bad)['status']
-        except Invalid: actual='INVALID'
+        bad = deepcopy(witness)
+        bad['point']['x'] = '6'
+        try:
+            actual = check(spec, bad)['status']
+        except Invalid:
+            actual = 'INVALID'
         record('infeasible-witness',i,'INVALID',actual,{'spec':spec,'witness':bad})
     for i in range(100):
         a,b,c = [F(rng.randint(1,50),rng.randint(1,20)) for _ in range(3)]
@@ -74,15 +78,24 @@ def run(out: Path) -> dict:
     for i in range(100):
         variant=gate_kinds[i%len(gate_kinds)]
         with tempfile.TemporaryDirectory(prefix='researchwitness-conformance-') as tmp:
-            case,data=base_case(); case['case_id']=f'synthetic-conformance-{i}'
-            if variant=='source-unverified': case['source']['capture_status']='unverified'
-            elif variant=='correction-present': case['source']['correction_check']['status']='present'
-            elif variant=='future-correction-check': case['source']['correction_check']['checked_on']='2026-10-05'
-            elif variant=='stale-correction-check': case['source']['correction_check']['checked_on']='2026-01-01'
-            elif variant=='objection': case['unresolved_objections']=['Synthetic applicability objection.']
-            elif variant=='unchecked-correction': case['source']['correction_check']['status']='unchecked'
-            elif variant=='legacy-field': case['reviews']=[]
-            elif variant=='quote-tamper': case['claim']['anchor']['quote']='Not present in captured source.'
+            case, data = base_case()
+            case['case_id'] = f'synthetic-conformance-{i}'
+            if variant == 'source-unverified':
+                case['source']['capture_status'] = 'unverified'
+            elif variant == 'correction-present':
+                case['source']['correction_check']['status'] = 'present'
+            elif variant == 'future-correction-check':
+                case['source']['correction_check']['checked_on'] = '2026-10-05'
+            elif variant == 'stale-correction-check':
+                case['source']['correction_check']['checked_on'] = '2026-01-01'
+            elif variant == 'objection':
+                case['unresolved_objections'] = ['Synthetic applicability objection.']
+            elif variant == 'unchecked-correction':
+                case['source']['correction_check']['status'] = 'unchecked'
+            elif variant == 'legacy-field':
+                case['reviews'] = []
+            elif variant == 'quote-tamper':
+                case['claim']['anchor']['quote'] = 'Not present in captured source.'
             write_case(tmp,case,data)
             if variant=='hash-tamper':
                 (Path(tmp)/'source.txt').write_text('An altered source.')
@@ -114,7 +127,8 @@ def run(out: Path) -> dict:
     out.mkdir(parents=True,exist_ok=True)
     (out/'synthetic-scenarios.jsonl').write_text(''.join(json.dumps(r,sort_keys=True)+'\n' for r in records))
     (out/'synthetic-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
-    if summary['mismatches']: raise RuntimeError('Conformance mismatch')
+    if summary['mismatches']:
+        raise RuntimeError('Conformance mismatch')
     return summary
 
 

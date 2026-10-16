@@ -414,7 +414,6 @@ class ResearchAuditTests(unittest.TestCase):
                 count_text = _text(count_node)
                 pair_span = e['relationship_quote']
                 rel_start = e['normalized_character_start']
-                rel_end = e['normalized_character_end']
                 count_start = pair_span.find(str(result['numerator']))
                 numerator_anchor = {'byte_start': count_node.byte_start, 'byte_end': count_node.byte_end,
                     'quote': count_text, 'character_start': rel_start + count_start,
@@ -523,9 +522,12 @@ class ResearchAuditTests(unittest.TestCase):
         for change in ['detector', 'status', 'count', 'document']:
             with self.subTest(change=change):
                 report = copy.deepcopy(audit)
-                if change == 'status': report['processing']['status'] = 'extraction_failed'
-                if change == 'count': report['processing']['relationships_detected'] = 0
-                if change == 'document': report['document']['document_id'] = 'another'
+                if change == 'status':
+                    report['processing']['status'] = 'extraction_failed'
+                if change == 'count':
+                    report['processing']['relationships_detected'] = 0
+                if change == 'document':
+                    report['document']['document_id'] = 'another'
                 path = self.run_manifest('current', report)
                 run = json.loads(path.read_text())
                 if change != 'detector': run['detector_files'] = audit['detector_files']
@@ -533,7 +535,8 @@ class ResearchAuditTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'contradict'):
                     compare_runs(self.annotation_path, [path])
         path = self.run_manifest('valid', audit)
-        run = json.loads(path.read_text()); run['detector_files'] = audit['detector_files']
+        run = json.loads(path.read_text())
+        run['detector_files'] = audit['detector_files']
         path.write_text(json.dumps(run))
         self.assertEqual(compare_runs(self.annotation_path, [path])['runs'][0]['metrics']['parsed_documents'], 1)
 
@@ -552,7 +555,8 @@ class ResearchAuditTests(unittest.TestCase):
             write_reports(fifo, self.root / 'out.md', report, '')
 
     def test_symlinks_and_oversized_files_fail_regular_file_reader(self):
-        link = self.root / 'link'; link.symlink_to(self.source)
+        link = self.root / 'link'
+        link.symlink_to(self.source)
         with self.assertRaisesRegex(ValueError, 'regular file'):
             read_regular(link, len(self.data))
         with self.assertRaisesRegex(ValueError, 'byte limit'):

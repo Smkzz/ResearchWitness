@@ -168,7 +168,7 @@ class PDFPercentageAuditTests(unittest.TestCase):
                         mock.Mock(returncode=0, stdout=""),
                     ],
                 ) as docker_run:
-                    with mock.patch("tools.pdf_percentage_audit.subprocess.Popen", side_effect=start_child) as popen:
+                    with mock.patch("tools.pdf_percentage_audit.subprocess.Popen", side_effect=start_child):
                         with self.assertRaisesRegex(PDFSourceError, "20-second extraction limit"):
                             _extract_layout_text(b"%PDF-1.7 synthetic bytes")
         child.kill.assert_called_once()
@@ -208,8 +208,10 @@ class PDFPercentageAuditTests(unittest.TestCase):
             *[(b'', code, True, 32, f'unclassified exit code {code}') for code in [2, 3, 99, 125, 126, 127, 137, 143]],
             (b'text', 0, False, 32, 'container ID')]:
             with self.subTest(expected=expected):
-                child = mock.Mock(); child.stdout = io.BytesIO(payload)
-                child.wait.return_value = returncode; child.poll.return_value = returncode
+                child = mock.Mock()
+                child.stdout = io.BytesIO(payload)
+                child.wait.return_value = returncode
+                child.poll.return_value = returncode
                 def start(command, **kwargs):
                     if cid:
                         Path(command[command.index('--cidfile') + 1]).write_text('a' * 64)
@@ -263,10 +265,14 @@ class PDFPercentageAuditTests(unittest.TestCase):
         self.assertTrue(normal_report_matches(report, data, text))
         for field in ['numerator', 'hash', 'count', 'anchor']:
             bad = copy.deepcopy(report)
-            if field == 'numerator': bad['results'][0]['numerator'] = 99
-            if field == 'hash': bad['source_sha256'] = '0' * 64
-            if field == 'count': bad['tables_inspected'] = 2
-            if field == 'anchor': bad['results'][0]['evidence']['page_text_char_start'] = 0
+            if field == 'numerator':
+                bad['results'][0]['numerator'] = 99
+            if field == 'hash':
+                bad['source_sha256'] = '0' * 64
+            if field == 'count':
+                bad['tables_inspected'] = 2
+            if field == 'anchor':
+                bad['results'][0]['evidence']['page_text_char_start'] = 0
             with self.subTest(field=field):
                 self.assertFalse(normal_report_matches(bad, data, text))
 

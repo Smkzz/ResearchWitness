@@ -183,7 +183,8 @@ class PublicDiscoveryTests(unittest.TestCase):
                 slept.append(seconds)
                 now[0] += seconds
 
-            wall_clock = lambda: now[0]
+            def wall_clock():
+                return now[0]
             _reserve_shared_rate_slot(
                 "www.ebi.ac.uk", 1.0, sleep,
                 state_path=state_path, wall_clock=wall_clock,

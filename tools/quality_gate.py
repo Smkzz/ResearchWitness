@@ -10,7 +10,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -114,7 +113,8 @@ def main() -> int:
         build_env['SOURCE_DATE_EPOCH'] = '1760000000'
         dist = temp / 'dist-a'
         dist2 = temp / 'dist-b'
-        dist.mkdir(); dist2.mkdir()
+        dist.mkdir()
+        dist2.mkdir()
         run(sys.executable, '-m', 'pip', 'wheel', '.', '--no-deps', '--no-build-isolation', '-w', str(dist), env=build_env)
         run(sys.executable, '-m', 'pip', 'wheel', '.', '--no-deps', '--no-build-isolation', '-w', str(dist2), env=build_env)
         wheels = list(dist.glob('researchwitness-*.whl'))

@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory(prefix='researchwitness-real-') as td:
                                '--output', str(case_out), '--html', str(html), '--as-of', '2026-10-04'],
                               cwd=ROOT, text=True, capture_output=True, check=True)
         data=json.loads(proc.stdout)
-        report=data['report']; ready=data['contact_readiness']
+        report = data['report']
         assert report['decision']==exp[0]
         assert ready['status']==exp[1]
         assert ready['author_contact_authorized'] is False
