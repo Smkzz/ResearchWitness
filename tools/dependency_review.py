@@ -7,6 +7,7 @@ License texts are evidence for human/AI review, not automatic legal approval.
 from __future__ import annotations
 
 import argparse
+import base64
 from datetime import datetime, timezone
 import hashlib
 from importlib import metadata
@@ -119,9 +120,27 @@ def osv_advisories(name: str, version: str) -> list:
     raise ValueError('OSV inventory exceeds page bound; review is incomplete')
 
 
+def print_license_evidence(output: Path) -> None:
+    """Log only captured public license bytes, retaining their exact encoding."""
+    total = 0
+    for path in sorted((output / 'licenses').rglob('*.txt')):
+        with path.open('rb') as stream:
+            data = stream.read(4 * 1024 * 1024 + 1)
+        total += len(data)
+        if len(data) > 4 * 1024 * 1024 or total > 16 * 1024 * 1024:
+            raise ValueError('license log evidence exceeds byte bound')
+        print('RW_LICENSE_FILE ' + json.dumps({
+            'path': path.relative_to(output).as_posix(),
+            'sha256': hashlib.sha256(data).hexdigest(),
+            'content_base64': base64.b64encode(data).decode('ascii'),
+        }))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--print-license-evidence', action='store_true',
+                        help='Also retain public distributed license texts in the CI log')
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     distributions = sorted((d for d in metadata.distributions()
@@ -153,6 +172,8 @@ def main() -> int:
                           'license_files': len(row['license_files']),
                           'pypi_advisories': [a.get('id') for a in row['pypi_advisories']],
                           'osv_advisories': [a.get('id') for a in row['osv_advisories']]}))
+    if args.print_license_evidence:
+        print_license_evidence(args.output)
     return int(bool(errors) or bool(result['advisory_count']))
 
 

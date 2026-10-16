@@ -1,4 +1,7 @@
 import importlib.util
+import base64
+from contextlib import redirect_stdout
+import io
 import json
 import os
 from pathlib import Path
@@ -14,6 +17,20 @@ SPEC.loader.exec_module(review)
 
 
 class DependencyReviewTests(unittest.TestCase):
+    def test_license_log_preserves_non_utf8_bytes(self):
+        with tempfile.TemporaryDirectory(dir=MODULE_PATH.parents[1]) as temporary:
+            root = Path(temporary)
+            license_path = root / 'licenses' / 'example.txt'
+            license_path.parent.mkdir()
+            license_path.write_bytes(b'copyright\xff\x1b\n')
+            output = io.StringIO()
+            with redirect_stdout(output):
+                review.print_license_evidence(root)
+            line = output.getvalue().splitlines()
+            self.assertEqual(len(line), 1)
+            record = json.loads(line[0].removeprefix('RW_LICENSE_FILE '))
+            self.assertEqual(base64.b64decode(record['content_base64']), license_path.read_bytes())
+
     def test_license_paths_links_and_size_are_rejected_before_query(self):
         class Metadata(dict):
             def get_all(self, _key, default):
