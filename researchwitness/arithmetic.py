@@ -6,7 +6,7 @@ from fractions import Fraction
 from math import isqrt
 import re
 from typing import Any
-from .strict import fields, require, integer, Invalid
+from .strict import fields, require, integer
 
 RATIONAL_RE = re.compile(r'-?(?:0|[1-9][0-9]*)(?:/[1-9][0-9]*)?\Z')
 

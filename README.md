@@ -13,7 +13,7 @@ The current software is an early step toward that goal. Today, ResearchWitness c
 
 That is a current capability limit, not the product goal.
 
-**Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
+**Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ (CI matrix: 3.11–3.13 on Ubuntu, Windows, and macOS) · runtime dependencies: none · Apache-2.0
 
 ## Status
 
@@ -98,10 +98,33 @@ The second line matters as much as the first.
 
 ## Quick start
 
-This development candidate is not published on PyPI. From a source checkout, install the package locally and inspect its agent interfaces:
+This development candidate is not published on PyPI. The installed verifier core is tested on Python 3.11–3.13 on Ubuntu, Windows, and macOS. From a source checkout, create and activate a virtual environment, then install the package locally:
+
+```bash
+python -m venv .venv
+```
+
+Activate it on macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Install the package:
 
 ```bash
 python -m pip install .
+```
+
+Then inspect its agent interfaces:
+
+```bash
 researchwitness --version
 python -m researchwitness capabilities --json
 python -m researchwitness schema intake
@@ -110,6 +133,14 @@ python -m researchwitness validate-intake work/fixed-point/audit.json
 ```
 
 `scaffold` creates a synthetic, editable example for one supported checker. Its source is marked `synthetic`, its correction search is `unchecked`, and it carries an unresolved objection. Replace those fields with source-pinned research material before treating the intake as a research case. `validate-intake` checks local artifact availability, quote anchoring, checker semantics, and witness validity without creating a bundle. The intake JSON Schema is also available at [`schemas/intake.schema.json`](schemas/intake.schema.json) and through `researchwitness schema intake` after installation.
+
+To run a complete synthetic verifier example from the repository root:
+
+```bash
+researchwitness verify examples/counterexample --as-of 2026-10-04
+```
+
+It returns `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` for the supplied formalization and witness, while `paper_error_established` remains `false`. This fixture is synthetic and demonstrates deterministic replay, not paper discovery or scientific validation.
 
 The easiest MVP workflow is `audit` using an agent-prepared intake file:
 
@@ -237,6 +268,32 @@ python -m researchwitness capabilities --json
 
 returns the current machine-readable capability list. Synthetic examples exercise software behavior; they do not establish new historical-paper coverage.
 
+## Source-checkout research-audit tools
+
+The installed `researchwitness` package is the deterministic verifier core. The separate `tools/` programs below run from a source checkout; `python -m pip install .` does not install them. They are development aids outside the trusted core and do not decide whether a paper is wrong.
+
+### Offline JATS audit
+
+To inspect a local JATS XML document and write source-anchored candidate evidence:
+
+```bash
+python -m tools.research_audit audit path/to/article.xml \
+  --document-id local-example --format jats \
+  --json-output out/audit.json --markdown-output out/audit.md
+```
+
+This command makes no network requests. It records the supplied bytes and their anchors; a source URL or provenance label is an operator assertion, not source authentication. Without a reviewed source capture, the report marks provenance as unverified. It can emit arithmetic mismatch candidates or abstain when scope is unclear. It does not establish a scientific error. See [`docs/OFFLINE_RESEARCH_AUDIT.md`](docs/OFFLINE_RESEARCH_AUDIT.md) for input limits and the source-bound comparison workflow.
+
+### Public metadata discovery
+
+`tools/discover_public_candidates.py` can query the approved public metadata services and record candidate leads. It retrieves metadata, not article full text, and it does not establish that a correction applies to the same table, cohort, or denominator. The collector is rate-limited, stops on access or transport failures, and does not switch routes or follow publisher DOI links. Review [`docs/SCIENTIFIC_CANDIDATE_REVIEW.md`](docs/SCIENTIFIC_CANDIDATE_REVIEW.md) before using it. The resulting registry is developer-exposed evidence, not an evaluation holdout.
+
+### PDF aid
+
+The source-checkout PDF percentage aid is experimental and requires a locally reviewed, SHA-256-pinned Poppler image plus a functioning Docker sandbox. Real PDF execution is not yet qualified. It fails closed when the isolation gate is unavailable and never falls back to host Poppler. Do not use it on protected evaluation documents. See [`docs/PDF_SANDBOX_QUALIFICATION.md`](docs/PDF_SANDBOX_QUALIFICATION.md); do not treat synthetic runner tests as sandbox qualification.
+
+All source-audit outputs remain candidates for independent human review. Hashes preserve byte identity; they do not authenticate publisher origin, guarantee extraction fidelity, or prove scientific error.
+
 ## Real-paper validation
 
 The committed executable historical fixtures cover the 2007 elliptic-curve corrigendum over `F_29` and the 2012 finite-map conclusion:
@@ -317,13 +374,18 @@ Bug reports and bounded deterministic verifier proposals are welcome. Start with
 
 ```bash
 python -m pip install -e '.[dev]'
-python -m pytest -q
+python -m ruff check .
+python -m coverage run -m pytest -q
+python -m coverage report
 python benchmarks/run_synthetic.py
 python validation/mvp_real/run_validation.py
 python tools/quality_gate.py
 ```
 
 The verifier has no runtime dependencies outside Python's standard library.
+The current evidence-backed engineering assessment is in
+[`docs/OSS_QUALITY_FINAL.md`](docs/OSS_QUALITY_FINAL.md), with the detailed
+Q1–Q10 findings in [`docs/OSS_QUALITY_AUDIT.md`](docs/OSS_QUALITY_AUDIT.md).
 
 ## Current product boundary
 

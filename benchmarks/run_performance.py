@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
-from fractions import Fraction
 import itertools
 import json
 from pathlib import Path
@@ -15,9 +14,10 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from researchwitness.checkers import check
-from researchwitness.capsule import core_digest
-from researchwitness.strict import digest
+# Direct execution inserts ROOT above before loading the local package.
+from researchwitness.checkers import check  # noqa: E402
+from researchwitness.capsule import core_digest  # noqa: E402
+from researchwitness.strict import digest  # noqa: E402
 
 
 def workloads() -> dict[str, tuple[dict, dict, str]]:

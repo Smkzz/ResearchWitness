@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "annotation_provenance": {
+      "maxLength": 10000,
+      "type": "string"
+    },
+    "documents": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "document_id": {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          "independence_status": {
+            "maxLength": 10000,
+            "type": "string"
+          },
+          "relationships": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "anchor": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "byte_end": {
+                      "maximum": 999999999,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "byte_start": {
+                      "maximum": 999999999,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "character_end": {
+                      "maximum": 999999999,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "character_start": {
+                      "maximum": 999999999,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "quote": {
+                      "maxLength": 10000,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "byte_start",
+                    "byte_end",
+                    "quote"
+                  ],
+                  "type": "object"
+                },
+                "arithmetic_status": {
+                  "enum": [
+                    "arithmetic_match",
+                    "arithmetic_mismatch_candidate",
+                    "not_computed"
+                  ]
+                },
+                "denominator": {
+                  "anyOf": [
+                    {
+                      "maximum": 999999999,
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "denominator_evidence": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "byte_end": {
+                        "maximum": 999999999,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "byte_start": {
+                        "maximum": 999999999,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "character_end": {
+                        "maximum": 999999999,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "character_start": {
+                        "maximum": 999999999,
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "quote": {
+                        "maxLength": 10000,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "byte_start",
+                      "byte_end",
+                      "quote"
+                    ],
+                    "type": "object"
+                  },
+                  "maxItems": 16,
+                  "type": "array"
+                },
+                "numerator": {
+                  "maximum": 999999999,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "precision": {
+                  "maximum": 6,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "relationship_id": {
+                  "maxLength": 250,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "reported_percent": {
+                  "pattern": "^[0-9]{1,3}(\\.[0-9]{1,6})?$",
+                  "type": "string"
+                },
+                "review_outcome": {
+                  "enum": [
+                    "arithmetic_only",
+                    "unresolved_rounding",
+                    "unresolved_scope",
+                    "correction_corroborated"
+                  ]
+                },
+                "scope_rationale": {
+                  "maxLength": 10000,
+                  "type": "string"
+                },
+                "scope_status": {
+                  "enum": [
+                    "explicit_cell",
+                    "explicit_header",
+                    "explicit_table",
+                    "explicit_row_group",
+                    "reviewer_mapped",
+                    "derived_unresolved",
+                    "unknown"
+                  ]
+                },
+                "table_id": {
+                  "maxLength": 10000,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "relationship_id",
+                "table_id",
+                "numerator",
+                "denominator",
+                "reported_percent",
+                "precision",
+                "scope_status",
+                "arithmetic_status",
+                "review_outcome",
+                "scope_rationale",
+                "anchor",
+                "denominator_evidence"
+              ],
+              "type": "object"
+            },
+            "maxItems": 5000,
+            "type": "array"
+          },
+          "source": {
+            "additionalProperties": false,
+            "properties": {
+              "license": {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              "path": {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              "provenance_status": {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              "sha256": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "url": {
+                "maxLength": 10000,
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "sha256",
+              "url",
+              "provenance_status",
+              "license"
+            ],
+            "type": "object"
+          },
+          "work_family_id": {
+            "maxLength": 10000,
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_id",
+          "work_family_id",
+          "independence_status",
+          "source",
+          "relationships"
+        ],
+        "type": "object"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "type": "array"
+    },
+    "exposure": {
+      "const": "development"
+    },
+    "schema_version": {
+      "const": 1
+    }
+  },
+  "required": [
+    "schema_version",
+    "exposure",
+    "annotation_provenance",
+    "documents"
+  ],
+  "type": "object"
+}

@@ -1,5 +1,4 @@
 """Generate explicitly synthetic v1 examples with no reviewer or approver objects."""
-from copy import deepcopy
 from pathlib import Path
 import json
 import sys

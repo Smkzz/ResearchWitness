@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -16,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXED_ZIP_TIME = (2026, 1, 1, 0, 0, 0)
 SOURCE_DATE_EPOCH = '1760000000'
 TOP_FILES = {
-    '.editorconfig', '.gitignore', 'CHANGELOG.md', 'CITATION.cff',
+    '.editorconfig', '.gitattributes', '.gitignore', 'CHANGELOG.md', 'CITATION.cff',
     'CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'LICENSE', 'NOTICE.md',
     'README.md', 'SECURITY.md', 'SUPPORT.md', 'pyproject.toml', 'CHECKSUMS.sha256',
 }
@@ -24,6 +25,76 @@ TOP_DIRS = {'.github', 'researchwitness', 'schemas', 'examples', 'benchmarks', '
 EXCLUDED_PARTS = {'.git', '.pytest_cache', '__pycache__', 'build', 'dist', 'researchwitness.egg-info'}
 EXCLUDED_SUFFIXES = {'.pyc', '.pyo'}
 EXCLUDED_REL_PATHS = {'evidence/synthetic-scenarios.jsonl', 'evidence/synthetic-summary.json'}
+WINDOWS_RESERVED_BASENAMES = {
+    'aux', 'con', 'conin$', 'conout$', 'nul', 'prn',
+    *(f'com{digit}' for digit in '123456789¹²³'),
+    *(f'lpt{digit}' for digit in '123456789¹²³'),
+}
+
+
+def _portable_archive_path_key(relative_path: str) -> str:
+    """Validate an ASCII Git path for safe, unambiguous cross-platform extraction."""
+    def invalid(reason: str) -> RuntimeError:
+        return RuntimeError(f'Refusing non-portable release path ({reason}): {relative_path!r}')
+
+    if not relative_path or relative_path.startswith('/'):
+        raise invalid('path must be relative')
+    if '\\' in relative_path:
+        raise invalid('backslash is not a portable archive separator')
+    if not relative_path.isascii():
+        raise invalid('non-ASCII names have platform-dependent case equivalence')
+
+    parts = relative_path.split('/')
+    if any(part in {'', '.', '..'} for part in parts):
+        raise invalid('empty or traversal component')
+    for part in parts:
+        if part.endswith(('.', ' ')):
+            raise invalid('component ends in a dot or space')
+        if any(ord(char) < 32 or char in '<>:"|?*' for char in part):
+            raise invalid('component contains a Windows-unsafe character')
+        basename = part.split('.', 1)[0].rstrip(' .').casefold()
+        if basename in WINDOWS_RESERVED_BASENAMES:
+            raise invalid('component uses a reserved Windows device name')
+
+    return relative_path.casefold()
+
+
+def _register_archive_path(
+    relative_path: str,
+    archive_path_keys: dict[str, str],
+    archive_directory_keys: dict[str, str],
+) -> None:
+    """Reject case-folded collisions and file/directory conflicts before filesystem access."""
+    path_key = _portable_archive_path_key(relative_path)
+    path_parts = path_key.split('/')
+    file_ancestor = next(
+        (
+            archive_path_keys['/'.join(path_parts[:index])]
+            for index in range(1, len(path_parts))
+            if '/'.join(path_parts[:index]) in archive_path_keys
+        ),
+        None,
+    )
+    if file_ancestor is not None:
+        raise RuntimeError(
+            f'Refusing release file/directory path conflict: '
+            f'{file_ancestor!r} and {relative_path!r}'
+        )
+    previous = archive_path_keys.get(path_key)
+    if previous is not None:
+        raise RuntimeError(
+            f'Refusing colliding release paths on case-insensitive filesystems: '
+            f'{previous!r} and {relative_path!r}'
+        )
+    descendant = archive_directory_keys.get(path_key)
+    if descendant is not None:
+        raise RuntimeError(
+            f'Refusing release file/directory path conflict: '
+            f'{relative_path!r} and {descendant!r}'
+        )
+    archive_path_keys[path_key] = relative_path
+    for index in range(1, len(path_parts)):
+        archive_directory_keys.setdefault('/'.join(path_parts[:index]), relative_path)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -36,23 +107,72 @@ def sha256_file(path: Path) -> str:
 
 def included_files(include_checksums: bool = True) -> list[Path]:
     files: list[Path] = []
-    for path in ROOT.rglob('*'):
-        if not path.is_file():
+    archive_path_keys: dict[str, str] = {}
+    archive_directory_keys: dict[str, str] = {}
+    indexed = subprocess.run(
+        ['git', 'ls-files', '--stage', '-z'],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+    ).stdout
+    unstaged = set(subprocess.run(
+        ['git', 'diff', '--name-only', '-z'],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+    ).stdout.split(b'\0'))
+    selected_entries: list[tuple[str, bytes, bytes, bytes, list[str]]] = []
+    for entry in indexed.split(b'\0'):
+        if not entry:
             continue
-        rel = path.relative_to(ROOT)
-        if any(part in EXCLUDED_PARTS for part in rel.parts):
+        metadata, raw_path = entry.split(b'\t', 1)
+        mode, _object_id, stage = metadata.split()
+        try:
+            relative_path = raw_path.decode('utf-8')
+        except UnicodeDecodeError as exc:
+            raise RuntimeError('Refusing a release path that is not valid UTF-8') from exc
+        parts = relative_path.split('/')
+        if any(part in EXCLUDED_PARTS for part in parts):
             continue
-        if path.suffix in EXCLUDED_SUFFIXES or path.name == '.coverage':
+        if Path(parts[-1]).suffix in EXCLUDED_SUFFIXES or parts[-1] == '.coverage':
             continue
-        if rel.as_posix() in EXCLUDED_REL_PATHS:
+        if relative_path in EXCLUDED_REL_PATHS:
             continue
-        if len(rel.parts) == 1:
-            if rel.name not in TOP_FILES:
+        if len(parts) == 1:
+            if parts[0] not in TOP_FILES:
                 continue
-        elif rel.parts[0] not in TOP_DIRS:
+        elif parts[0] not in TOP_DIRS:
             continue
-        if not include_checksums and rel.as_posix() == 'CHECKSUMS.sha256':
+        if not include_checksums and relative_path == 'CHECKSUMS.sha256':
             continue
+        _register_archive_path(relative_path, archive_path_keys, archive_directory_keys)
+
+        selected_entries.append((relative_path, raw_path, mode, stage, parts))
+
+    # Validate the complete path inventory before touching the filesystem. This makes
+    # collision checks deterministic even on case-insensitive checkout filesystems.
+    for relative_path, raw_path, mode, stage, parts in selected_entries:
+        if raw_path in unstaged and relative_path != 'CHECKSUMS.sha256':
+            raise RuntimeError(f'Refusing to package unstaged changes: {relative_path}')
+        if stage != b'0':
+            raise RuntimeError(f'Cannot package an unmerged Git index entry: {relative_path}')
+        if mode == b'120000':
+            raise RuntimeError(f'Refusing to package a symbolic link: {relative_path}')
+        if mode not in {b'100644', b'100755'}:
+            raise RuntimeError(f'Refusing non-regular indexed release file: {relative_path}')
+        rel = Path(*parts)
+        path = ROOT / rel
+        current = ROOT
+        for part in parts:
+            current = current / part
+            if current.is_symlink():
+                raise RuntimeError(f'Refusing a release path through a symbolic link: {relative_path}')
+        try:
+            file_stat = path.stat()
+        except FileNotFoundError as exc:
+            raise RuntimeError(f'Missing indexed release file: {relative_path}') from exc
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise RuntimeError(f'Refusing non-regular release file: {rel.as_posix()}')
         files.append(path)
     return sorted(files, key=lambda p: p.relative_to(ROOT).as_posix())
 
@@ -66,12 +186,19 @@ def write_checksums() -> None:
 
 
 def write_source_zip(destination: Path, version: str) -> None:
-    prefix = f'researchwitness-{version}/'
+    archive_root = f'researchwitness-{version}'
+    _portable_archive_path_key(archive_root)
+    selected_files = included_files()
+    archive_members = [
+        (path, f'{archive_root}/{path.relative_to(ROOT).as_posix()}')
+        for path in selected_files
+    ]
+    for _path, member in archive_members:
+        _portable_archive_path_key(member)
     with destination.open('xb') as stream:
         with zipfile.ZipFile(stream, 'w', compression=zipfile.ZIP_STORED) as archive:
-            for path in included_files():
-                rel = path.relative_to(ROOT).as_posix()
-                info = zipfile.ZipInfo(prefix + rel, date_time=FIXED_ZIP_TIME)
+            for path, member in archive_members:
+                info = zipfile.ZipInfo(member, date_time=FIXED_ZIP_TIME)
                 info.compress_type = zipfile.ZIP_STORED
                 info.create_system = 3
                 info.external_attr = 0o100644 << 16

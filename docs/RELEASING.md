@@ -7,10 +7,21 @@ ResearchWitness releases are evidence-bearing artifacts. A version bump is not c
 1. Update `CHANGELOG.md`, `README.md`, `CITATION.cff`, and package version metadata.
 2. Regenerate schemas / generated fixtures when their source changes.
 3. Ensure validation cases contain only redistributable or synthetic text, never publisher PDFs or private evidence.
+4. Stage every intended release file with Git before regenerating checksums. The source inventory uses Git-indexed files only; ignored and untracked files are never packaged, unstaged changes to selected files fail closed, selected symlinks are rejected, and archive paths must use portable ASCII names.
 
 ## Qualify
 
-From a clean checkout with development dependencies installed:
+From a clean checkout at the repository root, install the development dependencies in an isolated environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev]'
+```
+
+On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1` instead.
+
+Then continue with the release steps below:
 
 ```bash
 python -m pytest -q

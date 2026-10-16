@@ -21,9 +21,14 @@ Do not add a checker whose positive output depends only on an LLM judgment or on
 
 ```sh
 python -m pip install -e '.[dev]'
-python -m pytest -q
+python -m ruff check .
+python -m coverage run -m pytest -q
+python -m coverage report
+python -m coverage report --include='researchwitness/*.py' --fail-under=90
 python benchmarks/run_synthetic.py
 ```
+
+CI keeps the full repository coverage report visible and enforces at least 90% combined statement/branch coverage for the deterministic `researchwitness` verifier package. Development aids under `tools/` are reported but do not dilute that core threshold.
 
 If you change `tools/write_schema.py`, regenerate `schemas/case.schema.json` and ensure the schema tests remain green.
 

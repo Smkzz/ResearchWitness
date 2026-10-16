@@ -66,6 +66,12 @@ The parser and checkers contain explicit structural and arithmetic limits intend
 
 Do not add an unbounded CAS, SMT solver, optimizer, PDF parser, or arbitrary repository execution path to the trusted core without a separate threat model.
 
+## Untrusted PDF development aid
+
+The PDF percentage aid is outside the trusted verifier core. A supplied PDF is attacker-controlled input to Poppler. The aid requires a local SHA-256 image ID and fails closed if Docker, the pinned image, or a requested isolation option is unavailable. It requires `docker info` to report the built-in default seccomp profile and lets the daemon apply that default; it does not pass a non-portable `seccomp=builtin` option. It rejects images with baked environment variables, an entrypoint, or volumes. The PDF is sent to the container through standard input; no host path is mounted into it. A per-run CID file records the container ID, and a `finally` path removes only that verified container ID even when the Docker client is killed; missing ID or failed cleanup prevents returning extracted text. The container has no network, a read-only root filesystem, an unprivileged UID, no capabilities, Docker's built-in seccomp profile, no-new-privileges, cleared proxy variables, bounded memory/CPU/processes, and a private bounded temporary filesystem. Existing PDF byte, extracted-text, page, table, row, and time limits remain in force.
+
+The image itself must be reviewed and contain only the Poppler runtime and files it needs; it must not contain credentials or unrelated documents. The runner checks the image digest and selected image configuration, but does not inspect the root filesystem or establish image provenance. A digest pins image bytes; it does not attest to their builder or contents. The Docker daemon, container runtime, host kernel, and image provenance remain trusted assumptions. This reduces a parser compromise's access to host data but does not prove resistance to a container-runtime or kernel escape. Extracted text and audit candidates remain untrusted evidence; source and extraction hashes establish integrity of the bytes processed, not publisher authenticity, complete text fidelity, or scientific truth.
+
 ## Private data
 
 `pack` exports only manifested artifacts plus canonical `case.json` and `report.json`. This prevents accidental recursive collection of unrelated files, but an operator can still deliberately manifest sensitive material.
@@ -86,6 +92,7 @@ Any future integration capable of external communication must remain outside the
 
 | Version | Security fixes |
 |---|---|
+| 0.3.0.dev0 | Unreleased development candidate; fixes are made on the active development line. No response-time or support guarantee applies to this prerelease. |
 | 0.2.x | Yes |
 | < 0.2 | No |
 

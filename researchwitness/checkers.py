@@ -729,7 +729,7 @@ def _ff_enumerate(spec: dict, witness: Any, extra_required: set[str]) -> tuple[i
         require(sum(parsed.values()) <= 12, 'Finite-field polynomial degree too high')
         parsed_terms.append((coefficient, parsed))
     adjustment = integer(spec['point_count_adjustment'], -1000, 1000)
-    modulus = integer(spec['modulus'], 2, 4096)
+    integer(spec['modulus'], 2, 4096)
     enumeration_size = p ** len(variables)
     require(enumeration_size <= 2_000_000, 'Finite-field enumeration budget exceeded')
     require(enumeration_size * len(parsed_terms) <= 5_000_000, 'Finite-field work budget exceeded')
