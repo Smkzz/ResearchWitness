@@ -40,6 +40,9 @@ except ImportError:  # pragma: no cover - exercised on Windows
 
 
 REGISTRY_VERSION = 1
+MAX_REGISTRY_CANDIDATES = 250
+MAX_REGISTRY_SEARCHES = 500
+MAX_REGISTRY_INPUT_BYTES = 8 * 1024 * 1024
 ALLOWED_SOURCE_HOSTS = frozenset({
     "api.crossref.org",
     "www.ebi.ac.uk",
@@ -864,6 +867,9 @@ def search_crossref(
 
 def merge_candidates(*candidate_groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Merge on any shared ID, but preserve conflicting DOI aliases as unresolved."""
+    candidate_count = sum(len(group) for group in candidate_groups)
+    if candidate_count > MAX_REGISTRY_CANDIDATES:
+        raise ValueError(f"Candidate registry exceeds the {MAX_REGISTRY_CANDIDATES}-candidate limit")
     candidates = [
         json.loads(json.dumps(candidate))
         for group in candidate_groups for candidate in group
@@ -1013,6 +1019,8 @@ def empty_registry() -> dict[str, Any]:
 def registry_with_search(
     candidates: list[dict[str, Any]], searches: list[dict[str, Any]], *, updated_utc: str | None = None
 ) -> dict[str, Any]:
+    if len(searches) > MAX_REGISTRY_SEARCHES:
+        raise ValueError(f"Candidate registry exceeds the {MAX_REGISTRY_SEARCHES}-search limit")
     if not searches and candidates:
         raise ValueError("Candidates cannot be recorded without a source search")
     return {
@@ -1087,6 +1095,10 @@ def validate_registry_document(registry: Mapping[str, Any]) -> None:
     candidates = registry["candidates"]
     if not isinstance(searches, list) or not isinstance(candidates, list):
         raise ValueError("Candidate registry lists are malformed")
+    if len(searches) > MAX_REGISTRY_SEARCHES:
+        raise ValueError(f"Candidate registry exceeds the {MAX_REGISTRY_SEARCHES}-search limit")
+    if len(candidates) > MAX_REGISTRY_CANDIDATES:
+        raise ValueError(f"Candidate registry exceeds the {MAX_REGISTRY_CANDIDATES}-candidate limit")
 
     provider_hosts = {
         "europe_pmc": "www.ebi.ac.uk",

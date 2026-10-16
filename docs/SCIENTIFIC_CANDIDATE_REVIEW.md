@@ -81,3 +81,8 @@ For a transport failure, the discovery CLI's stderr JSON includes the fixed
 `transport_error_class` diagnostic when the transport layer can be classified.
 This field is operational output only: it is not added to the public candidate
 registry, and raw exception or proxy details are not emitted.
+
+Local registry inputs must be regular UTF-8 files no larger than 8 MiB. The
+registry contract permits at most 250 candidates and 500 search records so
+validation and duplicate-family checks remain bounded; archive older campaigns
+separately instead of merging an unbounded history.

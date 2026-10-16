@@ -15,6 +15,7 @@ from tools.public_discovery import (
     DEFAULT_CROSSREF_QUERY,
     DEFAULT_EUROPE_PMC_QUERY,
     InvalidSourceResponse,
+    MAX_REGISTRY_INPUT_BYTES,
     PublicSourceClient,
     SourceAccessError,
     empty_registry,
@@ -27,6 +28,7 @@ from tools.public_discovery import (
     merge_candidates,
     validate_registry_document,
 )
+from tools.offline_files import read_regular
 
 
 def _write_json(path: Path, value: object) -> None:
@@ -48,6 +50,14 @@ def _write_json(path: Path, value: object) -> None:
             temp_path.unlink()
 
 
+def _read_registry(path: Path) -> object:
+    try:
+        payload = read_regular(path, MAX_REGISTRY_INPUT_BYTES)
+        return json.loads(payload.decode("utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError, RecursionError) as exc:
+        raise ValueError(f"Cannot read bounded registry file {path.name}: {exc}") from exc
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -64,16 +74,22 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     if args.command == "summarize":
-        registry = json.loads(args.registry.read_text(encoding="utf-8"))
-        validate_registry_document(registry)
+        try:
+            registry = _read_registry(args.registry)
+            validate_registry_document(registry)
+        except (OSError, ValueError, RecursionError) as exc:
+            parser.error(str(exc))
         print(json.dumps(summarize_registry(registry), indent=2, sort_keys=True))
         return 0
 
     query = args.query or (
         DEFAULT_EUROPE_PMC_QUERY if args.provider == "europe-pmc" else DEFAULT_CROSSREF_QUERY
     )
-    previous = json.loads(args.existing.read_text(encoding="utf-8")) if args.existing else empty_registry()
-    validate_registry_document(previous)
+    try:
+        previous = _read_registry(args.existing) if args.existing else empty_registry()
+        validate_registry_document(previous)
+    except (OSError, ValueError, RecursionError) as exc:
+        parser.error(str(exc))
     client = PublicSourceClient()
     try:
         candidates, search = (

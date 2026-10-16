@@ -11,6 +11,7 @@
     "scope": {"const": "developer_exposed_public_source_candidates_only"},
     "searches": {
       "type": "array",
+      "maxItems": 500,
       "items": {
         "type": "object",
         "required": ["provider", "host", "status", "response_sha256", "record_count"],
@@ -69,6 +70,7 @@
     },
     "candidates": {
       "type": "array",
+      "maxItems": 250,
       "items": {
         "type": "object",
         "required": ["candidate_id", "candidate_kinds", "title", "identifiers", "work_family", "source_records", "mathematical_relationship", "preliminary_eligibility_v1_3", "independent_review_status", "exposure_status", "holdout_eligible", "blockers"],
