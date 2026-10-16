@@ -2,6 +2,18 @@
 
 Date: 2026-10-16. Reviewer: Codex, acting as an **AI-assisted delegated reviewer**.
 This is not an independent human approval, release authorization or scientific evaluation.
+
+**2026-10-16 owner acceptance addendum:** The project owner explicitly
+accepted the disclosed AI-assisted technical quality review in place of
+a second human review for the internal OSS 10/10 Q9 criterion. The
+previous human-review gate described below is superseded **only for this
+internal criterion**. It does not imply a second independent reviewer,
+authorize merging or releasing, or qualify scientific performance.
+The reviewed prior final PR head was
+`36edc7f824718c36546c1a53570ab81270fca131`; its CI, CodeQL and
+dependency-evidence runs passed. See [issue #14](https://github.com/Smkzz/ResearchWitness/issues/14)
+for post-documentation exact-head evidence.
+
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) remains draft and unmerged.
 
 ## Source identity and technical decision
@@ -20,8 +32,8 @@ The successor implementation is
 `93efdf4cdf20085a7fd914d3ce647c646ab6fe0a`, tree
 `fc38026bb2ce5e6b8cb5fea0d301b5b60f3a68a5`. Changed portions received a separate
 AI source review after fixes. The technical decision is to retain this candidate
-for human maintainer review and eventual independent integration after all checks
-pass. No unresolved source-level finding remains within the reviewed scope.
+for separately owner-authorized integration after all applicable checks pass.
+The owner accepts this labeled AI-assisted technical review for Q9. No unresolved source-level finding remains within the reviewed scope.
 
 | Surface | Review outcome |
 |---|---|
@@ -61,9 +73,9 @@ and the bypass list is empty. All required checks are bound to GitHub Actions
 - `Analyze Python`
 
 These are real PR-triggered jobs. Zero required approvals leaves the solo
-maintainer workflow usable after checks; it does not satisfy the separate human
-review criterion in the OSS-quality standard. No destructive push/delete test
-was performed against `main`.
+maintainer workflow usable after checks. The repository owner expressly
+replaced the separate human-review requirement with the documented AI-assisted
+assessment for Q9. No destructive push/delete test was performed against `main`.
 
 ## Security and distribution review
 
@@ -135,7 +147,7 @@ Live PR identities were re-read. Every PR remains open, draft and unmerged.
 
 | PR | Exact head | Dependency and disposition |
 |---|---|---|
-| #5 | `8d91362437223c85c700fec92f857ef90e883d15` | Ancestor of #6; compare is ahead-only, with two later commits and no behind commits. All 222 changed paths are in #6. All 345 tracked blobs remain present: 335 identical, ten evolved. Treat #6 as its successor; keep #5 open until a human confirms final disposition. |
+| #5 | `8d91362437223c85c700fec92f857ef90e883d15` | Ancestor of #6; compare is ahead-only, with two later commits and no behind commits. All 222 changed paths are in #6. All 345 tracked blobs remain present: 335 identical, ten evolved. Treat #6 as its successor; keep #5 open until a separate owner-approved final disposition. |
 | #6 | `94cd15859ec37a965db5f0a2f6dc7ebf620f56c5` | Main-based installed/core paper-audit/JATS foundation; parent of #7. |
 | #7 | `57fedcd9efa9afaabd76bc56b1bc06f1063354fe` | Based exactly on #6; source-mapped capability expansion. |
 | #8 | `80f1ee0189a2618377239702046160d7d0208f34` | Based exactly on #7; source/evidence follow-up. |
@@ -144,8 +156,8 @@ Live PR identities were re-read. Every PR remains open, draft and unmerged.
 | #11 | `6843593ff443d4a44c48d15a76949b323d0951ca` | Based exactly on #10; v1.3 denominator provenance. |
 | #12 | `78b26e2d9a31a1eafcc9a0f668b19f09283ce5e9` | Based exactly on #11; local UI and offline custody worker. Distinct security/authority review required before integration; this assignment does not approve that worker. |
 
-Recommended eventual order: human review of independent #13 first; after its
-acceptance, reconcile #6 against that accepted baseline, then integrate #6–#11
+Recommended eventual order: integrate AI-reviewed #13 only with separate owner
+merge authorization; after its acceptance, reconcile #6 against that accepted baseline, then integrate #6–#11
 in ancestry order. Review #12 separately before any integration. Do not merge #5
 in addition to its successor. No retarget, rebase, closure or merge is performed
 by this decision.
@@ -160,10 +172,15 @@ resolution or cherry-pick is not integration qualification. Re-run the complete
 combined candidate gates after reconciliation. PR #13 does not replace the
 installed `researchwitness.paper_audit` architecture in #6–#12.
 
-## Remaining gate
+## Owner acceptance and continuing boundaries
 
-A human maintainer must review the final PR #13 source and this integration
-decision. AI review cannot satisfy that criterion. Keep issue #14 open and
-`OSS_QUALITY_NOT_YET_10_OF_10` until that review is recorded. Merge, release,
-Wave 3, real PDF qualification and protected scientific custody remain separate
-and were not performed.
+The repository owner has explicitly accepted this AI-assisted technical
+quality review as sufficient for the internal 10/10 engineering standard.
+Q9 therefore passes: the repository governance checks are enforced and
+review modality is accepted. This is **not independent human approval**,
+outside certification or permission to merge/release. The final exact-head
+checks and closure decision are recorded in [issue #14](https://github.com/Smkzz/ResearchWitness/issues/14).
+
+PR #13 remains draft and unmerged. PR #12 custody-worker security, real
+PDF isolation, protected scientific evaluation and Wave 3 remain separate
+and unqualified where previously documented.
