@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXED_ZIP_TIME = (2026, 1, 1, 0, 0, 0)
 SOURCE_DATE_EPOCH = '1760000000'
 TOP_FILES = {
-    '.editorconfig', '.gitignore', 'CHANGELOG.md', 'CITATION.cff',
+    '.editorconfig', '.gitattributes', '.gitignore', 'CHANGELOG.md', 'CITATION.cff',
     'CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'LICENSE', 'NOTICE.md',
     'README.md', 'SECURITY.md', 'SUPPORT.md', 'pyproject.toml', 'CHECKSUMS.sha256',
 }
@@ -59,6 +59,44 @@ def _portable_archive_path_key(relative_path: str) -> str:
     return relative_path.casefold()
 
 
+def _register_archive_path(
+    relative_path: str,
+    archive_path_keys: dict[str, str],
+    archive_directory_keys: dict[str, str],
+) -> None:
+    """Reject case-folded collisions and file/directory conflicts before filesystem access."""
+    path_key = _portable_archive_path_key(relative_path)
+    path_parts = path_key.split('/')
+    file_ancestor = next(
+        (
+            archive_path_keys['/'.join(path_parts[:index])]
+            for index in range(1, len(path_parts))
+            if '/'.join(path_parts[:index]) in archive_path_keys
+        ),
+        None,
+    )
+    if file_ancestor is not None:
+        raise RuntimeError(
+            f'Refusing release file/directory path conflict: '
+            f'{file_ancestor!r} and {relative_path!r}'
+        )
+    previous = archive_path_keys.get(path_key)
+    if previous is not None:
+        raise RuntimeError(
+            f'Refusing colliding release paths on case-insensitive filesystems: '
+            f'{previous!r} and {relative_path!r}'
+        )
+    descendant = archive_directory_keys.get(path_key)
+    if descendant is not None:
+        raise RuntimeError(
+            f'Refusing release file/directory path conflict: '
+            f'{relative_path!r} and {descendant!r}'
+        )
+    archive_path_keys[path_key] = relative_path
+    for index in range(1, len(path_parts)):
+        archive_directory_keys.setdefault('/'.join(path_parts[:index]), relative_path)
+
+
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -83,6 +121,7 @@ def included_files(include_checksums: bool = True) -> list[Path]:
         check=True,
         stdout=subprocess.PIPE,
     ).stdout.split(b'\0'))
+    selected_entries: list[tuple[str, bytes, bytes, bytes, list[str]]] = []
     for entry in indexed.split(b'\0'):
         if not entry:
             continue
@@ -106,36 +145,13 @@ def included_files(include_checksums: bool = True) -> list[Path]:
             continue
         if not include_checksums and relative_path == 'CHECKSUMS.sha256':
             continue
-        path_key = _portable_archive_path_key(relative_path)
-        path_parts = path_key.split('/')
-        file_ancestor = next(
-            (
-                archive_path_keys['/'.join(path_parts[:index])]
-                for index in range(1, len(path_parts))
-                if '/'.join(path_parts[:index]) in archive_path_keys
-            ),
-            None,
-        )
-        if file_ancestor is not None:
-            raise RuntimeError(
-                f'Refusing release file/directory path conflict: '
-                f'{file_ancestor!r} and {relative_path!r}'
-            )
-        previous = archive_path_keys.get(path_key)
-        if previous is not None:
-            raise RuntimeError(
-                f'Refusing colliding release paths on case-insensitive filesystems: '
-                f'{previous!r} and {relative_path!r}'
-            )
-        descendant = archive_directory_keys.get(path_key)
-        if descendant is not None:
-            raise RuntimeError(
-                f'Refusing release file/directory path conflict: '
-                f'{relative_path!r} and {descendant!r}'
-            )
-        archive_path_keys[path_key] = relative_path
-        for index in range(1, len(path_parts)):
-            archive_directory_keys.setdefault('/'.join(path_parts[:index]), relative_path)
+        _register_archive_path(relative_path, archive_path_keys, archive_directory_keys)
+
+        selected_entries.append((relative_path, raw_path, mode, stage, parts))
+
+    # Validate the complete path inventory before touching the filesystem. This makes
+    # collision checks deterministic even on case-insensitive checkout filesystems.
+    for relative_path, raw_path, mode, stage, parts in selected_entries:
         if raw_path in unstaged and relative_path != 'CHECKSUMS.sha256':
             raise RuntimeError(f'Refusing to package unstaged changes: {relative_path}')
         if stage != b'0':

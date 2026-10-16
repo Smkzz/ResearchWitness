@@ -172,7 +172,7 @@ def write_reports(json_path: Path, markdown_path: Path, report: dict[str, Any], 
     for path, text in payloads:
         if not path.exists():
             path.parent.mkdir(parents=True, exist_ok=True)
-            with path.open("x", encoding="utf-8") as stream:
+            with path.open("x", encoding="utf-8", newline="\n") as stream:
                 stream.write(text)
 
 

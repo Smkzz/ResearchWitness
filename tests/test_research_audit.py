@@ -136,6 +136,8 @@ class ResearchAuditTests(unittest.TestCase):
             '--json-output', str(self.root / 'audit.json'), '--markdown-output', str(self.root / 'audit.md')]
         self.assertEqual(main(args), 0)
         before = (self.root / 'audit.json').read_bytes()
+        self.assertNotIn(b'\r\n', before)
+        self.assertNotIn(b'\r\n', (self.root / 'audit.md').read_bytes())
         self.assertEqual(main(args), 0)
         self.assertEqual(before, (self.root / 'audit.json').read_bytes())
 
