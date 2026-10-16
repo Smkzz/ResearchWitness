@@ -1,3 +1,8 @@
+> **Historical snapshot — 2026-10-14.** The record below is preserved unchanged.
+> Its local branch, missing dependencies and access failures describe that run,
+> not the current engineering state. See [project status](../docs/PROJECT_STATUS.md)
+> for merged capabilities and the separate, still-unfinished scientific gates.
+
 # Scientific evaluation readiness — 2026-10-14
 
 ## Decision

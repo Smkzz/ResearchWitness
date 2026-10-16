@@ -1,70 +1,79 @@
-# MVP architecture
+# Architecture
 
-ResearchWitness separates flexible research-agent work from deterministic evidence replay.
+ResearchWitness separates flexible candidate preparation from deterministic
+evidence replay. See [project status](PROJECT_STATUS.md) for integrated versus
+unmerged functionality.
 
 ```text
 source / paper
-    |
-    v
-research agent (untrusted preparation)
-    |- claim extraction
-    |- source/version capture
-    |- correction search
-    |- counterexample search
-    |- assumptions + objections
-    v
-audit.json + source artifacts
-    |
-    v
-intake.py
-    |- strict file reads
-    |- unique quote anchoring
-    |- canonical witness
-    |- evidence manifest + hashes
-    v
-private evidence bundle
-    |
-    v
-capsule.py + checkers.py
-    |- strict schema / resource bounds
-    |- deterministic verifier routing
-    |- exact or bounded arithmetic
-    |- subject/bundle/core digests
-    v
-scoped verification report
-    |
-    +--> product.py: static HTML
-    +--> product.py: contact readiness
-    +--> product.py: conservative draft (user review only)
+    -> research agent: claim, source/version, proposed witness, objections
+    -> intake.py: bounded reads, byte anchors, canonical witness and manifest
+    -> private evidence bundle
+    -> capsule.py + checkers.py: bounded deterministic verification
+    -> product.py: JSON/HTML presentation, readiness and local inquiry draft
 ```
 
 ## Trusted verifier boundary
 
-The trusted verification path is intentionally small: `strict.py`, `arithmetic.py`, `checkers.py`, and `capsule.py`. It has no network access, arbitrary code execution, optimizer, LLM client or paper-code runner.
+The trusted verification path is deliberately small: `strict.py`, `arithmetic.py`,
+`checkers.py` and `capsule.py`. It contains no network client, LLM, optimizer,
+arbitrary source-code execution or paper-code runner. It evaluates only supported
+structured inputs under explicit work budgets.
 
-`intake.py` is a convenience layer for agents. Its output is still an explicit bundle that can be inspected and replayed independently.
+`intake.py` is a preparation/convenience layer; its output remains an explicit
+bundle which can be inspected and replayed independently. Quote positions use
+zero-based byte offsets into supplied source bytes, not decoded-character indices.
+`product.py` formats results and applies workflow policy without changing the
+mathematical verdict.
 
-`product.py` is presentation/workflow policy. It does not change mathematical verdicts.
+## Installed core and source-checkout tools
+
+The wheel installs `researchwitness*`, packaged schemas and capability data,
+with no external runtime dependencies. The separate `tools/` programs run from
+a source checkout after `python -m pip install -e '.[dev]'` in its activated
+environment. Their schema validation uses the optional `jsonschema` dependency.
+
+- `tools.research_audit` produces bounded JATS/PDF extraction reports and
+  source-bound comparisons. Every finding remains unreviewed; arithmetic
+  matches or candidates do not establish scientific error or source authenticity.
+- JATS table aids track operands, headers, groups and source spans. Unsupported
+  weighting, missingness or scope can force abstention. Conditional calculations
+  retain their assumptions rather than asserting a guessed denominator.
+- Metadata discovery is a separate networked operation through restricted
+  managed-proxy/host/rate/redirect controls. Windows managed discovery remains
+  unavailable pending a reviewed ACL ownership guard.
+- PDF extraction requires a separately reviewed pinned image and qualified
+  Docker isolation. It has no host Poppler fallback. Real runtime qualification
+  has not been established by synthetic/mock tests.
+
+This source-tool path does not install the `researchwitness.paper_audit`
+architecture in the separate unmerged PR #6–#12 stack. The #12 custody worker
+has its own security and authority boundary and is not approved by PR #13.
+See [OFFLINE_RESEARCH_AUDIT.md](OFFLINE_RESEARCH_AUDIT.md) and
+[SECURITY.md](../SECURITY.md).
 
 ## Verifier plugins
 
-Verifier kinds are allowlisted by `checkers.KINDS`. Each checker must:
+Kinds are allowlisted by `checkers.KINDS`. A checker must accept only bounded
+structured data, use deterministic semantics, state exactly what the witness
+proves and excludes, fail closed on unsupported inputs, enforce a work budget,
+and avoid importing or executing case-supplied code.
 
-1. accept only bounded structured data;
-2. have deterministic semantics;
-3. state exactly what its witness proves;
-4. fail closed on unsupported inputs;
-5. enforce a computational work budget;
-6. avoid importing or executing case-supplied code.
+Finite-field enumeration and finite-PMF checks use small exact engines, not a
+general AI judge. Finite PMFs do not infer empirical populations. A rational AST
+is evaluated at a supplied point, not proved globally. A modular certificate
+checks the encoded system, including composite moduli, not the correctness of
+its interpretation. [PROTOCOL.md](PROTOCOL.md) and the runtime `capabilities`
+output contain the supported contracts.
 
-The finite-field and finite-PMF plugins demonstrate the intended direction: broaden semantic coverage using small exact engines rather than one general “AI judge.” The PMF plugin handles finite event probabilities and expected payoffs over a declared categorical state space; it does not infer a distribution from data or extend the arithmetic result to a population.
+## Command and contact readiness semantics
 
-The rational-expression checker uses a closed JSON AST for exact rational arithmetic. It can check rational-function witnesses such as quotients at one bounded point, while making no claim about the expression elsewhere in the domain.
+Successful execution is not necessarily a refutation: exit 0 can report
+`NO_REFUTATION_AT_WITNESS`, and a structurally valid intake need not provide a
+counterexample. Inspect the actual verdict and readiness fields separately.
 
-The modular linear-system checker verifies either an exact solution or a left-annihilator certificate, including over composite moduli. It checks only the supplied certificate and encoded system.
-
-## Contact readiness
-
-The product layer can label a case `READY_FOR_USER_REVIEW`, but never `authorized`. It blocks when the counterexample is absent, the source is not captured, correction status is unclear/stale/present, or objections remain.
-
-This keeps the original QEH product loop while avoiding a fake human-review requirement.
+`READY_FOR_USER_REVIEW` is a conservative draft-readiness state, never permission
+to contact an author. Missing counterexamples, unsupported capture assertions,
+unclear/stale/present corrections and unresolved objections block readiness.
+No sending occurs. Owner acceptance of an AI-assisted **OSS engineering review**
+does not satisfy independent scientific adjudication or protected evaluation.

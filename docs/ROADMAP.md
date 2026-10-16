@@ -1,46 +1,79 @@
 # Roadmap
 
-ResearchWitness is deliberately growing verifier breadth before growing marketing or automation surface.
+## Main — 0.3.0.dev0 (UNRELEASED)
 
-## Current local branch — 0.3.0.dev0 integration candidate (unreleased)
+PR #13 is merged into `main`. The [project-status index](PROJECT_STATUS.md)
+records its merge identity and post-merge checks. Current software includes:
 
-- Agent-prepared structured intake.
-- Deterministic evidence capsules and replay.
-- Ten bounded verifier families: scalar/radical, polynomial, rational-expression, binary UC, finite-field residue, quadratic/quartic residue rule, finite-map fixed point, finite-graph coloring, finite-PMF bounds, and modular linear-system certificates.
-- Machine-readable capability contracts, one replayable synthetic bundle per family, agent-intake JSON Schema, scaffold, and read-only intake validation.
-- Offline HTML / JSON reporting and deterministic evidence export.
-- Historical corrected-paper replay cases.
-- Conservative contact-readiness output; no external actions.
-- No unseen historical-corrigenda holdout has been run; this candidate is not release-qualified.
+- Agent-prepared intake, ten bounded verifier families and deterministic
+  evidence capsules, JSON/HTML reports and private evidence export.
+- Source-checkout JATS count/percentage auditing, comparison of source-bound
+  annotations and supplied runs, exact percentage-feasibility helpers and
+  guarded public metadata discovery.
+- Portable Git-index release inventory, source hashes, cross-platform Python
+  CI, Ruff, coverage reporting and an enforced verifier-core coverage floor.
+- Conservative author-inquiry drafting only; no external sending or publishing.
 
-## Next validation gate
+The internal 10/10 engineering assessment is owner-accepted AI review, not an
+independent human audit or scientific coverage claim. Current PDF extraction
+remains unqualified, and Windows managed acquisition remains blocked until its
+ACL ownership guard is reviewed. The installed verifier is separately tested
+on Windows. Merged code is still **not a tagged or PyPI release**.
 
-Freeze the verifier code and establish whether the added families improve historical coverage. Keep the 15-case screen immutable and report mechanism-level representability separately from end-to-end rediscovery. Build an independent public-source development corpus and sealed holdout before using discovery recall or false-positive rates as release claims.
+## Integration work
 
-The remaining gate work is:
+PR #13 does not replace the separate installed paper-audit architecture in
+PR #6–#12. Reconcile #6 with the merged baseline, preserve both required test
+populations and trust boundaries, then evaluate #6–#11 in ancestry order.
+PR #5 is an earlier ancestor of #6; do not integrate both as independent work.
+PR #12's local UI and custody worker require a separate security/authority review.
+The [maintainer review](OSS_MAINTAINER_REVIEW.md) records the six overlapping
+repository files and the original exact heads. No remaining PR is approved
+merely by being later in that sequence.
 
-1. recover or build source-pinned runnable artifacts for the 13 frozen-screen entries without committed fixtures;
-2. create independent development and sealed holdout sets with source/version records and negative controls;
-3. measure useful discovery coverage, unsupported rate, false formalization counterexamples, scope errors, and repeatability;
-4. decide whether the modular verifier wave merits a 0.3.0 research preview.
+## Next scientific validation gate
 
-Do not tag or publish `0.3.0` until the exact public commit passes the engineering and scientific gates.
+Freeze the detector before selecting new evaluation material. Preserve the
+15-corrigendum mechanism screen and distinguish representability, extraction,
+arithmetic checking, adjudication and end-to-end rediscovery.
 
-## Next empirical milestone
+Existing percentage experiments and manually/model-reviewed cases are
+**developer-exposed**. The earlier eight-document v1 sample failed its minimum;
+the separate v2 descriptive study met its own development minima. Neither
+establishes independent precision or recall. The last recorded v3 acquisition
+was blocked before selection. These historical outcomes are not repaired by
+a new documentation or software commit.
 
-Run a frozen **unseen historical-corrigenda discovery benchmark** with independent research agents. The deterministic verifier must remain unchanged during an evaluation wave. Report unsupported cases and source-interpretation failures rather than silently excluding them.
+Further work must:
 
-Metrics of interest include:
+1. Obtain source-pinned, legally usable evidence and explicitly record unavailable
+   inputs, versions, licenses, family overlap and parser refusals.
+2. Keep development and sealed holdout material separate; do not promote exposed
+   cases to untouched evidence.
+3. Measure missed relationships, unsupported inputs, false formalizations,
+   denominator errors, abstention, repeatability and effort per defensible finding.
+4. Run independent qualification through the authorized custodian, not by giving
+   developers access to reserved identities or labels.
 
-- known-error rediscovery;
-- false formalization counterexamples;
-- scope/interpretation errors;
-- unsupported-case rate;
-- reproducibility of evidence capsules;
-- cost and agent effort per defensible case.
+The existing v1.3 custody requirement remains at least one eligible untouched
+correction-backed positive and 50 accepted correct-negative relationships across
+15 independent works. Acceptance and isolation have not been established by
+this documentation repair. Wave 3 is not run or authorized here.
+
+## Release gate
+
+Do not tag or publish `0.3.0` until the exact candidate passes the engineering
+and applicable scientific gates and a release is separately authorized.
+[RELEASING.md](RELEASING.md) defines the developer/build procedure and exact-head
+checks. Green CI and an internal engineering score alone are not scientific
+release qualification.
 
 ## Later
 
-Potential adapters include paper retrieval, code-vs-paper consistency, and proof-assistant/certificate integrations. They should remain outside or below the trust boundary unless their outputs are independently machine-checkable.
+Potential research extensions include paper/code consistency, cross-section
+claims, richer statistical relationships and proof-assistant certificates.
+Keep discovery and unsupported reasoning outside the small deterministic
+trust boundary, and integrate only after evidence justifies their scope.
 
-Automatic public accusations, researcher scoring, misconduct inference, and automatic author contact are not roadmap goals.
+Automatic public accusations, researcher scoring, misconduct inference and
+automatic author contact are not project goals.

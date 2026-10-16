@@ -1,19 +1,41 @@
-# Validation assets
+# Validation assets and current evidence
 
-- `screening-15.json` — frozen 15-corrigendum coverage screen created before the MVP verifier expansion.
-- `mvp_real/` — executable end-to-end MVP replay cases for the elliptic-curve and modular fixed-point corrigenda.
-- `verifier-wave/screening-15-review.json` — post-wave mechanism-level representability review plus the three committed historical fixture replays.
-- `verifier-wave/performance.json` — representative bounded checker timings; not a discovery benchmark.
+For current capabilities and merge state, start with
+[project status](../docs/PROJECT_STATUS.md),
+[the OSS assessment](../docs/OSS_QUALITY_FINAL.md) and
+[the machine-readable checkpoint](OSS_QUALITY_CHECKPOINT.json).
+Internal software quality, historical replay and independent scientific
+performance are distinct forms of evidence.
 
-The historical screen is intentionally kept frozen so verifier coverage can be compared without changing the corpus after implementation.
+## Engineering and documentation
 
-After the 0.2.0 MVP expansion, the qualitative screen is:
+CI evaluates the exact source revision, supported Python/OS matrix, static checks,
+core coverage, source manifests, deterministic artifacts and clean installation.
+Documentation tests exercise fixed synthetic commands, expected result states,
+source hashes/anchors, setup prerequisites and maintained links. They do not
+execute arbitrary Markdown or establish scientific findings.
 
-- fully/faithfully encoded mechanism: **2/15** (network reliability, elliptic curve);
-- important mechanism or theorem conclusion encoded but not all premises: **2/15** (QTT-Tucker, modular fixed point);
-- partial only: **1/15** (log-concavity);
-- unsupported: **10/15**.
+The current checkpoint identifies the integrated baseline and links its original
+pre-merge evidence under [history](history/). Snapshot counts and versions are
+not silently reused as results for later commits. Exact new validation belongs
+to the respective PR/main check runs.
 
-These categories are coverage labels, not accuracy estimates. ResearchWitness still needs more verifier families before it can be described as broadly applicable to mathematical corrigenda.
+## Historical scientific material
 
-The verifier-wave review preserves the original JSON and its SHA-256. It reclassifies the already-supported elliptic and finite-map mechanisms while retaining the overall 2/15 fully representable, 2/15 mechanism-only, 1/15 partial, and 10/15 unsupported counts. Only two unique screen entries have committed runnable fixtures (three fixture runs total). The network-reliability K3 and QTT-Tucker results recorded in older prose have no runnable source bundles or tests in this tree; the review treats them as capability-fit assessments, not fresh reproductions. No sealed holdout is present or claimed.
+- [MVP replay runner](mvp_real/run_validation.py): three historical executable
+  development cases, not three untouched discoveries.
+- [Frozen 15-case screen](screening-15.json): a mechanism/coverage map, not a
+  complete end-to-end discovery benchmark.
+- [Verifier-wave records](verifier-wave/README.md): preserved dated results;
+  do not reuse their old test count or wheel hash as a current build result.
+- [2026-10-14 readiness assessment](SCIENTIFIC_EVALUATION_READINESS.md): historical
+  repository and source-access state, not a current software-quality score.
+- [2026-10-15 development experiment aggregate](development-percentage-campaign-20261015.json):
+  developer-exposed v1/v2 evidence with its original limitations and commitments.
+- [Campaign report](../RESEARCHWITNESS_NEXT_CAMPAIGN_REPORT.md): dated investigation
+  history, preserved rather than rewritten to imply success or independence.
+
+No protected-custody source, reserved evaluation identifier or private author
+correspondence belongs here. Synthetic fixtures are labeled. The installed
+verifier does not authenticate a publication's origin; source hashes establish
+byte integrity, not truth. Scientific Wave 3 remains separate and has not run.
