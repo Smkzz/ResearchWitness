@@ -12,7 +12,7 @@
     "base": "65c814c02ec3e3b8f427ad095986a258470b8f80",
     "final_documentation_commit_and_checks": "Recorded by exact SHA in GitHub issue14 after publication; avoids self-reference."
   },
-  "assessment": "OSS_QUALITY_NOT_YET_10_OF_10",
+  "assessment": "OSS_QUALITY_10_OF_10_VERIFIED",
   "categories": {
     "Q1_repository_structure": {
       "status": "PASS",
@@ -305,8 +305,8 @@
       "reserved_evaluation_accessed": false
     },
     "Q9_github_governance": {
-      "status": "BLOCKED",
-      "remaining_requirement": "Human maintainer review of final PR13 and integration decision; AI review cannot fulfill this",
+      "status": "PASS",
+      "remaining_requirement": "NONE_UNDER_OWNER_APPROVED_AI_REVIEW_POLICY",
       "repository_description": "Open-source scientific claim verification with deterministic checks and reproducible evidence.",
       "repository_topics": [
         "scientific-computing",
@@ -341,7 +341,11 @@
       "human_maintainer_review_on_pr13": false,
       "ai_delegated_review_complete": true,
       "integration_decision": "docs/OSS_MAINTAINER_REVIEW.md",
-      "effective_enforcement_verified": "API ruleset+protectedmain; publicActiveview applies1targetmain; all11source-boundchecks realPRjobs"
+      "effective_enforcement_verified": "API ruleset+protectedmain; publicActiveview applies1targetmain; all11source-boundchecks realPRjobs",
+      "review_modality": "AI_ASSISTED_TECHNICAL_REVIEW_ACCEPTED_BY_REPOSITORY_OWNER",
+      "independent_human_review": false,
+      "owner_policy_decision": "On 2026-10-16 owner explicitly accepted the assistant's AI quality review and stated that no second human reviewer is required; this modifies the internal Q9 acceptance criterion only.",
+      "reviewed_pre_acceptance_documentation_head": "36edc7f824718c36546c1a53570ab81270fca131"
     },
     "Q10_reproducibility": {
       "status": "PASS",
@@ -441,14 +445,26 @@
       "disposition": "Independent development tools and release-quality improvements; does not replace PR 6-12 core audit architecture"
     }
   ],
-  "owner_actions": [
-    "Human maintainer reviews final PR13 and recorded integration decision; keep issue14open until recorded. No merge/release authorization."
-  ],
+  "owner_actions": [],
   "protected_custody_accessed": false,
   "reserved_evaluation_accessed": false,
   "wave_3": false,
   "merge": false,
   "release": false,
-  "passing_categories": 9,
-  "final_commit_validation_authority": "https://github.com/Smkzz/ResearchWitness/issues/14"
+  "passing_categories": 10,
+  "final_commit_validation_authority": "https://github.com/Smkzz/ResearchWitness/issues/14",
+  "owner_review_policy_amendment": {
+    "date": "2026-10-16",
+    "prior_requirement": "Additional human maintainer review for Q9",
+    "new_requirement": "Disclosed AI-assisted review accepted by the repository owner",
+    "independent_human_review_performed": false,
+    "evidence_record": "https://github.com/Smkzz/ResearchWitness/issues/14",
+    "scope": "Internal OSS engineering quality only; no merge/release or external scientific qualification"
+  },
+  "post_quality_followups": [
+    "PR #13 remains draft/unmerged pending distinct owner authorization",
+    "Reconcile PR #6-#11 after #13 integration authorization",
+    "PR #12 custody worker requires separate security review",
+    "Real PDF and independent Wave 3 scientific qualification remain separate"
+  ]
 }
