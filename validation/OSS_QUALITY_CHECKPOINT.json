@@ -7,32 +7,31 @@
     "state": "open",
     "draft": true,
     "merged": false,
-    "validated_implementation_head": "1938496eed153816cc4cf58455d4c7e0d1988ae5",
-    "validated_implementation_tree": "bfdfdd9717979188c44677dcfbb3e67969ff6c1c",
-    "base": "65c814c02ec3e3b8f427ad095986a258470b8f80"
+    "validated_implementation_head": "93efdf4cdf20085a7fd914d3ce647c646ab6fe0a",
+    "validated_implementation_tree": "fc38026bb2ce5e6b8cb5fea0d301b5b60f3a68a5",
+    "base": "65c814c02ec3e3b8f427ad095986a258470b8f80",
+    "final_documentation_commit_and_checks": "Recorded by exact SHA in GitHub issue14 after publication; avoids self-reference."
   },
   "assessment": "OSS_QUALITY_NOT_YET_10_OF_10",
   "categories": {
     "Q1_repository_structure": {
       "status": "PASS",
-      "release_files_including_manifest_at_validated_head": 176,
-      "checksum_entries_at_validated_head": 175,
-      "release_files_including_manifest_after_audit_docs": 179,
-      "checksum_entries_after_audit_docs": 178,
-      "checksum_verification": "PASS",
-      "release_selection": "Git-indexed allowlist; ignored and untracked files excluded; portable path, symlink, mode and unstaged-file checks enforced"
+      "release_files_including_manifest": 184,
+      "checksum_entries": 183,
+      "checksum_verification": "Required by exact final documentation commit release gate; implementation checksum gate PASS",
+      "release_selection": "Git-indexed allowlist; portable paths, symlinks, modes, collisions, unstaged selected files and untracked exclusion enforced"
     },
     "Q2_ci_cd": {
       "status": "PASS",
-      "ci_run_id": 38881012074,
-      "ci_url": "https://github.com/Smkzz/ResearchWitness/actions/runs/38881012074",
+      "validated_head": "93efdf4cdf20085a7fd914d3ce647c646ab6fe0a",
+      "ci_run_id": 38891822471,
+      "ci_url": "https://github.com/Smkzz/ResearchWitness/actions/runs/38891822471",
       "ci_conclusion": "success",
-      "jobs": 10,
       "python_os_matrix_jobs": 9,
       "release_gate": "success",
-      "codeql_run_id": 38881012098,
-      "codeql_url": "https://github.com/Smkzz/ResearchWitness/actions/runs/38881012098",
-      "codeql_conclusion": "success"
+      "codeql_run_id": 38891822456,
+      "codeql_conclusion": "success",
+      "initial_attempt": "Windows3.11 optimized CLI subprocess exceeded unchanged10s timeout; same-head retry passed; timing root cause unestablished; no assertion/timeout/coverage changes."
     },
     "Q3_code_quality": {
       "status": "PASS",
@@ -46,33 +45,250 @@
       "codeql_new_alerts_in_pr_diff": 0,
       "pdf_execution": "UNAVAILABLE_UNTIL_OPERATOR_QUALIFIES_PINNED_IMAGE_AND_EFFECTIVE_DOCKER_BOUNDARY",
       "real_pdf_run": false,
-      "formal_codex_security_scan": "UNAVAILABLE_IN_TOOL_SESSION"
+      "formal_codex_security_scan": {
+        "scan_id": "376df00d-ea30-49cd-b75f-7c37c225defb",
+        "status": "COMPLETE_SEALED_READ_BACK",
+        "original_remote_head": "10233a8fa05a98aa77931be631fc07d40357836a",
+        "original_remote_tree": "ec55280925f84ee063e6e0f1a0674356e5bc0460",
+        "reviewed_changed_paths": 52,
+        "candidates": 2,
+        "reported_low": 1,
+        "suppressed": 1,
+        "successor_remediation": "248e8f1 fails closed without ownership verification; subsequent93efdf4 preserves this; supplementary changed portions AI-reviewed",
+        "human_approval": false
+      },
+      "windows_managed_discovery": "UNAVAILABLE_UNTIL_REVIEWED_ACL_OWNERSHIP_GUARD; installed verifier Windows support is separate"
     },
     "Q5_testing": {
       "status": "PASS",
-      "linux_and_macos_per_job": "490 passed, 108 subtests passed",
-      "windows_per_job": "484 passed, 6 POSIX-only skipped, 108 subtests passed",
+      "linux_and_macos_per_job": "498 passed,113 subtests passed",
+      "windows_per_job": "492 passed,6 POSIX-only skipped,113 subtests passed",
       "trusted_core_coverage_percent": 98,
       "trusted_core_coverage_floor_percent": 90,
       "whole_repository_coverage_percent": 79,
       "whole_repository_coverage_floor_enforced": false,
-      "high_value_tool_coverage_percent": {
-        "tools/jats_percentage_audit.py": 90,
-        "tools/pdf_percentage_audit.py": 84,
-        "tools/public_discovery.py": 80,
-        "tools/research_audit.py": 86,
-        "tools/percentage_benchmark.py": 76,
-        "tools/make_release.py": 67
-      }
+      "high_value_tool_coverage": "Earlier module percentages retained in historical audit; new exact-head full-repository report is79%, core98%. No unsupported per-module carry-forward."
     },
     "Q6_supply_chain": {
-      "status": "BLOCKED",
+      "status": "PASS",
+      "scope": "Resolved Python3.12 Ubuntu build/dev environment at93efdf4 plus package notices and GitHubviews; not all future/allowed versions or legal/binary-provenance certification",
       "runtime_dependencies": [],
       "development_dependencies_bounded": true,
+      "build_backend_requirement": "setuptools>=68",
       "github_actions_sha_pinned": true,
+      "checkout_persist_credentials": false,
+      "ordinary_pr_permissions": "contents:read",
+      "codeql_extra_permission": "security-events:write",
       "dependabot_configured": true,
-      "repository_security_alert_view": "UNAVAILABLE_THROUGH_CURRENT_GITHUB_CONNECTION",
-      "complete_license_advisory_review": "NOT_COMPLETED"
+      "dependency_graph_enabled": true,
+      "github_main_graph": {
+        "head": "65c814c02ec3e3b8f427ad095986a258470b8f80",
+        "entries": 8,
+        "python_declarations": 3,
+        "action_references": 5,
+        "transitive_pr13_graph": false
+      },
+      "dependabot_alerts": {
+        "open": 0,
+        "closed": 0
+      },
+      "secret_alerts": {
+        "open": 0,
+        "closed": 0
+      },
+      "code_scanning": {
+        "main_open": 0,
+        "main_closed": 0,
+        "pr13_open": 0,
+        "pr13_closed": 0
+      },
+      "repository_advisories": {
+        "triage": 0,
+        "draft": 0,
+        "published": 0,
+        "closed": 0
+      },
+      "private_reporting_enabled": true,
+      "security_update_prs_enabled": true,
+      "malware_monitoring_enabled": true,
+      "development_alert_auto_dismissal": false,
+      "dependency_evidence": {
+        "run_id": 38891822570,
+        "job_id": 116942890837,
+        "head": "93efdf4cdf20085a7fd914d3ce647c646ab6fe0a",
+        "checked_at": "2026-10-16T11:08:55.623601+00:00",
+        "pypi_and_osv_advisories": 0,
+        "query_errors": [],
+        "artifact_id": 12041589008,
+        "artifact_sha256": "0291b31e0fe66672cdc21f3b0e7e1583fb5107675e972cc2b8d4c9ea74bbf36a",
+        "artifact_expires": "2026-11-15",
+        "license_candidate_files": 39,
+        "unique_hashes": 33,
+        "total_bytes": 360200,
+        "license_hashes_verified": true,
+        "license_review": "READ_AND_REVIEWED_WITH_TERMS_AND_CAPTURE_NOISE_CLASSIFIED",
+        "notices": "Setuptools includes LGPL3 and MPL2 components despite MIT package metadata; retain vendor obligations if redistributing build tools. Tools not bundled in RWwheel/source; no runtime blocker evidenced.",
+        "capture_noise": "Four bytecode captures and SPDX identifier data are not package license conclusions.",
+        "license_inventory": [
+          {
+            "path": "licenses/Pygments/71a83872ad82f57be692cf827e048e2cd51d45169cfa1ea3f28706d97a872c0f.txt",
+            "sha256": "71a83872ad82f57be692cf827e048e2cd51d45169cfa1ea3f28706d97a872c0f"
+          },
+          {
+            "path": "licenses/Pygments/a9d66f1d526df02e29dce73436d34e56e8632f46c275bbdffc70569e882f9f17.txt",
+            "sha256": "a9d66f1d526df02e29dce73436d34e56e8632f46c275bbdffc70569e882f9f17"
+          },
+          {
+            "path": "licenses/attrs/882115c95dfc2af1eeb6714f8ec6d5cbcabf667caff8729f42420da63f714e9f.txt",
+            "sha256": "882115c95dfc2af1eeb6714f8ec6d5cbcabf667caff8729f42420da63f714e9f"
+          },
+          {
+            "path": "licenses/coverage/0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594.txt",
+            "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+          },
+          {
+            "path": "licenses/coverage/80e177ab397d5f332954693a52abc1b34b06c5792dd57297608b6d68a2f6af11.txt",
+            "sha256": "80e177ab397d5f332954693a52abc1b34b06c5792dd57297608b6d68a2f6af11"
+          },
+          {
+            "path": "licenses/iniconfig/3409fa91f7ace557894632676656e32264fe5ef7581535725dc9a23774551bd4.txt",
+            "sha256": "3409fa91f7ace557894632676656e32264fe5ef7581535725dc9a23774551bd4"
+          },
+          {
+            "path": "licenses/jsonschema/4f92a015a13c4d1a040bef018aa13430b4f1bc73b41b16bb846c346766de7439.txt",
+            "sha256": "4f92a015a13c4d1a040bef018aa13430b4f1bc73b41b16bb846c346766de7439"
+          },
+          {
+            "path": "licenses/jsonschema-specifications/42dcd63495f87b4eb7c7757afa379bb55a53f94afd7a5f657d9adf57236e515c.txt",
+            "sha256": "42dcd63495f87b4eb7c7757afa379bb55a53f94afd7a5f657d9adf57236e515c"
+          },
+          {
+            "path": "licenses/packaging/0ae39ee1d18f840f694b6204ea359b9b472496148d873975d51af783c0fa9855.txt",
+            "sha256": "0ae39ee1d18f840f694b6204ea359b9b472496148d873975d51af783c0fa9855"
+          },
+          {
+            "path": "licenses/packaging/0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594.txt",
+            "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+          },
+          {
+            "path": "licenses/packaging/590d12eee73ddbec53b4e9ee5bfc64d9cb3aacb4940e8ebcba260757ce56740b.txt",
+            "sha256": "590d12eee73ddbec53b4e9ee5bfc64d9cb3aacb4940e8ebcba260757ce56740b"
+          },
+          {
+            "path": "licenses/packaging/596ec35e2ca0ebcba9fd8343ff0a51625af548786257815f24b41f7e08613314.txt",
+            "sha256": "596ec35e2ca0ebcba9fd8343ff0a51625af548786257815f24b41f7e08613314"
+          },
+          {
+            "path": "licenses/packaging/7adb56631eef92e3e2c089fd6c6b5b35b56aa24f227bc98b72e040662607b1e8.txt",
+            "sha256": "7adb56631eef92e3e2c089fd6c6b5b35b56aa24f227bc98b72e040662607b1e8"
+          },
+          {
+            "path": "licenses/packaging/b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5.txt",
+            "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5"
+          },
+          {
+            "path": "licenses/packaging/cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48.txt",
+            "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48"
+          },
+          {
+            "path": "licenses/pluggy/d6b65e6c213a5d0b577911d34d6e5949b9f59d76c238c5071a2f3fc16cfb2606.txt",
+            "sha256": "d6b65e6c213a5d0b577911d34d6e5949b9f59d76c238c5071a2f3fc16cfb2606"
+          },
+          {
+            "path": "licenses/pytest/ca836a5f9ecca3b2f350230faa20a48fb8b145653b5568d784862df864706b9b.txt",
+            "sha256": "ca836a5f9ecca3b2f350230faa20a48fb8b145653b5568d784862df864706b9b"
+          },
+          {
+            "path": "licenses/referencing/42dcd63495f87b4eb7c7757afa379bb55a53f94afd7a5f657d9adf57236e515c.txt",
+            "sha256": "42dcd63495f87b4eb7c7757afa379bb55a53f94afd7a5f657d9adf57236e515c"
+          },
+          {
+            "path": "licenses/rpds-py/314e4e91be3baa93c0fb4bccc9e4e97cd643eb839b065af921782c2175fe9909.txt",
+            "sha256": "314e4e91be3baa93c0fb4bccc9e4e97cd643eb839b065af921782c2175fe9909"
+          },
+          {
+            "path": "licenses/ruff/2597d854122b77ddc71971564ca2350a37608575ce324adc5650a2b2051c8f18.txt",
+            "sha256": "2597d854122b77ddc71971564ca2350a37608575ce324adc5650a2b2051c8f18"
+          },
+          {
+            "path": "licenses/setuptools/09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7.txt",
+            "sha256": "09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7"
+          },
+          {
+            "path": "licenses/setuptools/09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46.txt",
+            "sha256": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46"
+          },
+          {
+            "path": "licenses/setuptools/0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594.txt",
+            "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+          },
+          {
+            "path": "licenses/setuptools/29e0fd62e929850e86eb28c3fdccf0cefdf4fa94879011cffb3d0d4bed6d4db6.txt",
+            "sha256": "29e0fd62e929850e86eb28c3fdccf0cefdf4fa94879011cffb3d0d4bed6d4db6"
+          },
+          {
+            "path": "licenses/setuptools/2dddf08818297a3b89d43d95ff659d8da85741108c9136dfa3a4d856c0623bd8.txt",
+            "sha256": "2dddf08818297a3b89d43d95ff659d8da85741108c9136dfa3a4d856c0623bd8"
+          },
+          {
+            "path": "licenses/setuptools/30c23618679108f3e8ea1d2a658c7ca417bdfc891c98ef1a89fa4ff0c9828654.txt",
+            "sha256": "30c23618679108f3e8ea1d2a658c7ca417bdfc891c98ef1a89fa4ff0c9828654"
+          },
+          {
+            "path": "licenses/setuptools/458502e12d97bbf64438606a20044aa85eb05fb0a8a807bb35dbec253fd1fc04.txt",
+            "sha256": "458502e12d97bbf64438606a20044aa85eb05fb0a8a807bb35dbec253fd1fc04"
+          },
+          {
+            "path": "licenses/setuptools/4f05cb1d9097c1281d17044b3f15bad364fa99289eba74851cce9fa7ca605bbf.txt",
+            "sha256": "4f05cb1d9097c1281d17044b3f15bad364fa99289eba74851cce9fa7ca605bbf"
+          },
+          {
+            "path": "licenses/setuptools/596ec35e2ca0ebcba9fd8343ff0a51625af548786257815f24b41f7e08613314.txt",
+            "sha256": "596ec35e2ca0ebcba9fd8343ff0a51625af548786257815f24b41f7e08613314"
+          },
+          {
+            "path": "licenses/setuptools/5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d.txt",
+            "sha256": "5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d"
+          },
+          {
+            "path": "licenses/setuptools/71f08a7316478e67d2f4c676f86f527639077dd64dada407cc3a631fe65e215b.txt",
+            "sha256": "71f08a7316478e67d2f4c676f86f527639077dd64dada407cc3a631fe65e215b"
+          },
+          {
+            "path": "licenses/setuptools/86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741.txt",
+            "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741"
+          },
+          {
+            "path": "licenses/setuptools/9755a18519666e5f0f4cae3daad3d7012bcae48a600b31237d75e9fe134e6683.txt",
+            "sha256": "9755a18519666e5f0f4cae3daad3d7012bcae48a600b31237d75e9fe134e6683"
+          },
+          {
+            "path": "licenses/setuptools/9a46d363c3ee51626cd73a086d8adb26470148606d4aaed1557408bdba6a8227.txt",
+            "sha256": "9a46d363c3ee51626cd73a086d8adb26470148606d4aaed1557408bdba6a8227"
+          },
+          {
+            "path": "licenses/setuptools/ade78d04982d69972d444a8e14a94f87a2334dd3855cc80348ea8e240aa0df2d.txt",
+            "sha256": "ade78d04982d69972d444a8e14a94f87a2334dd3855cc80348ea8e240aa0df2d"
+          },
+          {
+            "path": "licenses/setuptools/b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5.txt",
+            "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5"
+          },
+          {
+            "path": "licenses/setuptools/b80816b0d530b8accb4c2211783790984a6e3b61922c2b5ee92f3372ab2742fe.txt",
+            "sha256": "b80816b0d530b8accb4c2211783790984a6e3b61922c2b5ee92f3372ab2742fe"
+          },
+          {
+            "path": "licenses/setuptools/cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48.txt",
+            "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48"
+          },
+          {
+            "path": "licenses/typing_extensions/3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf.txt",
+            "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf"
+          }
+        ]
+      },
+      "version_ranges": "Retained; reviewed resolved snapshot only. Fresh audit required for later resolution."
     },
     "Q7_documentation": {
       "status": "PASS",
@@ -90,21 +306,51 @@
     },
     "Q9_github_governance": {
       "status": "BLOCKED",
-      "repository_description": null,
-      "repository_topics": [],
-      "main_protected": false,
-      "repository_rulesets": 0,
-      "branch_protection_read": "403_FROM_CURRENT_CONNECTION",
-      "settings_write_tool_available": false,
+      "remaining_requirement": "Human maintainer review of final PR13 and integration decision; AI review cannot fulfill this",
+      "repository_description": "Open-source scientific claim verification with deterministic checks and reproducible evidence.",
+      "repository_topics": [
+        "scientific-computing",
+        "open-science",
+        "research-integrity",
+        "reproducibility",
+        "python"
+      ],
+      "main_protected": true,
+      "ruleset_id": 25233301,
+      "ruleset_active": true,
+      "matching_ref": "refs/heads/main",
+      "require_pr": true,
+      "prevent_force_push": true,
+      "prevent_deletion": true,
+      "require_up_to_date": true,
+      "required_approvals": 0,
+      "bypass_actors": [],
+      "required_checks": [
+        "Python 3.11 / ubuntu-latest",
+        "Python 3.12 / ubuntu-latest",
+        "Python 3.13 / ubuntu-latest",
+        "Python 3.11 / windows-latest",
+        "Python 3.12 / windows-latest",
+        "Python 3.13 / windows-latest",
+        "Python 3.11 / macos-latest",
+        "Python 3.12 / macos-latest",
+        "Python 3.13 / macos-latest",
+        "Release gate",
+        "Analyze Python"
+      ],
       "human_maintainer_review_on_pr13": false,
-      "pr12_review": "github-advanced-security COMMENTED; not a human maintainer review"
+      "ai_delegated_review_complete": true,
+      "integration_decision": "docs/OSS_MAINTAINER_REVIEW.md",
+      "effective_enforcement_verified": "API ruleset+protectedmain; publicActiveview applies1targetmain; all11source-boundchecks realPRjobs"
     },
     "Q10_reproducibility": {
       "status": "PASS",
       "hosted_clean_checkout_release_gate": "PASS",
       "reproducible_wheel_and_offline_install": "PASS",
       "source_archive_reproducibility_regression": "PASS",
-      "local_development_dependency_install": "BLOCKED_BEFORE_HTTP_BY_EXECUTOR_PROXY; no retry or bypass"
+      "local_development_dependency_install": "Not attempted in this run; earlier proxy denial is historical. Hosted clean-environment installation passed.",
+      "validated_head": "93efdf4cdf20085a7fd914d3ce647c646ab6fe0a",
+      "heavy_local_dispatch": "DEFERRED: memory-preflight telemetry unavailable; no host or isolation bypass"
     }
   },
   "cross_platform_repairs": [
@@ -113,25 +359,96 @@
     "Validate the complete Git-index path set before filesystem access; collision tests do not depend on host filesystem case behavior"
   ],
   "pull_request_disposition": [
-    {"number": 5, "state": "open", "draft": true, "base": "main", "head": "8d91362437223c85c700fec92f857ef90e883d15", "changed_paths": 222, "disposition": "Likely superseded by PR 6 snapshot; owner review required before closure"},
-    {"number": 6, "state": "open", "draft": true, "base": "main", "head": "94cd15859ec37a965db5f0a2f6dc7ebf620f56c5", "changed_paths": 242, "disposition": "Structured JATS foundation; parent of stack 7-12"},
-    {"number": 7, "state": "open", "draft": true, "base": "PR 6", "head": "57fedcd9efa9afaabd76bc56b1bc06f1063354fe", "changed_paths": 37, "disposition": "Stacked source-mapped audit expansion"},
-    {"number": 8, "state": "open", "draft": true, "base": "PR 7", "head": "80f1ee0189a2618377239702046160d7d0208f34", "changed_paths": 10, "disposition": "Stacked evidence follow-up"},
-    {"number": 9, "state": "open", "draft": true, "base": "PR 8", "head": "5a50406e4b7662aa9520142d10b9c5d3527bbe65", "changed_paths": 15, "disposition": "Stacked evidence maturation"},
-    {"number": 10, "state": "open", "draft": true, "base": "PR 9", "head": "f2490bd55568915c501b3c81d1ae3d08fda18cad", "changed_paths": 30, "disposition": "Stacked v1.2 count/percentage qualification"},
-    {"number": 11, "state": "open", "draft": true, "base": "PR 10", "head": "6843593ff443d4a44c48d15a76949b323d0951ca", "changed_paths": 25, "disposition": "Stacked v1.3 denominator provenance"},
-    {"number": 12, "state": "open", "draft": true, "base": "PR 11", "head": "78b26e2d9a31a1eafcc9a0f668b19f09283ce5e9", "changed_paths": 82, "disposition": "Stacked local UI and offline custody worker; separate owner security review required"},
-    {"number": 13, "state": "open", "draft": true, "base": "main", "head": "1938496eed153816cc4cf58455d4c7e0d1988ae5", "changed_paths": 52, "disposition": "Independent development tools and release-quality improvements; does not replace PR 6-12 core audit architecture"}
+    {
+      "number": 5,
+      "state": "open",
+      "draft": true,
+      "base": "main",
+      "head": "8d91362437223c85c700fec92f857ef90e883d15",
+      "changed_paths": 222,
+      "disposition": "Ancestor/superseded snapshot of PR6;222changedpaths all inPR6;335/345blobs identical10evolved;keepopenpendinghuman disposition"
+    },
+    {
+      "number": 6,
+      "state": "open",
+      "draft": true,
+      "base": "main",
+      "head": "94cd15859ec37a965db5f0a2f6dc7ebf620f56c5",
+      "changed_paths": 242,
+      "disposition": "Structured JATS foundation; parent of stack 7-12"
+    },
+    {
+      "number": 7,
+      "state": "open",
+      "draft": true,
+      "base": "PR 6",
+      "head": "57fedcd9efa9afaabd76bc56b1bc06f1063354fe",
+      "changed_paths": 37,
+      "disposition": "Stacked source-mapped audit expansion"
+    },
+    {
+      "number": 8,
+      "state": "open",
+      "draft": true,
+      "base": "PR 7",
+      "head": "80f1ee0189a2618377239702046160d7d0208f34",
+      "changed_paths": 10,
+      "disposition": "Stacked evidence follow-up"
+    },
+    {
+      "number": 9,
+      "state": "open",
+      "draft": true,
+      "base": "PR 8",
+      "head": "5a50406e4b7662aa9520142d10b9c5d3527bbe65",
+      "changed_paths": 15,
+      "disposition": "Stacked evidence maturation"
+    },
+    {
+      "number": 10,
+      "state": "open",
+      "draft": true,
+      "base": "PR 9",
+      "head": "f2490bd55568915c501b3c81d1ae3d08fda18cad",
+      "changed_paths": 30,
+      "disposition": "Stacked v1.2 count/percentage qualification"
+    },
+    {
+      "number": 11,
+      "state": "open",
+      "draft": true,
+      "base": "PR 10",
+      "head": "6843593ff443d4a44c48d15a76949b323d0951ca",
+      "changed_paths": 25,
+      "disposition": "Stacked v1.3 denominator provenance"
+    },
+    {
+      "number": 12,
+      "state": "open",
+      "draft": true,
+      "base": "PR 11",
+      "head": "78b26e2d9a31a1eafcc9a0f668b19f09283ce5e9",
+      "changed_paths": 82,
+      "disposition": "Stacked local UI and offline custody worker; separate owner security review required"
+    },
+    {
+      "number": 13,
+      "state": "open",
+      "draft": true,
+      "base": "main",
+      "head": "93efdf4cdf20085a7fd914d3ce647c646ab6fe0a",
+      "changed_paths": 52,
+      "disposition": "Independent development tools and release-quality improvements; does not replace PR 6-12 core audit architecture"
+    }
   ],
   "owner_actions": [
-    "Set repository description and accurate topics",
-    "Configure and verify main ruleset: pull requests required, all 9 matrix checks plus Release gate and CodeQL required, force-push and deletion blocked, zero approvals for solo-maintainer usability",
-    "Inspect and record Dependabot/security alerts and complete dependency/license advisories",
-    "Have a human maintainer review PR 13 and decide the documented integration order/disposition for PR 5-12"
+    "Human maintainer reviews final PR13 and recorded integration decision; keep issue14open until recorded. No merge/release authorization."
   ],
   "protected_custody_accessed": false,
   "reserved_evaluation_accessed": false,
   "wave_3": false,
   "merge": false,
-  "release": false
+  "release": false,
+  "passing_categories": 9,
+  "final_commit_validation_authority": "https://github.com/Smkzz/ResearchWitness/issues/14"
 }

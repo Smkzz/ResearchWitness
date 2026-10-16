@@ -1,3 +1,9 @@
+> **Historical baseline retained.** This implementation audit predates the final
+> administration and supply-chain closure on 2026-10-16. Its missing-settings and
+> unavailable-alert statements describe that earlier session. Current results are
+> in [OSS_QUALITY_FINAL.md](OSS_QUALITY_FINAL.md),
+> [OSS_MAINTAINER_REVIEW.md](OSS_MAINTAINER_REVIEW.md) and the updated checkpoint.
+
 # ResearchWitness OSS quality audit
 
 **Assessment date:** 2026-10-16  
@@ -126,3 +132,4 @@ Suggested description: “Open-source, reproducible verification of scientific
 claims using deterministic checks and source-grounded evidence.” Suggested
 topics: `scientific-computing`, `open-science`, `research-integrity`,
 `reproducibility`, `python`.
+
