@@ -90,7 +90,7 @@ python -m tools.research_audit compare \
 
 The local annotation and run schemas are
 `percentage-annotations.v1.schema.json`, `percentage-annotations.v2.schema.json`
-and `percentage-run.v1.schema.json`. The comparison still reads v1. V2 records
+and `percentage-run.v1.schema.json`. The comparison accepts v1 and v2 annotations. V2 records
 independent count and percentage anchors, component spans, table/row/cell
 identity, work-family identity, source version and retrieval metadata,
 population scope, denominator basis, alternative interpretations, and reviewer
@@ -133,3 +133,4 @@ percentage and precision, the inverse compatible-denominator range for a
 count, and the sum of independently rounded component percentages. These
 checks report arithmetic feasibility only; they do not infer that counts are
 unweighted, mutually exclusive, exhaustive, or in the same population scope.
+

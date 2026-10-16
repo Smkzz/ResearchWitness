@@ -22,6 +22,8 @@ python tools/discover_public_candidates.py summarize \
 
 The collector is a tool outside the trusted `researchwitness` core. It is read-only, requires HTTPS through the inherited managed proxy, rejects proxy-bypass routes and cross-host redirects before following them, caps response sizes, and enforces a one-second per-host request-start interval across collector processes using a verified private per-user state directory and file. It stops on an access or transport failure. It does not follow DOI links to publishers, use credentials, retry a denial, or retain article full text. The recorded SHA-256 is for the returned metadata response, not for the original article or correction.
 
+The managed discovery transport currently requires POSIX ownership and mode checks for its private rate state. On Windows and other platforms without those checks, it refuses a request before network access. Windows support for the installed verifier core remains separate; enabling real Windows discovery requires a separately reviewed ACL ownership check. Synthetic transport tests do not qualify that missing boundary.
+
 Search hits are only metadata leads. An independent reviewer must capture the original and correction versions from a permitted public source, verify the applicable license, record content hashes and stable source anchors, and compare the exact numerical statements and scope. The code's percentage recomputation is only arithmetic at the printed precision; it cannot resolve cohort, denominator, table, or correction scope.
 
 ## Offline JATS table aid
@@ -86,3 +88,4 @@ Local registry inputs must be regular UTF-8 files no larger than 8 MiB. The
 registry contract permits at most 250 candidates and 500 search records so
 validation and duplicate-family checks remain bounded; archive older campaigns
 separately instead of merging an unbounded history.
+

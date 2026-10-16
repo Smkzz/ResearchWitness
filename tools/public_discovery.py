@@ -9,7 +9,6 @@ from __future__ import annotations
 import errno
 from datetime import datetime, timezone
 from hashlib import sha256
-import getpass
 import json
 import math
 import os
@@ -201,7 +200,10 @@ def _private_rate_state_directory(
     temp_root: Path | None = None, *, host: str = "rate-limit-state"
 ) -> Path:
     """Return a verified per-user directory for persistent rate-limit state."""
-    user_scope = str(getattr(os, "getuid", getpass.getuser)())
+    getuid = getattr(os, "getuid", None)
+    if not callable(getuid):
+        raise SourceAccessError(host, "private rate-limit state ownership cannot be verified on this platform")
+    user_scope = str(getuid())
     token = sha256(user_scope.encode("utf-8")).hexdigest()[:24]
     directory = (temp_root or Path(tempfile.gettempdir())) / f"researchwitness-public-rate-{token}"
     try:
@@ -1334,3 +1336,4 @@ def summarize_registry(registry: Mapping[str, Any]) -> dict[str, Any]:
             "qualification acceptance is maintained by the independent custodian, not this registry",
         ],
     }
+

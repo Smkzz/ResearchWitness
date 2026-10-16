@@ -16,12 +16,12 @@ def read_regular(path: Path, limit: int) -> bytes:
     flags |= getattr(os, "O_NOFOLLOW", 0)
     # The precheck also protects platforms without O_NONBLOCK/O_NOFOLLOW.
     info = path.lstat()
-    if not stat.S_ISREG(info.st_mode):
+    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
         raise ValueError(f"Input must be a regular file: {path.name}")
     descriptor = os.open(path, flags)
     try:
         info = os.fstat(descriptor)
-        if not stat.S_ISREG(info.st_mode):
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
             raise ValueError(f"Input must be a regular file: {path.name}")
         if info.st_size > limit:
             raise ValueError(f"Input exceeds its byte limit: {path.name}")
@@ -32,3 +32,4 @@ def read_regular(path: Path, limit: int) -> bytes:
         return data
     finally:
         os.close(descriptor)
+
