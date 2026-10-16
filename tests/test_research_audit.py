@@ -530,7 +530,8 @@ class ResearchAuditTests(unittest.TestCase):
                     report['document']['document_id'] = 'another'
                 path = self.run_manifest('current', report)
                 run = json.loads(path.read_text())
-                if change != 'detector': run['detector_files'] = audit['detector_files']
+                if change != 'detector':
+                    run['detector_files'] = audit['detector_files']
                 path.write_text(json.dumps(run))
                 with self.assertRaisesRegex(ValueError, 'contradict'):
                     compare_runs(self.annotation_path, [path])

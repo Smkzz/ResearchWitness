@@ -23,6 +23,7 @@ with tempfile.TemporaryDirectory(prefix='researchwitness-real-') as td:
                               cwd=ROOT, text=True, capture_output=True, check=True)
         data=json.loads(proc.stdout)
         report = data['report']
+        ready = data['contact_readiness']
         assert report['decision']==exp[0]
         assert ready['status']==exp[1]
         assert ready['author_contact_authorized'] is False
