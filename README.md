@@ -13,7 +13,7 @@ The current software is an early step toward that goal. Today, ResearchWitness c
 
 That is a current capability limit, not the product goal.
 
-**Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ · runtime dependencies: none · Apache-2.0
+**Development candidate:** `0.3.0.dev0` · unreleased · requires Python 3.11+ (CI tests 3.11–3.13) · runtime dependencies: none · Apache-2.0
 
 ## Status
 
@@ -98,10 +98,33 @@ The second line matters as much as the first.
 
 ## Quick start
 
-This development candidate is not published on PyPI. From a source checkout, install the package locally and inspect its agent interfaces:
+This development candidate is not published on PyPI. The installed verifier core is tested on Python 3.11–3.13. From a source checkout, create and activate a virtual environment, then install the package locally:
+
+```bash
+python -m venv .venv
+```
+
+Activate it on macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+On Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Install the package:
 
 ```bash
 python -m pip install .
+```
+
+Then inspect its agent interfaces:
+
+```bash
 researchwitness --version
 python -m researchwitness capabilities --json
 python -m researchwitness schema intake
@@ -317,7 +340,8 @@ Bug reports and bounded deterministic verifier proposals are welcome. Start with
 
 ```bash
 python -m pip install -e '.[dev]'
-python -m pytest -q
+python -m coverage run -m pytest -q
+python -m coverage report
 python benchmarks/run_synthetic.py
 python validation/mvp_real/run_validation.py
 python tools/quality_gate.py

@@ -34,7 +34,7 @@ Documentation = "https://github.com/Smkzz/ResearchWitness#readme"
 researchwitness = "researchwitness.__main__:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "jsonschema>=4,<5"]
+dev = ["pytest>=8,<10", "jsonschema>=4,<5", "coverage>=7.6,<8"]
 
 [tool.setuptools.packages.find]
 include = ["researchwitness*"]
@@ -45,3 +45,11 @@ researchwitness = ["capability_examples.json", "schemas/*.json"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+
+[tool.coverage.run]
+branch = true
+source = ["researchwitness", "tools"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

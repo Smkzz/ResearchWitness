@@ -92,6 +92,7 @@ Any future integration capable of external communication must remain outside the
 
 | Version | Security fixes |
 |---|---|
+| 0.3.0.dev0 | Unreleased development candidate; fixes are made on the active development line. No response-time or support guarantee applies to this prerelease. |
 | 0.2.x | Yes |
 | < 0.2 | No |
 

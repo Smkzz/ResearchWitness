@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import tempfile
 import unittest
@@ -55,6 +56,17 @@ class ReleaseInventoryTests(unittest.TestCase):
         self.assertNotIn("researchwitness-0.test/validation/untracked-private.json", names)
         self.assertNotIn("researchwitness-0.test/validation/ignored-private.json", names)
 
+    def test_source_zip_is_byte_for_byte_reproducible(self) -> None:
+        output_dir = self.root / "dist"
+        output_dir.mkdir()
+        first = output_dir / "first.zip"
+        second = output_dir / "second.zip"
+
+        make_release.write_source_zip(first, "0.test")
+        make_release.write_source_zip(second, "0.test")
+
+        self.assertEqual(first.read_bytes(), second.read_bytes())
+
     def test_selected_symlink_fails_closed(self) -> None:
         target = self.root.parent / "private-release-test-target"
         target.write_text("private", encoding="utf-8")
@@ -87,6 +99,82 @@ class ReleaseInventoryTests(unittest.TestCase):
 
         with self.assertRaisesRegex(RuntimeError, "unstaged changes"):
             make_release.included_files()
+
+    @unittest.skipUnless(os.name == "posix", "probe relies on POSIX backslash filename semantics")
+    def test_backslash_traversal_filename_fails_before_creating_archive(self) -> None:
+        relative = r"validation/..\..\..\escaped.txt"
+        path = self.root / relative
+        path.write_text("synthetic traversal probe", encoding="utf-8")
+        subprocess.run(["git", "add", "--", relative], cwd=self.root, check=True)
+
+        output = self.root / "dist" / "source.zip"
+        output.parent.mkdir()
+        with self.assertRaisesRegex(RuntimeError, "backslash"):
+            make_release.write_source_zip(output, "0.test")
+        self.assertFalse(output.exists())
+
+    def test_windows_reserved_device_name_fails_closed(self) -> None:
+        relative = "validation/CON.txt"
+        path = self.root / relative
+        path.write_text("synthetic reserved-name probe", encoding="utf-8")
+        subprocess.run(["git", "add", "--", relative], cwd=self.root, check=True)
+
+        with self.assertRaisesRegex(RuntimeError, "reserved Windows device name"):
+            make_release.included_files()
+
+    def test_non_ascii_archive_path_fails_closed(self) -> None:
+        relative = "validation/ı.txt"
+        path = self.root / relative
+        path.write_text("Unicode case-equivalence probe", encoding="utf-8")
+        subprocess.run(["git", "add", "--", relative], cwd=self.root, check=True)
+
+        with self.assertRaisesRegex(RuntimeError, "non-ASCII names"):
+            make_release.included_files()
+
+    def test_casefold_colliding_archive_paths_fail_closed(self) -> None:
+        for relative in ("validation/Report.txt", "validation/report.txt"):
+            path = self.root / relative
+            path.write_text(relative, encoding="utf-8")
+            subprocess.run(["git", "add", "--", relative], cwd=self.root, check=True)
+
+        with self.assertRaisesRegex(RuntimeError, "case-insensitive filesystems"):
+            make_release.included_files()
+
+    def test_casefold_file_directory_path_conflict_fails_closed(self) -> None:
+        paths = ("docs/Report", "docs/report/child.txt")
+        for relative in paths:
+            path = self.root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(relative, encoding="utf-8")
+            subprocess.run(["git", "add", "--", relative], cwd=self.root, check=True)
+
+        with self.assertRaisesRegex(RuntimeError, "file/directory path conflict"):
+            make_release.included_files()
+
+    def test_casefold_directory_file_path_conflict_fails_closed(self) -> None:
+        # The uppercase child path sorts before the lowercase file path in Git's index.
+        paths = ("docs/Report/child.txt", "docs/report")
+        for relative in paths:
+            path = self.root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(relative, encoding="utf-8")
+            subprocess.run(["git", "add", "--", relative], cwd=self.root, check=True)
+
+        with self.assertRaisesRegex(RuntimeError, "file/directory path conflict"):
+            make_release.included_files()
+
+    def test_windows_trailing_dot_and_colon_paths_fail_closed(self) -> None:
+        cases = (
+            ("validation/trailing-dot.", "ends in a dot or space"),
+            ("validation/alternate-stream:payload", "Windows-unsafe character"),
+        )
+        for relative, message in cases:
+            with self.subTest(relative=relative):
+                path = self.root / relative
+                path.write_text("synthetic portability probe", encoding="utf-8")
+                subprocess.run(["git", "add", "--", relative], cwd=self.root, check=True)
+                with self.assertRaisesRegex(RuntimeError, message):
+                    make_release.included_files()
 
 
 if __name__ == "__main__":
