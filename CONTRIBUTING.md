@@ -21,6 +21,7 @@ Do not add a checker whose positive output depends only on an LLM judgment or on
 
 ```sh
 python -m pip install -e '.[dev]'
+python -m ruff check .
 python -m coverage run -m pytest -q
 python -m coverage report
 python benchmarks/run_synthetic.py

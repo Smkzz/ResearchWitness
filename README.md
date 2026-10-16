@@ -134,6 +134,14 @@ python -m researchwitness validate-intake work/fixed-point/audit.json
 
 `scaffold` creates a synthetic, editable example for one supported checker. Its source is marked `synthetic`, its correction search is `unchecked`, and it carries an unresolved objection. Replace those fields with source-pinned research material before treating the intake as a research case. `validate-intake` checks local artifact availability, quote anchoring, checker semantics, and witness validity without creating a bundle. The intake JSON Schema is also available at [`schemas/intake.schema.json`](schemas/intake.schema.json) and through `researchwitness schema intake` after installation.
 
+To run a complete synthetic verifier example from the repository root:
+
+```bash
+researchwitness verify examples/counterexample --as-of 2026-10-04
+```
+
+It returns `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` for the supplied formalization and witness, while `paper_error_established` remains `false`. This fixture is synthetic and demonstrates deterministic replay, not paper discovery or scientific validation.
+
 The easiest MVP workflow is `audit` using an agent-prepared intake file:
 
 ```bash
@@ -340,6 +348,7 @@ Bug reports and bounded deterministic verifier proposals are welcome. Start with
 
 ```bash
 python -m pip install -e '.[dev]'
+python -m ruff check .
 python -m coverage run -m pytest -q
 python -m coverage report
 python benchmarks/run_synthetic.py
