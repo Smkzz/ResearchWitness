@@ -1,97 +1,83 @@
-# ResearchWitness OSS quality — final closure assessment
+# OSS quality: accepted baseline and current validation
 
-**Date:** 2026-10-16  
-**Validated implementation:** `93efdf4cdf20085a7fd914d3ce647c646ab6fe0a`  
-**Implementation tree:** `fc38026bb2ce5e6b8cb5fea0d301b5b60f3a68a5`  
-**PR #13:** [open, draft, unmerged](https://github.com/Smkzz/ResearchWitness/pull/13)  
-**Decision:** `OSS_QUALITY_10_OF_10_VERIFIED` — all ten internal engineering categories PASS under the owner's 2026-10-16 acceptance of disclosed AI-assisted technical review. This is not independent human approval, release authorization, or scientific validation.
+**Record updated:** 2026-10-16  
+**Version:** `0.3.0.dev0` — **UNRELEASED**  
+**PR #13:** [merged](https://github.com/Smkzz/ResearchWitness/pull/13) into protected `main`  
+**Internal baseline decision:** `OSS_QUALITY_10_OF_10_VERIFIED`
 
-## What is now complete
+This is a point-in-time, owner-accepted **AI-assisted engineering assessment**.
+It is not an independent human audit, external certification, proof of absence
+of unknown defects, or general scientific validation. Later changes require
+fresh tests and review; the baseline result must not be silently applied to an
+untested commit. [PROJECT_STATUS.md](PROJECT_STATUS.md) is the current-state index.
 
-The requested description and all five topics were saved and verified on a fresh
-GitHub page. [The active main ruleset](https://github.com/Smkzz/ResearchWitness/rules/25233301)
-requires PRs, all nine Python/OS jobs, `Release gate` and `Analyze Python`, bound
-to GitHub Actions. It prevents force pushes and deletion, requires an up-to-date
-branch, has no bypass actors, and requires zero approvals for solo-maintainer
-operation. Its effective public view matches `main`; the API reports the branch
-protected. These administrative operations require no further owner click-through.
+## Integration and validation identities
 
-Authenticated Security views were inspected. Dependabot and secret scanning each
-showed 0 open / 0 closed alerts; main and PR #13 code-scanning views showed no
-alerts. Advisory counts were zero in triage, draft, published and closed states.
-Dependency graph, alerts, security-fix PRs, malware monitoring and private
-vulnerability reporting are enabled. Silent development-alert dismissal was
-disabled. No real alert was dismissed to improve the score.
+The final accepted PR #13 head was
+`469c3160a4f58402841f60ddb95e28b67800198a`. It merged at
+`cb0270490a9bf1592a1d194cad395912afcefe9f` on 2026-10-16.
+Both have tree `657bc3effdf3d85707565a5cb386389787ac2299`.
 
-The [dependency evidence job](https://github.com/Smkzz/ResearchWitness/actions/runs/38891822570)
-resolved 14 build/dev distributions, captured distributed license/notice evidence
-and queried PyPI plus OSV successfully with zero advisories at the recorded time.
-The distribution review retains setuptools' LGPL-3 and MPL-2.0 component notices;
-its MIT package metadata does not replace those terms. These build/dev packages
-are not bundled in the ResearchWitness runtime wheel. No runtime license blocker
-was evidenced. Future dependency resolutions require fresh review.
+The merge itself did not change source bytes. Post-merge
+[CI 38900068975](https://github.com/Smkzz/ResearchWitness/actions/runs/38900068975)
+and [CodeQL 38900068843](https://github.com/Smkzz/ResearchWitness/actions/runs/38900068843)
+passed. The final pre-merge
+[dependency evidence run 38898296242](https://github.com/Smkzz/ResearchWitness/actions/runs/38898296242)
+also passed; it is a dated dependency snapshot, not a guarantee about future
+resolutions. [Issue #14](https://github.com/Smkzz/ResearchWitness/issues/14)
+records owner acceptance, closure and the post-merge readback.
 
-An AI-assisted technical review inspected all 52 original PR changed paths and
-supporting controls. A conditional low Windows rate-state finding was repaired by
-refusing managed discovery where ownership cannot be verified. Development file
-readers also reject hard links. Supplementary changes were reviewed after fixes.
-The trusted verifier's checker semantics remain unchanged. Real Windows discovery
-awaits an ACL guard; real PDF extraction awaits separate image/runtime qualification.
+## Ten-category acceptance scope
 
-## Ten-category result
-
-| Category | Result | Evidence |
+| Category | Baseline result | Evidence and continuing limits |
 |---|---|---|
-| Q1 Repository structure and release selection | PASS | Git-index allowlist, safe portable paths and complete source checksum inventory. |
-| Q2 CI/CD reliability | PASS | All nine Python 3.11–3.13 × Ubuntu/Windows/macOS jobs, Release gate and CodeQL passed at the implementation head. |
-| Q3 Code quality | PASS | Ruff and trusted-core static gate passed. |
-| Q4 Security and documented trust boundaries | PASS, scoped | Full AI source review, repaired local guards, no outstanding scoped source finding; no security certification or real PDF qualification claim. |
-| Q5 Testing and regression protection | PASS | 498 tests and 113 subtests per Linux/macOS job; Windows 492 tests, six POSIX-only skips and 113 subtests. Core coverage 98%, enforced floor 90%; whole repository 79%. |
-| Q6 Dependencies and supply chain | PASS, resolved snapshot | Actual Security views; 14-distribution advisory review; shipped license/notice review; pinned Actions and least-privilege workflows. |
-| Q7 Documentation | PASS | Installed-core/source-tool distinction and platform/qualification limits are explicit. |
-| Q8 File/evidence hygiene | PASS | Release inventory excludes private task/build/cache state; no protected custody or reserved evaluation accessed. |
-| Q9 GitHub governance and maintainer review | PASS — owner-accepted AI review | Metadata and active main protection verified. The owner explicitly accepted the disclosed AI technical review instead of requiring a second human reviewer for this internal gate. No independent human review is claimed. |
-| Q10 Reproducibility | PASS | Exact-head release gate, source checksums and ZIP regression, two matching wheels, offline install, synthetic 500/500 and historical replay. |
+| Q1 Repository structure | PASS | Git-index source allowlist, path/mode checks and complete manifest; private and generated task output excluded. |
+| Q2 CI/CD | PASS | Nine Python 3.11–3.13 jobs across Ubuntu/Windows/macOS, Release gate and CodeQL. New commits need their own runs. |
+| Q3 Code quality | PASS | Ruff E4/E7/E9/F and trusted-core static checks; no configured type checker or universal correctness guarantee. |
+| Q4 Security | PASS, scoped | AI source review, hard-link rejection and ownership guards. Real PDF isolation and Windows managed acquisition remain separately unqualified. |
+| Q5 Tests | PASS | Baseline reported 98% core and 79% whole-repository coverage; enforced core floor is 90%. POSIX-only skips on Windows remain explicit. |
+| Q6 Supply chain | PASS, reviewed snapshot | Authenticated alert inspection, 14 resolved build/dev distributions, PyPI/OSV queries and distributed license/notice review. Not every allowed future version. |
+| Q7 Documentation | PASS at accepted snapshot; maintain continuously | Current-state, source-tool dependencies, command semantics and historical records must agree with code; documentation regressions run with the suite. |
+| Q8 Evidence hygiene | PASS | Frozen scientific evidence is not changed by housekeeping; historical records retain their original meaning. |
+| Q9 Governance | PASS | Active main ruleset, real required checks and owner-accepted disclosed AI technical review. No independent human approval claimed. |
+| Q10 Reproducibility | PASS | Source checksums/ZIP regressions, two wheel builds in the same environment, offline installation and examples. Cross-environment byte identity is not assumed. |
 
-[CI run 38891822471](https://github.com/Smkzz/ResearchWitness/actions/runs/38891822471)
-passed after a retry. The first Windows Python 3.11 attempt hit the unchanged
-optimized-CLI test's ten-second subprocess timeout; the same source passed on
-retry. The cause of that timing event was not established. No test, timeout or
-coverage threshold was weakened. [CodeQL 38891822456](https://github.com/Smkzz/ResearchWitness/actions/runs/38891822456)
-and the dependency job passed. Heavy local dispatch was deferred because the
-authorized memory preflight could not obtain telemetry; hosted jobs supplied
-the comprehensive validation.
+The predecessor implementation recorded 498 tests/113 subtests per Linux/macOS
+job and 492 tests/113 subtests plus six POSIX-only skips on Windows. Those are
+**historical counts**, not expected counts for every future commit. One earlier
+Windows optimized-CLI subprocess timeout passed on retry; its cause was not
+established. Preserve that observation rather than claiming no timing failure
+ever occurred. Exact run details and the 39-file license/notice review remain
+in the [preserved pre-merge checkpoint](../validation/history/OSS_QUALITY_CHECKPOINT-premerge-20261016.json).
 
-## Owner decision and completion
+## Documentation follow-up
 
-On 2026-10-16, the repository owner expressly accepted the disclosed
-AI-assisted technical assessment as sufficient for the project's own Q9
-review requirement. An additional human reviewer is therefore **not required
-for this internal engineering-quality standard**. This is a deliberate
-owner-approved review-policy revision, not a false claim that an independent
-human review occurred. Exact post-documentation checks are referenced in
-[issue #14](https://github.com/Smkzz/ResearchWitness/issues/14).
+A post-merge critical review found stale PR status, missing development/build
+prerequisites, incomplete manifest instructions and ambiguous CLI result/offset
+semantics. This correction separates current status from historical evidence,
+adds a synthetic JATS example, and introduces automated documentation checks.
+No verifier algorithm or scientific label is changed. The corrective PR and its
+exact-head/post-merge checks are the evidence for the revised files; the older
+baseline checks are not misrepresented as executing the new tests.
 
-**All ten internal OSS engineering categories PASS for the reviewed PR #13
-scope.** The result applies to the verified commit, not to future changes,
-an external certification, a full scientific validation, or an assurance
-that unknown vulnerabilities do not exist.
+## Governance and review policy
 
-No merge, release, scientific Wave 3, real PDF sandbox qualification, or
-protected-custody operation is authorized by this acceptance.
+[Ruleset 25233301](https://github.com/Smkzz/ResearchWitness/rules/25233301) targets
+`main`, requires PRs, up-to-date checks and the nine Python/OS checks plus
+`Release gate` and `Analyze Python`, bound to GitHub Actions. It blocks force-push
+and deletion and has no bypass actors. Zero required approvals preserves the
+solo-maintainer workflow.
 
-Recommended eventual order: integrate AI-reviewed #13 only with separate owner authorization; reconcile the six
-shared files with #6; then #6–#11 in ancestry order; give #12 its own custody-worker
-security review. #5 is an ancestor/superseded snapshot of #6 and remains open
-pending owner-approved disposition. No PR was merged, closed, retargeted or force-pushed.
+The owner explicitly accepted the AI-assisted review in place of the project's
+self-imposed additional-human-review condition on 2026-10-16. This changes the
+internal acceptance policy, not the identity or independence of the reviewer.
+An outside program requiring a human audit would still need one.
 
-This document binds the implementation validation above. The final documentation
-commit, its exact-head checks and readbacks are recorded in issue #14 to avoid a
-self-referential commit identifier in the checksummed source tree. The earlier
-[`OSS_QUALITY_AUDIT.md`](OSS_QUALITY_AUDIT.md) is retained as a historical baseline;
-[`OSS_QUALITY_CHECKPOINT.json`](../validation/OSS_QUALITY_CHECKPOINT.json) and this
-report supersede its former administration/supply-chain blockers.
+## Remaining work is not an undisclosed release
 
-OSS engineering quality remains separate from scientific qualification: no
-Wave 3, reserved evaluation, protected custody access, scientific-error finding,
-real PDF execution, merge or release was performed.
+PR #13 is merged; other paper-audit PRs require their own integration decisions.
+See the [maintainer review](OSS_MAINTAINER_REVIEW.md) and [roadmap](ROADMAP.md).
+No package/tag release, scientific Wave 3, protected-custody access, independent
+scientific-error confirmation or real PDF qualification follows from this score.
+Historical reports are indexed under [project status](PROJECT_STATUS.md#historical-records),
+not presented as current blockers.

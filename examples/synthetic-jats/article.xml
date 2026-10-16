@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article>
+  <front><article-meta><title-group><article-title>Synthetic documentation example</article-title></title-group></article-meta></front>
+  <body>
+    <p>Invented software fixture only. No scientific study or real participants.</p>
+    <table-wrap id="explicit-population">
+      <label>Table 1</label>
+      <caption><p>Synthetic analysis set (N=50).</p></caption>
+      <table>
+        <thead><tr><th>Reason</th><th>Patients, n (%)</th></tr></thead>
+        <tbody>
+          <tr><td>Reason A</td><td>4 (8.00)</td></tr>
+          <tr><td>Reason B</td><td>4 (8.10)</td></tr>
+        </tbody>
+      </table>
+    </table-wrap>
+    <table-wrap id="unspecified-population">
+      <label>Table 2</label>
+      <caption><p>Synthetic outcomes with unspecified population.</p></caption>
+      <table>
+        <thead><tr><th>Outcome</th><th>Patients, n (%)</th></tr></thead>
+        <tbody><tr><td>Outcome A</td><td>4 (8.00)</td></tr></tbody>
+      </table>
+    </table-wrap>
+  </body>
+</article>

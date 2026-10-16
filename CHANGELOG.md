@@ -1,6 +1,27 @@
 # Changelog
 
-## 0.3.0.dev0 — verifier-wave integration candidate — unreleased
+## 0.3.0.dev0 — on main — UNRELEASED
+
+### Integrated PR #13 and post-merge documentation
+
+- Merged guarded public metadata discovery and separate source-checkout JATS
+  percentage audits, source-bound comparison and JSON/Markdown reports.
+- Added v1/v2 reference-annotation contracts, source anchors, conservative
+  denominator/missing-data abstentions and exact percentage-feasibility helpers.
+- Added fail-closed PDF runner preparation, hard-link input rejection and a
+  Windows managed-discovery ownership guard. Real PDF qualification and Windows
+  managed acquisition remain unavailable under the documented conditions.
+- Restricted release selection to reviewed Git-index paths with portable-name,
+  collision, link and unstaged-file checks; tested deterministic source ZIPs.
+- Added Python 3.11–3.13 CI on Ubuntu, Windows and macOS, Ruff, visible coverage,
+  a 90% verifier-core coverage floor and separate dated dependency evidence.
+- Preserved LF checkout/report bytes and made path-collision tests independent
+  of the host filesystem's case behavior.
+- Documented the actual merged state, current/historical evidence separation,
+  build/development prerequisites, checksum regeneration, command verdicts and
+  UTF-8 byte offsets; added a synthetic JATS example and documentation regressions.
+
+### Earlier verifier-wave changes
 
 - Added bounded rational-expression, finite-graph coloring, finite-PMF probability/expectation, and modular linear-system verifiers.
 - Added per-family exact resource contracts and replayable synthetic examples to `capabilities --json`.
@@ -10,6 +31,10 @@
 - This development candidate is not a published release. See `docs/ROADMAP.md` for the release gate.
 
 ## 0.2.0 — 2026-10-04 — MVP research preview
+
+This section preserves the historical development record. It does not assert
+that a GitHub Release exists or that every historical case is executable in
+the current tree; see [the validation record](docs/VALIDATION.md).
 
 ### Product workflow
 

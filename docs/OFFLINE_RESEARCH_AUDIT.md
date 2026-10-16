@@ -2,31 +2,52 @@
 
 This source-checkout workflow finds bounded count/percentage relationships,
 checks explicit arithmetic and exports evidence for researcher review. It is
-outside the trusted verifier core and is not a paper-error classifier. Install
-the project's optional development dependencies in an isolated environment.
+outside the trusted verifier core and is not a paper-error classifier.
 
-```bash
-python -m tools.research_audit audit /permitted/article.xml \
-  --document-id local-example --format jats \
-  --expected-sha256 <verified-source-hash> \
-  --source-url https://www.ebi.ac.uk/europepmc/webservices/rest/PMC000000/fullTextXML \
-  --provenance-status recorded_public_retrieval \
-  --json-output /output/audit.json --markdown-output /output/audit.md
+## Setup and synthetic example
+
+From the repository root, in an activated isolated virtual environment:
+
+```text
+python -m pip install -e '.[dev]'
+python -m tools.research_audit audit examples/synthetic-jats/article.xml --document-id synthetic-jats --format jats --json-output out/synthetic-jats/audit.json --markdown-output out/synthetic-jats/audit.md
 ```
 
-Use an actual identifier and verified hash. A URL/provenance status is an
-operator assertion; a hash verifies supplied bytes and does not authenticate
-publisher origin. An owner handoff requires an expected hash. Local documents
-can instead use the default `unverified_local` provenance. No network request
-occurs during an audit. Inputs must be regular files; existing reports with
-different content are not overwritten. A completed audit exits 0; unsupported
-or failed extraction exits 2 with a structured report when possible.
+The optional development dependencies include `jsonschema`; a core-only
+`python -m pip install .` does not install the source tools' requirements.
+The single-line command works in Bash and PowerShell and needs no network
+request after installation. Expected output: two tables, three relationships,
+one arithmetic match, one mismatch candidate and one abstention. The fixture
+is invented, not research data. `4/50` gives `8.00%`; one row deliberately prints
+`8.10%`, while the second table supplies no explicit denominator.
+
+JSON and Markdown outputs are created with deterministic LF newlines. Reusing
+identical input and detector bytes with the same output paths is idempotent;
+different existing reports are not overwritten. Use fresh outputs after changes.
+Every result remains unreviewed, with scientific error not established and
+source origin unauthenticated.
+
+## Local research input and provenance
+
+Replace the synthetic path and document ID with your own permitted source.
+`--expected-sha256` verifies the supplied source bytes. Use `--source-url` and
+`--provenance-status recorded_public_retrieval` only when you have a recorded
+retrieval; the tool does not fetch or authenticate that URL. A
+`owner_hash_verified_handoff` requires an expected hash. The default for local
+input is `unverified_local`.
+
+No network request occurs during an audit. Inputs must be regular single-link
+files; conflicting output paths are rejected. A completed audit exits 0,
+including when no mismatch is found or some relationships abstain. Failed or
+unsupported extraction exits 2 with a structured report when possible; missing
+input can fail before output creation. Inspect processing, findings and reasons,
+not only the exit code.
 
 JATS inputs are limited to 8 MiB, 100,000 XML nodes, depth 256, 512 tables,
 20,000 rows, 100,000 cells/layout slots, 256 columns and 1,000 relationships.
-DTD/entity declarations and non-article roots are refused. The pure-Python
-parser is bounded input validation, not an OS network/filesystem sandbox.
-Do not feed it protected custody or reserved evaluation sources.
+DTD/entity declarations and non-article roots are refused. The bounded Python
+parser is input validation, not an OS network/filesystem sandbox. Do not feed
+it protected custody or reserved evaluation sources.
 
 ## What is evaluated
 
@@ -74,63 +95,59 @@ abstention reasons and further evidence required. XML anchors identify original
 source elements; normalized character spans disambiguate cell components.
 
 For PDFs use `--format pdf` only after the independent runtime gate in
-[`PDF_SANDBOX_QUALIFICATION.md`](PDF_SANDBOX_QUALIFICATION.md) passes. The command
+[PDF_SANDBOX_QUALIFICATION.md](PDF_SANDBOX_QUALIFICATION.md) passes. The command
 uses the existing strict container runner, never host Poppler. Real PDF
-qualification is currently blocked; synthetic/mock tests do not lift that gate.
+qualification remains blocked; synthetic/mock tests do not lift that gate.
 
 ## Offline comparison of supplied runs
 
-```bash
-python -m tools.research_audit compare \
-  --annotations /evidence/percentage-annotations.json \
-  --run /evidence/run-historical.json --run /evidence/run-revised.json \
-  --json-output /output/comparison.json --markdown-output /output/comparison.md \
-  --require-no-regression
+This is a template requiring your own permitted local annotations and run
+manifests, not a bundled scientific dataset:
+
+```text
+python -m tools.research_audit compare --annotations path/to/percentage-annotations.json --run path/to/run-historical.json --run path/to/run-revised.json --json-output out/comparison.json --markdown-output out/comparison.md --require-no-regression
 ```
 
 The local annotation and run schemas are
 `percentage-annotations.v1.schema.json`, `percentage-annotations.v2.schema.json`
-and `percentage-run.v1.schema.json`. The comparison accepts v1 and v2 annotations. V2 records
-independent count and percentage anchors, component spans, table/row/cell
+and `percentage-run.v1.schema.json`. The comparison accepts v1 and v2 annotations.
+V2 records separate count/percentage anchors, component spans, table/row/cell
 identity, work-family identity, source version and retrieval metadata,
-population scope, denominator basis, alternative interpretations, and reviewer
-authority/status. Related correction sources carry their own hashes and exact
-anchors; a `correction_corroborated` label is rejected without a registered
-correction source and matching evidence span. Hashes commit to supplied bytes;
-they do not authenticate a source's origin or a reviewer's independence.
+population scope, denominator basis, alternatives and reviewer authority/status.
+Related correction sources carry their own hashes and exact anchors;
+`correction_corroborated` is rejected without a registered correction source and
+matching evidence span. Hashes commit to supplied bytes; they do not authenticate
+a source's origin or a reviewer's independence.
+
 Sources/reports are confined relative to their manifests. Source versions,
 report hashes, exact XML anchors, count/percent tokens, explicit denominator
 evidence and arithmetic are validated. Duplicate identifiers/source facts,
 special files, contradictory annotations and inconsistent integrated-audit
-identity/status are rejected.
-Legacy raw aid reports are supported with externally supplied detector hashes;
-those hashes are commitments, not proof that a particular executable produced
-the report. The harness never runs arbitrary historical code.
+identity/status are rejected. Legacy raw reports use supplied detector hashes;
+those are commitments, not proof that a particular executable produced a report.
+The harness never runs arbitrary historical code.
 
 Comparison JSON conforms to `research-benchmark.v1.schema.json`. It reports
 every supplied reference relationship, unannotated output, extraction coverage,
 arithmetic outcomes, denominator disagreements, span errors, abstention reasons
-and error taxonomy. A mismatch earns reference-discrepancy credit only with a
-valid source span and the matching resolved reference denominator. Unknown or
-derived reference scope is not credited as a detected discrepancy.
+and taxonomy. A mismatch earns reference-discrepancy credit only with a valid
+source span and matching resolved reference denominator. Unknown or derived
+reference scope does not receive detected-discrepancy credit.
 
 The optional development gate exits 3 for lost annotated coverage, new wrong
 denominators/span failures/false candidates, or a lost source-bound discrepancy
-candidate. A deliberate safety abstention can fail this gate and must be
-explained explicitly; it is not grounds to remove the gate or weaken scientific
-acceptance. The gate does not establish precision, recall, source authenticity,
-independent scientific error or frozen v1.3 qualification.
+candidate. An intentional safety abstention may fail this gate and must be
+explained, not hidden by changing labels or disabling checks. This does not
+establish precision, recall, source authenticity, independent scientific error
+or frozen v1.3 qualification.
 
-The reproducible owner evidence package holds permitted development sources,
-all frozen versions, manifests, provisional source-linked annotations and
-relationship-level outputs. Full-text research collections stay outside Git.
-The old failed sample is unchanged; any new prospectively selected development
-sample has a separate protocol and detector freeze.
+The owner evidence package holds permitted development sources, frozen versions,
+annotations and detailed reports outside Git. Old failed experiments stay failed;
+new prospective evaluation needs a separate protocol and detector freeze.
 
-`tools/percentage_math.py` provides additional exact checks for an explicitly
-supplied denominator: the integer numerator range compatible with a printed
-percentage and precision, the inverse compatible-denominator range for a
-count, and the sum of independently rounded component percentages. These
-checks report arithmetic feasibility only; they do not infer that counts are
-unweighted, mutually exclusive, exhaustive, or in the same population scope.
+`tools/percentage_math.py` additionally checks integer-numerator feasibility at a
+fixed denominator/precision, compatible-denominator ranges for a supplied count,
+and independent component-rounding sums. These are arithmetic checks, not proof
+that counts are unweighted, exhaustive, disjoint or in the same population.
 
+See [project status](PROJECT_STATUS.md) for the integration and research boundaries.

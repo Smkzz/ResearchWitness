@@ -1,3 +1,8 @@
+> **Historical verifier-wave snapshot.** The text and JSON evidence below retain
+> their original pre-merge meanings, counts and hashes. They do not describe the
+> latest main branch or fresh test execution. See [project status](../../docs/PROJECT_STATUS.md)
+> and [the current engineering assessment](../../docs/OSS_QUALITY_FINAL.md).
+
 # Verifier-wave candidate validation
 
 This directory records the unreleased `0.3.0.dev0` integration candidate. It does not change the frozen [`../screening-15.json`](../screening-15.json).

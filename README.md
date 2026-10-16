@@ -3,400 +3,332 @@
 [![CI](https://github.com/Smkzz/ResearchWitness/actions/workflows/ci.yml/badge.svg)](https://github.com/Smkzz/ResearchWitness/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Smkzz/ResearchWitness/actions/workflows/codeql.yml/badge.svg)](https://github.com/Smkzz/ResearchWitness/actions/workflows/codeql.yml)
 
-**Open-source research verification for published scientific papers.**
+**Open-source research verification with reproducible, source-linked evidence.**
 
-ResearchWitness is being built around a simple goal: **give it a research paper and have it independently check the work for things that may not add up.**
+ResearchWitness aims to make independent checking of scientific claims easier.
+The installed core verifies narrowly defined claims after an investigator or
+research agent supplies a formalization and a possible counterexample. Separate
+source-checkout tools extract supported count/percentage relationships from JATS
+XML and produce arithmetic candidates or explicit abstentions.
 
-That can include incorrect calculations, claims that are not supported by the presented evidence, contradictions inside the paper, reproducibility problems, and other anomalies worth a closer look. When ResearchWitness finds something, the goal is not just to flag it, but to produce a reproducible trail showing what was checked and why it was flagged.
+It does **not** autonomously fact-check an arbitrary paper, authenticate publisher
+origin, establish misconduct, or certify a paper's conclusions.
 
-The current software is an early step toward that goal. Today, ResearchWitness can rigorously verify certain narrow, formalized claims after an investigator or research agent has extracted the claim and supplied a possible counterexample. It does **not yet** take an arbitrary paper and fact-check the whole thing automatically.
-
-That is a current capability limit, not the product goal.
-
-**Development candidate:** `0.3.0.dev0` · unreleased · Python 3.11+ (CI matrix: 3.11–3.13 on Ubuntu, Windows, and macOS) · runtime dependencies: none · Apache-2.0
+**On main:** `0.3.0.dev0` · **UNRELEASED** · Python 3.11+ · CI tests Python
+3.11–3.13 on Ubuntu, Windows and macOS · installed runtime dependencies: none · Apache-2.0.
 
 ## Status
 
-This branch is an **unreleased verifier-wave candidate**, not a public release. The current implementation is the verification core of the larger ResearchWitness idea; end-to-end paper ingestion, automatic claim discovery, and broad anomaly detection are still under development.
+PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged into `main` on
+2026-10-16. Its post-merge CI and CodeQL passed. Merging is not a package release:
+no PyPI publication or tagged GitHub Release is claimed for `0.3.0.dev0`.
 
-The frozen 15-corrigendum screen remains unchanged. Its post-wave mechanism review classifies 2/15 as fully representable, 2/15 as mechanism-only, 1/15 as partial, and 10/15 as unsupported; only two screen entries have committed runnable fixtures. This is not yet a 15-paper discovery benchmark, and no sealed holdout has been evaluated. Unsupported mathematics fails closed.
+The owner's internal ten-category engineering assessment accepts the disclosed
+AI-assisted technical review. It is not an independent human audit, external
+security certification, or scientific-performance evaluation. See
+[project status](docs/PROJECT_STATUS.md) for the pinned merge/check identities,
+[current engineering assessment](docs/OSS_QUALITY_FINAL.md) and
+[roadmap](docs/ROADMAP.md) for pending research and integration work.
 
-For now, use it to verify **explicit formalization/witness pairs**. A verified anomaly is evidence about a specific checked claim; it is not automatically a verdict on an entire paper, an author, or misconduct.
-
-See [`docs/VALIDATION.md`](docs/VALIDATION.md) and [`docs/ROADMAP.md`](docs/ROADMAP.md).
+Real PDF extraction and Windows managed metadata discovery remain unavailable
+until their documented isolation/ownership requirements are qualified. Sealed
+holdout evaluation and scientific Wave 3 have not run. The separate PR #6–#12
+paper-audit/custody stack is **not included** in the merged PR #13 implementation.
 
 ## What we are building
 
-The intended product is easy to explain:
-
-```text
-research paper
-      |
-      v
-ResearchWitness
-  - reads the paper
-  - identifies important checkable claims
-  - looks for calculations, evidence or results that may not add up
-  - independently checks what it can
-  - separates verified findings from unresolved suspicions
-      |
-      v
-reproducible verification report
-```
-
-The aim is not to replace peer review or to label papers as simply "true" or "false". The aim is to make independent checking easier, faster, and reproducible.
+The long-term workflow is: paper → identify checkable claims → investigate
+possible discrepancies → verify supported findings → return reproducible evidence
+and uncertainty. Candidate discovery and deterministic verification are different
+jobs. ResearchWitness keeps them separate rather than treating an AI opinion as
+proof.
 
 ## Current MVP loop
 
-Today, the discovery step is still external to the deterministic core:
-
 ```text
-paper / source text
-       |
-       v
-investigator / research agent
-  - extracts one atomic claim
-  - searches for a possible counterexample
-  - records assumptions and objections
-       |
-       v
-structured intake
-       |
-       v
-ResearchWitness
-  - prepares an immutable evidence bundle
-  - routes the claim to a deterministic verifier
-  - replays the proposed witness exactly
-  - hashes source + evidence
-  - preserves unresolved objections
-       |
-       +--> JSON evidence report
-       +--> deterministic ZIP
-       +--> static HTML report
-       +--> contact readiness: READY_FOR_USER_REVIEW / NOT_READY
-       +--> conservative author-inquiry draft (user review required)
+paper and source material
+    -> investigator / research agent: claim, assumptions, proposed witness
+    -> structured intake with source anchors
+    -> deterministic verification and immutable evidence bundle
+    -> JSON report, optional HTML report and reproducible private ZIP
 ```
 
-ResearchWitness never sends mail, publishes accusations, infers misconduct, or authorizes contact.
+A separate source-checkout path scans supported JATS tables for arithmetic
+relationships. Neither path sends email or publishes findings. The installed
+core can prepare a conservative inquiry draft; sending always remains outside
+this software.
 
 ## Why this split exists
 
-Finding a possible problem and proving that the problem is real are different jobs.
-
-Flexible research tools can read papers, reconstruct claims, search for counterexamples, and notice inconsistencies. ResearchWitness then treats those proposed findings as untrusted until a smaller deterministic checker can reproduce them.
-
-That separation is important because the useful output is not “a tool says this paper is wrong.” It is a specific, inspectable result such as:
-
-```text
-FORMALIZATION_COUNTEREXAMPLE_VERIFIED
-
-paper_error_established: false
-contact_readiness: READY_FOR_USER_REVIEW
-```
-
-The second line matters as much as the first.
+A result such as `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` proves something about
+the supplied formalization and witness. `paper_error_established` still remains
+`false`: source authenticity, interpretation, assumptions and scientific impact
+are separate questions. An unsupported input is rejected or leads to abstention,
+not a guessed positive conclusion.
 
 ## Quick start
 
-This development candidate is not published on PyPI. The installed verifier core is tested on Python 3.11–3.13 on Ubuntu, Windows, and macOS. From a source checkout, create and activate a virtual environment, then install the package locally:
+Install from a source checkout; this candidate is not advertised as available on
+PyPI. You need Python 3.11+ and Git on PATH. From your chosen working directory:
 
-```bash
+```text
+git clone https://github.com/Smkzz/ResearchWitness.git
+cd ResearchWitness
 python -m venv .venv
 ```
 
-Activate it on macOS or Linux:
+Activate on macOS/Linux with `source .venv/bin/activate`, or on Windows PowerShell
+with `.venv\Scripts\Activate.ps1`. Then install the core:
 
-```bash
-source .venv/bin/activate
-```
-
-On Windows PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-Install the package:
-
-```bash
+```text
 python -m pip install .
-```
-
-Then inspect its agent interfaces:
-
-```bash
-researchwitness --version
+python -m researchwitness --version
 python -m researchwitness capabilities --json
 python -m researchwitness schema intake
+```
+
+Run this **synthetic** example from the repository root. The single-line command
+works in Bash and PowerShell:
+
+<!-- docs-smoke: core -->
+```text
+python -m researchwitness verify examples/counterexample --as-of 2026-10-04
+```
+
+Expected: exit 0, `decision: FORMALIZATION_COUNTEREXAMPLE_VERIFIED`, and
+`paper_error_established: false`. The fixed date makes this fixture repeatable;
+it is not the capture date for a new real research case.
+
+### Exit codes and result interpretation
+
+Exit 0 means the requested evaluation completed, **not** that an error was found.
+For example, `NO_REFUTATION_AT_WITNESS` is a valid completed evaluation.
+`validate-intake` can return `valid: true` with that `witness_status`. Inspect
+`decision` or `witness_status`, the source/provenance fields and contact readiness
+separately. Malformed core input normally exits 2 with `decision: INVALID` on
+stderr; argument errors also exit 2 and may instead show argparse usage.
+
+For JATS/PDF source audits, exit 0 means processing completed; inspect the counts,
+findings and abstentions. Unsupported/failed extraction exits 2. The comparison
+command with `--require-no-regression` exits 3 when its development gate fails.
+None of these codes establishes scientific truth or author-contact authority.
+
+### Create and inspect an intake
+
+```text
 python -m researchwitness scaffold finite_map_fixed_point --output work/fixed-point
 python -m researchwitness validate-intake work/fixed-point/audit.json
 ```
 
-`scaffold` creates a synthetic, editable example for one supported checker. Its source is marked `synthetic`, its correction search is `unchecked`, and it carries an unresolved objection. Replace those fields with source-pinned research material before treating the intake as a research case. `validate-intake` checks local artifact availability, quote anchoring, checker semantics, and witness validity without creating a bundle. The intake JSON Schema is also available at [`schemas/intake.schema.json`](schemas/intake.schema.json) and through `researchwitness schema intake` after installation.
+Use a fresh output directory. The scaffold is synthetic, with an unchecked
+correction search and an unresolved objection. Do not relabel it as real evidence.
+To create and replay a bundle from this scaffold:
 
-To run a complete synthetic verifier example from the repository root:
-
-```bash
-researchwitness verify examples/counterexample --as-of 2026-10-04
+```text
+python -m researchwitness audit work/fixed-point/audit.json --output work/fixed-point-bundle --as-of 2026-10-04
+python -m researchwitness verify work/fixed-point-bundle --as-of 2026-10-04
 ```
 
-It returns `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` for the supplied formalization and witness, while `paper_error_established` remains `false`. This fixture is synthetic and demonstrates deterministic replay, not paper discovery or scientific validation.
+The bundle can be inspected and replayed independently. The `audit` workflow
+checks declared source/correction files, quote anchors, witness semantics and
+hashes. It does not independently authenticate where the source came from.
 
-The easiest MVP workflow is `audit` using an agent-prepared intake file:
+### Reports and evidence export
 
-```bash
-python -m researchwitness audit audit.json \
-  --output evidence/my-case \
-  --html evidence/my-case.html \
-  --as-of 2026-10-04
+Use a new output filename for the deterministic private ZIP; report/draft output
+paths should be chosen deliberately and their parent directories must exist.
+
+```text
+python -m researchwitness report work/fixed-point-bundle --as-of 2026-10-04 --output work/fixed-point-report.html
+python -m researchwitness pack work/fixed-point-bundle --as-of 2026-10-04 --output work/fixed-point-evidence.zip
 ```
 
-The command:
-
-1. reads the declared source and correction-search evidence;
-2. anchors the claim quote to the supplied source bytes;
-3. canonicalizes the witness;
-4. builds a strict evidence bundle;
-5. routes the formalization to the matching verifier;
-6. emits the deterministic report plus contact-readiness state.
-
-You can later replay the capsule without the intake layer:
-
-```bash
-python -m researchwitness verify evidence/my-case --as-of 2026-10-04
-```
-
-Create a deterministic private evidence ZIP:
-
-```bash
-python -m researchwitness pack evidence/my-case \
-  --as-of 2026-10-04 \
-  --output my-case-evidence.zip
-```
-
-Render a standalone report:
-
-```bash
-python -m researchwitness report evidence/my-case \
-  --as-of 2026-10-04 \
-  --output report.html
-```
-
-If all MVP context gates are clean, a conservative draft can be generated:
-
-```bash
-python -m researchwitness contact-draft evidence/my-case \
-  --as-of 2026-10-04 \
-  --output author-inquiry.txt
-```
-
-This produces a draft only. The output explicitly requires user review and does not establish a paper-level error.
+`contact-draft` is available only when conservative readiness checks pass. The
+synthetic scaffold above intentionally remains `NOT_READY`. Do not remove its
+objections to present it as a research finding. With a genuinely eligible bundle,
+`python -m researchwitness contact-draft BUNDLE --as-of YYYY-MM-DD --output inquiry.txt`
+writes a draft requiring user review; it never sends mail.
 
 ## Agent intake format
 
-A research agent writes a small `audit.json` next to the source files it used:
+A research agent supplies `audit.json` beside the referenced source files.
+The complete schemas are available through `python -m researchwitness schema intake`
+and [schemas/intake.schema.json](schemas/intake.schema.json). The intake records
+source identifier/version, capture assertion, correction-search evidence, one
+atomic claim, assumptions, exclusions, exact quote, formalization, witness and
+unresolved objections. See [the agent protocol](prompts/AGENT_PROTOCOL.md).
 
-```json
-{
-  "intake_version": "0.1",
-  "case_id": "example-claim",
-  "source": {
-    "identifier": "doi:...",
-    "version": "v1",
-    "text_file": "source.txt",
-    "capture_status": "captured",
-    "correction_check": {
-      "checked_on": "2026-10-04",
-      "status": "none_found",
-      "evidence_file": "correction.txt"
-    }
-  },
-  "claim": {
-    "id": "eq-22",
-    "statement": "...",
-    "scope": "...",
-    "assumptions": ["..."],
-    "excluded_claims": ["..."],
-    "quote": "exact quote present in source.txt",
-    "formalization": {"kind": "..."}
-  },
-  "witness": {"kind": "..."},
-  "unresolved_objections": []
-}
-```
-
-If the quote appears more than once, the agent must provide `quote_offset`. ResearchWitness will not silently guess which occurrence was intended.
-
-See [`prompts/AGENT_PROTOCOL.md`](prompts/AGENT_PROTOCOL.md) for the preparation rules.
+If a quote occurs more than once, provide `quote_offset`: a **zero-based byte
+offset into the original supplied source bytes**, matching the UTF-8 encoded
+quote. It is not a character offset; a multibyte prefix changes the relationship
+between the two. ResearchWitness does not silently choose a repeated occurrence.
 
 ## Deterministic verifier plugins
 
-The `0.3.0.dev0` integration candidate allowlists ten checker families. Each registry entry includes the schema version, a concise input contract, exact resource bounds, what a positive witness proves and excludes, and an inline replay example with its source-checkout bundle path:
+`capabilities --json` describes ten bounded checker families and their exact
+input contracts, limits, proof scope and synthetic replay examples:
 
-1. **Scalar/radical comparison** — exact rationals plus certified square-root enclosures.
-2. **Polynomial upper-bound witness** — exact rational polynomial evaluation in a bounded domain.
-3. **Rational-expression upper-bound witness** — exact evaluation of a closed bounded rational AST at one in-domain point; it does not prove a global inequality.
-4. **Binary UC functional** — the QEH-derived finite independent-source regression checker.
-5. **Finite-field polynomial solution-count residue** — exhaustive prime-field enumeration with a hard work budget.
-6. **Finite-field quadratic/quartic residue rule** — additionally classifies a parameter by power-residue class and tests the resulting count-residue rule.
-7. **Finite self-map fixed-point conclusion** — exactly determines whether an explicit finite map has a fixed point; theorem premises remain separate.
-8. **Finite graph chromatic lower bound** — checks a supplied proper coloring and refutes a claimed lower bound when that coloring uses fewer colors; no chromatic-number search is performed.
-9. **Finite PMF bound** — exactly computes an event probability or expected payoff over a bounded finite state space and compares it with a rational bound.
-10. **Modular linear-system certificates** — verifies a solution vector or a left-annihilator certificate for a system over a bounded composite or prime modulus.
+| Family | What the supplied witness can establish |
+|---|---|
+| Scalar/radical comparison | Exact rational comparison with certified square-root enclosures. |
+| Polynomial upper-bound witness | Evaluation of a polynomial at a supplied bounded-domain point. |
+| Rational-expression upper-bound witness | Exact evaluation of a closed rational AST at one point, not a global inequality. |
+| Binary UC functional | The QEH-derived finite independent-source regression check. |
+| Finite-field polynomial solution-count residue | Exhaustive enumeration under an explicit hard work budget. |
+| Quadratic/quartic residue rule | Parameter residue classification and the associated point-count check. |
+| Finite self-map fixed-point conclusion | Whether the explicit finite map has a fixed point; theorem premises remain separate. |
+| Finite graph chromatic lower bound | A supplied proper coloring refutes a larger claimed lower bound; no optimal-coloring search. |
+| Finite PMF bound | Exact event probability or expectation of a supplied finite distribution, not population inference. |
+| Modular linear-system certificate | A supplied solution or left-annihilator certificate over the encoded modular system. |
 
-The rational-expression grammar and exact evaluation limits are documented in [`docs/EXPRESSION_DSL.md`](docs/EXPRESSION_DSL.md). It evaluates only a supplied point and does not establish a global inequality.
-
-The graph checker accepts simple undirected graphs with 1–256 vertices and 0–8,192 edges. It verifies a supplied proper coloring in O(V+E) time; it does not search for an optimal coloring. Replay the synthetic path-graph example with:
-
-```bash
-python -m researchwitness verify examples/graph-chromatic-lower-bound --as-of 2026-10-04
-```
-
-The finite PMF checker establishes arithmetic facts only for the supplied distribution. It does not validate empirical data or extend a result to a population or broader scientific claim. Replay its synthetic example with:
-
-```bash
-python -m researchwitness verify examples/finite-pmf-probability --as-of 2026-10-04
-```
-
-Run the modular certificate example with `python -m researchwitness verify examples/modular-linear-system --as-of 2026-10-04`. Its left-annihilator certificate proves that `2x = 1 (mod 6)` has no solution, contradicting the supplied formalization.
-
-Unsupported mathematics is rejected rather than approximated into a misleading scalar check. Every family has a synthetic replay bundle under [`examples/`](examples/), and `capabilities --json` includes a copy of its formalization and witness.
-
-```bash
-python -m researchwitness capabilities --json
-```
-
-returns the current machine-readable capability list. Synthetic examples exercise software behavior; they do not establish new historical-paper coverage.
+The graph checker supports 1–256 vertices and up to 8,192 edges. Rational-expression
+syntax and budgets are in [EXPRESSION_DSL.md](docs/EXPRESSION_DSL.md). Every family
+has a replayable [synthetic example](examples/). Unsupported mathematics is not
+approximated into a misleading scalar check.
 
 ## Source-checkout research-audit tools
 
-The installed `researchwitness` package is the deterministic verifier core. The separate `tools/` programs below run from a source checkout; `python -m pip install .` does not install them. They are development aids outside the trusted core and do not decide whether a paper is wrong.
+The wheel installs `researchwitness`, not `tools/`. From the **repository root**,
+in the activated environment, install the optional development dependencies:
+
+```text
+python -m pip install -e '.[dev]'
+```
+
+These include `jsonschema` for the source-tool contracts. A core-only
+`python -m pip install .` is not sufficient for this workflow. Source-tool
+commands below remain outside the trusted verifier core.
 
 ### Offline JATS audit
 
-To inspect a local JATS XML document and write source-anchored candidate evidence:
+Try the bundled invented fixture without retrieving any real paper:
 
-```bash
-python -m tools.research_audit audit path/to/article.xml \
-  --document-id local-example --format jats \
-  --json-output out/audit.json --markdown-output out/audit.md
+<!-- docs-smoke: jats -->
+```text
+python -m tools.research_audit audit examples/synthetic-jats/article.xml --document-id synthetic-jats --format jats --json-output out/synthetic-jats/audit.json --markdown-output out/synthetic-jats/audit.md
 ```
 
-This command makes no network requests. It records the supplied bytes and their anchors; a source URL or provenance label is an operator assertion, not source authentication. Without a reviewed source capture, the report marks provenance as unverified. It can emit arithmetic mismatch candidates or abstain when scope is unclear. It does not establish a scientific error. See [`docs/OFFLINE_RESEARCH_AUDIT.md`](docs/OFFLINE_RESEARCH_AUDIT.md) for input limits and the source-bound comparison workflow.
+Expected: two tables, three relationships, **one arithmetic match, one mismatch
+candidate and one abstention**. `4/50` is `8.00%`; the fixture deliberately prints
+`8.10%` once. Its other table has no explicit denominator, so calculation is
+withheld. Every finding remains `unreviewed` with scientific error
+`not_established`; provenance is `unverified_local`.
+
+The command writes JSON and Markdown, creates output directories, and makes no
+network request. Repeating identical inputs to the same output paths is allowed;
+it refuses to replace different existing reports. Use a fresh output directory
+when inputs or detector code change. Replace the fixture path and document ID
+with your own permitted source to audit a real document, without changing the
+provenance assertions unless supported by evidence.
+
+For input limits, source-bound comparisons and conditional calculations, see
+[OFFLINE_RESEARCH_AUDIT.md](docs/OFFLINE_RESEARCH_AUDIT.md).
 
 ### Public metadata discovery
 
-`tools/discover_public_candidates.py` can query the approved public metadata services and record candidate leads. It retrieves metadata, not article full text, and it does not establish that a correction applies to the same table, cohort, or denominator. The collector is rate-limited, stops on access or transport failures, and does not switch routes or follow publisher DOI links. Review [`docs/SCIENTIFIC_CANDIDATE_REVIEW.md`](docs/SCIENTIFIC_CANDIDATE_REVIEW.md) before using it. The resulting registry is developer-exposed evidence, not an evaluation holdout.
+The collector retrieves metadata leads through approved HTTPS services and the
+inherited managed proxy; it does not retrieve full-text papers or prove that a
+correction applies. It enforces rate, response and redirect boundaries and stops
+on access/transport failure rather than switching routes. Windows managed
+discovery is unavailable pending a reviewed ACL ownership guard; this does not
+remove Windows support for the installed verifier core. Follow
+[SCIENTIFIC_CANDIDATE_REVIEW.md](docs/SCIENTIFIC_CANDIDATE_REVIEW.md).
+Developer-exposed discoveries never become untouched holdout evidence.
 
 ### PDF aid
 
-The source-checkout PDF percentage aid is experimental and requires a locally reviewed, SHA-256-pinned Poppler image plus a functioning Docker sandbox. Real PDF execution is not yet qualified. It fails closed when the isolation gate is unavailable and never falls back to host Poppler. Do not use it on protected evaluation documents. See [`docs/PDF_SANDBOX_QUALIFICATION.md`](docs/PDF_SANDBOX_QUALIFICATION.md); do not treat synthetic runner tests as sandbox qualification.
-
-All source-audit outputs remain candidates for independent human review. Hashes preserve byte identity; they do not authenticate publisher origin, guarantee extraction fidelity, or prove scientific error.
+Real PDF extraction is **not qualified**. It requires a reviewed SHA-256-pinned
+local Poppler image and a qualified Docker isolation boundary. There is no host
+Poppler fallback. Do not use it on protected evaluation material; synthetic runner
+tests cannot establish real sandbox qualification. See
+[PDF_SANDBOX_QUALIFICATION.md](docs/PDF_SANDBOX_QUALIFICATION.md).
 
 ## Real-paper validation
 
-The committed executable historical fixtures cover the 2007 elliptic-curve corrigendum over `F_29` and the 2012 finite-map conclusion:
+Committed historical executable fixtures include the 2007 elliptic-curve
+corrigendum over `F_29` and a 2012 finite-map conclusion: `c=4` gives 40 points,
+`c=7` gives 20, and the two-state swap has no fixed point while an unencoded
+theorem premise remains an objection. The three replay cases are development
+reproductions, not three untouched discoveries.
 
-- elliptic-curve `c=4`: 40 points, `0 mod 8` versus expected `4 mod 8`;
-- elliptic-curve `c=7`: 20 points, `4 mod 8` versus expected `0 mod 8`;
-- modular-metric fixed point: the explicit swap on `{0,1}` has no fixed point, while the unencoded premise remains an open objection.
+Earlier 0.2.0 notes mention network-reliability and QTT-Tucker mechanisms whose
+runnable bundles are absent from this recovered tree. They are historical claims,
+not freshly reproduced cases. The frozen 15-corrigendum screen is a mechanism map:
+2/15 fully representable, 2 mechanism-only, 1 partial and 10 unsupported. It is
+not a 15-paper end-to-end benchmark. See [validation assets](validation/) and the
+[historical MVP record](docs/VALIDATION.md).
 
-The earlier `0.2.0` validation notes also describe network-reliability `K3` and QTT-Tucker mechanisms, but their runnable fixtures are absent from this recovered source tree. They are not counted as freshly reproduced cases in this candidate.
-
-The historical cases intentionally return `NOT_READY` for contact when a published correction is already known or source alignment remains unresolved.
-
-The previous frozen 15-paper screen is a mechanism-level coverage map, not an end-to-end discovery benchmark. Several corrigenda still require continuous probability/integration, PDE analysis, infinite-index arguments, database semantics, or domain-specific proof logic. See the candidate-specific coverage review under [`validation/verifier-wave/`](validation/verifier-wave/) for which screen entries are executable in this tree.
-
-See [`validation/`](validation/) and [`docs/VALIDATION.md`](docs/VALIDATION.md).
+The recorded v1/v2 percentage experiments are developer-exposed; their sample
+failures, partial reference census and adjudication limits remain unchanged.
+No independent precision/recall estimate or general scientific correctness claim
+follows from those experiments or from passing software tests.
 
 ## Contact readiness
 
-`READY_FOR_USER_REVIEW` means only:
-
-- the supplied formalization has a deterministic counterexample;
-- source capture is declared `captured`;
-- the correction search is recent and recorded as `none_found`;
-- no unresolved objection is present;
-- no known correction is recorded.
-
-It **does not** mean:
-
-- ResearchWitness authenticated the publication;
-- the formalization is necessarily the only correct reading of the paper;
-- the whole paper is wrong;
-- an author should automatically be contacted;
-- misconduct occurred.
-
+`READY_FOR_USER_REVIEW` means a deterministic counterexample exists for the
+supplied formalization, capture is asserted, correction evidence is recent and
+reports none found, and unresolved objections are absent. It does not mean the
+source is authenticated, the interpretation is uniquely correct, a whole paper
+is false or a person should automatically be contacted.
 `author_contact_authorized` is always `false`.
 
 ## Evidence integrity
 
-A strict evidence bundle binds:
-
-- source snapshot bytes;
-- exact claim quote + byte offset;
-- formalization;
-- witness;
-- correction-search evidence;
-- unresolved objections;
-- SHA-256 hashes of manifested artifacts.
-
-`subject_sha256` commits to the actual verification question. `bundle_sha256` commits to the complete manifested bundle.
-
-An externally stored bundle hash can later detect a coordinated rewrite:
-
-```bash
-python -m researchwitness verify evidence/my-case \
-  --expected-bundle-sha256 <trusted-sha256>
-```
+Bundles bind source bytes, quote byte offsets, formalization, witness,
+correction-search evidence, objections and SHA-256 manifests. `subject_sha256`
+commits to the verification question; `bundle_sha256` commits to the bundle.
+A separately trusted `--expected-bundle-sha256` pin detects changes to supplied
+bytes, not whether the original evidence was true or authentically sourced.
 
 ## Security model
 
-The deterministic verifier:
-
-- performs no network access;
-- executes no paper code;
-- imports no bundle code;
-- invokes no optimizer;
-- rejects duplicate JSON keys and JSON floats;
-- bounds JSON, artifact and mathematical workloads;
-- rejects symlinks, hard links, FIFOs and traversal paths;
-- uses exact rationals wherever possible.
-
-Read [`SECURITY.md`](SECURITY.md) for the complete threat model.
+The core has no network, LLM client, optimizer, paper-code execution or arbitrary
+bundle-code loading. It rejects or bounds duplicate JSON keys, floats, unsafe
+paths and links, special files, oversized input and excessive mathematical work.
+Read [SECURITY.md](SECURITY.md) for the trusted-local-process and quiescent-directory
+assumptions, including what the implementation does not protect against.
 
 ## Contributing
 
-Bug reports and bounded deterministic verifier proposals are welcome. Start with [`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md), and the repository issue forms. Security-sensitive reports follow [`SECURITY.md`](SECURITY.md).
+Start with [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+and the issue templates. Report security-sensitive information privately using
+[SECURITY.md](SECURITY.md); never upload credentials, private correspondence,
+restricted manuscripts or protected evaluation records to public issues.
 
 ## Development
 
-```bash
+Use a real Git checkout with Git on PATH and the activated virtual environment.
+The release gate uses `--no-build-isolation`, so install its declared backend
+explicitly in that environment before qualification:
+
+```text
+python -m pip install 'setuptools>=68'
 python -m pip install -e '.[dev]'
 python -m ruff check .
 python -m coverage run -m pytest -q
 python -m coverage report
+python -m coverage report --include='researchwitness/*.py' --fail-under=90
 python benchmarks/run_synthetic.py
 python validation/mvp_real/run_validation.py
 python tools/quality_gate.py
 ```
 
-The verifier has no runtime dependencies outside Python's standard library.
-The current evidence-backed engineering assessment is in
-[`docs/OSS_QUALITY_FINAL.md`](docs/OSS_QUALITY_FINAL.md), with the detailed
-Q1–Q10 findings in [`docs/OSS_QUALITY_AUDIT.md`](docs/OSS_QUALITY_AUDIT.md).
+After editing selected files, follow [RELEASING.md](docs/RELEASING.md) to stage
+intended changes and regenerate checksums before the release gate. Never use
+blanket staging to collect caches or private research. CI checks supported
+platforms, lint, coverage and reproducible artifacts. The whole-repository
+coverage report is retained separately from the enforced verifier-core floor.
 
-## Current product boundary
+## Documentation and current product boundary
 
-The current open-source core starts **after** a paper has been read and a specific claim has been selected for checking. It deliberately does not bundle a paid model provider or API, so the verification layer remains model-agnostic and reproducible.
+[Project status](docs/PROJECT_STATUS.md) separates current capabilities from
+historical evidence. [The final quality assessment](docs/OSS_QUALITY_FINAL.md)
+is the internal owner-accepted AI engineering review; [the initial audit](docs/OSS_QUALITY_AUDIT.md)
+is explicitly historical. New changes require their own checks.
 
-This is an implementation boundary, not the intended final product boundary.
-
-The direction for ResearchWitness is to move progressively closer to the full workflow: ingest a public research paper, identify claims worth checking, search for anomalies, verify supported findings with reproducible methods, and return a clear report that distinguishes confirmed problems from unresolved questions.
-
-The next steps are broader verifier coverage, stronger paper ingestion and claim extraction, anomaly discovery, and a frozen benchmark on unseen historical corrections. See the public [`roadmap`](docs/ROADMAP.md).
+The long-term paper-to-report goal remains broader than the current implementation.
+See [ROADMAP.md](docs/ROADMAP.md) for scientific evaluation and unmerged work.
 
 ## License
 
-Apache-2.0. See [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md).
+Apache-2.0. See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
