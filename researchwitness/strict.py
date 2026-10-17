@@ -11,6 +11,7 @@ from typing import Any
 
 MAX_JSON_BYTES = 2 * 1024 * 1024
 MAX_ARTIFACT_BYTES = 16 * 1024 * 1024
+MAX_BUNDLE_BYTES = 64 * 1024 * 1024
 MAX_DEPTH = 24
 MAX_NODES = 10000
 HASH_RE = re.compile(r"[0-9a-f]{64}\Z")

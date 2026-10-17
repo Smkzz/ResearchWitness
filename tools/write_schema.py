@@ -313,7 +313,7 @@ def make_intake_schema():
     date_schema = {'type': 'string', 'format': 'date', 'minLength': 10, 'maxLength': 10}
     intake = obj({
         'intake_version': enum('0.1'),
-        'case_id': text(100),
+        'case_id': ref('identifier'),
         'source': obj({
             'identifier': text(2000), 'version': text(100), 'text_file': path,
             'capture_status': enum('unverified', 'captured', 'synthetic'),
@@ -324,15 +324,15 @@ def make_intake_schema():
             }),
         }),
         'claim': obj({
-            'id': text(100), 'statement': text(8000), 'scope': text(4000),
-            'assumptions': arr(text(4000), 1, 10000),
-            'excluded_claims': arr(text(4000), 1, 10000),
+            'id': ref('identifier'), 'statement': text(8000), 'scope': text(4000),
+            'assumptions': ref('strings'),
+            'excluded_claims': ref('strings'),
             'quote': text(8000),
             'quote_offset': {'type': 'integer', 'minimum': 0, 'maximum': 16 * 1024 * 1024},
             'formalization': ref('formalization'),
         }, required=['id', 'statement', 'scope', 'assumptions', 'excluded_claims', 'quote', 'formalization']),
         'witness': ref('intake_witness'),
-        'unresolved_objections': arr(text(4000), 0, 10000),
+        'unresolved_objections': dict(arr(text(4000), 0), uniqueItems=True),
         'notes_files': arr(path, 0, 32),
     }, required=['intake_version', 'case_id', 'source', 'claim', 'witness', 'unresolved_objections'])
 

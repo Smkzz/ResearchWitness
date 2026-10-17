@@ -2,6 +2,16 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Public repository audit fixes
+
+- Reserve generated export filenames and their directory prefixes, including
+  `contact-readiness.json`, so evidence packing cannot overwrite manifested bytes.
+- Align intake validation and its packaged JSON Schema with bundle identifier,
+  unique-list and list-size rules; malformed checker-kind values are rejected
+  through the normal invalid-input response.
+- Apply the 64 MiB cumulative artifact limit and generated-path checks during
+  both intake validation and preparation, before creating an output bundle.
+
 ### Integrated PR #13 and post-merge documentation
 
 - Merged guarded public metadata discovery and separate source-checkout JATS

@@ -6,7 +6,7 @@ from pathlib import Path
 import platform
 from typing import Any
 
-from .strict import Bundle, fields, text, integer, require, loads, digest, byte_hash, HASH_RE, relative_path
+from .strict import Bundle, fields, text, integer, require, loads, digest, byte_hash, HASH_RE, MAX_BUNDLE_BYTES, relative_path
 from .checkers import check, KINDS
 
 VERSION = '0.3.0.dev0'
@@ -58,7 +58,9 @@ def validate_case(case: Any) -> None:
     require(type(artifacts) is dict and 1 <= len(artifacts) <= 64, 'Invalid artifact manifest')
     for name, hash_value in artifacts.items():
         relative_path(name)
-        require(name.casefold() not in {'case.json', 'report.json', 'checksums.sha256'}, 'Reserved artifact name')
+        require(name.split('/')[0].casefold() not in {
+            'case.json', 'report.json', 'contact-readiness.json', 'checksums.sha256',
+        }, 'Reserved artifact name')
         _hash(hash_value)
     require(len({name.casefold() for name in artifacts}) == len(artifacts), 'Case-insensitive path collision')
     for name in artifacts:
@@ -119,7 +121,7 @@ def load_bundle(root: Path | str) -> tuple[dict, dict[str, bytes]]:
     for name, expected in case['artifacts'].items():
         content = bundle.read(name)
         total += len(content)
-        require(total <= 64 * 1024 * 1024, 'Total bundle size limit exceeded')
+        require(total <= MAX_BUNDLE_BYTES, 'Total bundle size limit exceeded')
         require(byte_hash(content) == expected, 'Artifact hash mismatch: ' + name)
         data[name] = content
 

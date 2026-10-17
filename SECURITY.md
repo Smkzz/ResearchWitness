@@ -74,7 +74,11 @@ The image itself must be reviewed and contain only the Poppler runtime and files
 
 ## Private data
 
-`pack` exports only manifested artifacts plus canonical `case.json` and `report.json`. This prevents accidental recursive collection of unrelated files, but an operator can still deliberately manifest sensitive material.
+`pack` exports only manifested artifacts plus canonical `case.json`, `report.json`
+and `contact-readiness.json`. Generated metadata filenames and their directory
+prefixes are reserved, including case-insensitive variants, so export cannot
+overwrite a manifested artifact. This prevents accidental recursive collection
+of unrelated files, but an operator can still deliberately manifest sensitive material.
 
 Review the manifest before sharing a package. Keep unpublished manuscripts, private correspondence, personal contact details and credentials out of public repositories.
 
