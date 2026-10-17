@@ -11,9 +11,7 @@
       ]
     },
     "case_id": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 100
+      "$ref": "#/$defs/identifier"
     },
     "source": {
       "type": "object",
@@ -83,9 +81,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 100
+          "$ref": "#/$defs/identifier"
         },
         "statement": {
           "type": "string",
@@ -98,24 +94,10 @@
           "maxLength": 4000
         },
         "assumptions": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 4000
-          },
-          "minItems": 1,
-          "maxItems": 10000
+          "$ref": "#/$defs/strings"
         },
         "excluded_claims": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 4000
-          },
-          "minItems": 1,
-          "maxItems": 10000
+          "$ref": "#/$defs/strings"
         },
         "quote": {
           "type": "string",
@@ -153,7 +135,8 @@
         "maxLength": 4000
       },
       "minItems": 0,
-      "maxItems": 10000
+      "maxItems": 64,
+      "uniqueItems": true
     },
     "notes_files": {
       "type": "array",
