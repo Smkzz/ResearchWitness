@@ -347,11 +347,11 @@ def main(argv: list[str] | None = None) -> int:
                      for name in ('registry', 'protocol', 'run')]
         report = score(*documents, expected_registry_sha256=args.expected_registry_sha256,
                        expected_protocol_sha256=args.expected_protocol_sha256)
-        sys.stdout.write(canonical_bytes(report).decode('ascii'))
+        sys.stdout.buffer.write(canonical_bytes(report))
         return 0
     except (OSError, ValueError, TypeError, RecursionError) as exc:
         code = str(exc) if isinstance(exc, BenchmarkError) else 'INPUT_IO_OR_FORMAT_ERROR'
-        sys.stderr.write(canonical_bytes({'status': 'invalid', 'code': code}).decode('ascii'))
+        sys.stderr.buffer.write(canonical_bytes({'status': 'invalid', 'code': code}))
         return 2
 
 
