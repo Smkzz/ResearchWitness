@@ -1,77 +1,96 @@
 # Project status
 
-**As of:** 2026-10-16  
+**As of:** 2026-10-24  
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**PR #13:** merged on 2026-10-16 at 12:22:34 UTC
+**Observed pre-plan head:** `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a`
 
-This maintained index distinguishes current capabilities from pinned historical
-verification. It does not claim that an untested future commit has passed CI.
-Every new change needs its own exact-head checks.
+The current development instructions are [AGENTS.md](../AGENTS.md),
+[DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
+This status records an observed software baseline, not automatic qualification
+of a later commit. New work needs its own exact-head checks. The plan adds no
+claim-compiler, search engine, PDF qualification or scientific result by itself.
 
 ## Merged baseline
 
-PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged at
+PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16 at
 `cb0270490a9bf1592a1d194cad395912afcefe9f`, tree
-`657bc3effdf3d85707565a5cb386389787ac2299`. Its qualified final head was
+`657bc3effdf3d85707565a5cb386389787ac2299`. Its qualified head was
 `469c3160a4f58402841f60ddb95e28b67800198a`, with the identical tree.
 Post-merge [CI 38900068975](https://github.com/Smkzz/ResearchWitness/actions/runs/38900068975)
 and [CodeQL 38900068843](https://github.com/Smkzz/ResearchWitness/actions/runs/38900068843)
-passed at that merge commit. These identifiers describe the integration baseline,
-not a perpetually current branch-head identity.
+passed. Those identifiers remain the integration baseline, not the current head.
 
-[Issue #14](https://github.com/Smkzz/ResearchWitness/issues/14) records the internal
-10/10 engineering acceptance under the owner's explicit approval of a disclosed
-AI-assisted technical review. No independent human audit, external certification
-or general scientific validation is claimed. The [final assessment](OSS_QUALITY_FINAL.md),
-[maintainer review](OSS_MAINTAINER_REVIEW.md) and
-[current checkpoint](../validation/OSS_QUALITY_CHECKPOINT.json) distinguish
-this integration record from earlier evidence.
+PR [#17](https://github.com/Smkzz/ResearchWitness/pull/17) merged on 2026-10-16 at
+`397ef8a978ff8e9bc406f7de330e45b2a0f8b5f2`, aligning documentation and adding executable
+documentation contracts. PR [#18](https://github.com/Smkzz/ResearchWitness/pull/18)
+merged on 2026-10-17 at the observed head above, aligning intake/export validation,
+reserving generated metadata names and enforcing the 64 MiB aggregate input limit.
 
-`0.3.0.dev0` remains unreleased: no tagged GitHub Release or PyPI publication is
-claimed. Merging software does not authorize a package release.
+At #18, the reported local suite was 521 tests and 181 subtests, with 98.50% core
+coverage; synthetic conformance was 500/500 and historical replays 3/3. Main
+[CI 39030296638](https://github.com/Smkzz/ResearchWitness/actions/runs/39030296638)
+passed all nine Python/OS jobs and Release gate; main
+[CodeQL 39030296605](https://github.com/Smkzz/ResearchWitness/actions/runs/39030296605)
+passed. The later scheduled [CodeQL 39233639894](https://github.com/Smkzz/ResearchWitness/actions/runs/39233639894)
+passed on 2026-10-19 at the same head. These are observed historical checks, not
+new runs performed by this documentation change.
 
-## Available on main
+[Issue #14](https://github.com/Smkzz/ResearchWitness/issues/14) is closed. The owner's
+internal 10/10 engineering acceptance used disclosed AI-assisted review, not an
+independent human audit, security certification or scientific evaluation. The
+[final assessment](OSS_QUALITY_FINAL.md), [maintainer record](OSS_MAINTAINER_REVIEW.md)
+and [checkpoint](../validation/OSS_QUALITY_CHECKPOINT.json) remain pinned records.
+No GitHub Release or PyPI publication is claimed for this development version.
 
-- Dependency-free installed verifier, ten bounded checker families, structured
-  intake/schema/scaffold interfaces and deterministic evidence replay.
-- Source-checkout JATS arithmetic audit, source-bound comparison, JSON/Markdown
-  reports, conditional calculations and conservative abstentions. Install
-  `python -m pip install -e '.[dev]'` from the repository root.
-- Guarded metadata discovery, bounded file input, Git-index source ZIP selection,
-  cross-platform CI, Ruff and verifier-core coverage enforcement.
+## Available and pending
 
-Start with the [core quickstart](../README.md#quick-start),
-[synthetic JATS example](../README.md#offline-jats-audit),
-[source-tool reference](OFFLINE_RESEARCH_AUDIT.md), [architecture](ARCHITECTURE.md)
-and [release procedure](RELEASING.md).
+| Area | Observed state | Planned package |
+|---|---|---|
+| Deterministic verifier, intake, reports/export | Available for ten bounded families | Preserve in RW-01/RW-08 |
+| JATS/metadata tools | Checkout-only, narrow supported relationships | RW-01/RW-02/RW-09 |
+| Paper-audit stack #6-#11 | Draft, unmerged | RW-01 |
+| #12 local preview/custody worker | Draft, unmerged; authority not qualified | RW-03/RW-09 |
+| Real PDF extraction | Disabled pending real sandbox/image qualification | RW-03 |
+| Windows managed metadata | Fails closed pending ACL ownership qualification | RW-03 |
+| Claim compiler and adversarial search | Proposed system components, not implemented end to end | RW-06/RW-07 |
+| Research benchmark/independent evaluation | Development tools exist; sealed study not completed | RW-04/RW-05/RW-10/RW-11 |
+| Routine agent authority | Autonomous within safety and zero-incremental-cost limits | AGENTS.md |
 
-## Pending work and boundaries
+#5 is an ancestor of #6 and must not be imported as unrelated duplicate work.
+Dependency PRs #15/#16 were open at the observed snapshot; recheck before acting.
+Installed-core Windows support is tested separately from Windows metadata discovery.
+Synthetic PDF/custody tests do not establish real isolation. No protected holdout
+run, scientific Wave 3 or broad independent precision/recall claim is established.
 
-PR #6–#11 remain a separate unmerged paper-audit stack. PR #12 adds a custody
-worker requiring separate security review. The merged source-checkout tools do
-not install that stack's `researchwitness.paper_audit` implementation. This
-documentation change neither integrates those PRs nor grants custody authority.
+## Current operating policy
 
-Windows managed metadata discovery fails closed pending a reviewed ACL ownership
-guard; installed-core Windows support is separate. Real PDF extraction awaits a
-reviewed pinned image and qualified Docker boundary. Synthetic tests do not
-qualify that boundary. Sealed holdout evaluation and scientific Wave 3 have not
-run. See the [roadmap](ROADMAP.md); research results remain developer-exposed.
+Agents make ordinary technical decisions, obtain AI review, perform qualified
+merges and prepare scoped releases without asking for routine human signoff.
+Escalate only new safety-sensitive authority or actual unauthorized spending.
+Missing scientific evidence remains a gate, not a request for an opinion.
+See [DECISIONS.md](DECISIONS.md). Historical instructions requesting routine approval
+record their old context; current work follows AGENTS.md and the new plan.
 
 ## Historical records
 
-Historical dates, failed attempts, counts, hashes and limitations are retained.
-Old branch/review states describe their stated snapshot, not a current failure.
+Current interfaces: [README](../README.md), [architecture](ARCHITECTURE.md),
+[protocol](PROTOCOL.md), [offline tools](OFFLINE_RESEARCH_AUDIT.md),
+[source review](SCIENTIFIC_CANDIDATE_REVIEW.md), [security](../SECURITY.md),
+[PDF qualification](PDF_SANDBOX_QUALIFICATION.md), [contributing](../CONTRIBUTING.md)
+and [release procedure](RELEASING.md). [MVP.md](MVP.md) describes the existing narrow
+product contract, not a competing future priority list.
 
-- [Initial OSS quality audit](OSS_QUALITY_AUDIT.md)
-- [2026-10-15 campaign report](../RESEARCHWITNESS_NEXT_CAMPAIGN_REPORT.md)
-- [2026-10-14 scientific-readiness record](../validation/SCIENTIFIC_EVALUATION_READINESS.md)
-- [Historical MVP validation](VALIDATION.md)
-- [Historical verifier-wave records](../validation/verifier-wave/README.md)
-- [Preserved pre-merge engineering checkpoint](../validation/history/OSS_QUALITY_CHECKPOINT-premerge-20261016.json)
+The following are dated evidence, not instructions to repeat old approval loops:
 
-Frozen experiments and scientific JSON evidence are not relabeled as new or
-independent validation. The synthetic documentation fixture contains no real
-study data.
+- [Initial OSS audit](OSS_QUALITY_AUDIT.md) and the pinned final engineering records.
+- [2026-10-15 campaign report](../RESEARCHWITNESS_NEXT_CAMPAIGN_REPORT.md) and its
+  [checkpoint](../validation/RESEARCHWITNESS_NEXT_CAMPAIGN_CHECKPOINT.json).
+- [2026-10-14 scientific-readiness record](../validation/SCIENTIFIC_EVALUATION_READINESS.md).
+- [Historical MVP validation](VALIDATION.md) and [verifier-wave records](../validation/verifier-wave/README.md).
+- [Preserved pre-merge checkpoint](../validation/history/OSS_QUALITY_CHECKPOINT-premerge-20261016.json).
+
+Frozen dates, source hashes, failed attempts, exposure decisions and scientific
+labels are preserved. Append new evidence; do not relabel old results as current,
+independent, human-reviewed or successful. Never publish private custody records.

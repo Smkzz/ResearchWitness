@@ -1,54 +1,55 @@
 # Release process
 
-A merge, an engineering assessment and a package release are separate events.
-`0.3.0.dev0` is on main but remains UNRELEASED. A version bump alone is not
-qualification. Follow the [scientific release gate](ROADMAP.md#release-gate)
-as well as this engineering procedure; publication needs separate owner approval.
+A merge, an engineering preview and a scientific-performance claim are separate.
+The observed version `0.3.0.dev0` remains UNRELEASED. A version bump is not
+qualification. Follow [AGENTS.md](../AGENTS.md) and the
+[release gate](ROADMAP.md#release-gate).
+
+## Authority and release scope
+
+Routine safe, zero-incremental-cost merges and honestly scoped engineering-preview
+releases have standing owner authorization under `RW-PLAN-2026-10-24`; no additional
+human opinion or ceremonial signoff is needed. New billing/paid credits, expanded
+credentials/permissions or sensitive disclosure require the relevant safety/cost
+decision. Do not create a publishing credential or widen its scope silently.
+
+An engineering preview may disclose that independent scientific accuracy is not
+established. A release claiming measured research improvement additionally needs
+its frozen protocol/evaluation gates. Disabled PDF/custody capabilities stay disabled
+and documented. Lack of evidence is not repaired by owner or model confidence.
 
 ## Environment
 
 Use a real, clean Git checkout with Git on PATH and a supported Python version.
-An extracted source ZIP can run the software, but lacks the Git index required
-by `tools.make_release` to select or regenerate release files.
+A source ZIP can run the software but lacks the Git index needed by the release
+selector. Create and activate an isolated environment:
 
-Create and activate an isolated virtual environment. On macOS/Linux:
-
-```bash
+```text
 python -m venv .venv
-source .venv/bin/activate
 ```
 
-On Windows PowerShell:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-```
-
-From the repository root, install the declared build backend explicitly, then
-the development extra:
+On macOS/Linux use `source .venv/bin/activate`; on Windows PowerShell use
+`.venv\Scripts\Activate.ps1`. From the repository root install:
 
 ```text
 python -m pip install 'setuptools>=68'
 python -m pip install -e '.[dev]'
 ```
 
-The gate calls `pip wheel --no-build-isolation`; an editable installation with
-build isolation does not guarantee that setuptools exists in the active
-runtime environment. The development extra supplies pytest, jsonschema,
-coverage and Ruff. Network access is needed for this setup unless the required
-packages are already provisioned through an approved local package source.
-The subsequent offline gate does not fetch dependencies.
+The gate calls `pip wheel --no-build-isolation`; an editable build does not prove
+setuptools is installed in the active environment. Setup needs already provisioned
+packages or an approved package route. It does not authorize paid infrastructure.
+The later offline gate fetches no dependencies.
 
 ## Prepare and regenerate the manifest
 
-1. Update the changelog, README, citation and package version metadata only when
-   their meaning changes. Regenerate any affected schemas or synthetic fixtures.
-2. Review intended source changes and redistribution rights. Never stage private
-   manuscripts, credentials, author correspondence or reserved evaluation data.
-3. Stage the **specific intended paths** with `git add -- PATH...`; replace the
-   placeholder with actual reviewed filenames. Do not blindly use `git add .`.
-4. Regenerate and stage the existing tracked checksum manifest:
+1. Update current docs, changelog, package/citation metadata and affected generated
+   schemas/examples when their meaning changes. Keep frozen evidence unchanged.
+2. Review exact intended paths and redistribution rights; exclude secrets, private
+   source/correspondence, reserved data, caches and unrelated agent work.
+3. Stage reviewed paths with `git add -- PATH...`, replacing the placeholder with
+   actual paths. Never use blanket staging to collect a workspace.
+4. Regenerate and stage the tracked manifest:
 
 ```text
 python -c "from tools.make_release import write_checksums; write_checksums()"
@@ -57,15 +58,14 @@ git diff --cached --check
 git diff --cached --stat
 ```
 
-The approved selector uses Git-indexed, allowlisted paths. It refuses unstaged
-changes to selected files, unmerged entries, symbolic links, unsafe portable
-names and collisions. Caches, ignored/untracked files and local artifacts are
-not release inputs. `CHECKSUMS.sha256` is already tracked even though its name
-also appears in `.gitignore`; do not remove it from the inventory to pass checks.
+The allowlisted Git-index selector rejects selected unstaged changes, unresolved
+entries, links, unsafe portable names and collisions. Root agent entry points are
+part of the source inventory, as are docs and provider pointers. Untracked/ignored
+files are not release inputs. Do not remove CHECKSUMS.sha256 to make a gate pass.
 
 ## Qualify
 
-Run the same local checks that support the hosted gates:
+Use focused regressions during editing, then the final gates:
 
 ```text
 python -m ruff check .
@@ -77,44 +77,48 @@ python validation/mvp_real/run_validation.py
 python tools/quality_gate.py
 ```
 
-The last command checks source hashes, schema drift, trusted-core primitives,
-compilation, synthetic conformance, historical MVP replay, two wheel builds in
-one environment, clean offline wheel installation and installed-CLI behavior.
-Tests include source-ZIP reproducibility and documentation examples. Source-tool
-coverage remains visible separately from the core threshold. Inspect any skips;
-POSIX-only tests are intentionally skipped on Windows, not silently passed.
+The quality gate checks source hashes, schema drift, trusted-core primitives,
+compilation, synthetic conformance, historical replay, repeat wheel builds,
+clean offline installation and installed CLI behavior. Source ZIP reproducibility
+and documentation contracts are tested. Inspect platform-specific skips; do not
+count a skipped boundary test as real qualification.
 
-Commit only the reviewed source and regenerated manifest. Push a PR and require
-all nine `Python 3.11–3.13 / ubuntu-latest, windows-latest, macos-latest` checks,
-`Release gate` and CodeQL `Analyze Python` at the **exact proposed commit**.
-Also inspect the PR's `Dependency evidence` run and its dated advisory/license
-results. That job needs approved network access; it is not part of the offline
-gate. An unavailable advisory query is not proof of zero vulnerabilities.
+Commit one coherent reviewed change and manifest. A PR requires the nine
+`Python 3.11–3.13 / ubuntu-latest, windows-latest, macos-latest` checks,
+`Release gate` and CodeQL `Analyze Python` at the exact proposed commit. Inspect
+`Dependency evidence` and its dated advisory/license results too; unavailable
+advisory data is not evidence of no vulnerabilities. Use only authorized CI with
+known zero incremental cost or an explicit project spending authorization.
 
-If any source change follows validation, repeat affected checks and qualify the
-new exact commit. Never bypass the protected main ruleset, weaken tests or
-change scientific labels to obtain a pass. After merging, verify the new main
-CI and CodeQL; PR success alone is not post-merge evidence.
+Do not rerun identical successes without a reason. After source changes, qualify
+the new exact head. Preserve main protection and all scientific/security boundaries.
+After merging, inspect the new main CI and CodeQL. The PR success is not itself
+post-merge evidence. Record the exact commits, checks and limitations in the receipt.
 
-## Build review artifacts
+## Build and publish scoped artifacts
 
-With intended changes staged and a consistent manifest, use a **fresh output
-directory outside the source checkout**:
+With staged intended files and a consistent manifest, use a fresh external directory:
 
 ```text
 python tools/make_release.py --output-dir ../researchwitness-review-artifacts
 ```
 
-Review source ZIP and wheel inventories, sizes and SHA-256 values. The builder
-creates review artifacts; running it is not permission to upload a release.
-Reproducibility comparisons apply to the recorded build environment. Do not
-claim byte-identical wheels across different toolchains without testing that.
+Review source ZIP/wheel inventories, sizes and hashes. The builder does not upload
+anything. Compare two builds within the recorded toolchain; do not claim identical
+bytes across untested environments. Test installed workflows outside the checkout.
+
+Publish only through an already authorized safe zero-cost release route, with an
+exact tag/commit, changelog, checksums, known limitations and reproducibility steps.
+If permissions or billing are unknown, leave verified artifacts and record the
+specific blocker instead of expanding authority. No author/case accusation is
+included in a software release. Do not bundle private custody or licensed full text.
 
 ## Tagging policy
 
-- `0.x`: research-preview releases with explicit scope and incomplete coverage.
-- `1.0`: reserved for justified stable public API/protocol and empirical scope.
+- `0.x`: bounded research/engineering previews with explicit incomplete coverage.
+- `1.0`: requires justified stable API/protocol and documented empirical scope.
 
-Never describe a release as certifying arbitrary papers, autonomous peer review,
-author-contact authority or independent human approval. PDF/custody qualifications
-and scientific evaluation remain distinct from engineering acceptance.
+The plan revision and informal "v4" vision are not package versions. Preserve
+protocol compatibility or explicitly version breaking changes. A scientific result
+may be negative or inconclusive; release wording must reflect it without suggesting
+arbitrary-paper certification, human approval or automatic contact authority.

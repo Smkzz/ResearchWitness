@@ -1,89 +1,51 @@
 # ResearchWitness v1 protocol
 
-ResearchWitness v1 is an offline protocol for checking a supplied witness against a supplied mathematical formalization and preserving the exact inputs that produced the result.
-
-The protocol does **not** certify that the formalization faithfully represents a publication. That boundary is explicit in every report.
+This offline protocol checks a supplied witness against a supplied mathematical
+formalization and preserves the exact inputs. It does not certify correspondence
+to a publication or scientific applicability. [The development plan](DEVELOPMENT_PLAN.md)
+does not silently change this protocol or the runtime result vocabulary.
 
 ## 1. Case bundle
 
-A case directory contains:
+A case contains `case.json` plus manifested source artifacts, source-quote text,
+correction-status evidence, witness JSON and optional supplementary artifacts.
+Only manifested artifacts participate in the artifact inventory and private export.
+The core does not execute source/case code or contact external services.
 
-- `case.json` — the structured verification target;
-- one or more manifested source artifacts;
-- a text artifact containing the quoted source anchor;
-- a correction-status evidence artifact;
-- a witness JSON artifact;
-- optional supplemental artifacts.
+## 2. case.json
 
-Only manifested files participate in the bundle digest and private export.
-
-## 2. `case.json`
-
-The v1 top-level fields are:
-
-```text
-schema_version
-case_id
-artifacts
-source
-claim
-witness_artifact
-unresolved_objections
-disclosure
-```
-
-Reviewer identities, reviewer votes, approval flags and contact authorization are intentionally absent.
+Top-level v1 fields are `schema_version`, `case_id`, `artifacts`, `source`, `claim`,
+`witness_artifact`, `unresolved_objections` and `disclosure`. Reviewer votes, approval
+flags and contact authorization are intentionally absent. Autonomous agent authority
+belongs to [AGENTS.md](../AGENTS.md), not to a proof primitive in this schema.
 
 ### Source
 
-`source` records:
+`source` records `artifact`, `text_artifact`, `identifier`, `version`, `capture_status`
+and `correction_check`. Capture is `synthetic`, `captured` or `unverified`: contextual
+metadata, never authenticated origin. Correction status records a date, `unchecked`,
+`none_found` or `present`, and manifested evidence. Age/status affects context,
+not the mathematical verdict.
 
-```text
-artifact
-text_artifact
-identifier
-version
-capture_status
-correction_check
-```
+### Claim and witness
 
-`capture_status` is contextual metadata:
-
-- `synthetic`
-- `captured`
-- `unverified`
-
-It is never promoted to authenticated provenance.
-
-`correction_check` records a date, one of `unchecked | none_found | present`, and a manifested evidence artifact. Its age/status becomes a context flag rather than changing the mathematical result.
-
-### Claim
-
-A claim contains:
-
-- an atomic identifier;
-- the natural-language statement;
-- a narrow scope string;
-- explicit assumptions;
-- explicit excluded implications;
-- a byte-offset source quote anchor;
-- an allowlisted formalization.
-
-The anchor is verified against the supplied text bytes. It does not authenticate the publication.
-
-The `rational_expression_upper_bound` checker evaluates a closed exact-rational
-AST at one in-domain witness point. Its node grammar, limits, and scope are
-described in [Exact rational expression checker](EXPRESSION_DSL.md).
-
-### Witness
-
-`witness_artifact` points to checker-specific JSON. A witness cannot override the target bound or formalization supplied by the claim.
+A claim has an atomic ID, statement, narrow scope, explicit assumptions/exclusions,
+a zero-based UTF-8 byte-offset quote anchor and allowlisted formalization. Anchor
+matching does not authenticate the source or verify its scientific interpretation.
+`witness_artifact` references checker-specific JSON; it cannot override the target
+bound/formalization supplied by the claim. See [EXPRESSION_DSL.md](EXPRESSION_DSL.md)
+for closed rational AST evaluation at one in-domain point and its work limits.
 
 ### Finite PMF arithmetic
 
-`finite_pmf_bound` formalizations support two exact operations over an explicitly declared finite categorical sample space. The sample space is the Cartesian product of `domains`; it may contain at most 256 states across at most 8 variables. The witness lists distinct positive-mass atoms using exact rational strings. Unlisted states have probability zero, and the listed masses must sum exactly to one.
+`finite_pmf_bound` supports exact probability or expectation for an explicit finite
+categorical sample space: the Cartesian product of at most 8 variable domains and
+at most 256 states. Witness atoms are distinct positive masses written as exact
+rationals; absent states have zero mass, and the total must equal one.
 
-For an event probability, `event` is a union of partial assignments. An empty event list denotes the empty event, while an empty assignment in the list denotes the whole sample space. Overlapping clauses count each atom once. `relation` is `at_most` or `at_least`; equality satisfies either bound and therefore produces no refutation.
+An event is a union of partial assignments. Empty event list means empty event;
+an empty assignment means the entire space. Overlap counts once. `at_most`/`at_least`
+bounds include equality, which does not refute either bound.
 
 ```json
 {
@@ -96,128 +58,70 @@ For an event probability, `event` is a union of partial assignments. An empty ev
 }
 ```
 
-For an expected payoff, `payoffs` must assign an exact rational value to every state in the declared sample space exactly once. The checker sums `probability × payoff` over the supplied PMF. Both operations validate all PMF masses and arithmetic exactly; neither makes an observation-to-distribution inference.
-
-The reported result is scoped to arithmetic over that supplied finite PMF and formalization. Empirical validity, sampling assumptions, population probabilities and broader generalized conclusions remain outside the checker.
+Expected payoff requires a rational payoff for every state exactly once and sums
+mass times payoff. These checks validate supplied finite arithmetic, not inference
+from observations, empirical distributions or population/generalized conclusions.
 
 ## 3. Formalization results
 
-All checkers return one of:
+Checker results are `REFUTED_FOR_FORMALIZATION`, `NO_REFUTATION_AT_WITNESS` or
+`INCONCLUSIVE_INTERVAL`. Package decisions map the first to
+`FORMALIZATION_COUNTEREXAMPLE_VERIFIED` and preserve the other two names.
+A positive establishes a strict contradiction for that formalization/witness only.
 
-```text
-REFUTED_FOR_FORMALIZATION
-NO_REFUTATION_AT_WITNESS
-INCONCLUSIVE_INTERVAL
-```
-
-The package-level `decision` maps these to:
-
-```text
-FORMALIZATION_COUNTEREXAMPLE_VERIFIED
-NO_REFUTATION_AT_WITNESS
-INCONCLUSIVE_INTERVAL
-```
-
-`FORMALIZATION_COUNTEREXAMPLE_VERIFIED` means the checker established a strict contradiction for the exact supplied formalization/witness pair.
-
-It does not mean:
-
-- the paper is false;
-- the global optimum is known;
-- every version of the source contains the same claim;
-- the broader theorem fails;
-- an author should be contacted;
-- misconduct occurred.
-
-For that reason every report contains:
+It does not establish a false paper, known global optimum, unchanged source versions,
+a failed broader theorem, contact authority or misconduct. Reports always retain:
 
 ```text
 paper_error_established: false
 external_actions: OUT_OF_SCOPE
 ```
 
+Completed evaluation can return no refutation. An unsupported interpretation must
+not be reduced to an unrelated supported check to manufacture a positive.
+
 ## 4. Context flags
 
-Context is reported separately from arithmetic. Examples include:
-
-```text
-BUNDLE_NOT_EXTERNALLY_PINNED
-SOURCE_CAPTURE_UNVERIFIED
-SYNTHETIC_SOURCE
-FUTURE_CORRECTION_CHECK
-STALE_CORRECTION_CHECK
-CORRECTION_STATUS_UNCHECKED
-CORRECTION_PRESENT
-EMPTY_CORRECTION_EVIDENCE
-OPEN_OBJECTION
-```
-
-A context flag cannot change a valid arithmetic counterexample into a non-counterexample. Conversely, exact arithmetic cannot clear a source-interpretation objection.
+Context includes `BUNDLE_NOT_EXTERNALLY_PINNED`, `SOURCE_CAPTURE_UNVERIFIED`,
+`SYNTHETIC_SOURCE`, `FUTURE_CORRECTION_CHECK`, `STALE_CORRECTION_CHECK`,
+`CORRECTION_STATUS_UNCHECKED`, `CORRECTION_PRESENT`, `EMPTY_CORRECTION_EVIDENCE`
+and `OPEN_OBJECTION`. Context does not invalidate exact arithmetic; arithmetic
+does not clear a source-interpretation objection. AI consensus cannot clear either.
 
 ## 5. Digests
 
-### Subject digest
-
-`subject_sha256` commits to the verification question and its direct inputs:
-
-- schema/case identity;
-- source metadata;
-- claim text, scope, assumptions, exclusions, anchor and formalization;
-- witness artifact identity/hash;
-- correction-status evidence identity/hash;
-- unresolved objections.
-
-Supplemental manifested artifacts do not change the subject digest.
-
-### Bundle digest
-
-`bundle_sha256` commits to the complete `case.json`, including the full artifact manifest.
-
-A caller may preserve this value outside the bundle and later pass it as `--expected-bundle-sha256`. This detects a coherent rewrite after the pin was created.
-
-Neither digest authenticates the original source.
+`subject_sha256` binds schema/case identity, source metadata, claim/scope/assumptions/
+exclusions/anchor/formalization, witness identity/hash, correction-evidence identity/
+hash and objections. Unrelated supplementary artifacts do not change it.
+`bundle_sha256` binds complete `case.json`, including the artifact manifest.
+A separately preserved `--expected-bundle-sha256` pin detects later coherent changes;
+neither digest authenticates the original evidence or makes it true.
 
 ## 6. Exports
 
-`pack` writes a deterministic private ZIP containing only:
-
-- manifested artifacts;
-- canonical `case.json`;
-- canonical `report.json`.
-
-Unrelated files in the case directory are ignored. Existing output files are not overwritten.
-
-Equal entries are written with sorted names, fixed metadata and `ZIP_STORED` compression mode.
+`pack` writes a deterministic private ZIP containing manifested artifacts and
+canonical `case.json`, `report.json` and `contact-readiness.json`. Generated root
+filenames and directory-prefix collisions, including case variants, are reserved.
+Unrelated files are ignored; existing ZIP outputs are not overwritten. Entries use
+sorted names, fixed metadata and ZIP_STORED compression. Aggregate artifact limits
+and shared intake/export validation apply before prepared outputs are created.
+Do not manifest private material merely because the exporter can package it.
 
 ## 7. Timeline protocol
 
-The optional timeline is a separate hash-chained object bound to the case subject.
+The separate hash-chained timeline binds to the case subject. Event kinds are
+`INQUIRY_RECORDED`, `AUTHOR_POSITION_RECORDED`, `CORRECTION_NOTICE_RECORDED`,
+`REVISION_WITNESS_RECHECK`, `CASE_WITHDRAWN` and `CASE_REOPENED`. These are recorded
+assertions, not authenticated facts. An author's position or correction notice is
+not proof. An old witness ceasing to refute a revision is not global correctness.
 
-Supported event kinds:
-
-```text
-INQUIRY_RECORDED
-AUTHOR_POSITION_RECORDED
-CORRECTION_NOTICE_RECORDED
-REVISION_WITNESS_RECHECK
-CASE_WITHDRAWN
-CASE_REOPENED
-```
-
-These are records, not authenticated facts. In particular:
-
-- an author-position event is not proof;
-- a correction notice is not proof;
-- an old witness ceasing to refute a revision is not proof that the revision is globally correct.
-
-The revision result vocabulary is intentionally narrow:
-
-```text
-OLD_WITNESS_STILL_REFUTES_REVISION
-OLD_WITNESS_NO_LONGER_REFUTES_REVISION
-REVISION_CHECK_INCONCLUSIVE
-```
+Revision verdicts remain `OLD_WITNESS_STILL_REFUTES_REVISION`,
+`OLD_WITNESS_NO_LONGER_REFUTES_REVISION` and `REVISION_CHECK_INCONCLUSIVE`.
+Recording an event does not send any message or authorize external action.
 
 ## 8. Extending the protocol
 
-A new checker belongs in v1 only if it can produce a deterministic, bounded, machine-checkable result with explicit scope. General LLM judgments may help create candidate bundles but cannot become trusted-core proof primitives.
+New checkers must remain deterministic, bounded, explicitly scoped and machine-
+checkable. General model judgments may propose bundles but cannot become trusted
+proof primitives. Changes need versioned compatibility decisions and regressions;
+a plan or broader agent autonomy does not itself change installed schema semantics.

@@ -1,0 +1,288 @@
+{
+  "schema_version": "researchwitness-execution-state.v1",
+  "plan_id": "RW-PLAN-2026-10-24",
+  "plan_revision": 1,
+  "updated_on": "2026-10-24",
+  "plan_path": "docs/DEVELOPMENT_PLAN.md",
+  "entry_point": "AGENTS.md",
+  "baseline": {
+    "observed_main_sha": "242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a",
+    "observed_on": "2026-10-24",
+    "version": "0.3.0.dev0",
+    "release": "UNRELEASED",
+    "note": "Pre-plan observed software baseline; refresh live state before writes. This is not a claim that later commits passed checks."
+  },
+  "authority": {
+    "routine_human_approval_required": false,
+    "human_escalation_categories": [
+      "safety",
+      "real_money"
+    ],
+    "authorized_incremental_spend_eur": 0,
+    "scientific_or_security_gates_waived": false
+  },
+  "next_task": "RW-01",
+  "allowed_states": [
+    "todo",
+    "ready",
+    "in_progress",
+    "in_review",
+    "blocked_safety",
+    "blocked_cost",
+    "blocked_external",
+    "blocked_evidence",
+    "done"
+  ],
+  "state_rules": {
+    "coordinator_is_single_writer": true,
+    "done_requires_acceptance_evidence": true,
+    "blocked_work_does_not_stop_unrelated_work": true,
+    "readiness_requires_dependencies_done": true,
+    "leases_require_utc_expiry_and_exact_base": true
+  },
+  "capability_gates": {
+    "pdf_execution": {
+      "status": "unqualified",
+      "evidence": []
+    },
+    "windows_managed_metadata": {
+      "status": "unqualified",
+      "evidence": []
+    },
+    "protected_custody": {
+      "status": "unqualified",
+      "evidence": []
+    },
+    "scientific_wave_3": {
+      "status": "not_run",
+      "evidence": []
+    }
+  },
+  "tasks": [
+    {
+      "id": "RW-01",
+      "title": "Consolidate main and the paper-audit PR stack",
+      "priority": 1,
+      "depends_on": [],
+      "required_capability_gates": [],
+      "role": "integration",
+      "status": "ready",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-01---consolidate-the-existing-implementations",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-02",
+      "title": "Source evidence and provenance",
+      "priority": 2,
+      "depends_on": [
+        "RW-01"
+      ],
+      "required_capability_gates": [],
+      "role": "source-adapter",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-02---source-evidence-and-provenance",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-03",
+      "title": "Qualify PDF, Windows and custody boundaries separately",
+      "priority": 2,
+      "depends_on": [],
+      "required_capability_gates": [],
+      "role": "security-isolation",
+      "status": "ready",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-03---qualify-execution-and-custody-boundaries",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-04",
+      "title": "Benchmark protocol and offline harness",
+      "priority": 1,
+      "depends_on": [],
+      "required_capability_gates": [],
+      "role": "benchmark-methods",
+      "status": "ready",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-04---benchmark-protocol-and-harness",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-05",
+      "title": "Independently curate and seal the evaluation corpus",
+      "priority": 3,
+      "depends_on": [
+        "RW-02",
+        "RW-03",
+        "RW-04"
+      ],
+      "required_capability_gates": [
+        "protected_custody"
+      ],
+      "role": "isolated-custodian",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-05---independent-evidence-curation-and-sealed-custody",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-06",
+      "title": "Source-bound claim compiler",
+      "priority": 3,
+      "depends_on": [
+        "RW-01",
+        "RW-02",
+        "RW-04"
+      ],
+      "required_capability_gates": [],
+      "role": "claim-extraction",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-06---source-bound-claim-compiler",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-07",
+      "title": "Bounded adversarial discovery",
+      "priority": 4,
+      "depends_on": [
+        "RW-06"
+      ],
+      "required_capability_gates": [],
+      "role": "search-harness",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-07---bounded-adversarial-discovery",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-08",
+      "title": "Verification scope and justified certificate extension",
+      "priority": 3,
+      "depends_on": [
+        "RW-01",
+        "RW-04"
+      ],
+      "required_capability_gates": [],
+      "role": "verifier",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-08---verification-scope-and-certificate-extensions",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-09",
+      "title": "Usable installed workflow and engineering preview",
+      "priority": 3,
+      "depends_on": [
+        "RW-01",
+        "RW-02"
+      ],
+      "required_capability_gates": [],
+      "role": "product-packaging",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-09---usable-product-and-preview-release",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-10",
+      "title": "Development comparisons and candidate freeze",
+      "priority": 4,
+      "depends_on": [
+        "RW-04",
+        "RW-06",
+        "RW-07",
+        "RW-08"
+      ],
+      "required_capability_gates": [],
+      "role": "experiment",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-10---development-comparison-and-candidate-freeze",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-11",
+      "title": "One sealed confirmatory evaluation",
+      "priority": 5,
+      "depends_on": [
+        "RW-05",
+        "RW-10"
+      ],
+      "required_capability_gates": [
+        "protected_custody"
+      ],
+      "role": "isolated-evaluation",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-11---one-sealed-confirmatory-evaluation",
+      "evidence": [],
+      "blocker": null
+    },
+    {
+      "id": "RW-12",
+      "title": "Research release and maintenance closure",
+      "priority": 6,
+      "depends_on": [
+        "RW-09",
+        "RW-11"
+      ],
+      "required_capability_gates": [],
+      "role": "release-coordinator",
+      "status": "todo",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-12---research-release-and-maintenance-closure",
+      "evidence": [],
+      "blocker": null
+    }
+  ]
+}
