@@ -73,7 +73,7 @@ Missing scientific evidence remains a gate, not a request for an opinion.
 See [DECISIONS.md](DECISIONS.md). Historical instructions requesting routine approval
 record their old context; current work follows AGENTS.md and the new plan.
 
-## Documentation map and preserved history
+## Historical records
 
 Current interfaces: [README](../README.md), [architecture](ARCHITECTURE.md),
 [protocol](PROTOCOL.md), [offline tools](OFFLINE_RESEARCH_AUDIT.md),
