@@ -1,0 +1,77 @@
+{
+  "exposure": "synthetic",
+  "label_basis": "synthetic_construction",
+  "schema_version": "rw-development-registry.v1",
+  "works": [
+    {
+      "eligible": true,
+      "exclusion_reason": null,
+      "family_id": "f1",
+      "interpretation_sha256": "e986c105d926b83ea91509c7316ba3e9a0b410f0693eacec20090ee850d25738",
+      "label": "positive",
+      "source_sha256": "b1efc9a6a9f88625412a3014edc19d5d1842c8b4f54fc23595209716c082b07f",
+      "target_id": "target-p1",
+      "work_id": "p1"
+    },
+    {
+      "eligible": true,
+      "exclusion_reason": null,
+      "family_id": "f1",
+      "interpretation_sha256": "5a8af7eb2b90dfe8134240b69c0d6ee617e517f259f01f9ba154eebbacff966d",
+      "label": "positive",
+      "source_sha256": "ca62a6972048f667a75f6c4e611a1c0c7d4cd0a19e77afda81be5157bd329ed2",
+      "target_id": "target-p1v2",
+      "work_id": "p1v2"
+    },
+    {
+      "eligible": true,
+      "exclusion_reason": null,
+      "family_id": "f2",
+      "interpretation_sha256": "693658079f832723409c5b005863f62ddf256fe597d583b92b8690fe241221c8",
+      "label": "positive",
+      "source_sha256": "d16441fd8a5790fe36cc5ae75c571816fb0a44f3f57fc63233eb2ec869f35241",
+      "target_id": "target-p2",
+      "work_id": "p2"
+    },
+    {
+      "eligible": true,
+      "exclusion_reason": null,
+      "family_id": "f3",
+      "interpretation_sha256": "d2b2e100f38c96b6464dc7df78339ea6932a268fcd357c05cd3aad13a92420c6",
+      "label": "negative",
+      "source_sha256": "a2916be9848acbd8827ae11008e95d4ce7a0d65dd900b56383c27b2bc6f876e0",
+      "target_id": null,
+      "work_id": "n1"
+    },
+    {
+      "eligible": true,
+      "exclusion_reason": null,
+      "family_id": "f4",
+      "interpretation_sha256": "4fb5bc8f08458799c785991a91dfd8b08d3d3029603e6c83cab12a8fa03f7e24",
+      "label": "negative",
+      "source_sha256": "9ca9d43a4b0778fbd053a14511cd06b199739a36bd89441050f209c2dfc02d1d",
+      "target_id": null,
+      "work_id": "n2"
+    },
+    {
+      "eligible": true,
+      "exclusion_reason": null,
+      "family_id": "f5",
+      "interpretation_sha256": "93ee7bc1e9c42860b0aed560688509afc77fd5a6647306ef0b2d319a7a127a93",
+      "label": "unresolved",
+      "source_sha256": "a872bc65fdd06cc18fe3596058f9b65517a907672e74b010e95caacf086c7107",
+      "target_id": null,
+      "work_id": "u1"
+    },
+    {
+      "eligible": false,
+      "exclusion_reason": "synthetic-exclusion",
+      "family_id": "f6",
+      "interpretation_sha256": "dfa96ceb2a13845cdb504c97a377360e79c4268a0fee62e1c5685dfa57003325",
+      "label": "negative",
+      "source_sha256": "ad6f89f63c2b05f789e57137fb0b77369fe75e1bbaa3a97b44a5d5619b2b3d99",
+      "target_id": null,
+      "work_id": "x1"
+    }
+  ]
+}

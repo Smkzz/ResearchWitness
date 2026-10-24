@@ -12,6 +12,28 @@ This status records an observed software baseline, not automatic qualification
 of a later commit. New work needs its own exact-head checks. The plan adds no
 claim-compiler, search engine, PDF qualification or scientific result by itself.
 
+## Initial implementation slices - 2026-10-24
+
+Implementation started from the merged plan head
+`32a8f20f0f64a0dd6c6e9c9cb8a0a4c4e3e12732`. RW-01 has selectively migrated the
+operand-only `researchwitness.paper_statistics.recompute_two_by_two` helper from
+PR #11, retaining its four upstream scenario groups and hardening malformed inputs
+and Decimal context isolation. It is not the complete paper-audit stack or a new
+trusted certificate family. See [the integration map](INTEGRATION_MAP.md).
+
+RW-04 now has executable [development receipt accounting](DEVELOPMENT_RECEIPT_SCORER.md)
+in `tools.verification_benchmark`, with externally pinned manifests and complete
+registered denominators. This scores supplied declarations; it does not replay
+certificates, run candidates, authenticate labels or provide scientific validation.
+Both RW-01 and RW-04 remain incomplete and ready for their next bounded slices.
+
+[The implementation receipt](IMPLEMENTATION_2026-10-24.md) records 85 local focused
+tests, two scoped AI reviews and a reproduced/fixed Decimal-default-context defect.
+Full-tree hosted checks and exact candidate/merge identities belong to the containing
+PR's receipts, not to an assumed reuse of earlier successes. No new package/tag was
+published. RW-03 still lacks a qualified real execution environment; PDF, native
+Windows metadata and protected custody gates remain unchanged and unqualified.
+
 ## Merged baseline
 
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16 at
@@ -25,7 +47,7 @@ passed. Those identifiers remain the integration baseline, not the current head.
 PR [#17](https://github.com/Smkzz/ResearchWitness/pull/17) merged on 2026-10-16 at
 `397ef8a978ff8e9bc406f7de330e45b2a0f8b5f2`, aligning documentation and adding executable
 documentation contracts. PR [#18](https://github.com/Smkzz/ResearchWitness/pull/18)
-merged on 2026-10-17 at the observed head above, aligning intake/export validation,
+merged on 2026-10-17 at the observed pre-plan head above, aligning intake/export validation,
 reserving generated metadata names and enforcing the 64 MiB aggregate input limit.
 
 At #18, the reported local suite was 521 tests and 181 subtests, with 98.50% core
@@ -50,12 +72,12 @@ No GitHub Release or PyPI publication is claimed for this development version.
 |---|---|---|
 | Deterministic verifier, intake, reports/export | Available for ten bounded families | Preserve in RW-01/RW-08 |
 | JATS/metadata tools | Checkout-only, narrow supported relationships | RW-01/RW-02/RW-09 |
-| Paper-audit stack #6-#11 | Draft, unmerged | RW-01 |
+| Paper-audit stack #6-#11 | Stack unmerged; standalone 2x2 helper selectively migrated | RW-01 |
 | #12 local preview/custody worker | Draft, unmerged; authority not qualified | RW-03/RW-09 |
 | Real PDF extraction | Disabled pending real sandbox/image qualification | RW-03 |
 | Windows managed metadata | Fails closed pending ACL ownership qualification | RW-03 |
 | Claim compiler and adversarial search | Proposed system components, not implemented end to end | RW-06/RW-07 |
-| Research benchmark/independent evaluation | Development tools exist; sealed study not completed | RW-04/RW-05/RW-10/RW-11 |
+| Research benchmark/independent evaluation | Development receipt scorer exists; actual runner and sealed study pending | RW-04/RW-05/RW-10/RW-11 |
 | Routine agent authority | Autonomous within safety and zero-incremental-cost limits | AGENTS.md |
 
 #5 is an ancestor of #6 and must not be imported as unrelated duplicate work.
