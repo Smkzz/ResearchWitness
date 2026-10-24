@@ -17,7 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXED_ZIP_TIME = (2026, 1, 1, 0, 0, 0)
 SOURCE_DATE_EPOCH = '1760000000'
 TOP_FILES = {
-    '.editorconfig', '.gitattributes', '.gitignore', 'CHANGELOG.md', 'CITATION.cff',
+    '.editorconfig', '.gitattributes', '.gitignore', 'AGENTS.md', 'CLAUDE.md',
+    'CHANGELOG.md', 'CITATION.cff',
     'CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'LICENSE', 'NOTICE.md',
     'README.md', 'SECURITY.md', 'SUPPORT.md', 'pyproject.toml', 'CHECKSUMS.sha256',
 }

@@ -1,12 +1,15 @@
 # Maintainer review: integration record and continuing boundaries
 
-**Updated:** 2026-10-16  
+**Updated:** 2026-10-24  
 **Version:** `0.3.0.dev0` — **UNRELEASED**  
 **Review mode:** AI-assisted delegated technical review, explicitly accepted by the owner.
 
-This is not independent human approval or scientific adjudication. The owner
-accepted this review modality for the internal Q9 engineering gate. GitHub's
-required status checks and all security/custody boundaries remain in place.
+The owner's 2026-10-24 standing instruction delegates routine implementation,
+review, integration and scoped release decisions to autonomous agents. Follow
+[AGENTS.md](../AGENTS.md), [the development plan](DEVELOPMENT_PLAN.md) and
+[the execution ledger](EXECUTION_STATE.json). Only safety-sensitive authority
+changes or unauthorized actual spending require human approval. This delegation
+does not waive checks or establish independent human/scientific adjudication.
 
 ## PR #13 is merged
 
@@ -16,9 +19,13 @@ Qualified head `469c3160a4f58402841f60ddb95e28b67800198a` was merged as
 [#13](https://github.com/Smkzz/ResearchWitness/pull/13) is closed and merged,
 not an open draft. Post-merge [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/38900068975)
 and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/38900068843)
-passed. See [project status](PROJECT_STATUS.md),
-[the final assessment](OSS_QUALITY_FINAL.md) and
-[issue #14](https://github.com/Smkzz/ResearchWitness/issues/14).
+passed. This is its historical integration identity, not the latest main head.
+
+PR #17 subsequently aligned documentation; PR #18 repaired intake/export
+consistency. The software baseline observed on 2026-10-24 is
+`242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a`. See
+[project status](PROJECT_STATUS.md) for exact checks. These observations do not
+claim that later documentation or software commits passed the same checks.
 
 ## Preserved technical-review evidence
 
@@ -29,6 +36,9 @@ Windows ownership finding and successor fixes are historical evidence, not
 newly repeated tests in this documentation pass. The
 [preserved machine record](../validation/history/OSS_QUALITY_CHECKPOINT-premerge-20261016.json)
 retains exact earlier hashes, counts, policy decisions and dependency notices.
+The [final assessment](OSS_QUALITY_FINAL.md) and
+[issue #14](https://github.com/Smkzz/ResearchWitness/issues/14) record the internal
+engineering acceptance, not scientific qualification.
 
 The review traced Git-index release inventory, portable path/collision/link
 checks, deterministic archive metadata, wheel scope, no-network core behavior,
@@ -60,34 +70,33 @@ fresh checking; zero historical alerts is not a permanently current inventory.
 
 ## Remaining PR integration decisions
 
-The graph below describes the review snapshot, not approval to merge every PR.
+The following work belongs to RW-01; this table is not a blanket merge approval.
 
 | PR | Relationship | Disposition |
 |---|---|---|
-| #5 | Ancestor of #6; its paths persist in the successor | Do not merge separately from its successor; closure still needs a deliberate owner decision. |
-| #6 | Main-based installed/core paper-audit foundation | Reconcile with the now-merged #13 baseline, not the old main. |
-| #7–#11 | Consecutive stack based on #6 through #10 | Evaluate in ancestry order and rerun full combined-candidate gates. |
-| #12 | Based on #11, local UI and offline custody worker | Separate security/authority qualification before integration; no custody grant here. |
-| #13 | Independent source tools and OSS quality branch | Merged, with exact post-merge checks above. |
+| #5 | Ancestor of #6; its paths persist in the successor | Do not merge independently. The agent coordinator may close as superseded after recording ancestry and verifying no unique changes are lost. |
+| #6 | Installed/core paper-audit foundation | Reconcile with current main, preserving #13/#17/#18 fixes. |
+| #7–#11 | Consecutive stack based on #6 through #10 | Evaluate in ancestry order and qualify the combined candidate. |
+| #12 | Based on #11, local UI and offline custody worker | Split ordinary UI integration from separate security/authority qualification; no custody grant here. |
+| #13, #17, #18 | Source tools, documentation and intake hardening | Already merged; preserve their behavior and safeguards. |
 
-The six shared #6/#13 paths are `CHECKSUMS.sha256`, `CONTRIBUTING.md`, `README.md`,
-`SECURITY.md`, `pyproject.toml` and `tools/quality_gate.py`. Resolve them
-semantically: retain both relevant test populations, the source-tool/runtime
-separation, strict release guards, PDF/custody boundaries and scientific limits.
-Regenerate checksums after reconciliation. A conflict-free textual merge is not
-qualification of the combined architecture.
+The original six shared #6/#13 paths are `CHECKSUMS.sha256`, `CONTRIBUTING.md`,
+`README.md`, `SECURITY.md`, `pyproject.toml` and `tools/quality_gate.py`. Refresh
+this list against live branches. Resolve overlaps semantically: retain both test
+populations, source-tool/runtime separation, release guards, PDF/custody boundaries
+and scientific limits. Regenerate checksums after reconciliation. A conflict-free
+textual merge is not qualification of the combined architecture.
 
-Routine dependency-update PRs are separate from the reviewed source changes.
-Their mere presence is not a vulnerability, nor permission to skip their checks.
+Routine dependency-update PRs are separate work. Their presence is neither proof
+of a vulnerability nor permission to skip required exact-head checks.
 
 ## Ongoing documentation review
 
-Post-merge corrections resolve stale state, setup omissions, checksum steps,
-exit-code ambiguity and byte-offset units. Fixed synthetic examples and
-version/link/status contracts are tested, without executing arbitrary Markdown
-or downloading research documents. New findings must be corrected and the exact
-corrective commit checked before claiming current documentation acceptance.
+Maintain current interfaces, setup, checksum steps, exit-code semantics and byte
+offsets. Test fixed synthetic examples and version/link/status contracts without
+executing arbitrary Markdown or downloading research documents. Every corrective
+commit needs its own checks before current acceptance is claimed.
 
-The [initial audit](OSS_QUALITY_AUDIT.md) and scientific-development records remain
-historical. No separate human review, release, Wave 3 or real PDF qualification
-is implied by this maintenance work.
+The [initial audit](OSS_QUALITY_AUDIT.md) and frozen scientific-development records
+remain historical. No new human review, release, Wave 3 or real PDF qualification
+is implied by adopting the autonomous development plan.

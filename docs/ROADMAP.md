@@ -1,79 +1,73 @@
 # Roadmap
 
+The authoritative implementation plan is [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md),
+identifier `RW-PLAN-2026-10-24`. Agents start at [AGENTS.md](../AGENTS.md), then read
+[EXECUTION_STATE.json](EXECUTION_STATE.json). This page is the navigation summary,
+not a second independently maintained task list.
+
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-PR #13 is merged into `main`. The [project-status index](PROJECT_STATUS.md)
-records its merge identity and post-merge checks. Current software includes:
-
-- Agent-prepared intake, ten bounded verifier families and deterministic
-  evidence capsules, JSON/HTML reports and private evidence export.
-- Source-checkout JATS count/percentage auditing, comparison of source-bound
-  annotations and supplied runs, exact percentage-feasibility helpers and
-  guarded public metadata discovery.
-- Portable Git-index release inventory, source hashes, cross-platform Python
-  CI, Ruff, coverage reporting and an enforced verifier-core coverage floor.
-- Conservative author-inquiry drafting only; no external sending or publishing.
-
-The internal 10/10 engineering assessment is owner-accepted AI review, not an
-independent human audit or scientific coverage claim. Current PDF extraction
-remains unqualified, and Windows managed acquisition remains blocked until its
-ACL ownership guard is reviewed. The installed verifier is separately tested
-on Windows. Merged code is still **not a tagged or PyPI release**.
+The observed pre-plan main is `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a` (2026-10-17).
+PR #13, post-merge documentation #17 and intake/export hardening #18 are integrated.
+There is a dependency-free verifier with ten bounded families, intake and evidence
+replay/export, plus checkout-only JATS arithmetic and guarded metadata tools.
+See [PROJECT_STATUS.md](PROJECT_STATUS.md) for identities and observed checks.
+No published package, general paper checker or independent accuracy is implied.
 
 ## Integration work
 
-PR #13 does not replace the separate installed paper-audit architecture in
-PR #6–#12. Reconcile #6 with the merged baseline, preserve both required test
-populations and trust boundaries, then evaluate #6–#11 in ancestry order.
-PR #5 is an earlier ancestor of #6; do not integrate both as independent work.
-PR #12's local UI and custody worker require a separate security/authority review.
-The [maintainer review](OSS_MAINTAINER_REVIEW.md) records the six overlapping
-repository files and the original exact heads. No remaining PR is approved
-merely by being later in that sequence.
+RW-01 reconciles #6-#11 with current main, preserving both test populations and
+trust boundaries. #5 is an ancestor, not duplicate work to merge independently.
+#12's UI and protected custody worker are reviewed separately. Dependencies and
+PR dispositions must be based on the actual current heads, not old summaries.
+Do not discard main's later security/intake/export fixes during integration.
+
+## Planned delivery
+
+1. **M1:** coherent installed audit flow and honestly scoped engineering preview
+   (RW-01, RW-02, RW-09).
+2. **M2:** qualified custody, independent source curation and benchmark protocol
+   (RW-03, RW-04, RW-05).
+3. **M3:** source-bound claim compiler, bounded adversarial search and verified
+   certificates, compared under fixed resources (RW-06, RW-07, RW-08, RW-10).
+4. **M4:** one sealed evaluation and evidence-based research release (RW-11, RW-12).
+
+Safe RW-03 preparation and RW-04 can run alongside RW-01. A blocked PDF/provider
+path must not stop independent JATS development. These are planned deliverables,
+not capabilities made available by updating documentation.
 
 ## Next scientific validation gate
 
-Freeze the detector before selecting new evaluation material. Preserve the
-15-corrigendum mechanism screen and distinguish representability, extraction,
-arithmetic checking, adjudication and end-to-end rediscovery.
+Freeze protocol and candidate before confirmatory selection/output exposure.
+Historical percentage studies and source reviews remain developer-exposed.
+Keep failed samples, missing sources, parser refusals, partial censuses, false
+formalizations and unresolved labels in the accounting. Do not turn a positive
+formalization-level certificate into a claim about an entire paper.
 
-Existing percentage experiments and manually/model-reviewed cases are
-**developer-exposed**. The earlier eight-document v1 sample failed its minimum;
-the separate v2 descriptive study met its own development minima. Neither
-establishes independent precision or recall. The last recorded v3 acquisition
-was blocked before selection. These historical outcomes are not repaired by
-a new documentation or software commit.
-
-Further work must:
-
-1. Obtain source-pinned, legally usable evidence and explicitly record unavailable
-   inputs, versions, licenses, family overlap and parser refusals.
-2. Keep development and sealed holdout material separate; do not promote exposed
-   cases to untouched evidence.
-3. Measure missed relationships, unsupported inputs, false formalizations,
-   denominator errors, abstention, repeatability and effort per defensible finding.
-4. Run independent qualification through the authorized custodian, not by giving
-   developers access to reserved identities or labels.
-
-The existing v1.3 custody requirement remains at least one eligible untouched
-correction-backed positive and 50 accepted correct-negative relationships across
-15 independent works. Acceptance and isolation have not been established by
-this documentation repair. Wave 3 is not run or authorized here.
+The legacy v1.3 custody minimum remains one eligible untouched correction-backed
+positive and 50 accepted correct-negative relationships across 15 independent
+works. It is not sufficient by itself for the new comparative accuracy study.
+Use [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md) to preregister the new design.
+Scientific Wave 3 has not run. AI review is allowed but must be identified as AI
+review; model consensus does not establish ground truth or custody independence.
 
 ## Release gate
 
-Do not tag or publish `0.3.0` until the exact candidate passes the engineering
-and applicable scientific gates and a release is separately authorized.
-[RELEASING.md](RELEASING.md) defines the developer/build procedure and exact-head
-checks. Green CI and an internal engineering score alone are not scientific
-release qualification.
+Agents have standing authority for routine safe, zero-cost merges and scoped
+engineering previews after exact-head checks. No additional owner opinion or
+ceremonial approval is required. New spending or safety-sensitive authority
+changes still need a decision. [RELEASING.md](RELEASING.md) defines the procedure.
 
-## Later
+A preview must disclose its unsupported capabilities and unestablished scientific
+performance. A release claiming measured research improvement additionally needs
+its frozen scientific gates. Green CI is not scientific validation; a version
+bump is not qualification. Preserve the existing version until an actual release
+package is deliberately prepared and checked.
 
-Potential research extensions include paper/code consistency, cross-section
-claims, richer statistical relationships and proof-assistant certificates.
-Keep discovery and unsupported reasoning outside the small deterministic
-trust boundary, and integrate only after evidence justifies their scope.
+## Later and non-goals
 
-Automatic public accusations, researcher scoring, misconduct inference and
-automatic author contact are not project goals.
+Paper/code consistency, richer statistics and proof-assistant certificates are
+extensions selected from measured development misses, not an obligation to build
+everything before the first preview. Keep discovery outside the small verifier.
+Automatic accusations, researcher scoring, misconduct inference and author contact
+are not project goals. The conversational "v4" label is not a product version.

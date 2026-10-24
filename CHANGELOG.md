@@ -2,6 +2,22 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Autonomous development plan - 2026-10-24
+
+- Added canonical AGENTS.md, provider/continuation pointers, a 12-package dependency
+  plan, machine-readable execution state, decision log and benchmark specification.
+- Recorded standing autonomous engineering authority: human decisions only for new
+  safety-sensitive authority or actual unauthorized spending; default incremental
+  budget EUR 0. Scientific evidence/security gates are not relaxed.
+- Aligned active status, architecture, roadmap, contribution/release and investigation
+  instructions; distinguished planned compiler/search/benchmark work from available
+  code and engineering previews from scientifically supported claims.
+- Corrected export metadata documentation and changed discovery examples to use fresh
+  campaign paths instead of overwriting historical evidence.
+- Included agent entry points in the source archive inventory and added documentation/
+  task-graph consistency tests. No runtime verifier algorithm, label or frozen study
+  was changed; no planned research component is implemented by this documentation.
+
 ### Public repository audit fixes
 
 - Reserve generated export filenames and their directory prefixes, including

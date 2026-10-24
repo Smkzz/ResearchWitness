@@ -5,43 +5,44 @@
 
 **Open-source research verification with reproducible, source-linked evidence.**
 
-ResearchWitness aims to make independent checking of scientific claims easier.
-The installed core verifies narrowly defined claims after an investigator or
-research agent supplies a formalization and a possible counterexample. Separate
-source-checkout tools extract supported count/percentage relationships from JATS
-XML and produce arithmetic candidates or explicit abstentions.
-
-It does **not** autonomously fact-check an arbitrary paper, authenticate publisher
-origin, establish misconduct, or certify a paper's conclusions.
+The installed core verifies narrowly defined claims after an investigator or agent
+supplies a formalization and possible counterexample. Separate checkout tools
+extract supported JATS count/percentage relationships and report arithmetic
+candidates or explicit abstentions. It does **not** autonomously fact-check any
+paper, authenticate publisher origin, establish misconduct or certify conclusions.
 
 **On main:** `0.3.0.dev0` · **UNRELEASED** · Python 3.11+ · CI tests Python
-3.11–3.13 on Ubuntu, Windows and macOS · installed runtime dependencies: none · Apache-2.0.
+3.11–3.13 on Ubuntu, Windows and macOS · no installed runtime dependencies · Apache-2.0.
+
+## Agent start and development plan
+
+Every development agent starts with **[AGENTS.md](AGENTS.md)**, then
+[the current status](docs/PROJECT_STATUS.md), [the development plan](docs/DEVELOPMENT_PLAN.md)
+and [the execution ledger](docs/EXECUTION_STATE.json). The active plan is
+`RW-PLAN-2026-10-24`: consolidate existing implementations, establish a benchmark,
+add source-bound claim proposals and bounded adversarial search, then measure them.
+The plan revision and informal "v4" vision are not package versions or implemented
+features. [Continuation instructions](prompts/CONTINUE.md) resume the same queue.
+
+Agents make ordinary technical choices, review and qualified merges autonomously.
+Only new safety-sensitive authority or actual unauthorized money use needs a human
+decision. Evidence and security gates remain mandatory; missing scientific evidence
+is not replaced by an opinion. Default incremental spending authorization is EUR 0.
 
 ## Status
 
-PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged into `main` on
-2026-10-16. Its post-merge CI and CodeQL passed. Merging is not a package release:
-no PyPI publication or tagged GitHub Release is claimed for `0.3.0.dev0`.
+PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed
+by documentation #17 and intake/export consistency #18. The observed pre-plan main
+is `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a` (2026-10-17), with passing main CI/CodeQL.
+See [project status](docs/PROJECT_STATUS.md) for exact receipts; this is not a claim
+that an untested later head passed. No tagged release or PyPI publication is claimed.
 
-The owner's internal ten-category engineering assessment accepts the disclosed
-AI-assisted technical review. It is not an independent human audit, external
-security certification, or scientific-performance evaluation. See
-[project status](docs/PROJECT_STATUS.md) for the pinned merge/check identities,
-[current engineering assessment](docs/OSS_QUALITY_FINAL.md) and
-[roadmap](docs/ROADMAP.md) for pending research and integration work.
-
-Real PDF extraction and Windows managed metadata discovery remain unavailable
-until their documented isolation/ownership requirements are qualified. Sealed
-holdout evaluation and scientific Wave 3 have not run. The separate PR #6–#12
-paper-audit/custody stack is **not included** in the merged PR #13 implementation.
-
-## What we are building
-
-The long-term workflow is: paper → identify checkable claims → investigate
-possible discrepancies → verify supported findings → return reproducible evidence
-and uncertainty. Candidate discovery and deterministic verification are different
-jobs. ResearchWitness keeps them separate rather than treating an AI opinion as
-proof.
+The internal 10-category engineering assessment used owner-accepted AI review,
+not an independent human audit, security certification or scientific evaluation.
+[Its report](docs/OSS_QUALITY_FINAL.md) is a pinned record. PR #6-#12 remains a separate
+unmerged paper-audit/UI/custody stack. Real PDF extraction and Windows managed
+metadata acquisition remain unavailable until their boundaries are qualified.
+Scientific Wave 3 and sealed confirmatory evaluation have not run.
 
 ## Current MVP loop
 
@@ -49,27 +50,20 @@ proof.
 paper and source material
     -> investigator / research agent: claim, assumptions, proposed witness
     -> structured intake with source anchors
-    -> deterministic verification and immutable evidence bundle
-    -> JSON report, optional HTML report and reproducible private ZIP
+    -> deterministic verification and evidence bundle
+    -> JSON report, optional HTML and reproducible private ZIP
 ```
 
-A separate source-checkout path scans supported JATS tables for arithmetic
-relationships. Neither path sends email or publishes findings. The installed
-core can prepare a conservative inquiry draft; sending always remains outside
-this software.
-
-## Why this split exists
-
-A result such as `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` proves something about
-the supplied formalization and witness. `paper_error_established` still remains
-`false`: source authenticity, interpretation, assumptions and scientific impact
-are separate questions. An unsupported input is rejected or leads to abstention,
-not a guessed positive conclusion.
+The long-term source-to-discovery goal is broader than this implementation.
+Candidate discovery, source interpretation and mathematical verification are
+different jobs. `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` proves something about the
+supplied formalization/witness; `paper_error_established` remains `false`.
+Unsupported inputs are rejected or abstained on, not guessed into a positive.
 
 ## Quick start
 
-Install from a source checkout; this candidate is not advertised as available on
-PyPI. You need Python 3.11+ and Git on PATH. From your chosen working directory:
+Install from source; this candidate is not advertised as available on PyPI.
+You need Python 3.11+ and Git on PATH:
 
 ```text
 git clone https://github.com/Smkzz/ResearchWitness.git
@@ -77,8 +71,8 @@ cd ResearchWitness
 python -m venv .venv
 ```
 
-Activate on macOS/Linux with `source .venv/bin/activate`, or on Windows PowerShell
-with `.venv\Scripts\Activate.ps1`. Then install the core:
+Activate with `source .venv/bin/activate` on macOS/Linux or
+`.venv\Scripts\Activate.ps1` in Windows PowerShell, then:
 
 ```text
 python -m pip install .
@@ -87,219 +81,169 @@ python -m researchwitness capabilities --json
 python -m researchwitness schema intake
 ```
 
-Run this **synthetic** example from the repository root. The single-line command
-works in Bash and PowerShell:
+From the repository root run this **synthetic** example:
 
 <!-- docs-smoke: core -->
 ```text
 python -m researchwitness verify examples/counterexample --as-of 2026-10-04
 ```
 
-Expected: exit 0, `decision: FORMALIZATION_COUNTEREXAMPLE_VERIFIED`, and
-`paper_error_established: false`. The fixed date makes this fixture repeatable;
-it is not the capture date for a new real research case.
+Expected: exit 0, `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` and
+`paper_error_established: false`. The fixed date makes the fixture replayable;
+it is not the capture date of a new research finding.
 
-### Exit codes and result interpretation
+### Exit codes and interpretation
 
-Exit 0 means the requested evaluation completed, **not** that an error was found.
-For example, `NO_REFUTATION_AT_WITNESS` is a valid completed evaluation.
-`validate-intake` can return `valid: true` with that `witness_status`. Inspect
-`decision` or `witness_status`, the source/provenance fields and contact readiness
-separately. Malformed core input normally exits 2 with `decision: INVALID` on
-stderr; argument errors also exit 2 and may instead show argparse usage.
+Exit 0 means evaluation completed, not that an error was found.
+`NO_REFUTATION_AT_WITNESS` is a valid result; `validate-intake` may return
+`valid: true` with that witness status. Inspect verdict, source context and readiness
+separately. Malformed core inputs normally exit 2 with `INVALID`; argument errors
+also exit 2 and may show argparse usage. JATS/PDF audits exit 0 for completed
+processing (including abstentions), 2 for unsupported/failed extraction, and the
+comparison's `--require-no-regression` exits 3 for its development-gate failure.
+None establishes paper-level truth or contact authority.
 
-For JATS/PDF source audits, exit 0 means processing completed; inspect the counts,
-findings and abstentions. Unsupported/failed extraction exits 2. The comparison
-command with `--require-no-regression` exits 3 when its development gate fails.
-None of these codes establishes scientific truth or author-contact authority.
+### Prepare a case, replay and export
 
-### Create and inspect an intake
+Use fresh output directories:
 
 ```text
 python -m researchwitness scaffold finite_map_fixed_point --output work/fixed-point
 python -m researchwitness validate-intake work/fixed-point/audit.json
-```
-
-Use a fresh output directory. The scaffold is synthetic, with an unchecked
-correction search and an unresolved objection. Do not relabel it as real evidence.
-To create and replay a bundle from this scaffold:
-
-```text
 python -m researchwitness audit work/fixed-point/audit.json --output work/fixed-point-bundle --as-of 2026-10-04
 python -m researchwitness verify work/fixed-point-bundle --as-of 2026-10-04
-```
-
-The bundle can be inspected and replayed independently. The `audit` workflow
-checks declared source/correction files, quote anchors, witness semantics and
-hashes. It does not independently authenticate where the source came from.
-
-### Reports and evidence export
-
-Use a new output filename for the deterministic private ZIP; report/draft output
-paths should be chosen deliberately and their parent directories must exist.
-
-```text
 python -m researchwitness report work/fixed-point-bundle --as-of 2026-10-04 --output work/fixed-point-report.html
 python -m researchwitness pack work/fixed-point-bundle --as-of 2026-10-04 --output work/fixed-point-evidence.zip
 ```
 
-`contact-draft` is available only when conservative readiness checks pass. The
-synthetic scaffold above intentionally remains `NOT_READY`. Do not remove its
-objections to present it as a research finding. With a genuinely eligible bundle,
-`python -m researchwitness contact-draft BUNDLE --as-of YYYY-MM-DD --output inquiry.txt`
-writes a draft requiring user review; it never sends mail.
+The scaffold is synthetic, with an unchecked correction search and unresolved
+objection; do not remove objections to present it as real evidence. Report/draft
+parent directories must exist. The deterministic ZIP needs a new output filename.
+Packing includes only manifested artifacts and reserved generated metadata, not
+an entire directory. Intake/verification/export share bounded validation.
 
 ## Agent intake format
 
-A research agent supplies `audit.json` beside the referenced source files.
-The complete schemas are available through `python -m researchwitness schema intake`
-and [schemas/intake.schema.json](schemas/intake.schema.json). The intake records
-source identifier/version, capture assertion, correction-search evidence, one
-atomic claim, assumptions, exclusions, exact quote, formalization, witness and
-unresolved objections. See [the agent protocol](prompts/AGENT_PROTOCOL.md).
+The agent supplies `audit.json` beside referenced source files. Schemas are available
+through `python -m researchwitness schema intake` and
+[schemas/intake.schema.json](schemas/intake.schema.json). Record exact source/version,
+capture assertion, correction evidence, one atomic claim, assumptions/exclusions,
+quote, formalization, witness and unresolved objections. Follow
+[the investigation protocol](prompts/AGENT_PROTOCOL.md).
 
-If a quote occurs more than once, provide `quote_offset`: a **zero-based byte
-offset into the original supplied source bytes**, matching the UTF-8 encoded
-quote. It is not a character offset; a multibyte prefix changes the relationship
-between the two. ResearchWitness does not silently choose a repeated occurrence.
+`quote_offset` is a **zero-based byte offset into original source bytes**, matching
+the UTF-8 quote, not a character index. Supply it when the quote repeats. A source
+hash or quote match establishes byte consistency, not publisher authenticity.
 
 ## Deterministic verifier plugins
 
-`capabilities --json` describes ten bounded checker families and their exact
-input contracts, limits, proof scope and synthetic replay examples:
+`capabilities --json` lists ten bounded families with contracts, limits and examples:
 
-| Family | What the supplied witness can establish |
+| Family | Scope of the supplied witness |
 |---|---|
 | Scalar/radical comparison | Exact rational comparison with certified square-root enclosures. |
-| Polynomial upper-bound witness | Evaluation of a polynomial at a supplied bounded-domain point. |
-| Rational-expression upper-bound witness | Exact evaluation of a closed rational AST at one point, not a global inequality. |
-| Binary UC functional | The QEH-derived finite independent-source regression check. |
-| Finite-field polynomial solution-count residue | Exhaustive enumeration under an explicit hard work budget. |
-| Quadratic/quartic residue rule | Parameter residue classification and the associated point-count check. |
-| Finite self-map fixed-point conclusion | Whether the explicit finite map has a fixed point; theorem premises remain separate. |
-| Finite graph chromatic lower bound | A supplied proper coloring refutes a larger claimed lower bound; no optimal-coloring search. |
-| Finite PMF bound | Exact event probability or expectation of a supplied finite distribution, not population inference. |
-| Modular linear-system certificate | A supplied solution or left-annihilator certificate over the encoded modular system. |
+| Polynomial upper-bound witness | Polynomial evaluation at a supplied bounded-domain point. |
+| Rational-expression upper-bound witness | Exact closed rational AST evaluation at one point, not a global inequality. |
+| Binary UC functional | QEH-derived finite independent-source regression check. |
+| Finite-field polynomial solution-count residue | Exhaustive enumeration under a hard work budget. |
+| Quadratic/quartic residue rule | Parameter residue classification and point-count check. |
+| Finite self-map fixed-point conclusion | Fixed points of an explicit finite map; theorem premises stay separate. |
+| Finite graph chromatic lower bound | A supplied proper coloring refutes a larger lower bound; no optimal search. |
+| Finite PMF bound | Event probability/expectation for a supplied distribution, not population inference. |
+| Modular linear-system certificate | A supplied solution or left-annihilator certificate for the encoded system. |
 
-The graph checker supports 1–256 vertices and up to 8,192 edges. Rational-expression
-syntax and budgets are in [EXPRESSION_DSL.md](docs/EXPRESSION_DSL.md). Every family
-has a replayable [synthetic example](examples/). Unsupported mathematics is not
-approximated into a misleading scalar check.
+The graph checker accepts 1–256 vertices and at most 8,192 edges. See
+[EXPRESSION_DSL.md](docs/EXPRESSION_DSL.md), [PROTOCOL.md](docs/PROTOCOL.md) and
+[synthetic examples](examples/). Unsupported mathematics is not approximated into
+an unrelated scalar check. Future certificate extensions follow RW-08.
 
 ## Source-checkout research-audit tools
 
-The wheel installs `researchwitness`, not `tools/`. From the **repository root**,
-in the activated environment, install the optional development dependencies:
+The wheel installs `researchwitness`, not `tools/`. From the **repository root** in
+the activated environment install optional development dependencies:
 
 ```text
 python -m pip install -e '.[dev]'
 ```
 
-These include `jsonschema` for the source-tool contracts. A core-only
-`python -m pip install .` is not sufficient for this workflow. Source-tool
-commands below remain outside the trusted verifier core.
+These include `jsonschema`; a core-only install is not sufficient for source tools.
 
 ### Offline JATS audit
 
-Try the bundled invented fixture without retrieving any real paper:
+Use the invented local fixture without a network request:
 
 <!-- docs-smoke: jats -->
 ```text
 python -m tools.research_audit audit examples/synthetic-jats/article.xml --document-id synthetic-jats --format jats --json-output out/synthetic-jats/audit.json --markdown-output out/synthetic-jats/audit.md
 ```
 
-Expected: two tables, three relationships, **one arithmetic match, one mismatch
-candidate and one abstention**. `4/50` is `8.00%`; the fixture deliberately prints
-`8.10%` once. Its other table has no explicit denominator, so calculation is
-withheld. Every finding remains `unreviewed` with scientific error
-`not_established`; provenance is `unverified_local`.
+Expected: two tables, three relationships, one arithmetic match, one mismatch
+candidate and one abstention. `4/50` is `8.00%`; one fixture row prints `8.10%`.
+The other table lacks an explicit denominator. All findings stay `unreviewed`,
+scientific error `not_established`, and provenance `unverified_local`.
 
-The command writes JSON and Markdown, creates output directories, and makes no
-network request. Repeating identical inputs to the same output paths is allowed;
-it refuses to replace different existing reports. Use a fresh output directory
-when inputs or detector code change. Replace the fixture path and document ID
-with your own permitted source to audit a real document, without changing the
-provenance assertions unless supported by evidence.
-
-For input limits, source-bound comparisons and conditional calculations, see
-[OFFLINE_RESEARCH_AUDIT.md](docs/OFFLINE_RESEARCH_AUDIT.md).
+The command creates JSON/Markdown directories and repeats identical outputs
+idempotently; different existing reports are not overwritten. Use fresh outputs
+when inputs/code change. Own permitted sources need honest provenance assertions.
+See [OFFLINE_RESEARCH_AUDIT.md](docs/OFFLINE_RESEARCH_AUDIT.md) for limits and comparison.
 
 ### Public metadata discovery
 
-The collector retrieves metadata leads through approved HTTPS services and the
-inherited managed proxy; it does not retrieve full-text papers or prove that a
-correction applies. It enforces rate, response and redirect boundaries and stops
-on access/transport failure rather than switching routes. Windows managed
-discovery is unavailable pending a reviewed ACL ownership guard; this does not
-remove Windows support for the installed verifier core. Follow
-[SCIENTIFIC_CANDIDATE_REVIEW.md](docs/SCIENTIFIC_CANDIDATE_REVIEW.md).
-Developer-exposed discoveries never become untouched holdout evidence.
+The separate collector retrieves leads through approved HTTPS services and inherited
+managed proxy controls, not paper full text. Rate/response/redirect limits remain;
+access denial is not bypassed by a different route. Windows discovery remains blocked
+pending ACL qualification, separately from installed-core Windows support. Follow
+[SCIENTIFIC_CANDIDATE_REVIEW.md](docs/SCIENTIFIC_CANDIDATE_REVIEW.md). Development-discovered
+cases never become untouched holdouts merely by being reviewed later.
 
 ### PDF aid
 
-Real PDF extraction is **not qualified**. It requires a reviewed SHA-256-pinned
-local Poppler image and a qualified Docker isolation boundary. There is no host
-Poppler fallback. Do not use it on protected evaluation material; synthetic runner
-tests cannot establish real sandbox qualification. See
-[PDF_SANDBOX_QUALIFICATION.md](docs/PDF_SANDBOX_QUALIFICATION.md).
+Real PDF extraction is **not qualified**. It needs a reviewed SHA-256-pinned minimal
+Poppler image and real Docker isolation/resource/cleanup evidence. There is no host
+fallback. Mock tests do not lift the gate. See
+[PDF_SANDBOX_QUALIFICATION.md](docs/PDF_SANDBOX_QUALIFICATION.md); do not use developer
+aids on protected evaluation material.
 
-## Real-paper validation
+## Real-paper validation and benchmark
 
-Committed historical executable fixtures include the 2007 elliptic-curve
-corrigendum over `F_29` and a 2012 finite-map conclusion: `c=4` gives 40 points,
-`c=7` gives 20, and the two-state swap has no fixed point while an unencoded
-theorem premise remains an objection. The three replay cases are development
-reproductions, not three untouched discoveries.
+The executable historical fixtures include a 2007 elliptic-curve corrigendum over
+`F_29` and a 2012 finite-map conclusion. These three replay cases are development
+reproductions, not untouched discoveries. Earlier 0.2.0 notes also mention cases
+whose runnable bundles are absent from the recovered tree; they are historical
+claims, not freshly reproduced evidence. The frozen 15-case mechanism screen is
+not an end-to-end paper benchmark. See [validation assets](validation/) and
+[the historical record](docs/VALIDATION.md).
 
-Earlier 0.2.0 notes mention network-reliability and QTT-Tucker mechanisms whose
-runnable bundles are absent from this recovered tree. They are historical claims,
-not freshly reproduced cases. The frozen 15-corrigendum screen is a mechanism map:
-2/15 fully representable, 2 mechanism-only, 1 partial and 10 unsupported. It is
-not a 15-paper end-to-end benchmark. See [validation assets](validation/) and the
-[historical MVP record](docs/VALIDATION.md).
-
-The recorded v1/v2 percentage experiments are developer-exposed; their sample
-failures, partial reference census and adjudication limits remain unchanged.
-No independent precision/recall estimate or general scientific correctness claim
-follows from those experiments or from passing software tests.
+The v1/v2 percentage studies remain developer-exposed, with their failures and
+adjudication limits preserved. They establish no independent general precision/
+recall. [BENCHMARK_PROTOCOL.md](docs/BENCHMARK_PROTOCOL.md) specifies future measurement;
+it is not an already frozen or completed evaluation.
 
 ## Contact readiness
 
-`READY_FOR_USER_REVIEW` means a deterministic counterexample exists for the
-supplied formalization, capture is asserted, correction evidence is recent and
-reports none found, and unresolved objections are absent. It does not mean the
-source is authenticated, the interpretation is uniquely correct, a whole paper
-is false or a person should automatically be contacted.
-`author_contact_authorized` is always `false`.
+`READY_FOR_USER_REVIEW` is the unchanged legacy draft-readiness result. It requires
+a verified formalization counterexample and conservative context gates; it does
+not authenticate the source, resolve all possible interpretations or authorize
+contact. `author_contact_authorized` stays `false`. For an eligible bundle,
+`python -m researchwitness contact-draft BUNDLE --as-of YYYY-MM-DD --output inquiry.txt`
+creates a local draft. An agent may prepare it autonomously; sending remains outside
+this software and needs a separate safety decision. The synthetic scaffold stays
+`NOT_READY` intentionally. Never remove its objections to manufacture eligibility.
 
-## Evidence integrity
+## Evidence integrity and security
 
-Bundles bind source bytes, quote byte offsets, formalization, witness,
-correction-search evidence, objections and SHA-256 manifests. `subject_sha256`
-commits to the verification question; `bundle_sha256` commits to the bundle.
-A separately trusted `--expected-bundle-sha256` pin detects changes to supplied
-bytes, not whether the original evidence was true or authentically sourced.
-
-## Security model
-
-The core has no network, LLM client, optimizer, paper-code execution or arbitrary
-bundle-code loading. It rejects or bounds duplicate JSON keys, floats, unsafe
-paths and links, special files, oversized input and excessive mathematical work.
-Read [SECURITY.md](SECURITY.md) for the trusted-local-process and quiescent-directory
-assumptions, including what the implementation does not protect against.
-
-## Contributing
-
-Start with [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-and the issue templates. Report security-sensitive information privately using
-[SECURITY.md](SECURITY.md); never upload credentials, private correspondence,
-restricted manuscripts or protected evaluation records to public issues.
+Bundles bind source bytes/quote offsets, formalization, witness, correction evidence,
+objections and manifests. `subject_sha256` commits to the verification question;
+`bundle_sha256` to the bundle. A separately trusted expected-bundle hash detects
+later byte changes, not original truth. The core has no network, LLM, optimizer,
+paper-code execution or dynamic loading. It rejects/bounds unsafe JSON, paths/links,
+special files, excessive inputs and work. Read [SECURITY.md](SECURITY.md) for local
+process, quiescent-directory and source-origin assumptions.
 
 ## Development
 
-Use a real Git checkout with Git on PATH and the activated virtual environment.
-The release gate uses `--no-build-isolation`, so install its declared backend
-explicitly in that environment before qualification:
+Use a real Git checkout with Git on PATH and the activated environment. The release
+gate uses `--no-build-isolation`, so install its backend explicitly:
 
 ```text
 python -m pip install 'setuptools>=68'
@@ -313,21 +257,11 @@ python validation/mvp_real/run_validation.py
 python tools/quality_gate.py
 ```
 
-After editing selected files, follow [RELEASING.md](docs/RELEASING.md) to stage
-intended changes and regenerate checksums before the release gate. Never use
-blanket staging to collect caches or private research. CI checks supported
-platforms, lint, coverage and reproducible artifacts. The whole-repository
-coverage report is retained separately from the enforced verifier-core floor.
-
-## Documentation and current product boundary
-
-[Project status](docs/PROJECT_STATUS.md) separates current capabilities from
-historical evidence. [The final quality assessment](docs/OSS_QUALITY_FINAL.md)
-is the internal owner-accepted AI engineering review; [the initial audit](docs/OSS_QUALITY_AUDIT.md)
-is explicitly historical. New changes require their own checks.
-
-The long-term paper-to-report goal remains broader than the current implementation.
-See [ROADMAP.md](docs/ROADMAP.md) for scientific evaluation and unmerged work.
+Follow [CONTRIBUTING.md](CONTRIBUTING.md) and [RELEASING.md](docs/RELEASING.md) for
+reviewed staging, checksum regeneration, exact-head checks and qualified releases.
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and issue templates apply. Do not post private
+material or sensitive security reports publicly. Current capabilities are indexed
+in [PROJECT_STATUS.md](docs/PROJECT_STATUS.md); historical evidence stays unchanged.
 
 ## License
 
