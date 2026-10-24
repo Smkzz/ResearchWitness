@@ -1,0 +1,17 @@
+{
+  "implementation_sha256": "bfc12a2f371c73aa985be3b5447843fb05ee696a720d20f2fe1f83bf093ca2db",
+  "max_calls": 2,
+  "max_cost_micro_eur": 0,
+  "max_elapsed_ms": 1000,
+  "registry_sha256": "d50970fb826edb1a9f9b1a2f6dbc1489c02ecf885bc7d179ffffcaf1e5281710",
+  "schedule": [
+    "p1",
+    "p1v2",
+    "p2",
+    "n1",
+    "n2",
+    "u1",
+    "x1"
+  ],
+  "schema_version": "rw-development-protocol.v1"
+}

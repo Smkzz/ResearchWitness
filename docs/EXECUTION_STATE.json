@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a",
+    "observed_main_sha": "32a8f20f0f64a0dd6c6e9c9cb8a0a4c4e3e12732",
     "observed_on": "2026-10-24",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Pre-plan observed software baseline; refresh live state before writes. This is not a claim that later commits passed checks."
+    "note": "Pre-implementation observed baseline. First partial slices are recorded below; containing PR supplies exact-head checks. Refresh live state before writes."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -72,8 +72,19 @@
       "base_sha": null,
       "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-01---consolidate-the-existing-implementations",
-      "evidence": [],
-      "blocker": null
+      "evidence": [
+        "docs/IMPLEMENTATION_2026-10-24.md"
+      ],
+      "blocker": null,
+      "completed_slices": [
+        {
+          "id": "RW-01A",
+          "scope": "operand-only 2x2 helper, not complete paper-audit integration",
+          "implementation": "researchwitness/paper_statistics.py",
+          "tests": "tests/test_paper_statistics_integration.py"
+        }
+      ],
+      "next_action": "Reconcile canonical source/JATS representation and preserve source-mapped detector tests."
     },
     {
       "id": "RW-02",
@@ -100,14 +111,21 @@
       "depends_on": [],
       "required_capability_gates": [],
       "role": "security-isolation",
-      "status": "ready",
+      "status": "blocked_external",
       "owner": null,
       "branch": null,
       "base_sha": null,
       "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-03---qualify-execution-and-custody-boundaries",
-      "evidence": [],
-      "blocker": null
+      "evidence": [
+        "docs/IMPLEMENTATION_2026-10-24.md"
+      ],
+      "blocker": {
+        "category": "environment",
+        "reason": "No Docker CLI or native Windows ACL execution in this Linux runtime; delegated local command initialization failed before execution. No actual PDF/custody qualification attempted.",
+        "unlock_condition": "Use an already authorized working native runtime and collect the separate image/isolation, ACL and protected-custody receipts; new privileges or spend require a bounded safety/cost decision.",
+        "next_unblocked_task": "RW-01"
+      }
     },
     {
       "id": "RW-04",
@@ -122,8 +140,19 @@
       "base_sha": null,
       "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-04---benchmark-protocol-and-harness",
-      "evidence": [],
-      "blocker": null
+      "evidence": [
+        "docs/IMPLEMENTATION_2026-10-24.md"
+      ],
+      "blocker": null,
+      "completed_slices": [
+        {
+          "id": "RW-04A",
+          "scope": "development receipt accounting, not certificate replay or a complete benchmark",
+          "implementation": "tools/verification_benchmark.py",
+          "tests": "tests/test_verification_benchmark.py"
+        }
+      ],
+      "next_action": "Implement registered execution and actual audit/verifier adapters, schemas and frozen evaluation design."
     },
     {
       "id": "RW-05",
