@@ -1,55 +1,66 @@
-# RW-01 integration map - first bounded slice
+# RW-01 integration map
 
-**Observed baseline:** `32a8f20f0f64a0dd6c6e9c9cb8a0a4c4e3e12732` (plan adopted).  
-**Stack tip inspected:** PR #11, `6843593ff443d4a44c48d15a76949b323d0951ca`.  
+**Current slice baseline:** `b2d4863d28e037d35bd8052997e6b02318977771` (PR #20).  
+**Legacy stack tip inspected:** PR #11, `6843593ff443d4a44c48d15a76949b323d0951ca`.  
 **Common ancestor:** `65c814c02ec3e3b8f427ad095986a258470b8f80`.
 
-The GitHub comparison reports 22 stack-side commits and 39 main-side commits.
-This is diverged history, not a fast-forward. Its large file response is not a
-complete reviewed inventory. No blanket merge, PR closure, force-push, historical
-corpus import or replacement of current core/security/release files was performed.
-RW-01 remains incomplete. Follow [the plan](DEVELOPMENT_PLAN.md) and
-[execution state](EXECUTION_STATE.json).
+The earlier comparison from plan head `32a8f20f0f64a0dd6c6e9c9cb8a0a4c4e3e12732`
+reported 22 stack-side and 39 main-side commits. That is a dated divergence record,
+not the current commit count or a complete reviewed inventory. No blanket merge,
+legacy PR closure, force-push, historical corpus import or replacement of current
+core/security/release files has occurred. RW-01 remains incomplete. Follow
+[the plan](DEVELOPMENT_PLAN.md) and [execution state](EXECUTION_STATE.json).
 
-## Landed slice: operand-only 2x2 arithmetic
+## RW-01A: operand-only 2x2 arithmetic
 
-`researchwitness/paper_statistics.py` reuses the small standalone calculator from
-PR #11. Original blob: `9ebcb2fd47f76b5c5100e0f2b4ba3e6cb6718da6`.
-Original source: [pinned module](https://github.com/Smkzz/ResearchWitness/blob/6843593ff443d4a44c48d15a76949b323d0951ca/researchwitness/paper_statistics.py).
+`researchwitness/paper_statistics.py` reuses the standalone calculator from PR #11,
+original blob `9ebcb2fd47f76b5c5100e0f2b4ba3e6cb6718da6`. It computes crude risk ratios,
+odds ratios and differences in proportions from explicit unadjusted counts. It is
+an installed Python helper, not a new trusted `checkers.KINDS` family or paper-audit
+CLI. Four upstream scenario groups and malformed-input/context regressions remain
+in `tests/test_paper_statistics_integration.py`. Fully specified Decimal contexts
+and exact differential checks protect it from mutable ambient rounding settings.
+See the preserved [first-slice receipt](IMPLEMENTATION_2026-10-24.md).
 
-It computes crude risk ratios, odds ratios and differences in proportions from
-four supplied nonnegative integer counts under explicit unadjusted context. It
-returns arithmetic consistency, an arithmetic candidate or unsupported. It does
-not parse a paper, authenticate a source, establish scientific applicability or
-add a new trusted `checkers.KINDS` family. It is available as an installed Python
-helper, not a new paper-audit CLI command. The existing ten checker families and
-runtime proof/status contracts are unchanged.
+## RW-01B: canonical source evidence, without replacing the parser
 
-The four existing upstream 2x2 scenarios are retained in
-`tests/test_paper_statistics_integration.py`: RR/OR/difference, mismatch, adjustment/
-zero-cell policy, and half-up/count bounds. Additional cases reject non-string
-reported values, truthy non-boolean context flags and malformed counts. Rounding,
-tolerance and difference formatting use a fully specified Decimal context, including
-traps/exponent limits, so neither thread context nor mutable `DefaultContext` changes
-results. A second agent identified the DefaultContext defect; the new regression
-failed before repair and passed afterward. A fixed-seed differential test checks
-300 bounded calculations against independent exact Fraction/integer rounding.
+`researchwitness/paper_document.py` is copied byte-for-byte from legacy blob
+`4a000cb423de3d45811f64ed942b0d9425f373ef`. `tools/jats_source_adapter.py` uses its
+immutable `SourceAnchor` and `NumericAssertion` contracts with the **current main**
+JATS detector. The legacy parser normalizes XML before parsing; importing it as a
+replacement would not preserve the current original-byte anchor semantics.
+It is therefore not imported or enabled by this slice.
+
+The bridge reconstructs element identity, complete normalized quotes and operand
+bindings from captured original bytes; explicit element-span semantics prevent
+confusion with literal quote offsets. Unknown scientific context remains null.
+All existing scope/rounding abstentions and conditional calculations stay visible.
+Separate exact integer arithmetic replay validates resolved numerical relationships,
+not a source's authenticity or the paper's conclusion. Both component and relation
+IDs bind the evidence appropriate to their roles. The existing detector is unchanged.
+
+`tools.registered_jats_run` and `tools.jats_demo` provide actual checkout-only
+source-to-report execution with registered denominators and recovery. See
+[JATS_DEVELOPMENT_RUNNER.md](JATS_DEVELOPMENT_RUNNER.md) and the
+[current implementation receipt](IMPLEMENTATION_2026-10-25.md).
+This is not full `PaperDocument` table construction, migration of all legacy
+source-mapped detectors, or completion of the installed product.
 
 ## Remaining integration, in order
 
 | Component | Disposition |
 |---|---|
-| #5 ancestor and #6 foundation | Refresh effective changes; do not merge #5 as duplicate work or close it before no-unique-change evidence exists. |
-| Canonical `paper_document` and JATS model/parser | Next RW-01 slice. Reconcile original-byte anchors and supported layouts with current `tools/jats_percentage_audit.py`. |
-| Denominator provenance, flow, ratios, statistics source mapping | Not yet imported; retain their actual tests when their dependencies land. The 2x2 helper alone supplies no source mapping. |
-| `paper_audit`, coverage, review/CLI/schema wiring | Not yet integrated; avoid retaining conflicting public audit entry points. |
-| #12 local UI | Separate from custody activation; not imported. |
-| #12 custody and old `_pdf_worker` | Not imported or activated. Existing safety gates still apply. |
-| Main intake/export, source selection, CI and agent policy | Retained, not overwritten by older stack versions. |
-| Historical case records and frozen studies | Preserved in their original branches/records; no relabeling, protected-data read or corpus replay. |
-| #15/#16 dependency maintenance | Separate pending work; not implicitly resolved by this slice. |
+| #5 ancestor and #6 foundation | Refresh effective changes; do not merge #5 twice or close it before proving no unique changes are lost. |
+| Canonical model | Preserved unchanged; source-anchor/numeric-assertion bridge implemented. Rich table projection still pending. |
+| Legacy JATS parser and denominator provenance | Not imported. Reconcile exact original-byte mappings, layouts and denominator semantics before adoption. |
+| Flow, ratios, statistics source mapping | Not yet imported; retain their actual tests with their dependencies. |
+| `paper_audit`, coverage, review/CLI/schema wiring | Pending; create one installed audit path, not conflicting public commands. |
+| #12 local UI/custody and old `_pdf_worker` | Not imported or activated; safety gates unchanged. |
+| Current core, intake/export, source selection, CI and agent policy | Retained, not overwritten by older stack versions. |
+| Frozen studies and historical case records | Preserved in original records; no relabeling, protected reads or corpus replay. |
+| #15/#16 dependency maintenance | Separate pending work, not resolved by these slices. |
 
-The installed source-to-report workflow, combined original test populations and
-full PR-stack disposition are still outstanding. Do not mark RW-01 done because
-this isolated helper passes. The next slice should reconcile the two JATS/source
-representations and preserve main's bounded file handling and denominator rules.
+The combined retained test populations and full PR-stack disposition remain
+outstanding. Passing the bridge/runner tests does not complete RW-01 or establish
+scientific discovery performance. Next work is richer source-model consolidation
+and detector wiring, not repeating the same successful tests.

@@ -2,15 +2,15 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 1,
-  "updated_on": "2026-10-24",
+  "updated_on": "2026-10-25",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "32a8f20f0f64a0dd6c6e9c9cb8a0a4c4e3e12732",
-    "observed_on": "2026-10-24",
+    "observed_main_sha": "b2d4863d28e037d35bd8052997e6b02318977771",
+    "observed_on": "2026-10-25",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Pre-implementation observed baseline. First partial slices are recorded below; containing PR supplies exact-head checks. Refresh live state before writes."
+    "note": "Observed baseline before RW-01B/RW-04B. Containing PR supplies exact candidate and post-merge qualification; refresh live state before writes."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -73,7 +73,8 @@
       "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-01---consolidate-the-existing-implementations",
       "evidence": [
-        "docs/IMPLEMENTATION_2026-10-24.md"
+        "docs/IMPLEMENTATION_2026-10-24.md",
+        "docs/IMPLEMENTATION_2026-10-25.md"
       ],
       "blocker": null,
       "completed_slices": [
@@ -82,9 +83,15 @@
           "scope": "operand-only 2x2 helper, not complete paper-audit integration",
           "implementation": "researchwitness/paper_statistics.py",
           "tests": "tests/test_paper_statistics_integration.py"
+        },
+        {
+          "id": "RW-01B",
+          "scope": "canonical source-anchor/numeric-assertion bridge with original-byte JATS evidence and exact arithmetic replay; rich parser and installed pipeline still pending",
+          "implementation": "tools/jats_source_adapter.py",
+          "tests": "tests/test_jats_source_bridge.py"
         }
       ],
-      "next_action": "Reconcile canonical source/JATS representation and preserve source-mapped detector tests."
+      "next_action": "Reconcile rich JATS/table and denominator-provenance contracts, preserve source-mapped detector tests, and wire one installed audit entry point."
     },
     {
       "id": "RW-02",
@@ -118,12 +125,13 @@
       "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-03---qualify-execution-and-custody-boundaries",
       "evidence": [
-        "docs/IMPLEMENTATION_2026-10-24.md"
+        "docs/IMPLEMENTATION_2026-10-24.md",
+        "docs/IMPLEMENTATION_2026-10-25.md"
       ],
       "blocker": {
         "category": "environment",
-        "reason": "No Docker CLI or native Windows ACL execution in this Linux runtime; delegated local command initialization failed before execution. No actual PDF/custody qualification attempted.",
-        "unlock_condition": "Use an already authorized working native runtime and collect the separate image/isolation, ACL and protected-custody receipts; new privileges or spend require a bounded safety/cost decision.",
+        "reason": "Prior session: no Docker CLI/native Windows ACL execution in the Linux runtime; delegated native commands failed initialization. This slice performs no new native PDF/custody qualification.",
+        "unlock_condition": "Use an already authorized working native runtime and collect separate image/isolation, ACL and protected-custody receipts; new privileges or spend require a bounded safety/cost decision.",
         "next_unblocked_task": "RW-01"
       }
     },
@@ -141,7 +149,8 @@
       "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-04---benchmark-protocol-and-harness",
       "evidence": [
-        "docs/IMPLEMENTATION_2026-10-24.md"
+        "docs/IMPLEMENTATION_2026-10-24.md",
+        "docs/IMPLEMENTATION_2026-10-25.md"
       ],
       "blocker": null,
       "completed_slices": [
@@ -150,9 +159,15 @@
           "scope": "development receipt accounting, not certificate replay or a complete benchmark",
           "implementation": "tools/verification_benchmark.py",
           "tests": "tests/test_verification_benchmark.py"
+        },
+        {
+          "id": "RW-04B",
+          "scope": "fixed source-only JATS execution, exact arithmetic replay, durable emission journal and read-only recovery; not a scientific comparative benchmark",
+          "implementation": "tools/registered_jats_run.py",
+          "tests": "tests/test_registered_jats_run.py"
         }
       ],
-      "next_action": "Implement registered execution and actual audit/verifier adapters, schemas and frozen evaluation design."
+      "next_action": "Implement comparative baseline adapters, formal registration schemas and the frozen statistical design; curate source-reviewed labels without exposing sealed material."
     },
     {
       "id": "RW-05",
