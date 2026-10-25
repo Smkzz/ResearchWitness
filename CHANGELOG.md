@@ -2,6 +2,27 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Source-bound development execution - 2026-10-25
+
+- Preserved the canonical immutable source model from the legacy paper-audit stack
+  and bridged current JATS results to original-byte element anchors and numeric
+  assertions without changing denominator/abstention semantics.
+- Added independent exact percentage replay, registered source-only JATS execution,
+  bounded private code snapshots, emission-preserving journals and read-only recovery.
+- Added a runnable three-case synthetic demonstration and source/runner regressions.
+  This does not complete the installed audit product, scientific benchmark or
+  native PDF/Windows/custody qualification; existing trusted checker families,
+  protocol schemas and frozen evidence remain unchanged.
+
+### Initial implementation slices - 2026-10-24
+
+- Selectively integrated the standalone 2x2 calculator, strict input handling and
+  fully isolated Decimal context, with original scenario and differential tests.
+- Added the offline development receipt scorer with externally pinned registrations,
+  complete denominator accounting and explicit supplied-declaration limitations.
+- Corrected canonical CLI bytes on Windows. These were partial RW-01/RW-04 slices,
+  not a complete paper-audit integration or independent scientific evaluation.
+
 ### Autonomous development plan - 2026-10-24
 
 - Added canonical AGENTS.md, provider/continuation pointers, a 12-package dependency
