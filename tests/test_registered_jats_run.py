@@ -136,7 +136,7 @@ def test_actual_end_to_end_source_execution_and_recovery(tmp_path):
     assert [e['event'] for e in events] == ['attempt_started','output_recorded','attempt_finished']*3
     for index,event in enumerate(events):
         assert event['sequence'] == index
-    assert not b'\r\n' in (tmp_path/'result/summary.json').read_bytes()
+    assert b'\r\n' not in (tmp_path/'result/summary.json').read_bytes()
 
 
 def test_missing_source_preserves_registered_denominator(tmp_path):
