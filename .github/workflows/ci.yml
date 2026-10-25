@@ -66,3 +66,15 @@ jobs:
         run: python -m pip install -e '.[dev]'
       - name: Run offline release qualification
         run: python tools/quality_gate.py
+      - name: Build review artifacts from the qualified source inventory
+        run: |
+          python tools/make_release.py --output-dir "$RUNNER_TEMP/researchwitness-review"
+          git diff --exit-code -- CHECKSUMS.sha256
+          git rev-parse HEAD > "$RUNNER_TEMP/researchwitness-review/source-commit.txt"
+      - name: Retain public review artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: researchwitness-review-${{ github.sha }}
+          path: ${{ runner.temp }}/researchwitness-review/
+          if-no-files-found: error
+          retention-days: 7
