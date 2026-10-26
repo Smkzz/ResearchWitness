@@ -270,6 +270,16 @@ regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
 and [synthetic example](examples/source-capture/README.md). This does not
 grant protected custody or confirmatory evaluation access.
 
+### Raw PMC OAI-PMH source-identity derivation (RW-01M)
+
+The checkout-only offline [PMC envelope adapter](docs/PMC_OAI_ENVELOPE.md)
+preserves a supplied complete OAI-PMH response digest and original article byte
+span, then derives a separately hashed standalone JATS source. It records any
+inherited namespace declarations inserted in the derived XML and supports exact
+replay. It never fetches an article, authenticates origin or licence, or turns
+development reviews into independent labels. Keep raw responses and receipts
+private; real provider capture and custody gates remain unqualified.
+
 ### Source-version-bound development review
 
 The checkout-only [RW-01L binding](docs/SOURCE_REVIEW_BINDING.md) checks that an RW-01K original-JATS capture manifest and an RW-01J denominator review packet refer to **exactly the same source bytes and declared version**. Optional completed source-linked review records remain unauthenticated development annotations, never protected or scientifically adjudicated labels.
