@@ -43,6 +43,8 @@ CODE_FILES = (
     'researchwitness/capsule.py', 'researchwitness/checkers.py',
     'researchwitness/strict.py', 'researchwitness/example_data.py',
     'researchwitness/capability_examples.json', 'researchwitness/paper_document.py',
+    'researchwitness/_jats_parser.py', 'researchwitness/_jats_math.py',
+    'researchwitness/_jats_files.py',
     'tools/__init__.py', 'tools/offline_files.py', 'tools/public_discovery.py',
     'tools/jats_percentage_audit.py', 'tools/jats_source_adapter.py',
     'tools/jats_worker.py', 'tools/verification_benchmark.py', 'tools/registered_jats_run.py',

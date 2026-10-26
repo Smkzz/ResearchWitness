@@ -2,7 +2,7 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 1,
-  "updated_on": "2026-10-25",
+  "updated_on": "2026-10-26",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
@@ -74,7 +74,8 @@
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-01---consolidate-the-existing-implementations",
       "evidence": [
         "docs/IMPLEMENTATION_2026-10-24.md",
-        "docs/IMPLEMENTATION_2026-10-25.md"
+        "docs/IMPLEMENTATION_2026-10-25.md",
+        "https://github.com/Smkzz/ResearchWitness/pull/22"
       ],
       "blocker": null,
       "completed_slices": [
@@ -89,9 +90,15 @@
           "scope": "canonical source-anchor/numeric-assertion bridge with original-byte JATS evidence and exact arithmetic replay; rich parser and installed pipeline still pending",
           "implementation": "tools/jats_source_adapter.py",
           "tests": "tests/test_jats_source_bridge.py"
+        },
+        {
+          "id": "RW-01C",
+          "scope": "installed offline JATS review/replay bundle (partial RW-01)",
+          "implementation": "researchwitness/jats_product.py",
+          "tests": "tests/test_installed_jats_workflow.py"
         }
       ],
-      "next_action": "Reconcile rich JATS/table and denominator-provenance contracts, preserve source-mapped detector tests, and wire one installed audit entry point."
+      "next_action": "Complete rich table/denominator provenance integration and reconcile legacy source-mapped tests; confirm PR #22 exact-head qualification before a merge."
     },
     {
       "id": "RW-02",

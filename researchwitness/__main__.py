@@ -74,6 +74,16 @@ def main(argv: list[str] | None = None) -> int:
     command.add_argument('--as-of', type=date.fromisoformat, default=date.today())
     command.add_argument('--html', type=Path, default=None)
 
+    command = sub.add_parser('audit-jats')
+    command.add_argument('source', type=Path)
+    command.add_argument('--output-dir', type=Path, required=True)
+    command.add_argument('--document-id', required=True)
+    command.add_argument('--expected-source-sha256')
+
+    command = sub.add_parser('replay-jats')
+    command.add_argument('bundle', type=Path)
+    command.add_argument('--expected-manifest-sha256')
+
     command = sub.add_parser('capabilities')
     command.add_argument('--json', action='store_true',
                          help='Emit the machine-readable capability registry (the default format).')
@@ -86,6 +96,16 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     try:
+        if args.command in ('audit-jats', 'replay-jats'):
+            from .jats_product import audit_source, replay_bundle
+            try:
+                result = (audit_source(args.source, args.output_dir, args.document_id,
+                         args.expected_source_sha256) if args.command == 'audit-jats'
+                          else replay_bundle(args.bundle, args.expected_manifest_sha256))
+            except ValueError as exc:
+                raise Invalid(str(exc)) from exc
+            print(json.dumps(result, indent=2, ensure_ascii=True))
+            return 0
         if args.command == 'capabilities':
             print(json.dumps({'version': VERSION, 'checkers': capabilities()}, indent=2))
             return 0

@@ -25,7 +25,9 @@ from tools.pdf_percentage_audit import PDFSourceError, audit_pdf_percentage_tabl
 ROOT = Path(__file__).resolve().parents[1]
 DETECTOR_PATHS = ("tools/research_audit.py", "tools/audit_contracts.py",
                   "tools/offline_files.py", "tools/jats_percentage_audit.py",
-                  "tools/pdf_percentage_audit.py", "tools/public_discovery.py")
+                  "tools/pdf_percentage_audit.py", "tools/public_discovery.py",
+                  "researchwitness/_jats_parser.py", "researchwitness/_jats_math.py",
+                  "researchwitness/_jats_files.py", "researchwitness/jats_product.py")
 
 
 def sha(data: bytes) -> str:

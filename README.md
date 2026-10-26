@@ -122,6 +122,24 @@ parent directories must exist. The deterministic ZIP needs a new output filename
 Packing includes only manifested artifacts and reserved generated metadata, not
 an entire directory. Intake/verification/export share bounded validation.
 
+## Installed JATS review (development scope)
+
+The distribution now includes the existing bounded JATS percentage detector without
+loading network-discovery tools. It produces unreviewed arithmetic candidates, not a
+whole-paper conclusion, misconduct allegation or author-contact authorization.
+Use a new output directory (create the parent first):
+
+```text
+researchwitness audit-jats examples/synthetic-jats/article.xml --document-id synthetic-jats --output-dir out/installed-jats
+researchwitness replay-jats out/installed-jats --expected-manifest-sha256 <manifest-sha256-from-audit>
+```
+
+The bundle stores original XML, structured JSON, escaped offline HTML, and a SHA-256
+manifest. Replay re-extracts from the preserved source and checks the exact report.
+Save the manifest hash externally if later coherent modification must be detected.
+The synthetic example includes one match, one candidate and one abstention.
+PDF/OCR and independent scientific evaluation remain unqualified.
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available

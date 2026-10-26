@@ -12,6 +12,19 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## Installed JATS review candidate - 2026-10-26
+
+PR #22 introduces the installed `audit-jats` and `replay-jats` CLI using
+the current bounded JATS parser as one implementation shared with the checkout
+tool. Results use immutable source hashes, exact source offsets, JSON/HTML and a
+recomputed manifest-validated replay. Decimal context mutation does not silently
+change arithmetic. Denominator and scientific interpretation ambiguity still
+abstain. Engineering qualification of the exact proposed head is recorded in
+PR #22; the historical 752-test uncommitted result is not a CI receipt.
+
+This is no sealed research evaluation, PDF isolation or scientific discovery proof.
+No author contact, provider billing or public package publication is performed.
+
 ## Source-bound execution slices - 2026-10-25
 
 RW-01B preserves the legacy immutable canonical model and bridges the current JATS

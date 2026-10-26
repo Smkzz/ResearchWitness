@@ -64,3 +64,11 @@ The combined retained test populations and full PR-stack disposition remain
 outstanding. Passing the bridge/runner tests does not complete RW-01 or establish
 scientific discovery performance. Next work is richer source-model consolidation
 and detector wiring, not repeating the same successful tests.
+
+## RW-01C candidate — installed JATS review
+
+The existing JATS detector is the single parser implementation in the wheel;
+legacy checkout imports and direct invocation remain supported. JSON/HTML
+review bundles and replay are separate from unmerged rich-table/flow components.
+PR #22 holds the exact-source integration and test evidence; this is not a
+blanket merge of #6–#12 and not independent scientific adjudication.

@@ -2,6 +2,17 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Installed offline JATS review candidate - 2026-10-26
+
+- Reuse the existing JATS parser inside the installed wheel, preserving old
+  checkout module imports and direct script entry points.
+- Remove the parser's dependency on network-discovery modules and use a fully
+  specified Decimal context for exact percentage display arithmetic.
+- Add `audit-jats` and `replay-jats`, source and JSON/HTML review bundles,
+  strict manifest checks and a clean-wheel smoke check. No whole-paper verdict,
+  real PDF/custody qualification or scientific accuracy claim is made.
+
+
 ### Source-bound development execution - 2026-10-25
 
 - Preserved the canonical immutable source model from the legacy paper-audit stack
