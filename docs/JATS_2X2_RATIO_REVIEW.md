@@ -24,6 +24,12 @@ opt-in sections rather than trusting a supplied detector result.
 
 - Source is bounded UTF-8 JATS, parsed by the *current* original-byte parser.
   The legacy XML-normalizing parser is not installed or invoked.
+- The table caption must explicitly describe independent, unmatched or mutually
+  exclusive groups. Mere "unadjusted OR" wording does not qualify a marginal
+  estimand. Matched, paired, conditional, stratified, crossover or otherwise
+  complex contexts in the table/header/wrapper metadata suppress candidates.
+  Adjacent narrative outside the table is not yet projected; independent study
+  interpretation remains mandatory even when this syntactic gate passes.
 - A single structurally mapped body row has precisely one outcome column,
   four distinct nonnegative integer count columns and one reported *unadjusted
   odds ratio, exposed versus unexposed* column. Four header roles must be

@@ -8,6 +8,8 @@
   to the installed, original-byte-preserving JATS projection without importing
   the older XML-normalizing parser. Retain explicit group/timepoint and strict
   source-layout/context checks; refusals and caps remain visible.
+  A caption-level independent-group declaration is required; matched, paired,
+  conditional and stratified contexts are unsupported.
 - Add optional `audit-jats --include-unadjusted-2x2` JSON/escaped HTML review
   and deterministic bundle replay. The default review remains percentage-only.
 - Add invented positive, consistent and hard-negative fixtures, tamper cases,

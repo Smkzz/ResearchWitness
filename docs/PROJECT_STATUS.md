@@ -19,8 +19,9 @@ explicitly unadjusted odds-ratio rows from the current original-byte-preserving
 JATS table projection to the existing `recompute_two_by_two` arithmetic helper.
 It is a selective adaptation of the legacy PR #11 source checker, not a second
 parser, a full source-interpretation system or a new trusted proof family.
-Unknown layout, adjustment, source cues, extra rows, footnotes and zero-cell
-conventions abstain. Source-mapped candidates are human-review material only;
+Unknown layout, matched/paired designs, absent explicit independent-group
+scope, adjustment, source cues, extra rows, footnotes and zero-cell conventions
+abstain. Source-mapped candidates are human-review material only;
 source origin and scientific correctness are NOT established.
 
 The opt-in review and optional table projection are replayed against preserved

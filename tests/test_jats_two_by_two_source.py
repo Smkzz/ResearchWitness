@@ -70,7 +70,12 @@ def test_consistent_report_is_checked_but_not_called_error():
 
 @pytest.mark.parametrize(("old", "new", "expected"), [
     (b"Unadjusted odds ratio", b"Adjusted odds ratio", "NOT_APPLICABLE"),
-    (b"Invented 30-day mortality comparison", b"Invented weighted 30-day mortality comparison", "UNSUPPORTED"),
+    (b"Invented independent groups: 30-day mortality comparison",
+     b"Invented weighted independent groups: 30-day mortality comparison", "UNSUPPORTED"),
+    (b"Invented independent groups: 30-day mortality comparison",
+     b"Invented matched independent groups: 30-day mortality comparison", "UNSUPPORTED"),
+    (b"Invented independent groups: 30-day mortality comparison",
+     b"Invented 30-day mortality comparison", "INCOMPLETE"),
     (b"30-day mortality", b"outcome mortality", "UNSUPPORTED"),
     (b"<td>12</td>", b"<td>12.0</td>", "INCOMPLETE"),
     (b"<td>12</td>", b"<td>0</td>", "UNSUPPORTED"),
@@ -133,9 +138,12 @@ def test_header_span_footnote_and_source_scope_are_fail_closed():
     assert notes_report["findings"] == []
     assert not notes_report["scan_complete"]
 
-    caption_n = swap(raw, b"Invented 30-day mortality comparison",
-                     b"Invented 30-day mortality comparison (N=100)")
+    caption_n = swap(raw, b"Invented independent groups: 30-day mortality comparison",
+                     b"Invented independent groups: 30-day mortality comparison (N=100)")
     assert not examine(caption_n)["findings"]
+    conditional = swap(raw, b'id="synthetic-or"',
+                       b'id="synthetic-or" specific-use="conditional"')
+    assert not examine(conditional)["findings"]
 
 
 def test_structural_ambiguity_never_qualifies_candidate():

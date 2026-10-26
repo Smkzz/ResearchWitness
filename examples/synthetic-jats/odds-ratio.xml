@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <article><body><table-wrap id="synthetic-or">
-<label>Table 1</label><caption><p>Invented 30-day mortality comparison.</p></caption>
+<label>Table 1</label><caption><p>Invented independent groups: 30-day mortality comparison.</p></caption>
 <table><thead><tr>
 <th>Outcome</th><th>Exposed event</th><th>Exposed non-event</th>
 <th>Unexposed event</th><th>Unexposed non-event</th>

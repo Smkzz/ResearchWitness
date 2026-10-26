@@ -161,7 +161,7 @@ The entirely invented example prints `2.20` where the exact ratio of its
 explicit counts rounds to `2.14`. The result is an **unreviewed source-bound
 arithmetic candidate**, not a statement that a real paper contains an error.
 The review remains separate from percentage findings and is independently
-reconstructed from the saved original source when replayed. Missing timepoint,
+reconstructed from the saved original source when replayed. Missing timepoint, explicit independent-group scope,
 orientation, adjustment status, cell disjointness, extra rows, footnotes, spans
 or unrecognized table structure cause abstention. There is no PDF access,
 publisher authentication or author communication.

@@ -31,8 +31,15 @@ _TIMEPOINT = re.compile(
     r'week\s+[0-9]{1,4}|month\s+[0-9]{1,4}|year\s+[0-9]{1,4})\b',
     re.IGNORECASE,
 )
+# Words that make the marginal four-cell OR inapplicable, even when the
+# printed heading says "unadjusted". These are conservative syntactic gates.
+_MARGINAL_GROUP_CUE = re.compile(
+    r'\b(?:independent\s+groups?|unmatched\s+groups?|mutually\s+exclusive\s+groups?)\b',
+    re.IGNORECASE,
+)
 _UNSAFE_CONTEXT = re.compile(
     r'\b(?:weighted|adjusted|adjustment|model(?:led|ing)?|regression|cluster(?:ed|ing)?|'
+    r'matched|matching|paired|conditional|stratif(?:ied|ication)|crossover|'
     r'imput(?:ed|ation)|standardized|propensity|bootstrap|multiple time[ -]?points?|'
     r'repeated[ -]?measures?|missing data|multiple responses?|overlap(?:ping)?)\b',
     re.IGNORECASE,
@@ -54,6 +61,7 @@ def _table_context(table: Table) -> str:
         table.label, table.caption,
         *(note.text for note in table.footnotes),
         *(header for column in table.columns for header in column.header_hierarchy),
+        *(f"{key} {value}" for key, value in table.wrap_metadata),
         *(cell.raw_text for row in table.rows if row.row_group.startswith(('tbody:', 'tfoot:')) for cell in row.cells),
     ])
 
@@ -148,6 +156,15 @@ def _check_table(document: PaperDocument, table: Table) -> dict[str, Any]:
     if _UNSAFE_CONTEXT.search(table_context):
         base.update(status='UNSUPPORTED', skipped_objects=potential_rows, scan_complete=False)
         base['skip_reasons'].append({'reason': 'MODEL_ADJUSTED_WEIGHTED_OR_COMPLEX_CONTEXT'})
+        return base
+    # The table alone must explicitly say the source counts are from
+    # independent groups; "unadjusted OR" alone can refer to matched,
+    # conditional, paired or otherwise non-marginal estimates.
+    # Surrounding prose is *not* projected, so an accepted result remains
+    # conditional on later independent source interpretation review.
+    if not _MARGINAL_GROUP_CUE.search(table.caption):
+        base.update(status='INCOMPLETE', skipped_objects=potential_rows, scan_complete=False)
+        base['skip_reasons'].append({'reason': 'INDEPENDENT_GROUPS_NOT_EXPLICIT'})
         return base
     if table.footnotes:
         base.update(status='INCOMPLETE', skipped_objects=potential_rows, scan_complete=False)
@@ -302,7 +319,7 @@ def check_jats_unadjusted_2x2_tables(document: PaperDocument) -> dict[str, Any]:
     """Check exact 2x2 count tables with a same-row, oriented crude odds ratio."""
     findings: list[dict[str, Any]] = []
     tables = []
-    limitations = []
+    limitations = ['MARGINAL_GROUP_SCOPE_NOT_INDEPENDENTLY_ADJUDICATED']
     candidate_limit_reached = False
     for table in document.tables:
         result = _check_table(document, table)
