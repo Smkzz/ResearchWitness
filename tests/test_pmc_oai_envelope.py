@@ -12,6 +12,9 @@ import sys
 import pytest
 
 from tools import pmc_oai_envelope as pmc
+from tools import denominator_scope_review as scope
+from tools import pmc_source_review_chain as chain
+from tools import source_capture_manifest as capture
 from tools import verification_benchmark as vb
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -207,10 +210,7 @@ def test_cli_extraction_is_private_exclusive_and_replays(tmp_path: Path):
     assert json.loads(check.stdout)["status"] == "RAW_SPAN_AND_DERIVED_JATS_REPLAYED"
 
 
-# RW-01N: one signed-off-by-nobody development identity chain, never ground truth.
-from tools import denominator_scope_review as scope
-from tools import pmc_source_review_chain as chain
-from tools import source_capture_manifest as capture
+# RW-01N: full development-only provenance chain regression tests.
 
 
 def chain_records():
