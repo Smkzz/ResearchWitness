@@ -27,6 +27,14 @@ indices. Its metadata, path and aggregate artifact validation must stay consiste
 with verification/export. `product.py` formats results and applies workflow policy
 without changing the mathematical verdict.
 
+## Rich source-bound JATS table projection (RW-01D)
+
+The installed JATS audit can optionally emit a typed PaperDocument table model
+using the unchanged original-byte parser. It records header identity, spans,
+footnotes, raw numeric lexemes and detector denominator proposals. Population,
+method and result applicability remain unknown without independent source
+evidence. See [source model contract](JATS_TABLE_PROJECTION.md).
+
 ## Installed core and source-checkout tools
 
 The wheel installs `researchwitness*`, packaged schemas and capability data with

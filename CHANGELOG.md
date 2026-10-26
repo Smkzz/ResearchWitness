@@ -2,6 +2,17 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Rich JATS table projection candidate - 2026-10-26
+
+- Add optional audit-jats --include-structure output of source-bound
+  PaperDocument tables from the existing original-byte parser.
+- Preserve headers, spans, row labels, footnotes, typed lexemes and
+  detector denominator evidence; flag uncertain or malformed structures.
+- Include the optional structure in manifest-validated replay without
+  changing the smaller default audit path. No new trusted checker,
+  scientific accuracy, protected custody, PDF or paid-provider claim.
+
+
 ### Paired development comparison candidate - 2026-10-26
 
 - Add a strict paired development-result comparer reusing the existing

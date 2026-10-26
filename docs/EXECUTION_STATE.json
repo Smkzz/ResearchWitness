@@ -75,7 +75,8 @@
       "evidence": [
         "docs/IMPLEMENTATION_2026-10-24.md",
         "docs/IMPLEMENTATION_2026-10-25.md",
-        "https://github.com/Smkzz/ResearchWitness/pull/22"
+        "https://github.com/Smkzz/ResearchWitness/pull/22",
+        "https://github.com/Smkzz/ResearchWitness/pull/24"
       ],
       "blocker": null,
       "completed_slices": [
@@ -96,9 +97,15 @@
           "scope": "installed offline JATS review/replay bundle (partial RW-01)",
           "implementation": "researchwitness/jats_product.py",
           "tests": "tests/test_installed_jats_workflow.py"
+        },
+        {
+          "id": "RW-01D",
+          "scope": "opt-in source-byte preserving table projection using current parser; not full legacy stack",
+          "implementation": "researchwitness/jats_table_projection.py",
+          "tests": "tests/test_jats_table_projection.py"
         }
       ],
-      "next_action": "Complete rich table/denominator provenance integration and reconcile legacy source-mapped tests; confirm PR #22 exact-head qualification before a merge."
+      "next_action": "Integrate legacy PR #6-#11 source-mapped ratios/flows/denominator provenance with original-byte table model; do not import old normalizing parser or protected custody."
     },
     {
       "id": "RW-02",

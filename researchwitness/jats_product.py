@@ -59,11 +59,13 @@ def implementation_files() -> dict[str, str]:
     root = Path(__file__).resolve().parent
     return {
         name: digest(read_regular(root / name, 128 * 1024))
-        for name in ("_jats_parser.py", "_jats_math.py", "_jats_files.py", "jats_product.py")
+        for name in ("_jats_parser.py", "_jats_math.py", "_jats_files.py",
+                     "jats_product.py", "jats_table_projection.py", "paper_document.py")
     }
 
 
-def make_report(source: bytes, document_id: str, source_pin_present: bool) -> dict[str, Any]:
+def make_report(source: bytes, document_id: str, source_pin_present: bool,
+                *, include_structure: bool = False) -> dict[str, Any]:
     if type(document_id) is not str or IDENTIFIER.fullmatch(document_id) is None:
         raise ValueError("Invalid document identifier")
     result = audit_jats_percentage_tables(source)
@@ -78,7 +80,7 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool) -> di
             "scientific_error_status": "not_established",
             "relationship": relation,
         })
-    return {
+    report = {
         "schema_version": REPORT_VERSION,
         "document": {
             "document_id": document_id,
@@ -113,6 +115,10 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool) -> di
             "PDF/OCR, sealed evaluation, network, AI providers and author contact are outside scope.",
         ],
     }
+    if include_structure:
+        from .jats_table_projection import project_jats_tables
+        report["table_projection"] = project_jats_tables(source, result).to_dict()
+    return report
 
 
 def render_html(report: dict[str, Any]) -> bytes:
@@ -163,7 +169,8 @@ def write_new(path: Path, data: bytes) -> None:
 
 
 def audit_source(source: Path, output_dir: Path, document_id: str,
-                 expected_source_sha256: str | None = None) -> dict[str, Any]:
+                 expected_source_sha256: str | None = None,
+                 *, include_structure: bool = False) -> dict[str, Any]:
     if (expected_source_sha256 is not None and
             (type(expected_source_sha256) is not str or
              HASH.fullmatch(expected_source_sha256) is None)):
@@ -172,7 +179,8 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
     if expected_source_sha256 is not None and digest(data) != expected_source_sha256:
         raise ValueError("Source SHA-256 differs from expected version")
     # Do all interpretation before touching output, which must be a new directory.
-    report = make_report(data, document_id, expected_source_sha256 is not None)
+    report = make_report(data, document_id, expected_source_sha256 is not None,
+                         include_structure=include_structure)
     report_bytes = canonical_json(report)
     html_bytes = render_html(report)
     if len(report_bytes) > MAX_REPORT_BYTES or len(html_bytes) > MAX_REPORT_BYTES:
@@ -243,7 +251,9 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
     pinned_before = saved_report.get("document", {}).get("expected_hash_verified")
     if type(pinned_before) is not bool:
         raise ValueError("Invalid recorded source pin state")
-    new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before)
+    structured = saved_report.get("table_projection") is not None
+    new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before,
+                             include_structure=structured)
     if (canonical_json(new_report) != contents[REPORT_NAME]
             or render_html(new_report) != contents[HTML_NAME]):
         raise ValueError("Independent replay disagrees with recorded result")

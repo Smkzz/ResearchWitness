@@ -6,9 +6,9 @@
 **Open-source research verification with reproducible, source-linked evidence.**
 
 The installed core verifies narrowly defined claims after an investigator or agent
-supplies a formalization and possible counterexample. Separate checkout tools
-extract supported JATS count/percentage relationships and report arithmetic
-candidates or explicit abstentions. It does **not** autonomously fact-check any
+supplies a formalization and possible counterexample. The installed JATS audit extracts supported count/percentage relationships
+and records arithmetic candidates or explicit abstentions. Separate checkout
+tools retain guarded metadata discovery and scientific-development comparisons. It does **not** autonomously fact-check any
 paper, authenticate publisher origin, establish misconduct or certify conclusions.
 
 **On main:** `0.3.0.dev0` · **UNRELEASED** · Python 3.11+ · CI tests Python
@@ -133,6 +133,11 @@ Use a new output directory (create the parent first):
 researchwitness audit-jats examples/synthetic-jats/article.xml --document-id synthetic-jats --output-dir out/installed-jats
 researchwitness replay-jats out/installed-jats --expected-manifest-sha256 <manifest-sha256-from-audit>
 ```
+
+Add --include-structure to audit-jats to include a source-mapped table model
+(headers, spans, row labels, footnotes and denominator cues) within the same
+private JSON bundle. This does NOT resolve ambiguous populations or adjustment
+scope. See [JATS table model](docs/JATS_TABLE_PROJECTION.md).
 
 The bundle stores original XML, structured JSON, escaped offline HTML, and a SHA-256
 manifest. Replay re-extracts from the preserved source and checks the exact report.

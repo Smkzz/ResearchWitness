@@ -1,6 +1,6 @@
 # Project status
 
-**As of:** 2026-10-25  
+**As of:** 2026-10-26  
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
@@ -11,6 +11,19 @@ The current development instructions are [AGENTS.md](../AGENTS.md),
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01D: source-mapped table projection (candidate)
+
+The installed audit-jats --include-structure optionally projects the existing
+original-byte JATS parser to the immutable PaperDocument table model. Header
+references, row/column spans, original XML offsets, caption denominator cues,
+numeric surface forms and footnotes are preserved without guessing scientific
+context. The existing detector's conditional/unknown denominator decisions stay
+unresolved. See [the table model contract](JATS_TABLE_PROJECTION.md).
+
+This is partial RW-01 work. Rich legacy flow/ratio integrations and protected
+custody remain pending. Qualification belongs to the exact PR head; a proposal
+is not independent scientific accuracy evidence.
 
 ## Paired development comparison slice - 2026-10-26
 

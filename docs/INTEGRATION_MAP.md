@@ -51,7 +51,7 @@ source-mapped detectors, or completion of the installed product.
 | Component | Disposition |
 |---|---|
 | #5 ancestor and #6 foundation | Refresh effective changes; do not merge #5 twice or close it before proving no unique changes are lost. |
-| Canonical model | Preserved unchanged; source-anchor/numeric-assertion bridge implemented. Rich table projection still pending. |
+| Canonical model | Preserved unchanged; source-anchor/numeric-assertion bridge implemented. An opt-in rich table projection is now in RW-01D; full legacy source-mapped ratio and flow integration remains pending. |
 | Legacy JATS parser and denominator provenance | Not imported. Reconcile exact original-byte mappings, layouts and denominator semantics before adoption. |
 | Flow, ratios, statistics source mapping | Not yet imported; retain their actual tests with their dependencies. |
 | `paper_audit`, coverage, review/CLI/schema wiring | Pending; create one installed audit path, not conflicting public commands. |
@@ -72,3 +72,12 @@ legacy checkout imports and direct invocation remain supported. JSON/HTML
 review bundles and replay are separate from unmerged rich-table/flow components.
 PR #22 holds the exact-source integration and test evidence; this is not a
 blanket merge of #6–#12 and not independent scientific adjudication.
+
+## RW-01D: opt-in rich table structure
+
+The installed JATS audit optionally serializes the existing immutable
+PaperDocument table model from original XML element spans, inherited header
+cells, table row/column spans, footnotes and detector denominator proposals.
+No second parser, population guessing, merged legacy flow algorithm,
+scientific source adjudication or new PDF/custody authority is introduced.
+See [the scoped model contract](JATS_TABLE_PROJECTION.md).
