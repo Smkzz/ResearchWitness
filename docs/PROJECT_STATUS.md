@@ -12,6 +12,10 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01L: declared source/version and denominator-review binding (candidate)
+
+The checkout-only `tools.source_review_binding` replays the same JATS source bytes through the earlier RW-01K capture manifest and RW-01J review packet. It rejects mismatched source digests, version metadata or packet facts and accounts for an optional complete pair of developer-supplied reviews. It **does not** authenticate publisher rights, real reviewer independence, source meaning, or scientific denominator correctness. See [RW-01L protocol](SOURCE_REVIEW_BINDING.md).
+
 ## RW-01K: private source-version evidence capture and declared lineage (candidate)
 
 The offline, checkout-only `tools.source_capture_manifest` utility creates a

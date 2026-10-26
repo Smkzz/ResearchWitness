@@ -199,3 +199,7 @@ preserved source SHA-256, but neither program attests legal licence or a
 reviewer's qualifications/independence. Capture/version/correction grouping
 is a prerequisite to comparative development evaluation, not evidence that
 the broader unmerged PR #11 semantic resolver is ready to deploy.
+
+## RW-01L: source-version-bound review workflow
+
+`tools/source_review_binding.py` composes two *existing* checkout-only contracts, RW-01K `replay_capture` and RW-01J `validate_packet`/`reconcile`, without duplicating JATS parsing or selecting a scientific denominator. Review inputs and source/metadata/packet identities must all match external commitments. Provenance and reviewer claims remain **declared**, not verified. This is not custody activation or labelled real-paper evidence.

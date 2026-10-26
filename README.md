@@ -270,6 +270,10 @@ regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
 and [synthetic example](examples/source-capture/README.md). This does not
 grant protected custody or confirmatory evaluation access.
 
+### Source-version-bound development review
+
+The checkout-only [RW-01L binding](docs/SOURCE_REVIEW_BINDING.md) checks that an RW-01K original-JATS capture manifest and an RW-01J denominator review packet refer to **exactly the same source bytes and declared version**. Optional completed source-linked review records remain unauthenticated development annotations, never protected or scientifically adjudicated labels.
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available
