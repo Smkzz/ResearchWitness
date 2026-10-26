@@ -12,6 +12,24 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01K: private source-version evidence capture and declared lineage (candidate)
+
+The offline, checkout-only `tools.source_capture_manifest` utility creates a
+replayable capture manifest for a user-supplied original JATS XML file,
+including the source hash, declared version/family, correction/supplement
+parent, retrieval route/time, rights evidence and developer exposure.
+A separate registry checks duplicate versions, byte-identical independent
+family claims, byte-identical purported new versions inside the same family,
+and declared version/parent relationships.
+
+These are operator **declarations**; the tool does not authenticate the
+publisher, verify legal permission, prove when capture occurred, establish
+real-data labelling or open protected custody. No real copyrighted paper is
+committed. See [source capture protocol](SOURCE_CAPTURE_LINEAGE.md).
+The next RW-01 evidence gate requires legally usable independently verified
+original-source/version captures and substantively independent source-scope
+annotations before comparing the legacy PR #11 denominator resolver.
+
 ## RW-01J: source-bound development annotation and review protocol (candidate)
 
 The checkout-only `tools.denominator_scope_review` tool prepares original-byte

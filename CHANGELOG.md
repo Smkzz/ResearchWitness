@@ -2,6 +2,19 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Source capture and declared version lineage (RW-01K) — 2026-10-26
+
+- Add checkout-only, offline bounded JATS source capture/replay that records
+  original byte hash, declared retrieval/version/rights/exposure metadata and
+  explicit nonauthenticated provenance without publishing raw source text.
+- Add pinned developer-version registry grouping articles with their
+  revisions/corrections/supplements, refusing duplicated independent families,
+  broken/circular parent chains and inconsistent declarations.
+- Add source/rights/correction/lineage adversarial tests and private capture
+  instructions. No independent publisher/license adjudication, gold corpus,
+  protected custody, paid provider, live fetch or verifier authority change.
+
+
 ### Denominator scope development-review packet (RW-01J) — 2026-10-26
 
 - Add a checkout-only offline JATS source-fact annotation packet over the

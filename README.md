@@ -253,6 +253,23 @@ independently adjudicated dataset is supplied. See the
 [fictional example](examples/denominator-scope-review/README.md). Keep real
 licensed source and private review files out of public Git.
 
+### Private source-version and rights capture (development only)
+
+The offline, checkout-only `tools.source_capture_manifest` helper records an
+operator-supplied original JATS file hash and source record/version identity,
+declared retrieval timestamp/route, rights evidence, exposure and
+correction/supplement lineage. Source bytes are validated and replayed locally
+without downloading or exposing the paper in CLI output. A registry groups
+declared versions/corrections into conservative work families, detecting
+duplicate bytes even under new version IDs and broken parent chains.
+
+**No publisher authenticity, legal permission, timestamp, reviewer identity or
+scientific family independence is verified by this tool.** Real-paper source
+bytes and manifests are private inputs and are not part of the public
+regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
+and [synthetic example](examples/source-capture/README.md). This does not
+grant protected custody or confirmatory evaluation access.
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available
