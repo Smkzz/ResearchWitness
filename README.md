@@ -145,6 +145,29 @@ Save the manifest hash externally if later coherent modification must be detecte
 The synthetic example includes one match, one candidate and one abstention.
 PDF/OCR and independent scientific evaluation remain unqualified.
 
+### Optional source-mapped unadjusted 2×2 odds ratios
+
+The installed JATS audit also supports a narrow **opt-in** calculation
+against four explicit event/non-event counts and a printed *crude* odds ratio
+in the same clearly labelled table row. Use an existing parent and a fresh
+output path:
+
+```text
+python -m researchwitness audit-jats examples/synthetic-jats/odds-ratio.xml --document-id invented-or --output-dir work/odds-review --include-unadjusted-2x2
+python -m researchwitness replay-jats work/odds-review --expected-manifest-sha256 HASH_FROM_PRIOR_AUDIT
+```
+
+The entirely invented example prints `2.20` where the exact ratio of its
+explicit counts rounds to `2.14`. The result is an **unreviewed source-bound
+arithmetic candidate**, not a statement that a real paper contains an error.
+The review remains separate from percentage findings and is independently
+reconstructed from the saved original source when replayed. Missing timepoint, explicit independent-group scope,
+orientation, adjustment status, cell disjointness, extra rows, footnotes, spans
+or unrecognized table structure cause abstention. There is no PDF access,
+publisher authentication or author communication.
+
+See the [strict scope and evidence contract](docs/JATS_2X2_RATIO_REVIEW.md).
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available

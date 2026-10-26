@@ -178,6 +178,23 @@ def main() -> int:
         ).stdout)
         if reread['status'] != 'verified':
             raise RuntimeError('installed table replay mismatch')
+        # Source-mapped crude-OR audit must run from the wheel, not the checkout.
+        odds_dir = temp / 'installed-2x2-jats'
+        odds = json.loads(run(str(cli), 'audit-jats',
+                             str(ROOT / 'examples/synthetic-jats/odds-ratio.xml'),
+                             '--document-id', 'synthetic-or', '--output-dir', str(odds_dir),
+                             '--include-unadjusted-2x2', cwd=temp).stdout)
+        or_report = json.loads((odds_dir / 'report.json').read_bytes())
+        or_review = or_report['odds_ratio_review']
+        if (not or_review['scan_complete'] or len(or_review['findings']) != 1
+                or or_review['findings'][0]['recomputed_at_display_precision'] != '2.14'
+                or or_report['paper_error_established'] is not False):
+            raise RuntimeError('installed 2x2 source-mapping smoke mismatch')
+        or_replay = json.loads(run(str(cli), 'replay-jats', str(odds_dir),
+                                  '--expected-manifest-sha256', odds['manifest_sha256'],
+                                  cwd=temp).stdout)
+        if or_replay['status'] != 'verified':
+            raise RuntimeError('installed 2x2 replay smoke mismatch')
         if smoke['paper_error_established'] or smoke['external_actions'] != 'OUT_OF_SCOPE':
             raise RuntimeError('scope invariant failed in installed wheel')
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)

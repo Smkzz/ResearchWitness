@@ -77,7 +77,8 @@
         "docs/IMPLEMENTATION_2026-10-25.md",
         "https://github.com/Smkzz/ResearchWitness/pull/22",
         "https://github.com/Smkzz/ResearchWitness/pull/24",
-        "https://github.com/Smkzz/ResearchWitness/pull/27"
+        "https://github.com/Smkzz/ResearchWitness/pull/27",
+        "https://github.com/Smkzz/ResearchWitness/pull/29"
       ],
       "blocker": null,
       "completed_slices": [
@@ -110,9 +111,15 @@
           "scope": "unchanged bounded source-declared sample-flow add/subtract checking; no paper extraction",
           "implementation": "researchwitness/paper_flow.py",
           "tests": "tests/test_paper_flow_and_statistics.py"
+        },
+        {
+          "id": "RW-01F",
+          "scope": "opt-in original-byte JATS source-mapped unadjusted 2x2 odds ratio arithmetic; no paper-level scientific adjudication",
+          "implementation": "researchwitness/paper_two_by_two_source.py",
+          "tests": "tests/test_jats_two_by_two_source.py"
         }
       ],
-      "next_action": "Source-map supported legacy explicit flow and ratio assertions to original-byte JATS table evidence; reconcile old PRs #5–#12 separately from protected custody."
+      "next_action": "Reconcile remaining source-mapped prose flow, denominator provenance and statistics adapters with the current original-byte JATS pipeline. Preserve all existing abstentions and protected-custody boundaries."
     },
     {
       "id": "RW-02",

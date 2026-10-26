@@ -95,3 +95,17 @@ return `FLOW_RELATION_AMBIGUOUS`.
 This is an installed operand-only helper, not a second JATS parser or automatic
 PRISMA flow detector. Rich source mapping and other legacy integration remain
 pending. The source import was not a blanket merge of #6–#12.
+
+## RW-01F: explicit unadjusted 2×2 row review
+
+`researchwitness/paper_two_by_two_source.py` adapts the reviewed PR #11
+crude odds-ratio row checker to the installed `jats_table_projection` model.
+The *same* original-byte JATS parser remains authoritative; row groups now
+carry original group labels and the projection's `mapped_not_adjudicated`
+status is permitted only with the single non-inference warning and all
+strict source-layout gates intact. Exact role/orientation columns, five
+numeric cell anchors and a separate outcome/timepoint row anchor are required.
+The existing operand-only `paper_statistics.recompute_two_by_two` remains
+the arithmetic engine. No richer arbitrary-paper analysis, adjustment
+assumptions or PDF/custody privilege is imported. The legacy denominator,
+statistics-source and prose-flow adapters remain to be reconciled separately.

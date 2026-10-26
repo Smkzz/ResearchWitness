@@ -2,6 +2,21 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Opt-in source-mapped unadjusted odds ratio review - 2026-10-26
+
+- Adapt the reviewed legacy PR #11 same-row crude 2×2 arithmetic detector
+  to the installed, original-byte-preserving JATS projection without importing
+  the older XML-normalizing parser. Retain explicit group/timepoint and strict
+  source-layout/context checks; refusals and caps remain visible.
+  A caption-level independent-group declaration is required; matched, paired,
+  conditional and stratified contexts are unsupported.
+- Add optional `audit-jats --include-unadjusted-2x2` JSON/escaped HTML review
+  and deterministic bundle replay. The default review remains percentage-only.
+- Add invented positive, consistent and hard-negative fixtures, tamper cases,
+  source-byte anchors and clean-wheel smoke. These are unreviewed arithmetic
+  candidates, not scientific results, protected data or a new core proof family.
+
+
 ### Explicit sample-flow helper - 2026-10-26
 
 - Selectively reuse unchanged legacy flow types, bounded count arithmetic and
