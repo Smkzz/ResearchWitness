@@ -2,6 +2,15 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01M: offline PMC OAI-PMH response-to-JATS derivation — 2026-10-26
+
+- Add checkout-only replayable original-response and article-byte-span identity,
+  strict GetRecord/PMCID and declared-license matching, safe inherited-namespace
+  derivation with a separate JATS SHA-256, and private exclusive-file output.
+- Reject ambiguous/malformed content and inconsistent transfer declarations.
+  Tests are synthetic; there is no network fetch, verified publisher provenance,
+  independent source/rights review, protected custody or scientific-performance claim.
+
 ### RW-01L: source-version-bound review packets — 2026-10-26
 
 - Add an offline checkout-only bridge between RW-01K capture replay and RW-01J source-fact packet/review reconciliation; reject stale metadata, mismatched bytes, external digests and incomplete reviewer pairs.
