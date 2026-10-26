@@ -4,13 +4,27 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Observed implementation baseline:** `b2d4863d28e037d35bd8052997e6b02318977771`
+**Observed pre-RW-01M main:** `3048cdb474d881a6e2f1ab107583ddc89dd4e814`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01M: offline PMC OAI-PMH envelope-to-source bridge (candidate)
+
+The checkout-only `tools.pmc_oai_envelope` prepares deterministic raw-envelope,
+original-article-span and separately derived-JATS commitments for an
+operator-supplied OAI-PMH GetRecord response. It rejects mismatched OAI
+identifiers, unsupported article types, ambiguous licence links, unsafe XML,
+duplicate articles, and unsupported namespaces. Inherited namespace declarations
+may be inserted into the standalone JATS start tag with a separate SHA-256.
+Only the already-supplied bytes are processed, with no network acquisition.
+Source origin, observed transfer status, licence rights, custody independence,
+scientific source meaning and source labels remain unauthenticated. The
+candidate's exact-head CI and post-merge checks must be inspected separately.
+See [PMC envelope contract](PMC_OAI_ENVELOPE.md) and [issue #35](https://github.com/Smkzz/ResearchWitness/issues/35).
 
 ## RW-01L: declared source/version and denominator-review binding (candidate)
 
