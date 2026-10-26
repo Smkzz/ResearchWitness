@@ -34,6 +34,7 @@ MAX_TRANSFER_BYTES = 32 * 1024
 MAX_RECEIPT_BYTES = 32 * 1024
 MAX_NODES = jats.MAX_XML_NODES
 MAX_DEPTH = jats.MAX_XML_DEPTH
+MAX_NAMESPACE_BINDINGS = 64
 OAI_ID = re.compile(r"oai:pubmedcentral\.nih\.gov:([1-9][0-9]{0,11})\Z")
 SAFE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}\Z")
 DECLARATION = re.compile(br"<!\s*(?:DOCTYPE|ENTITY)\b", re.I)
@@ -111,6 +112,7 @@ def parse_envelope(raw: bytes) -> Node:
                 inherited.pop(prefix, None)
             else:
                 inherited[prefix] = uri
+        require(len(inherited) <= MAX_NAMESPACE_BINDINGS, "ENVELOPE_NAMESPACE_LIMIT")
         index = parser.CurrentByteIndex
         node = Node(name, dict(attrs), index, jats._tag_end(raw, index),
                     parent=stack[-1] if stack else None,
@@ -265,6 +267,13 @@ def derive(raw: bytes, transfer: dict[str, Any]) -> tuple[bytes, dict[str, Any]]
         require(parsed_stamp.strftime(stamp_format) == datestamp, "OAI_DATESTAMP_INVALID")
     except ValueError as exc:
         raise vb.BenchmarkError("OAI_DATESTAMP_INVALID") from exc
+    all_articles = 0
+    search = [root]
+    while search:
+        element = search.pop()
+        all_articles += jats._local_name(element.tag) == "article"
+        require(all_articles <= 1, "OAI_MULTIPLE_ARTICLES")
+        search.extend(element.children)
     metadata = one(children(record, OAI + "metadata"), "OAI_METADATA_COUNT")
     article = one([c for c in metadata.children if jats._local_name(c.tag) == "article"],
                   "OAI_ARTICLE_COUNT")
@@ -286,6 +295,15 @@ def derive(raw: bytes, transfer: dict[str, Any]) -> tuple[bytes, dict[str, Any]]
     require(len(href) == 1
             and href[0] == LICENCE_HREF[transfer["declared_license_id"]],
             "ARTICLE_LICENSE_UNCLEAR")
+    licence_text = []
+    pending = [license_node]
+    while pending:
+        element = pending.pop()
+        licence_text.extend(p.lower() for p in element.parts if isinstance(p, str))
+        pending.extend(element.children)
+    require(not any(flag in " ".join(licence_text)
+                    for flag in ("all rights reserved", "not licensed", "no permission")),
+            "ARTICLE_LICENSE_CONTRADICTORY")
     source, injections = _derive(raw, article)
     span = raw[article.start:article.end]
     receipt = {
