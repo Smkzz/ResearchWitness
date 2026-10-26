@@ -4,13 +4,24 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Observed pre-RW-01M main:** `3048cdb474d881a6e2f1ab107583ddc89dd4e814`
+**Observed pre-RW-01N main:** `fe6b68efe875e09dfc6bb8aee56aee698803a082`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01N: complete offline raw-PMC capture and review identity chain (candidate)
+
+The checkout-only `tools.pmc_source_review_chain` checks three separately pinned
+stage envelopes: original PMC response to derived JATS (RW-01M), derived source
+capture (RW-01K) and source-fact/reviewer packet (RW-01J/L). It refuses source,
+route, declared UTC capture time and licence/evidence mismatches while reusing
+all earlier independent replays and optional developer-review reconciliation.
+No real provider transfer is authenticated, legal reuse independently assessed,
+work-family independence established, scientific label adjudicated or protected
+holdout accessed. See [RW-01N private workflow](PMC_OAI_ENVELOPE.md#rw-01n-enforce-the-complete-declared-identity-chain).
 
 ## RW-01M: offline PMC OAI-PMH envelope-to-source bridge (candidate)
 
