@@ -2,13 +2,21 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Explicit sample-flow helper - 2026-10-26
+
+- Selectively reuse unchanged legacy flow types, bounded count arithmetic and
+  retained regression tests. Only explicit complete, disjoint and same-scope
+  count flows are supported; ambiguous relationships abstain. No automatic
+  source extraction, new trusted proof family or scientific discovery claim.
+
+
 ### Prospective study design contract (RW-04D) — 2026-10-26
 
-- AI review follow-up PR #26 aligned schema conditional arm identities and
-  strict text/hash anchors, clarified mandatory Python-only cross-field checks
-  and declared paired-test direction, safety upper-bound method and joint
-  statistical/practical acceptance rule. These are planned analysis choices,
-  not executed independent science; unqualified sealed custody stays off.
+- AI-reviewed PR #26 closed schema/validator mismatch, constrained model
+  identity and lexical fields, and specified one-sided paired-discordance
+  detection, conservative negative false-alarm upper bounds and joint
+  significance/practical/safety decision rules. These are study-design
+  declarations, not executed independent statistical evaluation.
 
 - Add strict offline future-study **draft** validation and canonical digest with
   a public JSON Schema and entirely synthetic pilot declaration.

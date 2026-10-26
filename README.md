@@ -33,14 +33,17 @@ is not replaced by an opinion. Default incremental spending authorization is EUR
 
 ## Status
 
-**Latest verified main, 2026-10-26:** `7fe226cd2e21980ca4d42cc48b066df3652c2b23`
-(PRs [#24](https://github.com/Smkzz/ResearchWitness/pull/24),
-[#25](https://github.com/Smkzz/ResearchWitness/pull/25) and
-[#26](https://github.com/Smkzz/ResearchWitness/pull/26)).
-The installed source-mapped JATS table projection and prospective research
-**draft** validation are integrated. Post-merge [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/40313280006)
-and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/40313279916)
-passed. No published version, independent scientific evaluation, PDF/custody
+**Latest verified implementation main (2026-10-26):**
+`659adf299a3efc4322cb5781337454b507e77ac6`. PRs
+[#24](https://github.com/Smkzz/ResearchWitness/pull/24),
+[#25](https://github.com/Smkzz/ResearchWitness/pull/25),
+[#26](https://github.com/Smkzz/ResearchWitness/pull/26) and
+[#27](https://github.com/Smkzz/ResearchWitness/pull/27)
+integrated bounded source-mapped table projection, prospective study
+**draft** validation with reviewed statistical declarations, and a
+restricted explicit sample-flow helper. [Main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090213)
+and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090186)
+passed. No tagged release, independent scientific evaluation, PDF/custody
 qualification or power-justified frozen study is claimed.
 
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed

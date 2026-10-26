@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Latest verified main:** `7fe226cd2e21980ca4d42cc48b066df3652c2b23`
+**Latest verified implementation main:** `659adf299a3efc4322cb5781337454b507e77ac6`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,23 +12,38 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## Current qualified engineering head (2026-10-26)
+## Current verified engineering head (2026-10-26)
 
-PR [#24](https://github.com/Smkzz/ResearchWitness/pull/24) merged source-bound
-optional rich JATS tables as `abb873af2f3697e7e8143c970f8bc938760062e3`.
-PR [#25](https://github.com/Smkzz/ResearchWitness/pull/25) merged the prospective
-study **draft** validator as `1548244613b48d9f59dee72f73fbfc5f5e622df6`.
-The source-only AI review discovered schema/decision contract gaps; follow-up
-PR [#26](https://github.com/Smkzz/ResearchWitness/pull/26) fixed them and merged
-as `7fe226cd2e21980ca4d42cc48b066df3652c2b23`. Do not treat
-PR #25's original head alone as the final scientific-methods contract.
+PR [#24](https://github.com/Smkzz/ResearchWitness/pull/24) merged optional
+source-bound rich JATS table projection at `abb873af2f3697e7e8143c970f8bc938760062e3`.
+PR [#25](https://github.com/Smkzz/ResearchWitness/pull/25) merged a
+prospective study **draft** validator; a read-only AI review identified
+schema and analysis-contract gaps, subsequently fixed by
+PR [#26](https://github.com/Smkzz/ResearchWitness/pull/26), merged as
+`7fe226cd2e21980ca4d42cc48b066df3652c2b23`.
+Do **not** treat PR #25's original head as a final registration contract.
+PR [#27](https://github.com/Smkzz/ResearchWitness/pull/27) selectively
+added a bounded explicit sample-flow helper as
+`659adf299a3efc4322cb5781337454b507e77ac6`.
 
-Post-merge [main CI 40313280006](https://github.com/Smkzz/ResearchWitness/actions/runs/40313280006)
-passed all nine Python/OS matrix jobs and Release gate; [main CodeQL 40313279916](https://github.com/Smkzz/ResearchWitness/actions/runs/40313279916)
-passed. The qualified PR #26 candidate reported 777 tests, 274 subtests and
-94% core package coverage on Ubuntu/Python 3.12. These are **engineering**
-receipts, not verified scientific precision/recall or an authorized sealed run.
-Both RW-01 and RW-04 remain partially complete, and RW-03 custody is unqualified.
+Post-merge [main CI 40314090213](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090213)
+passed nine OS/Python combinations and the Release gate; [main CodeQL
+40314090186](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090186)
+passed. PR #26 engineering candidate passed 777 tests and 274 subtests,
+with 94% core package coverage. These are **engineering qualification**
+receipts, not source-adjudicated precision/recall or sealed-science results.
+RW-01/RW-04 remain partial; RW-03 custody and native PDF/Windows gates
+remain unqualified. Developer-source reviews are not human audits.
+
+## RW-01E: explicit sample-flow arithmetic (integrated)
+
+The unchanged bounded `paper_flow.py` model from legacy PR #11 and its
+original operand-only test cases are selectively integrated. It checks only
+explicit same-population/timepoint operations with disjointness and completeness
+affirmed by the caller. Unknown scope, overlap or relation structure abstains.
+This is NOT automatic sample-flow extraction from a paper or evidence that
+published results are erroneous. Source mapping and remaining legacy stack
+still need separate qualification. See [integration map](INTEGRATION_MAP.md).
 
 ## RW-01D: source-mapped table projection (integrated)
 
