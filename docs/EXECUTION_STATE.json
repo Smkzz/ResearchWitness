@@ -83,7 +83,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/31",
         "https://github.com/Smkzz/ResearchWitness/pull/32",
         "https://github.com/Smkzz/ResearchWitness/pull/33",
-        "https://github.com/Smkzz/ResearchWitness/pull/34"
+        "https://github.com/Smkzz/ResearchWitness/pull/34",
+        "https://github.com/Smkzz/ResearchWitness/pull/35"
       ],
       "blocker": null,
       "completed_slices": [
@@ -152,9 +153,15 @@
           "scope": "checkout-only offline source/version/rights/exposure capture, replay and correction-family lineage declarations; not publisher rights, real labels or independent work-family authentication",
           "implementation": "tools/source_capture_manifest.py",
           "tests": "tests/test_source_capture_manifest.py"
+        },
+        {
+          "id": "RW-01L",
+          "scope": "offline source-byte/version-bound RW-01K capture plus RW-01J review workflow with optional declared annotations; no independent real-paper labels",
+          "implementation": "tools/source_review_binding.py",
+          "tests": "tests/test_source_review_binding.py"
         }
       ],
-      "next_action": "Obtain legally usable original research JATS sources and independently documented publisher/version/rights/correction records; create privately pinned captures with RW-01K, then collect genuinely separate source-context annotations through RW-01J. Only then evaluate legacy PR #11 semantic denominator resolver on exposed development families. RW-01K exact-head CI and post-merge checks required; protected custody and paid calls remain forbidden."
+      "next_action": "Obtain explicitly permitted real open-JATS source/version records and independent substantive denominator-scope reviews using RW-01K/J/L; only then benchmark legacy semantic resolver on exposed source families. RW-01L exact-head and post-merge checks required; no protected custody or paid calls."
     },
     {
       "id": "RW-02",

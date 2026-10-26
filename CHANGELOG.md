@@ -2,6 +2,12 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01L: source-version-bound review packets — 2026-10-26
+
+- Add an offline checkout-only bridge between RW-01K capture replay and RW-01J source-fact packet/review reconciliation; reject stale metadata, mismatched bytes, external digests and incomplete reviewer pairs.
+- Preserve all non-authentication/scientific limitations. Add synthetic validation regressions with no paid provider, protected custody or new verifier capabilities.
+
+
 ### Source capture and declared version lineage (RW-01K) — 2026-10-26
 
 - Add checkout-only, offline bounded JATS source capture/replay that records
