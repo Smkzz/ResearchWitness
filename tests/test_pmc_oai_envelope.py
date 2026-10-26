@@ -205,3 +205,156 @@ def test_cli_extraction_is_private_exclusive_and_replays(tmp_path: Path):
                            cwd=ROOT, capture_output=True)
     assert check.returncode == 0, check.stderr.decode()
     assert json.loads(check.stdout)["status"] == "RAW_SPAN_AND_DERIVED_JATS_REPLAYED"
+
+
+# RW-01N: one signed-off-by-nobody development identity chain, never ground truth.
+from tools import denominator_scope_review as scope
+from tools import pmc_source_review_chain as chain
+from tools import source_capture_manifest as capture
+
+
+def chain_records():
+    raw = example()
+    declared = transfer(raw)
+    source, extraction = pmc.derive(raw, declared)
+    meta = {
+        "schema_version": capture.METADATA_VERSION,
+        "record_id": "synthetic-pmc12345-v1",
+        "work_family_id": "fictional-family-12345",
+        "version_id": "v1",
+        "kind": "article",
+        "parent_record_id": None,
+        "correction_notice_uri": None,
+        "origin": {
+            "retrieval_route": "pmc_open_access",
+            "capture_uri": pmc.ENDPOINT,
+            "publisher_uri": None,
+            "captured_at_utc": declared["captured_at_utc"],
+            "expected_source_sha256": sha256(source).hexdigest(),
+        },
+        "rights": {
+            "classification": "declared_open_license",
+            "license_id": declared["declared_license_id"],
+            "evidence_uri": declared["rights_evidence_uri"],
+        },
+        "exposure": {
+            "partition": "development_exposed",
+            "prior_access": "known_exposed",
+            "label_status": "no_independent_scientific_label",
+        },
+    }
+    captured = capture.envelope(capture.build_capture(source, meta))
+    packet = scope.make_packet(source)
+    review = {"packet": packet, "packet_sha256": vb.commitment(packet)}
+    derivation = pmc.receipt_envelope(extraction)
+    pins = {
+        "expected_derivation_sha256": derivation["receipt_sha256"],
+        "expected_capture_sha256": captured["manifest_sha256"],
+        "expected_packet_sha256": review["packet_sha256"],
+    }
+    return raw, declared, source, derivation, meta, captured, review, pins
+
+
+def test_complete_pmc_capture_and_blinded_review_packet_chain_replays():
+    inputs = chain_records()
+    result = chain.bind_chain(*inputs[:-1], **inputs[-1])
+    assert result["schema_version"] == chain.VERSION
+    assert result["raw_envelope_sha256"] == sha256(inputs[0]).hexdigest()
+    assert result["derived_jats_sha256"] == sha256(inputs[2]).hexdigest()
+    assert result["source_capture_manifest_sha256"] == inputs[5]["manifest_sha256"]
+    assert result["review_packet_sha256"] == inputs[6]["packet_sha256"]
+    assert result["review_status"] == "REVIEWS_NOT_SUPPLIED"
+    assert all(result[flag] is False for flag in (
+        "operator_retrieval_verified", "publisher_authenticity_verified",
+        "license_rights_verified_by_tool", "family_independence_authenticated",
+        "reviewer_independence_authenticated", "scientific_scope_truth_established",
+        "protected_evaluation_permitted",
+    ))
+    assert "Invented example" not in json.dumps(result)
+    assert chain.bind_chain(*inputs[:-1], **inputs[-1]) == result
+
+
+@pytest.mark.parametrize(("field", "changed", "diagnostic"), [
+    ("route", "operator_supplied", "PMC_CAPTURE_ROUTE_MISMATCH"),
+    ("capture_uri", None, "RETRIEVAL_URI_REQUIRED"),
+    ("time", "2026-10-26T20:25:00Z", "PMC_CAPTURE_TIME_DECLARATION_MISMATCH"),
+    ("licence", "CC0-1.0", "PMC_LICENSE_DECLARATIONS_MISMATCH"),
+    ("evidence", "https://creativecommons.org/publicdomain/zero/1.0/",
+     "PMC_LICENSE_DECLARATIONS_MISMATCH"),
+    ("source_hash", "f" * 64, "PMC_DERIVED_SOURCE_HASH_MISMATCH"),
+])
+def test_chain_rejects_cross_workflow_declaration_disagreement(field, changed, diagnostic):
+    raw, t, source, derivation, meta, cap, packet, pins = chain_records()
+    other = deepcopy(meta)
+    if field == "route":
+        other["origin"]["retrieval_route"] = changed
+    elif field == "capture_uri":
+        other["origin"]["capture_uri"] = changed
+    elif field == "time":
+        other["origin"]["captured_at_utc"] = changed
+    elif field == "licence":
+        other["rights"]["license_id"] = changed
+    elif field == "evidence":
+        other["rights"]["evidence_uri"] = changed
+    else:
+        other["origin"]["expected_source_sha256"] = changed
+    with pytest.raises(vb.BenchmarkError, match=diagnostic):
+        chain.bind_chain(raw, t, source, derivation, other, cap, packet, **pins)
+
+
+def test_chain_rejects_replaced_capture_and_review_pins():
+    raw, t, source, derivation, meta, cap, packet, pins = chain_records()
+    changed = deepcopy(pins)
+    changed["expected_derivation_sha256"] = "f" * 64
+    with pytest.raises(vb.BenchmarkError, match="DERIVATION_EXTERNAL_PIN_MISMATCH"):
+        chain.bind_chain(raw, t, source, derivation, meta, cap, packet, **changed)
+    changed = deepcopy(pins)
+    changed["expected_capture_sha256"] = "f" * 64
+    with pytest.raises(vb.BenchmarkError, match="EXTERNAL_MANIFEST_PIN_MISMATCH"):
+        chain.bind_chain(raw, t, source, derivation, meta, cap, packet, **changed)
+    changed = deepcopy(pins)
+    changed["expected_packet_sha256"] = "f" * 64
+    with pytest.raises(vb.BenchmarkError, match="PACKET_ENVELOPE_PIN"):
+        chain.bind_chain(raw, t, source, derivation, meta, cap, packet, **changed)
+
+
+def test_chain_ensures_derived_source_is_exactly_replayed():
+    raw, t, source, derivation, meta, cap, packet, pins = chain_records()
+    with pytest.raises(vb.BenchmarkError, match="DERIVATION_REPLAY_MISMATCH"):
+        chain.bind_chain(raw, t, source + b" ", derivation, meta, cap, packet, **pins)
+
+
+def test_chain_never_accepts_an_incomplete_review_pair():
+    raw, t, source, derivation, meta, cap, packet, pins = chain_records()
+    with pytest.raises(vb.BenchmarkError, match="BOTH_REVIEWS_REQUIRED_OR_OMITTED"):
+        chain.bind_chain(raw, t, source, derivation, meta, cap, packet,
+                         review_a={}, **pins)
+
+
+def test_chain_cli_replays_private_inputs_and_declines_wrong_pin(tmp_path: Path):
+    raw, t, source, derivation, meta, cap, packet, pins = chain_records()
+    args = [
+        ("raw-envelope", raw, "raw.xml"),
+        ("transfer", vb.canonical_bytes(t), "transfer.json"),
+        ("derived-source", source, "derived.xml"),
+        ("derivation-envelope", vb.canonical_bytes(derivation), "derivation.json"),
+        ("metadata", vb.canonical_bytes(meta), "metadata.json"),
+        ("capture-envelope", vb.canonical_bytes(cap), "capture.json"),
+        ("packet-envelope", vb.canonical_bytes(packet), "packet.json"),
+    ]
+    command = [sys.executable, "-m", "tools.pmc_source_review_chain"]
+    for name, data, filename in args:
+        path = tmp_path / filename
+        path.write_bytes(data)
+        command.extend(("--" + name, str(path)))
+    for key, value in pins.items():
+        command.extend(("--" + key.replace("_", "-"), value))
+    result = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=30)
+    assert result.returncode == 0, result.stderr
+    assert b"Invented example" not in result.stdout
+    assert json.loads(result.stdout)["review_status"] == "REVIEWS_NOT_SUPPLIED"
+    wrong = command.copy()
+    wrong[-1] = "0" * 64
+    refused = subprocess.run(wrong, cwd=ROOT, capture_output=True, timeout=30)
+    assert refused.returncode == 2
+    assert json.loads(refused.stderr)["code"] == "PACKET_ENVELOPE_PIN"
