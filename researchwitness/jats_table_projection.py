@@ -56,33 +56,56 @@ def _refs(node: jats._Node) -> tuple[tuple[str, str], ...]:
     return tuple(result)
 
 
-def _numeric_values(text: str, headers: tuple[jats._Node, ...] = ()) -> tuple[NumericValue, ...]:
-    """Record lexically explicit values, without inferring population scope."""
+def _numeric_values(
+    text: str, headers: tuple[jats._Node, ...] = (),
+    *, conflicting_header_roles: bool = False,
+) -> tuple[NumericValue, ...]:
+    """Preserve explicit numeric lexemes without inventing percentage roles.
+
+    A count(SD) cell is syntactically similar to count(percent). Only an
+    explicit '%' token or an unambiguous percentage heading permits percentage
+    classification. A cell spanning distinct column roles is never classified
+    from inherited headings alone.
+    """
+    heading = " ".join(jats._text(h) for h in headers).casefold()
+    percent_heading = "%" in heading or "percent" in heading
+    statistical_spread = any(
+        marker in heading for marker in
+        ("mean", "standard deviation", "sd", "confidence interval", "95% ci")
+    )
+    explicit_percent = "%" in text
+    confident_percent = (
+        explicit_percent or
+        (percent_heading and not statistical_spread and not conflicting_header_roles)
+    )
     ratio = jats._COUNT_RATIO_PERCENT_RE.fullmatch(text)
     combined = ratio or jats._COUNT_PERCENT_RE.fullmatch(text)
     if combined:
         count = combined.group("count")
         percent = combined.group("percent")
-        values = [
-            NumericValue(count, str(int(count.replace(",", ""))), "count", None),
-        ]
+        count_role = "count" if confident_percent else None
+        denom_role = "explicit_ratio_denominator" if confident_percent else None
+        values = [NumericValue(count, str(int(count.replace(",", ""))), count_role, None)]
         if ratio:
             denominator = ratio.group("denominator")
-            values.append(NumericValue(denominator, str(int(denominator.replace(",", ""))),
-                                       "explicit_ratio_denominator", None))
-        values.append(NumericValue(percent, percent, "percent",
-                                   len(percent.partition(".")[2])))
+            values.append(NumericValue(
+                denominator, str(int(denominator.replace(",", ""))), denom_role, None,
+            ))
+        values.append(NumericValue(
+            percent, percent, "percent" if confident_percent else None,
+            len(percent.partition(".")[2]),
+        ))
         return tuple(values)
-    percent = jats._PERCENT_ONLY_RE.fullmatch(text)
-    if percent:
-        value = percent.group("percent")
-        # A bare numeric cell is not automatically a percentage or a count.
-        heading = " ".join(jats._text(h) for h in headers).casefold()
-        kind = ("percent" if text.strip().endswith("%") or
-                "%" in heading or "percent" in heading else
-                "count" if jats._is_count_header(list(headers)) and
-                jats._COUNT_ONLY_RE.fullmatch(text) else None)
-        return (NumericValue(value, value, kind, len(value.partition(".")[2])),)
+    numeric = jats._PERCENT_ONLY_RE.fullmatch(text)
+    if numeric:
+        value = numeric.group("percent")
+        role = (
+            "percent" if (explicit_percent or confident_percent) else
+            "count" if (not conflicting_header_roles and
+                        jats._is_count_header(list(headers)) and
+                        jats._COUNT_ONLY_RE.fullmatch(text)) else None
+        )
+        return (NumericValue(value, value, role, len(value.partition(".")[2])),)
     return ()
 
 
@@ -147,6 +170,7 @@ def _table(
     rows: list[TableRow] = []
     spans: list[CellSpan] = []
     bad_data_layout = malformed_body
+    semantic_role_ambiguity = False
     for ri, row in enumerate(body_rows):
         cells = jats._cells(row)
         positions, supported = layouts[ri]
@@ -160,7 +184,23 @@ def _table(
                 bad_data_layout = True
                 colspan = colspan or 1
                 rowspan = rowspan or 1
-            inherited_headers = tuple(header_columns.get(col, ()))
+            # A spanning body cell inherits every covered column, not just the
+            # first. Keep the source-cited references deduplicated.
+            column_headers = [
+                tuple(header_columns.get(k, ()))
+                for k in range(col, min(width, col + colspan))
+            ]
+            conflicting_roles = len({
+                tuple(id(header) for header in h) for h in column_headers
+            }) > 1
+            semantic_role_ambiguity |= conflicting_roles
+            inherited_headers = tuple(dict.fromkeys(
+                id(header) for headers in column_headers for header in headers
+            ))
+            headers_by_id = {
+                id(header): header for headers in column_headers for header in headers
+            }
+            inherited_headers = tuple(headers_by_id[key] for key in inherited_headers)
             refs: list[HeaderCellReference] = []
             for header in inherited_headers:
                 header_ri, header_col = header_positions[id(header)]
@@ -182,7 +222,9 @@ def _table(
             footnotes = tuple(rid for kind, rid in xrefs if kind in {"fn", "table-fn"})
             actual.append(TableCell(
                 raw_text=raw,
-                normalized_numeric_values=_numeric_values(raw, inherited_headers),
+                normalized_numeric_values=_numeric_values(
+                    raw, inherited_headers, conflicting_header_roles=conflicting_roles,
+                ),
                 row_identity=row_identity,
                 column_identity=col,
                 effective_headers=tuple(jats._text(h) for h in inherited_headers),
@@ -216,6 +258,8 @@ def _table(
         warnings.append("body_layout_ambiguous")
     if duplicate_id:
         warnings.append("duplicate_source_table_id")
+    if semantic_role_ambiguity:
+        warnings.append("spanning_cell_role_ambiguous")
     warnings.append("numeric_lexemes_only_denominator_scope_not_inferred")
     return Table(
         label=label, caption=caption, table_id=table_id,
@@ -249,6 +293,26 @@ def project_jats_tables(source: bytes, detector_report: dict | None = None) -> P
             if len(table_pairs) > MAX_MODEL_TABLES:
                 raise jats.JATSSourceError("JATS table projection exceeds table-count limit")
 
+    # Bound projected source tables *before* constructing large nested models.
+    estimated_rows = estimated_cells = 0
+    for _wrapper, table in table_pairs:
+        for row in jats._descendants(table, "tr"):
+            estimated_rows += 1
+            estimated_cells += len(jats._cells(row))
+            if estimated_rows > MAX_MODEL_ROWS or estimated_cells > MAX_MODEL_CELLS:
+                raise jats.JATSSourceError("JATS table projection exceeds row/cell limit")
+
+    # Recompute supplied detector results against original bytes; merely checking
+    # source hash and cell offset would permit fabricated numeric assertions.
+    actual_report = jats.audit_jats_percentage_tables(source)
+    if detector_report is not None:
+        if (type(detector_report) is not dict or
+                detector_report.get("source_sha256") != source_hash):
+            raise jats.JATSSourceError("Source and detector report refer to different bytes")
+        if detector_report != actual_report:
+            raise jats.JATSSourceError("Supplied detector report does not match source")
+    detector_report = actual_report
+
     identifiers: dict[str, int] = {}
     for wrapper, _table_node in table_pairs:
         key = jats._attribute(wrapper, "id")
@@ -266,10 +330,6 @@ def project_jats_tables(source: bytes, detector_report: dict | None = None) -> P
         if row_count > MAX_MODEL_ROWS or cell_count > MAX_MODEL_CELLS:
             raise jats.JATSSourceError("JATS table projection exceeds row/cell limit")
 
-    if detector_report is None:
-        detector_report = jats.audit_jats_percentage_tables(source)
-    if detector_report["source_sha256"] != source_hash:
-        raise jats.JATSSourceError("Source and detector report refer to different bytes")
     spans = {(cell.source_anchor.start_byte, cell.source_anchor.end_byte): cell
              for table in tables for row in table.rows for cell in row.cells}
     assertions: list[NumericAssertion] = []

@@ -19,12 +19,13 @@ The JSON report contains table_projection when requested, including source hashe
 
 - An element's start_byte:end_byte range includes original XML markup. A quote is the complete normalized element text. These are different kinds of location, not interchangeable literal quote offsets.
 - Headers, caption N cues, row labels, footnote references, source versions and detector denominator facts are recorded as traceable evidence, never silently treated as verified scientific population or denominator scope.
-- Plain numbers are not automatically classified as percentages; roles require explicit syntax or a supported column heading. Numeric contents in unsupported mixed cells remain raw.
+- Bare numbers or mean(SD) pairs are not automatically classified as percentages. Source percent tokens or unambiguous matching column headers are required; conflicting headers on a spanning body cell preserve all header references but suppress inferred numeric roles.
 - Header spans and row/column layouts preserve warnings on malformed or missing structures. Duplicate source-assigned table IDs receive distinct indexed model identities and explicit warnings; no guessed publisher identity is introduced.
 - An asserted denominator is included in a numeric assertion only if the unchanged detector reports a resolved arithmetic relation. Conditional and unknown denominators remain absent. A trusted reviewer must still verify source correspondence and applicability.
 - The projection does not reconstruct scientific narrative sections or figures. Missing population, outcome, group, timepoint or adjustment fields remain null; their identity_key remains unavailable.
 - extraction_confidence=0.0 is an uncalibrated placeholder, not a probabilistic quality score. Inspect structure_status and limitations instead.
 - A large opt-in projection can exceed the fixed report byte limit; it fails closed rather than truncating source data. Default audit behavior is retained.
+- Supplied detector reports are recomputed against original source bytes before being projected, preventing altered numerator, percentage, denominator or status fields from forging source-linked assertions.
 - Replaying a bundle checks recorded source and implementation bytes, not original publisher authority. An independently retained manifest digest is necessary to detect coherent changes; hashes cannot prove scientific validity.
 
 ## Engineering acceptance and next work

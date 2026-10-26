@@ -1,6 +1,7 @@
 """RW-01D: rich JATS table projection never invents scientific context."""
 from __future__ import annotations
 
+from copy import deepcopy
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -189,3 +190,52 @@ def test_no_doctype_or_missing_source_bytes_enter_model():
     source = b'<!DOCTYPE article SYSTEM "file:///private"><article/>'
     with pytest.raises(jats.JATSSourceError):
         project_jats_tables(source)
+
+
+def test_sd_not_misclassified_as_count_percent():
+    source = (b"<article><table-wrap><table><thead><tr>"
+              b"<th>Mean (SD)</th></tr></thead><tbody><tr>"
+              b"<td>4 (8.00)</td></tr></tbody></table></table-wrap></article>")
+    model = project_jats_tables(source)
+    items = model.tables[0].rows[0].cells[0].normalized_numeric_values
+    assert [item.surface for item in items] == ["4", "8.00"]
+    assert [item.unit for item in items] == [None, None]
+
+
+def test_spanning_body_cell_preserves_all_header_refs_without_inferred_roles():
+    source = (b"<article><table-wrap><table><thead><tr>"
+              b"<th>Count</th><th>Percentage</th></tr></thead><tbody><tr>"
+              b"<td colspan='2'>4</td></tr></tbody></table></table-wrap></article>")
+    model = project_jats_tables(source)
+    table = model.tables[0]
+    cell = table.rows[0].cells[0]
+    assert cell.effective_headers == ("Count", "Percentage")
+    assert [h.text for h in cell.effective_header_refs] == ["Count", "Percentage"]
+    assert cell.normalized_numeric_values[0].unit is None
+    assert "spanning_cell_role_ambiguous" in table.limitations
+    assert table.structure_status == "ambiguous"
+
+
+@pytest.mark.parametrize(("part","value"), [
+    ("reported_percent", "99.99"),
+    ("numerator", 99),
+    ("denominator", 5),
+    ("status", "arithmetic_match"),
+])
+def test_supplied_detector_result_cannot_forge_numeric_assertion(part, value):
+    source = FIXTURE.read_bytes()
+    detector = jats.audit_jats_percentage_tables(source)
+    changed = deepcopy(detector)
+    changed["results"][1][part] = value
+    assert changed["source_sha256"] == sha256(source).hexdigest()
+    with pytest.raises(jats.JATSSourceError, match="does not match source"):
+        project_jats_tables(source, changed)
+
+
+def test_supplied_denominator_role_and_value_cannot_be_forged():
+    source = FIXTURE.read_bytes()
+    changed = deepcopy(jats.audit_jats_percentage_tables(source))
+    target = changed["results"][0]["evidence"]["denominator_sources"][0]
+    target["value"] = 999
+    with pytest.raises(jats.JATSSourceError, match="does not match source"):
+        project_jats_tables(source, changed)
