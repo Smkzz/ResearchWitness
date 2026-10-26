@@ -2,6 +2,11 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01N: complete offline development-source identity replay — 2026-10-26
+
+- Bind the already-derived PMC JATS bytes to RW-01K private capture metadata and RW-01J/L source-scope review packets, checking separately pinned stage digests and exact source, route, time and licence declarations.
+- Add synthetic cross-stage mismatch and CLI regressions. No authentic provider transfer, independent scientific reviewer, real-source corpus, source licence verification, new privilege, paid call or sealed evaluation is claimed.
+
 ### RW-01M: offline PMC OAI-PMH response-to-JATS derivation — 2026-10-26
 
 - Add checkout-only replayable original-response and article-byte-span identity,
