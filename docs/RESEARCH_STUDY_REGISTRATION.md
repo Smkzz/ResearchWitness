@@ -97,3 +97,45 @@ source-pinned set under that isolation. RW-10/RW-11: freeze one candidate,
 run one registered evaluation and produce permitted aggregates. A
 negative/inconclusive outcome is valid research; no new scientific
 breakthrough is claimed by building the registration template.
+
+## Exact preregistered analysis choices (draft fields)
+
+The draft's primary estimand is the candidate-minus-baseline **positive-family
+successful detection rate**. Its one-sided test is the exact conditional paired
+discordance test: among eligible positive families where *exactly one* method
+succeeded, under the no-advantage null, candidate-only wins follow a Binomial
+(n discordant, 1/2) tail. If there are no discordant families, there is no
+primary evidence of improvement. Statistical significance must be below the
+preallocated primary alpha **and** the observed family-level detection rate
+improvement must meet the declared minimum practical gain.
+
+The safety estimand is the candidate-minus-baseline **negative-family emitted
+false-alarm rate**. The declared one-sided upper bound method uses a Bonferroni
+union bound of exact Clopper–Pearson marginal binomial intervals: at each
+preallocated safety alpha, take the candidate upper bound with tail alpha/2
+minus the baseline lower bound with tail alpha/2. It is conservative and
+requires independently sampled work families; dependence within a family is
+handled by making the family the unit. It is not a substitute for genuine
+source-backed labels. The bound must be *no greater than* the prespecified
+maximum allowable increase, including zero. An unknown or incomplete data
+stratum cannot be silently omitted; the preregistered missingness rule can
+force an inconclusive result.
+
+The success decision requires **both**: one-sided primary significance and
+practical gain, **and** the safety upper bound within the declared margin.
+These are specified algorithms and thresholds, not algorithms executed by this
+draft validator. A later qualified statistical runner must implement and test
+them independently against established references before scientific promotion.
+
+The example's phrase “at most five percentage points” matches its safety
+margin of 1/20. A safety margin of 1 is rejected as vacuous, although *any*
+permitted margin still needs separate scientific justification and approval as
+a justified design choice, not necessarily human opinion.
+
+JSON Schema checks a structural subset. Python additionally rejects JSON
+numeric 1.0 in integer slots, compares distinct arm commitments, constrains
+fractions and alpha sums, and checks other field interactions not expressible
+in standard JSON Schema without nonportable data-dependent extensions.
+A schema-valid object is **not** valid for this plan unless Python validation
+also passes. The receipt still remains draft-only, with zero evidence of actual
+pre-outcome timestamping or sealed custody.

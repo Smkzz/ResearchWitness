@@ -75,6 +75,14 @@ def test_external_pin_is_not_created_by_report():
     (lambda x: x["endpoints"].update(no_hidden_failures=False),
      "MISSING_CASE_POLICY"),
     (lambda x: x["analysis"].update(paired_unit="relationship"), "PAIRED_UNIT"),
+    (lambda x: x["analysis"].update(primary_sidedness="two_sided"), "PRIMARY_SIDEDNESS"),
+    (lambda x: x["analysis"].update(primary_estimand="row_rate"), "PRIMARY_ESTIMAND"),
+    (lambda x: x["analysis"].update(safety_bound_method="normal_wald"),
+     "SAFETY_BOUND_METHOD"),
+    (lambda x: x["analysis"].update(safety_estimand="positive_family_rate"),
+     "SAFETY_ESTIMAND"),
+    (lambda x: x["analysis"].update(success_decision_rule="primary_only"),
+     "SUCCESS_DECISION_RULE"),
     (lambda x: x["analysis"].update(missingness_policy="complete_cases_only"),
      "MISSINGNESS_POLICY"),
     (lambda x: x["analysis"].update(multiplicity_policy="retune_on_holdout"),
@@ -175,3 +183,76 @@ def test_canonical_validation_is_deterministic():
     one = registration.validate(value)
     two = registration.validate(deepcopy(value))
     assert vb.canonical_bytes(one) == vb.canonical_bytes(two)
+
+
+def test_safety_margin_cannot_be_vacuous():
+    obj = draft()
+    obj["analysis"]["maximum_false_alarm_increase"] = {
+        "numerator": 1, "denominator": 1,
+    }
+    with pytest.raises(vb.BenchmarkError, match="VACUOUS_SAFETY_MARGIN"):
+        registration.validate(obj)
+
+
+@pytest.mark.parametrize(("mutation", "confirmatory"), [
+    (lambda x: x["arms"][0].update(
+        proposal_kind="authorized_cached_ai",
+        model_sha256=None, prompt_sha256=None), False),
+    (lambda x: x["arms"][0].update(model_sha256="a" * 64), False),
+    (lambda x: x["sampling"].update(minimum_negative_families=14), True),
+    (lambda x: x.update(study_id=x["study_id"] + "\n"), False),
+    (lambda x: x["arms"][0].update(implementation_sha256="a" * 64 + "\n"), False),
+    (lambda x: x["sampling"].update(selection_rule=" " + x["sampling"]["selection_rule"]), False),
+])
+def test_schema_rejects_matching_lexical_and_conditional_violations(mutation, confirmatory):
+    obj = draft()
+    if confirmatory:
+        obj["designation"] = "confirmatory_intended"
+    mutation(obj)
+    schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    errors = list(jsonschema.Draft202012Validator(schema).iter_errors(obj))
+    assert errors, "Schema must reject this lexically/conditionally invalid record"
+
+def test_schema_cannot_replace_runtime_cross_field_checks():
+    obj = draft()
+    schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    validator = jsonschema.Draft202012Validator(schema)
+    # Both hashes are well formed but identical; JSON Schema cannot compare them.
+    obj["arms"][1]["implementation_sha256"] = obj["arms"][0]["implementation_sha256"]
+    validator.validate(obj)
+    with pytest.raises(vb.BenchmarkError, match="IDENTICAL_ARM_COMMITMENTS"):
+        registration.validate(obj)
+    # The mandatory executable validator also checks the paired alpha budget.
+    obj = draft()
+    obj["analysis"]["primary_alpha"] = {"numerator": 1, "denominator": 20}
+    validator.validate(obj)
+    with pytest.raises(vb.BenchmarkError, match="FAMILYWISE_ALPHA_EXCEEDED"):
+        registration.validate(obj)
+
+
+def test_schema_integer_semantics_are_more_permissive_than_python():
+    obj = draft()
+    schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
+    obj["resources"]["max_cost_micro_eur_per_work"] = 0.0
+    # JSON Schema's numeric equality accepts 0.0 as equal to 0. The Python
+    # executable contract rejects floating number encodings for integer slots.
+    jsonschema.Draft202012Validator(schema).validate(obj)
+    with pytest.raises(vb.BenchmarkError, match="NON_INTEGER_JSON_NUMBER"):
+        registration.validate(obj)
+
+
+@pytest.mark.parametrize("bad_bytes", [
+    b'{"a":NaN}',
+    b'{"a":2.0}',
+    b'{"a":1} trailing',
+])
+def test_cli_refuses_nonnumeric_and_trailing_json(tmp_path, bad_bytes):
+    path = tmp_path / "bad.json"
+    path.write_bytes(bad_bytes)
+    result = subprocess.run(
+        [sys.executable, "-m", "tools.research_preregistration", str(path)],
+        cwd=ROOT, capture_output=True, timeout=30,
+    )
+    assert result.returncode == 2
+    assert not result.stdout
+    assert json.loads(result.stderr)["status"] == "invalid"
