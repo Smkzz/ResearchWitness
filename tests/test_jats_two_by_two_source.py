@@ -98,9 +98,11 @@ def test_multirow_or_auxiliary_column_does_not_silently_skip_data():
         b"<td>12</td><td>88</td><td>6</td><td>94</td><td>2.20</td>"
         b"</tr></tr></tbody></table>",
     )
-    # Deliberately malformed XML must be rejected by the original parser.
-    with pytest.raises(ValueError):
-        examine(duplicate)
+    # Nested table rows are XML-parseable but not a valid supported layout.
+    # Failure here must be explicit incomplete coverage, not a false positive.
+    nested = examine(duplicate)
+    assert nested["findings"] == []
+    assert nested["scan_complete"] is False
     good_second = raw.replace(
         b"</tr></tbody></table>",
         b'</tr><tr><th scope="row">30-day mortality</th>'
