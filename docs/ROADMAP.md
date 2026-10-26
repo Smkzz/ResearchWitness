@@ -10,7 +10,7 @@ not a second independently maintained task list.
 The observed pre-plan main is `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a` (2026-10-17).
 PR #13, post-merge documentation #17 and intake/export hardening #18 are integrated.
 There is a dependency-free verifier with ten bounded families, intake and evidence
-replay/export, plus checkout-only JATS arithmetic and guarded metadata tools.
+replay/export, plus installed bounded JATS arithmetic and guarded checkout metadata tools.
 See [PROJECT_STATUS.md](PROJECT_STATUS.md) for identities and observed checks.
 No published package, general paper checker or independent accuracy is implied.
 
@@ -71,3 +71,10 @@ extensions selected from measured development misses, not an obligation to build
 everything before the first preview. Keep discovery outside the small verifier.
 Automatic accusations, researcher scoring, misconduct inference and author contact
 are not project goals. The conversational "v4" label is not a product version.
+
+## Partial RW-01D progress
+
+An optional installed source-byte-preserving PaperDocument table projection
+records original header, layout and denominator context without declaring
+scientific population scope. The richer legacy source-mapped flow, ratio and
+statistics integrations still need review, and scientific Wave 3 remains blocked.

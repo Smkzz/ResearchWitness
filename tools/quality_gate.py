@@ -161,6 +161,23 @@ def main() -> int:
                                 cwd=temp).stdout)
         if replay['status'] != 'verified' or replay['findings_replayed'] != 3:
             raise RuntimeError('installed JATS replay smoke mismatch')
+        structured_dir = temp / 'installed-structured-jats'
+        structured = json.loads(run(
+            str(cli), 'audit-jats', str(ROOT / 'examples/synthetic-jats/article.xml'), '--document-id',
+            'synthetic-jats', '--output-dir', str(structured_dir),
+            '--include-structure', cwd=temp,
+        ).stdout)
+        content = json.loads((structured_dir / 'report.json').read_bytes())
+        if (len(content['table_projection']['tables']) != 2 or
+                len(content['table_projection']['numeric_assertions']) != 3):
+            raise RuntimeError('installed table projection smoke mismatch')
+        reread = json.loads(run(
+            str(cli), 'replay-jats', str(structured_dir),
+            '--expected-manifest-sha256', structured['manifest_sha256'],
+            cwd=temp,
+        ).stdout)
+        if reread['status'] != 'verified':
+            raise RuntimeError('installed table replay mismatch')
         if smoke['paper_error_established'] or smoke['external_actions'] != 'OUT_OF_SCOPE':
             raise RuntimeError('scope invariant failed in installed wheel')
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)
