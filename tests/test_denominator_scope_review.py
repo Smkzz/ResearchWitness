@@ -289,7 +289,7 @@ def test_cli_prepare_and_reconcile_with_external_hashes(tmp_path):
     args[args.index(digest)] = "0" * 64
     failed = subprocess.run(args, cwd=ROOT, capture_output=True, timeout=40)
     assert failed.returncode == 2
-    assert json.loads(failed.stderr)["code"] == "PACKET_PIN_MISMATCH"
+    assert json.loads(failed.stderr)["code"] == "PACKET_ENVELOPE_PIN"
 
 
 def test_json_duplicate_keys_are_rejected_without_echoing_user_text(tmp_path):
