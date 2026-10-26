@@ -133,3 +133,16 @@ provenance, protected custody and independent scientific adjudication.
 Legacy ratio, denominator provenance, broader sample-flow formats, public
 screening coverage and PR #12 UI/custody continue separately. No old
 source parser or broad legacy dispatcher was imported.
+
+## RW-01H: source-mapped independent-observation SD/SE/n
+
+`researchwitness/paper_statistics_source.py` is a narrow adaptation of the
+legacy PR #11 descriptive SD, SE and n checker. It consumes the *current*,
+immutable original-byte `JATS Table` projection, not the obsolete XML
+normalizer. Only explicit row/header source mappings, a caption asserting
+independent observations and the exact relation SE = SD/sqrt(n) qualify.
+Unsupported footnote, denominator, structured ambiguity or adjusted/weighted,
+paired/repeated observations abstain. It does not infer study-level estimator
+semantics outside the table. The same report/replay path produces separately
+labelled private unreviewed candidates; the ten trusted verifier families
+remain unchanged. This does not qualify PR #11's entire stack.

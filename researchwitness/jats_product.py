@@ -62,14 +62,15 @@ def implementation_files() -> dict[str, str]:
         for name in ("_jats_parser.py", "_jats_math.py", "_jats_files.py",
                      "jats_product.py", "jats_table_projection.py", "paper_document.py",
                      "paper_statistics.py", "paper_two_by_two_source.py",
-                     "paper_flow.py", "paper_flow_source.py")
+                     "paper_flow.py", "paper_flow_source.py", "paper_statistics_source.py")
     }
 
 
 def make_report(source: bytes, document_id: str, source_pin_present: bool,
                 *, include_structure: bool = False,
                 include_odds_ratio: bool = False,
-                include_prose_flows: bool = False) -> dict[str, Any]:
+                include_prose_flows: bool = False,
+                include_sd_se_n: bool = False) -> dict[str, Any]:
     if type(document_id) is not str or IDENTIFIER.fullmatch(document_id) is None:
         raise ValueError("Invalid document identifier")
     result = audit_jats_percentage_tables(source)
@@ -119,7 +120,7 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
             "PDF/OCR, sealed evaluation, network, AI providers and author contact are outside scope.",
         ],
     }
-    if include_structure or include_odds_ratio or include_prose_flows:
+    if include_structure or include_odds_ratio or include_prose_flows or include_sd_se_n:
         from .jats_table_projection import project_jats_tables
         projection = project_jats_tables(source, result,
                                          include_body_paragraphs=include_prose_flows)
@@ -128,6 +129,9 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
         if include_odds_ratio:
             from .paper_two_by_two_source import check_jats_unadjusted_2x2_tables
             report["odds_ratio_review"] = check_jats_unadjusted_2x2_tables(projection)
+        if include_sd_se_n:
+            from .paper_statistics_source import check_jats_sd_se_n_tables
+            report["statistical_se_review"] = check_jats_sd_se_n_tables(projection)
         if include_prose_flows:
             from dataclasses import asdict
             from .paper_flow_source import MAX_MAPPED_RELATIONS, map_jats_sample_flows
@@ -258,6 +262,31 @@ def render_html(report: dict[str, Any]) -> bytes:
             "<p>Whole-article flow coverage has not been established.</p>"
         )
         html = html.replace("</html>\n", section + "</html>\n")
+    if "statistical_se_review" in report:
+        review = report["statistical_se_review"]
+        rows = []
+        for item in review["findings"]:
+            columns = (
+                item["table_id"], item["row_identity"], item["n_exact"],
+                item["sd_exact"], item["reported_se"],
+                item["recomputed_se_at_display_precision"], "UNREVIEWED",
+            )
+            rows.append("<tr>" + "".join(
+                "<td>" + escape(str(value), quote=True) + "</td>"
+                for value in columns
+            ) + "</tr>")
+        section = (
+            "<h2>Opt-in SD/SE/n JATS arithmetic review</h2>"
+            "<p>Explicit caption formula SE = SD / sqrt(n) and independent "
+            "observations required. Unreviewed arithmetic candidates only.</p>"
+            "<p>Scan complete: " + escape(str(review["scan_complete"])) +
+            "; candidates: " + str(len(review["findings"])) + "</p>"
+            "<table><thead><tr><th>Table</th><th>Measure</th>"
+            "<th>n</th><th>SD</th><th>Printed SE</th><th>Computed SE</th>"
+            "<th>Review</th></tr></thead><tbody>" +
+            "".join(rows) + "</tbody></table>"
+        )
+        html = html.replace("</html>\n", section + "</html>\n")
     return html.encode("utf-8")
 
 
@@ -272,7 +301,8 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
                  expected_source_sha256: str | None = None,
                  *, include_structure: bool = False,
                  include_odds_ratio: bool = False,
-                 include_prose_flows: bool = False) -> dict[str, Any]:
+                 include_prose_flows: bool = False,
+                 include_sd_se_n: bool = False) -> dict[str, Any]:
     if (expected_source_sha256 is not None and
             (type(expected_source_sha256) is not str or
              HASH.fullmatch(expected_source_sha256) is None)):
@@ -284,7 +314,8 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
     report = make_report(data, document_id, expected_source_sha256 is not None,
                          include_structure=include_structure,
                          include_odds_ratio=include_odds_ratio,
-                         include_prose_flows=include_prose_flows)
+                         include_prose_flows=include_prose_flows,
+                         include_sd_se_n=include_sd_se_n)
     report_bytes = canonical_json(report)
     html_bytes = render_html(report)
     if len(report_bytes) > MAX_REPORT_BYTES or len(html_bytes) > MAX_REPORT_BYTES:
@@ -358,10 +389,12 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
     structured = "table_projection" in saved_report
     odds_ratio = "odds_ratio_review" in saved_report
     prose_flows = "sample_flow_review" in saved_report
+    sd_se_n = "statistical_se_review" in saved_report
     new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before,
                              include_structure=structured,
                              include_odds_ratio=odds_ratio,
-                             include_prose_flows=prose_flows)
+                             include_prose_flows=prose_flows,
+                             include_sd_se_n=sd_se_n)
     if (canonical_json(new_report) != contents[REPORT_NAME]
             or render_html(new_report) != contents[HTML_NAME]):
         raise ValueError("Independent replay disagrees with recorded result")
