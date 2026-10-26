@@ -238,6 +238,7 @@ def test_explicit_formula_and_independence_both_required_even_when_numbers_disag
     "Weighted independent observations; SE = SD/sqrt(n)",
     "Independent observations; SE = SD/sqrt(n) in paired samples",
     "Independent observations; SE = SD/sqrt(n) with clustering",
+    "Independent observations; SE = SD/sqrt(n) in cluster randomized sampling",
     "Independent observations; SE = SD/sqrt(n) but values were adjusted",
     "Independent observations; SE = SD/sqrt(n) for repeated measures",
 ])

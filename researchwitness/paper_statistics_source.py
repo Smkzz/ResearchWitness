@@ -61,7 +61,7 @@ _INDEPENDENT_OBSERVATIONS = re.compile(
 )
 _TABLE_SCOPE_AMBIGUITY = re.compile(
     r'\b(?:weighted|weighting|adjusted|adjustment|covariate|multivariable|'
-    r'multivariate|clustered|cluster\s+robust|imput(?:ed|ation)|'
+    r'multivariate|cluster(?:ed|ing|s)?|cluster\s+robust|imput(?:ed|ation)|'
     r'matched|paired|conditional|stratif(?:ied|ication)|crossover|'
     r'repeated[ -]?measures?|repeated observations?|longitudinal|'
     r'multiple time[ -]?points?|across visits?|between visits?|'
