@@ -12,6 +12,16 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## Paired development comparison slice - 2026-10-26
+
+RW-04C adds `tools.paired_development_comparison`, a checkout-only,
+deterministic comparison of two externally pinned registered development runs.
+It preserves all work-family denominators, negative-family alarms before
+certificate validation, missing results and resource-budget equivalence.
+The output is a descriptive comparison of declarations, not a scientifically
+independent accuracy estimate. RW-04 remains incomplete pending independent
+source/certificate adapters, sample registration and sealed evaluation.
+
 ## Installed JATS review candidate - 2026-10-26
 
 PR #22 introduces the installed `audit-jats` and `replay-jats` CLI using

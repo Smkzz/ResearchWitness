@@ -157,7 +157,8 @@
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-04---benchmark-protocol-and-harness",
       "evidence": [
         "docs/IMPLEMENTATION_2026-10-24.md",
-        "docs/IMPLEMENTATION_2026-10-25.md"
+        "docs/IMPLEMENTATION_2026-10-25.md",
+        "https://github.com/Smkzz/ResearchWitness/pull/23"
       ],
       "blocker": null,
       "completed_slices": [
@@ -172,9 +173,15 @@
           "scope": "fixed source-only JATS execution, exact arithmetic replay, durable emission journal and read-only recovery; not a scientific comparative benchmark",
           "implementation": "tools/registered_jats_run.py",
           "tests": "tests/test_registered_jats_run.py"
+        },
+        {
+          "id": "RW-04C",
+          "scope": "paired developer-exposed receipt comparison with missing-family bounds; no scientific inference",
+          "implementation": "tools/paired_development_comparison.py",
+          "tests": "tests/test_paired_development_comparison.py"
         }
       ],
-      "next_action": "Implement comparative baseline adapters, formal registration schemas and the frozen statistical design; curate source-reviewed labels without exposing sealed material."
+      "next_action": "Implement research registration schema, sealed-custody independent labels, and predeclared statistical design; do not turn paired declaration counts into scientific precision or recall."
     },
     {
       "id": "RW-05",
