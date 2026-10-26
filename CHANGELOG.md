@@ -2,6 +2,14 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Explicit sample-flow helper - 2026-10-26
+
+- Selectively reuse unchanged legacy flow types, bounded count arithmetic and
+  retained regression tests. Only explicit complete, disjoint and same-scope
+  count flows are supported; ambiguous relationships abstain. No automatic
+  source extraction, new trusted proof family or scientific discovery claim.
+
+
 ### Prospective study design contract (RW-04D) — 2026-10-26
 
 - Add strict offline future-study **draft** validation and canonical digest with

@@ -81,3 +81,17 @@ cells, table row/column spans, footnotes and detector denominator proposals.
 No second parser, population guessing, merged legacy flow algorithm,
 scientific source adjudication or new PDF/custody authority is introduced.
 See [the scoped model contract](JATS_TABLE_PROJECTION.md).
+
+## RW-01E: explicit finite sample-flow arithmetic
+
+The unchanged legacy `researchwitness/paper_flow.py` model and the entire
+`tests/test_paper_flow_and_statistics.py` test module were imported from
+PR #11 by their original Git blob identities. They reuse the current immutable
+`SourceAnchor` type but never authenticate it or parse paper text. Only
+explicit complete same-scope add/subtract operations may produce arithmetic
+candidates; omissions, overlap, unknown groups and non-explicit relations
+return `FLOW_RELATION_AMBIGUOUS`.
+
+This is an installed operand-only helper, not a second JATS parser or automatic
+PRISMA flow detector. Rich source mapping and other legacy integration remain
+pending. The source import was not a blanket merge of #6–#12.
