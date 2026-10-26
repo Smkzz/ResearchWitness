@@ -165,3 +165,20 @@ flag means multiple *visible* values, not that the publication is erroneous.
 One unchanged default audit and one optional private report/replay path
 remain. Next RW-01 work is independent semantic scope reconciliation with
 labelled source examples and abstention evidence, not blind PR #11 adoption.
+
+
+## RW-01J: developer-exposed source-scope review before semantic resolver merge
+
+`tools/denominator_scope_review.py` consumes only the existing
+`researchwitness.jats_denominator_trace` and original JATS XML. It creates
+pinned, reviewer-facing source fact references without revealing the
+detector's base-selection preference. Reviewers annotate five explicit
+scope dimensions, with trace-fact-ID validation and full relation coverage.
+Reconciliation accounts for different bases, uncertain/missing facts,
+different opinions and copy-identical submissions; it is NOT independent
+scientific review or a new automatic denominator resolver.
+
+The legacy PR #11 `denominator_provenance.py` remains unmerged; a genuinely
+labelled development comparison is needed before importing its complex
+subgroup/population semantics. No alternate JATS parser or protected-custody
+authority was introduced.

@@ -48,3 +48,16 @@ and applicable safety gates even if general scientific performance is unknown.
 A release that claims measured research improvement also needs the frozen
 comparative evaluation. No separate ceremonial owner approval is required, but
 new spending, permissions or unsafe disclosure still require a decision.
+
+
+## 2026-10-26 — Denominator source applicability must be reviewed separately
+
+RW-01I proved trace fidelity to original XML, not that a given numeric
+denominator applies to the same population, group, timepoint, analysis set
+and percentage base. RW-01J introduces an offline development annotation
+protocol with source-fact references and complete two-record comparison.
+Reviewer IDs, declarations, source hashes or agreement do **not** authenticate
+scientific independence or source meaning. Identical review rows, explicit
+conflicting source bases, missing facts and disagreements remain unadjudicated.
+No real independent gold corpus is claimed, and the unmerged legacy
+scope resolver must not be promoted using synthetic agreement alone.

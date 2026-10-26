@@ -12,6 +12,22 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01J: source-bound development annotation and review protocol (candidate)
+
+The checkout-only `tools.denominator_scope_review` tool prepares original-byte
+JATS denominator-fact packets without disclosing the detector's selected
+denominator, comparison or source-scope verdict. It validates two separately
+submitted complete development annotations, source/packet commitments and
+explicit source-fact references, then preserves dissent, missing evidence,
+copied records and visible competing bases. The tool cannot authenticate
+reviewer identities or scientific truth; synthetic tests are **not** an
+independently labelled real-paper dataset.
+
+Genuinely separate licensed real-source review and substantive adjudication
+remain missing evidence. No protected custody, PDF/Windows privilege, author
+contact or scientific superiority evaluation is qualified by this tool.
+See [denominator scope review](DENOMINATOR_SCOPE_REVIEW.md).
+
 ## RW-01I: original-byte denominator source evidence (candidate)
 
 The installed `audit-jats --include-denominator-trace` option makes the

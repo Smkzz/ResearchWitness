@@ -2,6 +2,21 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Denominator scope development-review packet (RW-01J) — 2026-10-26
+
+- Add a checkout-only offline JATS source-fact annotation packet over the
+  qualified original-byte trace, with the detector's decisions excluded from
+  the reviewer-facing view. Fact ordering uses original XML position.
+- Require full source/packet commitments, a complete separate pair of reviewer
+  records and exact original source-fact references. Record conflicts,
+  copied reviews, abstentions and disagreements without pretending to
+  authenticate reviewer independence or determine scientific truth.
+- Add synthetic-only regressions for source/packet tampering, missing or
+  invented fact references, incorrect external pins, JSON and review controls.
+- No real independently adjudicated corpus, protected data, paid service,
+  trusted verifier change, PDF activation or new scientific accuracy claim.
+
+
 ### Source-anchored denominator evidence tracing (RW-01I) - 2026-10-26
 
 - Add an opt-in `audit-jats --include-denominator-trace` over the **existing**
