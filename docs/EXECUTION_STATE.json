@@ -82,7 +82,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/30",
         "https://github.com/Smkzz/ResearchWitness/pull/31",
         "https://github.com/Smkzz/ResearchWitness/pull/32",
-        "https://github.com/Smkzz/ResearchWitness/pull/33"
+        "https://github.com/Smkzz/ResearchWitness/pull/33",
+        "https://github.com/Smkzz/ResearchWitness/pull/34"
       ],
       "blocker": null,
       "completed_slices": [
@@ -145,9 +146,15 @@
           "scope": "offline checkout-only source-pinned denominator-scope development reviewer packet and two record reconciliation; no authenticated real reviewer labels, completeness or scientific adjudication",
           "implementation": "tools/denominator_scope_review.py",
           "tests": "tests/test_denominator_scope_review.py"
+        },
+        {
+          "id": "RW-01K",
+          "scope": "checkout-only offline source/version/rights/exposure capture, replay and correction-family lineage declarations; not publisher rights, real labels or independent work-family authentication",
+          "implementation": "tools/source_capture_manifest.py",
+          "tests": "tests/test_source_capture_manifest.py"
         }
       ],
-      "next_action": "Secure legally usable real source/version captures and substantive, genuinely independent denominator-scope annotations; record reviewer exposure/modality and any disagreements. Compare the legacy PR #11 semantic resolver against these development-only labels before selective import. Do not open protected custody or infer correct bases from arithmetic. RW-01J exact-head and post-merge checks still required."
+      "next_action": "Obtain legally usable original research JATS sources and independently documented publisher/version/rights/correction records; create privately pinned captures with RW-01K, then collect genuinely separate source-context annotations through RW-01J. Only then evaluate legacy PR #11 semantic denominator resolver on exposed development families. RW-01K exact-head CI and post-merge checks required; protected custody and paid calls remain forbidden."
     },
     {
       "id": "RW-02",

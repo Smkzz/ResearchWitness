@@ -182,3 +182,20 @@ The legacy PR #11 `denominator_provenance.py` remains unmerged; a genuinely
 labelled development comparison is needed before importing its complex
 subgroup/population semantics. No alternate JATS parser or protected-custody
 authority was introduced.
+
+
+## RW-01K: private source capture/lineage before real-paper label comparison
+
+`tools/source_capture_manifest.py` is an offline checkout-only manifest builder,
+byte/hash replay checker and declared work-family/version registry. It uses the
+same `researchwitness._jats_parser` for bounded JATS format acceptance and
+`tools.verification_benchmark` for strict JSON/commitments. It **does not**
+download papers, add a second XML parser or reinterpret existing percentage
+detector output. Registry mode checks manifests/lineage but deliberately does
+not pretend to reopen or authenticate original sources.
+
+The RW-01J reviewer packet can be associated via the same independently
+preserved source SHA-256, but neither program attests legal licence or a
+reviewer's qualifications/independence. Capture/version/correction grouping
+is a prerequisite to comparative development evaluation, not evidence that
+the broader unmerged PR #11 semantic resolver is ready to deploy.

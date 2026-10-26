@@ -61,3 +61,15 @@ scientific independence or source meaning. Identical review rows, explicit
 conflicting source bases, missing facts and disagreements remain unadjudicated.
 No real independent gold corpus is claimed, and the unmerged legacy
 scope resolver must not be promoted using synthetic agreement alone.
+
+
+## 2026-10-26 — Treat source version and rights as declared, never authenticated
+
+Proceed with a small offline capture and family registry before real-paper
+scope adjudication. The operator must explicitly supply byte-exact original
+source, retrieval and version details, rights/exposure evidence and correction
+links. Tool checks prove local consistency and declared lineage only;
+publisher identity, legal scope, clock history and work-family independence
+remain unqualified. A repository source checksum or two model personas
+cannot fill this evidence gap. Do not publish licensed text or import the
+old full denominator resolver merely because capture metadata parses.
