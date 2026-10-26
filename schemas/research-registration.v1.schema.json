@@ -22,7 +22,7 @@
     },
     "study_id": {
       "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$"
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}(?![\\s\\S])$"
     },
     "designation": {
       "enum": [
@@ -33,7 +33,8 @@
     "research_question": {
       "type": "string",
       "minLength": 40,
-      "maxLength": 2000
+      "maxLength": 2000,
+      "pattern": "^\\S(?:[\\s\\S]*\\S)?(?![\\s\\S])$"
     },
     "arms": {
       "type": "array",
@@ -83,7 +84,53 @@
                 }
               ]
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "proposal_kind"
+                ],
+                "properties": {
+                  "proposal_kind": {
+                    "const": "deterministic_local"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "model_sha256": {
+                    "type": "null"
+                  },
+                  "prompt_sha256": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "proposal_kind"
+                ],
+                "properties": {
+                  "proposal_kind": {
+                    "const": "authorized_cached_ai"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "model_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  "prompt_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  }
+                }
+              }
+            }
+          ]
         },
         {
           "type": "object",
@@ -128,7 +175,53 @@
                 }
               ]
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "proposal_kind"
+                ],
+                "properties": {
+                  "proposal_kind": {
+                    "const": "deterministic_local"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "model_sha256": {
+                    "type": "null"
+                  },
+                  "prompt_sha256": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "proposal_kind"
+                ],
+                "properties": {
+                  "proposal_kind": {
+                    "const": "authorized_cached_ai"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "model_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  },
+                  "prompt_sha256": {
+                    "$ref": "#/$defs/sha256"
+                  }
+                }
+              }
+            }
+          ]
         }
       ]
     },
@@ -180,7 +273,8 @@
         "sample_size_justification": {
           "type": "string",
           "minLength": 35,
-          "maxLength": 2000
+          "maxLength": 2000,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?(?![\\s\\S])$"
         }
       }
     },
@@ -221,7 +315,12 @@
         "maximum_false_alarm_increase",
         "missingness_policy",
         "multiplicity_policy",
-        "uncertainty_plan"
+        "uncertainty_plan",
+        "primary_sidedness",
+        "primary_estimand",
+        "safety_bound_method",
+        "safety_estimand",
+        "success_decision_rule"
       ],
       "properties": {
         "paired_unit": {
@@ -254,7 +353,23 @@
         "uncertainty_plan": {
           "type": "string",
           "minLength": 40,
-          "maxLength": 2000
+          "maxLength": 2000,
+          "pattern": "^\\S(?:[\\s\\S]*\\S)?(?![\\s\\S])$"
+        },
+        "primary_sidedness": {
+          "const": "one_sided_candidate_improvement"
+        },
+        "primary_estimand": {
+          "const": "candidate_minus_baseline_positive_family_detection"
+        },
+        "safety_bound_method": {
+          "const": "bonferroni_clopper_pearson_difference"
+        },
+        "safety_estimand": {
+          "const": "candidate_minus_baseline_negative_family_alarm_rate"
+        },
+        "success_decision_rule": {
+          "const": "significant_and_practical_detection_gain_and_safe_upper_bound"
         }
       }
     },
@@ -344,12 +459,13 @@
   "$defs": {
     "sha256": {
       "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
+      "pattern": "^[0-9a-f]{64}(?![\\s\\S])$"
     },
     "longText": {
       "type": "string",
       "minLength": 35,
-      "maxLength": 2000
+      "maxLength": 2000,
+      "pattern": "^\\S(?:[\\s\\S]*\\S)?(?![\\s\\S])$"
     },
     "positiveFraction": {
       "type": "object",
@@ -391,5 +507,37 @@
         }
       }
     }
-  }
+  },
+  "$comment": "Structural JSON Schema is a first gate, not equivalent to strict runtime validation. Python validator additionally enforces exact integer syntax (rejects 1.0), cross-field hash inequality, alpha sum, fraction numerator <= denominator, safety margin < 1, and an unqualified custody/draft-only receipt. Both must be used; schema acceptance alone is not a valid registration.",
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "designation"
+        ],
+        "properties": {
+          "designation": {
+            "const": "confirmatory_intended"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "sampling": {
+            "properties": {
+              "minimum_negative_families": {
+                "minimum": 15
+              },
+              "minimum_negative_relationships": {
+                "minimum": 50
+              },
+              "sample_size_justification": {
+                "minLength": 60
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
