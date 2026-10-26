@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "b2d4863d28e037d35bd8052997e6b02318977771",
-    "observed_on": "2026-10-25",
+    "observed_main_sha": "3048cdb474d881a6e2f1ab107583ddc89dd4e814",
+    "observed_on": "2026-10-26",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Observed baseline before RW-01B/RW-04B. Containing PR supplies exact candidate and post-merge qualification; refresh live state before writes."
+    "note": "Verified pre-RW-01M main after merged PR #36. RW-01M is a candidate until exact-head and post-merge gates; no real raw PMC bytes have been acquired."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -84,7 +84,7 @@
         "https://github.com/Smkzz/ResearchWitness/pull/32",
         "https://github.com/Smkzz/ResearchWitness/pull/33",
         "https://github.com/Smkzz/ResearchWitness/pull/34",
-        "https://github.com/Smkzz/ResearchWitness/pull/35"
+        "https://github.com/Smkzz/ResearchWitness/issues/35"
       ],
       "blocker": null,
       "completed_slices": [
@@ -159,9 +159,15 @@
           "scope": "offline source-byte/version-bound RW-01K capture plus RW-01J review workflow with optional declared annotations; no independent real-paper labels",
           "implementation": "tools/source_review_binding.py",
           "tests": "tests/test_source_review_binding.py"
+        },
+        {
+          "id": "RW-01M",
+          "scope": "candidate offline PMC OAI-PMH GetRecord response span / inherited-namespace JATS derivation and replay; no actual provider transfer, legal rights or scientific source proof",
+          "implementation": "tools/pmc_oai_envelope.py",
+          "tests": "tests/test_pmc_oai_envelope.py"
         }
       ],
-      "next_action": "Obtain explicitly permitted real open-JATS source/version records and independent substantive denominator-scope reviews using RW-01K/J/L; only then benchmark legacy semantic resolver on exposed source families. RW-01L exact-head and post-merge checks required; no protected custody or paid calls."
+      "next_action": "Qualify and merge RW-01M exact-head checks. Then obtain authorized and genuinely preserved private PMC raw response entities with separate retrieval and rights records, verify the derived-to-capture-to-review chain, and commission substantive independent development-source annotations. No sealed data or paid provider."
     },
     {
       "id": "RW-02",
