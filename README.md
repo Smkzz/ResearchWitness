@@ -6,10 +6,12 @@
 **Open-source research verification with reproducible, source-linked evidence.**
 
 The installed core verifies narrowly defined claims after an investigator or agent
-supplies a formalization and possible counterexample. The installed JATS audit extracts supported count/percentage relationships
-and records arithmetic candidates or explicit abstentions. Separate checkout
-tools retain guarded metadata discovery and scientific-development comparisons. It does **not** autonomously fact-check any
-paper, authenticate publisher origin, establish misconduct or certify conclusions.
+supplies a formalization and possible counterexample. The installed JATS audit
+extracts supported count/percentage relationships and records arithmetic candidates
+or explicit abstentions. Separate checkout tools retain guarded metadata discovery
+and scientific-development comparisons. ResearchWitness does **not** autonomously
+fact-check any paper, authenticate publisher origin, establish misconduct or certify
+conclusions.
 
 **On main:** `0.3.0.dev0` · **UNRELEASED** · Python 3.11+ · CI tests Python
 3.11–3.13 on Ubuntu, Windows and macOS · no installed runtime dependencies · Apache-2.0.
@@ -30,6 +32,19 @@ decision. Evidence and security gates remain mandatory; missing scientific evide
 is not replaced by an opinion. Default incremental spending authorization is EUR 0.
 
 ## Status
+
+**Latest verified implementation main (2026-10-26):**
+`659adf299a3efc4322cb5781337454b507e77ac6`. PRs
+[#24](https://github.com/Smkzz/ResearchWitness/pull/24),
+[#25](https://github.com/Smkzz/ResearchWitness/pull/25),
+[#26](https://github.com/Smkzz/ResearchWitness/pull/26) and
+[#27](https://github.com/Smkzz/ResearchWitness/pull/27)
+integrated bounded source-mapped table projection, prospective study
+**draft** validation with reviewed statistical declarations, and a
+restricted explicit sample-flow helper. [Main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090213)
+and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090186)
+passed. No tagged release, independent scientific evaluation, PDF/custody
+qualification or power-justified frozen study is claimed.
 
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed
 by documentation #17 and intake/export consistency #18. The observed pre-plan main

@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Observed implementation baseline:** `b2d4863d28e037d35bd8052997e6b02318977771`
+**Latest verified implementation main:** `659adf299a3efc4322cb5781337454b507e77ac6`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,30 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-01E: explicit sample-flow arithmetic (candidate)
+## Current verified engineering head (2026-10-26)
+
+PR [#24](https://github.com/Smkzz/ResearchWitness/pull/24) merged optional
+source-bound rich JATS table projection at `abb873af2f3697e7e8143c970f8bc938760062e3`.
+PR [#25](https://github.com/Smkzz/ResearchWitness/pull/25) merged a
+prospective study **draft** validator; a read-only AI review identified
+schema and analysis-contract gaps, subsequently fixed by
+PR [#26](https://github.com/Smkzz/ResearchWitness/pull/26), merged as
+`7fe226cd2e21980ca4d42cc48b066df3652c2b23`.
+Do **not** treat PR #25's original head as a final registration contract.
+PR [#27](https://github.com/Smkzz/ResearchWitness/pull/27) selectively
+added a bounded explicit sample-flow helper as
+`659adf299a3efc4322cb5781337454b507e77ac6`.
+
+Post-merge [main CI 40314090213](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090213)
+passed nine OS/Python combinations and the Release gate; [main CodeQL
+40314090186](https://github.com/Smkzz/ResearchWitness/actions/runs/40314090186)
+passed. PR #26 engineering candidate passed 777 tests and 274 subtests,
+with 94% core package coverage. These are **engineering qualification**
+receipts, not source-adjudicated precision/recall or sealed-science results.
+RW-01/RW-04 remain partial; RW-03 custody and native PDF/Windows gates
+remain unqualified. Developer-source reviews are not human audits.
+
+## RW-01E: explicit sample-flow arithmetic (integrated)
 
 The unchanged bounded `paper_flow.py` model from legacy PR #11 and its
 original operand-only test cases are selectively integrated. It checks only
@@ -22,7 +45,7 @@ This is NOT automatic sample-flow extraction from a paper or evidence that
 published results are erroneous. Source mapping and remaining legacy stack
 still need separate qualification. See [integration map](INTEGRATION_MAP.md).
 
-## RW-01D: source-mapped table projection (candidate)
+## RW-01D: source-mapped table projection (integrated)
 
 The installed audit-jats --include-structure optionally projects the existing
 original-byte JATS parser to the immutable PaperDocument table model. Header
@@ -35,7 +58,7 @@ This is partial RW-01 work. Rich legacy flow/ratio integrations and protected
 custody remain pending. Qualification belongs to the exact PR head; a proposal
 is not independent scientific accuracy evidence.
 
-## RW-04D — prospective preregistration draft (candidate)
+## RW-04D — prospective preregistration draft (integrated)
 
 A new checkout-only offline `tools.research_preregistration` validator accepts
 strict versioned prospective study **drafts**, with an accompanying JSON Schema

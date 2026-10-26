@@ -12,6 +12,12 @@
 
 ### Prospective study design contract (RW-04D) — 2026-10-26
 
+- AI-reviewed PR #26 closed schema/validator mismatch, constrained model
+  identity and lexical fields, and specified one-sided paired-discordance
+  detection, conservative negative false-alarm upper bounds and joint
+  significance/practical/safety decision rules. These are study-design
+  declarations, not executed independent statistical evaluation.
+
 - Add strict offline future-study **draft** validation and canonical digest with
   a public JSON Schema and entirely synthetic pilot declaration.
 - Require two pinned method arms, work-family sampling rules, separate primary

@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "b2d4863d28e037d35bd8052997e6b02318977771",
-    "observed_on": "2026-10-25",
+    "observed_main_sha": "659adf299a3efc4322cb5781337454b507e77ac6",
+    "observed_on": "2026-10-26",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Observed baseline before RW-01B/RW-04B. Containing PR supplies exact candidate and post-merge qualification; refresh live state before writes."
+    "note": "Last qualified implementation SHA after PR #24–#27. Main CI 40314090213 and CodeQL 40314090186 passed; refresh live state before writes. Engineering evidence does not establish scientific accuracy or real custody."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -112,7 +112,7 @@
           "tests": "tests/test_paper_flow_and_statistics.py"
         }
       ],
-      "next_action": "Source-map supported legacy explicit flow and ratio assertions to original-byte JATS table evidence; reconcile old PRs #5–#12 separately from protected custody."
+      "next_action": "Integrate legacy source-mapped flow, ratios, adjustments and denominator evidence into the preserved byte-anchored JATS model; explicit flow helper alone does not extract research findings. Retain default safety/custody blocks."
     },
     {
       "id": "RW-02",
@@ -173,7 +173,8 @@
         "docs/IMPLEMENTATION_2026-10-24.md",
         "docs/IMPLEMENTATION_2026-10-25.md",
         "https://github.com/Smkzz/ResearchWitness/pull/23",
-        "https://github.com/Smkzz/ResearchWitness/pull/25"
+        "https://github.com/Smkzz/ResearchWitness/pull/25",
+        "https://github.com/Smkzz/ResearchWitness/pull/26"
       ],
       "blocker": null,
       "completed_slices": [
@@ -202,7 +203,7 @@
           "tests": "tests/test_research_preregistration.py"
         }
       ],
-      "next_action": "Add independently grounded source/certificate evaluation interfaces and design a justified family-clustered power analysis; external sealed registration and custody remain unqualified."
+      "next_action": "Build a source/certificate-grounded comparative runner and family-level sample-size/power analysis; draft protocol is not an independently frozen study, and protected-custody RW-03 remains unqualified."
     },
     {
       "id": "RW-05",

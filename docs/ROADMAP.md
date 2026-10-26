@@ -7,6 +7,13 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
+**Latest verified implementation main:** `659adf299a3efc4322cb5781337454b507e77ac6`
+(2026-10-26), after PRs #24–#27. Original-byte table evidence, an
+explicit sample-flow arithmetic helper and prospective study **draft**
+validation are integrated; main CI and CodeQL passed. This is **not**
+a complete paper-verifier, qualified custody, published package or
+independently measured improvement.
+
 The observed pre-plan main is `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a` (2026-10-17).
 PR #13, post-merge documentation #17 and intake/export hardening #18 are integrated.
 There is a dependency-free verifier with ten bounded families, intake and evidence
