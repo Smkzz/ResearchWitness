@@ -12,6 +12,16 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01E: explicit sample-flow arithmetic (candidate)
+
+The unchanged bounded `paper_flow.py` model from legacy PR #11 and its
+original operand-only test cases are selectively integrated. It checks only
+explicit same-population/timepoint operations with disjointness and completeness
+affirmed by the caller. Unknown scope, overlap or relation structure abstains.
+This is NOT automatic sample-flow extraction from a paper or evidence that
+published results are erroneous. Source mapping and remaining legacy stack
+still need separate qualification. See [integration map](INTEGRATION_MAP.md).
+
 ## RW-01D: source-mapped table projection (candidate)
 
 The installed audit-jats --include-structure optionally projects the existing
