@@ -168,6 +168,10 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
             "denominator_fact_count": len(traced),
             "denominator_fact_values": values,
             "provenance_flags": reasons,
+            "source_scope_review_state": (
+                "MULTIPLE_VISIBLE_VALUES_REQUIRE_INDEPENDENT_REVIEW"
+                if len(values) > 1 else "NOT_INDEPENDENTLY_ADJUDICATED"
+            ),
             "denominator_facts": traced,
             "scientific_denominator_scope_independently_adjudicated": False,
         })

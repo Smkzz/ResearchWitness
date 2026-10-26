@@ -91,10 +91,12 @@ def test_conflicting_denominator_sources_visible_but_not_resolved():
     assert altered != data
     trace = traced.trace_denominators(altered)
     row = trace["relations"][0]
-    assert row["detector_status"] == "scope_ambiguous"
-    assert row["detector_denominator"] is None
+    assert row["detector_status"] == "arithmetic_mismatch_candidate"
+    assert row["detector_denominator"] == 20
     assert row["denominator_fact_values"] == [20, 50]
     assert "MULTIPLE_VISIBLE_DENOMINATOR_VALUES" in row["provenance_flags"]
+    assert row["source_scope_review_state"] == "MULTIPLE_VISIBLE_VALUES_REQUIRE_INDEPENDENT_REVIEW"
+    assert row["scientific_denominator_scope_independently_adjudicated"] is False
     assert trace["multiple_fact_values_relation_count"] >= 1
 
 
