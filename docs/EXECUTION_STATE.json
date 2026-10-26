@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "b2d4863d28e037d35bd8052997e6b02318977771",
-    "observed_on": "2026-10-25",
+    "observed_main_sha": "7fe226cd2e21980ca4d42cc48b066df3652c2b23",
+    "observed_on": "2026-10-26",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Observed baseline before RW-01B/RW-04B. Containing PR supplies exact candidate and post-merge qualification; refresh live state before writes."
+    "note": "Verified after PR #24, #25 and #26 merge; main CI 40313280006 and CodeQL 40313279916 passed. Refresh actual live state before any future write. This is engineering, not scientific qualification."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -105,7 +105,7 @@
           "tests": "tests/test_jats_table_projection.py"
         }
       ],
-      "next_action": "Integrate legacy PR #6-#11 source-mapped ratios/flows/denominator provenance with original-byte table model; do not import old normalizing parser or protected custody."
+      "next_action": "Reconcile remaining legacy source-mapped flow/ratio/statistics and denominator scopes against original-byte JATS model; preserve all installed safeguards, do not import unqualified PDF/custody."
     },
     {
       "id": "RW-02",
@@ -166,7 +166,8 @@
         "docs/IMPLEMENTATION_2026-10-24.md",
         "docs/IMPLEMENTATION_2026-10-25.md",
         "https://github.com/Smkzz/ResearchWitness/pull/23",
-        "https://github.com/Smkzz/ResearchWitness/pull/25"
+        "https://github.com/Smkzz/ResearchWitness/pull/25",
+        "https://github.com/Smkzz/ResearchWitness/pull/26"
       ],
       "blocker": null,
       "completed_slices": [
@@ -195,7 +196,7 @@
           "tests": "tests/test_research_preregistration.py"
         }
       ],
-      "next_action": "Add independently grounded source/certificate evaluation interfaces and design a justified family-clustered power analysis; external sealed registration and custody remain unqualified."
+      "next_action": "Build source/certificate-grounded comparative benchmark and justified family-level power/sample-size design; draft registration is not a frozen scientific study; RW-03 custody gate remains separate."
     },
     {
       "id": "RW-05",

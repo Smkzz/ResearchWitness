@@ -4,6 +4,12 @@
 
 ### Prospective study design contract (RW-04D) — 2026-10-26
 
+- AI review follow-up PR #26 aligned schema conditional arm identities and
+  strict text/hash anchors, clarified mandatory Python-only cross-field checks
+  and declared paired-test direction, safety upper-bound method and joint
+  statistical/practical acceptance rule. These are planned analysis choices,
+  not executed independent science; unqualified sealed custody stays off.
+
 - Add strict offline future-study **draft** validation and canonical digest with
   a public JSON Schema and entirely synthetic pilot declaration.
 - Require two pinned method arms, work-family sampling rules, separate primary

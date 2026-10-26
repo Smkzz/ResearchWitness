@@ -6,10 +6,12 @@
 **Open-source research verification with reproducible, source-linked evidence.**
 
 The installed core verifies narrowly defined claims after an investigator or agent
-supplies a formalization and possible counterexample. The installed JATS audit extracts supported count/percentage relationships
-and records arithmetic candidates or explicit abstentions. Separate checkout
-tools retain guarded metadata discovery and scientific-development comparisons. It does **not** autonomously fact-check any
-paper, authenticate publisher origin, establish misconduct or certify conclusions.
+supplies a formalization and possible counterexample. The installed JATS audit
+extracts supported count/percentage relationships and records arithmetic candidates
+or explicit abstentions. Separate checkout tools retain guarded metadata discovery
+and scientific-development comparisons. ResearchWitness does **not** autonomously
+fact-check any paper, authenticate publisher origin, establish misconduct or certify
+conclusions.
 
 **On main:** `0.3.0.dev0` · **UNRELEASED** · Python 3.11+ · CI tests Python
 3.11–3.13 on Ubuntu, Windows and macOS · no installed runtime dependencies · Apache-2.0.
@@ -30,6 +32,16 @@ decision. Evidence and security gates remain mandatory; missing scientific evide
 is not replaced by an opinion. Default incremental spending authorization is EUR 0.
 
 ## Status
+
+**Latest verified main, 2026-10-26:** `7fe226cd2e21980ca4d42cc48b066df3652c2b23`
+(PRs [#24](https://github.com/Smkzz/ResearchWitness/pull/24),
+[#25](https://github.com/Smkzz/ResearchWitness/pull/25) and
+[#26](https://github.com/Smkzz/ResearchWitness/pull/26)).
+The installed source-mapped JATS table projection and prospective research
+**draft** validation are integrated. Post-merge [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/40313280006)
+and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/40313279916)
+passed. No published version, independent scientific evaluation, PDF/custody
+qualification or power-justified frozen study is claimed.
 
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed
 by documentation #17 and intake/export consistency #18. The observed pre-plan main

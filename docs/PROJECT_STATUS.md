@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Observed implementation baseline:** `b2d4863d28e037d35bd8052997e6b02318977771`
+**Latest verified main:** `7fe226cd2e21980ca4d42cc48b066df3652c2b23`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,25 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-01D: source-mapped table projection (candidate)
+## Current qualified engineering head (2026-10-26)
+
+PR [#24](https://github.com/Smkzz/ResearchWitness/pull/24) merged source-bound
+optional rich JATS tables as `abb873af2f3697e7e8143c970f8bc938760062e3`.
+PR [#25](https://github.com/Smkzz/ResearchWitness/pull/25) merged the prospective
+study **draft** validator as `1548244613b48d9f59dee72f73fbfc5f5e622df6`.
+The source-only AI review discovered schema/decision contract gaps; follow-up
+PR [#26](https://github.com/Smkzz/ResearchWitness/pull/26) fixed them and merged
+as `7fe226cd2e21980ca4d42cc48b066df3652c2b23`. Do not treat
+PR #25's original head alone as the final scientific-methods contract.
+
+Post-merge [main CI 40313280006](https://github.com/Smkzz/ResearchWitness/actions/runs/40313280006)
+passed all nine Python/OS matrix jobs and Release gate; [main CodeQL 40313279916](https://github.com/Smkzz/ResearchWitness/actions/runs/40313279916)
+passed. The qualified PR #26 candidate reported 777 tests, 274 subtests and
+94% core package coverage on Ubuntu/Python 3.12. These are **engineering**
+receipts, not verified scientific precision/recall or an authorized sealed run.
+Both RW-01 and RW-04 remain partially complete, and RW-03 custody is unqualified.
+
+## RW-01D: source-mapped table projection (integrated)
 
 The installed audit-jats --include-structure optionally projects the existing
 original-byte JATS parser to the immutable PaperDocument table model. Header
@@ -25,7 +43,7 @@ This is partial RW-01 work. Rich legacy flow/ratio integrations and protected
 custody remain pending. Qualification belongs to the exact PR head; a proposal
 is not independent scientific accuracy evidence.
 
-## RW-04D — prospective preregistration draft (candidate)
+## RW-04D — prospective preregistration draft (integrated)
 
 A new checkout-only offline `tools.research_preregistration` validator accepts
 strict versioned prospective study **drafts**, with an accompanying JSON Schema
