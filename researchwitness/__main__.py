@@ -81,6 +81,8 @@ def main(argv: list[str] | None = None) -> int:
     command.add_argument('--expected-source-sha256')
     command.add_argument('--include-structure', action='store_true',
                          help='Include bounded source-mapped tables (larger private report).')
+    command.add_argument('--include-unadjusted-2x2', action='store_true',
+                         help='Check explicit crude same-row odds ratios; scientific applicability unverified.')
 
     command = sub.add_parser('replay-jats')
     command.add_argument('bundle', type=Path)
@@ -103,7 +105,8 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 result = (audit_source(args.source, args.output_dir, args.document_id,
                          args.expected_source_sha256,
-                         include_structure=args.include_structure) if args.command == 'audit-jats'
+                         include_structure=args.include_structure,
+                         include_odds_ratio=args.include_unadjusted_2x2) if args.command == 'audit-jats'
                           else replay_bundle(args.bundle, args.expected_manifest_sha256))
             except ValueError as exc:
                 raise Invalid(str(exc)) from exc

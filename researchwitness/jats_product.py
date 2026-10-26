@@ -60,12 +60,14 @@ def implementation_files() -> dict[str, str]:
     return {
         name: digest(read_regular(root / name, 128 * 1024))
         for name in ("_jats_parser.py", "_jats_math.py", "_jats_files.py",
-                     "jats_product.py", "jats_table_projection.py", "paper_document.py")
+                     "jats_product.py", "jats_table_projection.py", "paper_document.py",
+                     "paper_statistics.py", "paper_two_by_two_source.py")
     }
 
 
 def make_report(source: bytes, document_id: str, source_pin_present: bool,
-                *, include_structure: bool = False) -> dict[str, Any]:
+                *, include_structure: bool = False,
+                include_odds_ratio: bool = False) -> dict[str, Any]:
     if type(document_id) is not str or IDENTIFIER.fullmatch(document_id) is None:
         raise ValueError("Invalid document identifier")
     result = audit_jats_percentage_tables(source)
@@ -115,9 +117,14 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
             "PDF/OCR, sealed evaluation, network, AI providers and author contact are outside scope.",
         ],
     }
-    if include_structure:
+    if include_structure or include_odds_ratio:
         from .jats_table_projection import project_jats_tables
-        report["table_projection"] = project_jats_tables(source, result).to_dict()
+        projection = project_jats_tables(source, result)
+        if include_structure:
+            report["table_projection"] = projection.to_dict()
+        if include_odds_ratio:
+            from .paper_two_by_two_source import check_jats_unadjusted_2x2_tables
+            report["odds_ratio_review"] = check_jats_unadjusted_2x2_tables(projection)
     return report
 
 
@@ -158,6 +165,27 @@ def render_html(report: dict[str, Any]) -> bytes:
         "<p><small>Offline. No source authentication, scientific adjudication,"
         " or external action performed.</small></p></html>\n"
     )
+    if "odds_ratio_review" in report:
+        review = report["odds_ratio_review"]
+        candidate_rows = []
+        for finding in review["findings"]:
+            cells = (finding["table_id"], finding["row_identity"],
+                     finding["timepoint"], finding["reported_odds_ratio"],
+                     finding["recomputed_at_display_precision"], finding["status"])
+            candidate_rows.append("<tr>" + "".join(
+                "<td>" + escape(str(value), quote=True) + "</td>"
+                for value in cells
+            ) + "</tr>")
+        disclosure = (
+            "<h2>Opt-in unadjusted 2×2 odds-ratio review</h2>"
+            "<p>Only explicit source-mapped counts are considered. "
+            "Every mismatch is an unreviewed arithmetic candidate.</p>"
+            "<p>Scan complete: " + escape(str(review["scan_complete"])) + "</p>"
+            "<table><thead><tr><th>Table</th><th>Outcome</th><th>Timepoint</th>"
+            "<th>Reported OR</th><th>Recomputed OR</th><th>Status</th></tr></thead>"
+            "<tbody>" + "".join(candidate_rows) + "</tbody></table>"
+        )
+        html = html.replace("</html>\n", disclosure + "</html>\n")
     return html.encode("utf-8")
 
 
@@ -170,7 +198,8 @@ def write_new(path: Path, data: bytes) -> None:
 
 def audit_source(source: Path, output_dir: Path, document_id: str,
                  expected_source_sha256: str | None = None,
-                 *, include_structure: bool = False) -> dict[str, Any]:
+                 *, include_structure: bool = False,
+                 include_odds_ratio: bool = False) -> dict[str, Any]:
     if (expected_source_sha256 is not None and
             (type(expected_source_sha256) is not str or
              HASH.fullmatch(expected_source_sha256) is None)):
@@ -180,7 +209,8 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
         raise ValueError("Source SHA-256 differs from expected version")
     # Do all interpretation before touching output, which must be a new directory.
     report = make_report(data, document_id, expected_source_sha256 is not None,
-                         include_structure=include_structure)
+                         include_structure=include_structure,
+                         include_odds_ratio=include_odds_ratio)
     report_bytes = canonical_json(report)
     html_bytes = render_html(report)
     if len(report_bytes) > MAX_REPORT_BYTES or len(html_bytes) > MAX_REPORT_BYTES:
@@ -251,9 +281,11 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
     pinned_before = saved_report.get("document", {}).get("expected_hash_verified")
     if type(pinned_before) is not bool:
         raise ValueError("Invalid recorded source pin state")
-    structured = saved_report.get("table_projection") is not None
+    structured = "table_projection" in saved_report
+    odds_ratio = "odds_ratio_review" in saved_report
     new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before,
-                             include_structure=structured)
+                             include_structure=structured,
+                             include_odds_ratio=odds_ratio)
     if (canonical_json(new_report) != contents[REPORT_NAME]
             or render_html(new_report) != contents[HTML_NAME]):
         raise ValueError("Independent replay disagrees with recorded result")

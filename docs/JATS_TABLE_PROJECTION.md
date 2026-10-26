@@ -33,3 +33,11 @@ The JSON report contains table_projection when requested, including source hashe
 The tests exercise nested/cross-spanning headers, original Unicode byte anchors, footnotes, malformed and missing layouts, duplicate IDs, source-version mismatch, explicit/unknown denominators, optional installed CLI and bundle replay. Exact-head CI and post-merge checks are required; no frozen real-world scientific corpus was processed.
 
 Next RW-01 work is source-mapped ratios, flows and richer denominators from legacy PR #6–#11. They must use the preserved original-byte model without widening source interpretation. PR #12's protected custody/unsafe runtime is separately unqualified and remains disabled.
+
+## Opt-in unadjusted 2×2 odds ratio relationship
+
+An additional opt-in source checker consumes this bounded original-byte table
+projection for exactly labelled single-row unadjusted odds ratios, without
+modifying its model. See [the 2×2 review contract](JATS_2X2_RATIO_REVIEW.md).
+Its strict structural acceptance is **not** an assertion that the paper's
+scientific populations are authentic or comparable. Ineligible rows abstain.

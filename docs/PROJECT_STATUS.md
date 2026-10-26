@@ -12,6 +12,23 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01F: optional original-source 2×2 arithmetic (candidate)
+
+The installed `audit-jats --include-unadjusted-2x2` option maps bounded
+explicitly unadjusted odds-ratio rows from the current original-byte-preserving
+JATS table projection to the existing `recompute_two_by_two` arithmetic helper.
+It is a selective adaptation of the legacy PR #11 source checker, not a second
+parser, a full source-interpretation system or a new trusted proof family.
+Unknown layout, adjustment, source cues, extra rows, footnotes and zero-cell
+conventions abstain. Source-mapped candidates are human-review material only;
+source origin and scientific correctness are NOT established.
+
+The opt-in review and optional table projection are replayed against preserved
+source bytes and implementation identifiers inside the existing private bundle.
+See [the detailed contract](JATS_2X2_RATIO_REVIEW.md) and [integration map](INTEGRATION_MAP.md).
+Candidate CI and exact main post-merge receipts belong to the associated PR.
+RW-01 is still partial; legacy source-flow parsing and other ratios remain open.
+
 ## RW-01E: explicit sample-flow arithmetic (candidate)
 
 The unchanged bounded `paper_flow.py` model from legacy PR #11 and its
