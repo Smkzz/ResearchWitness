@@ -163,7 +163,7 @@ def main() -> int:
             raise RuntimeError('installed JATS replay smoke mismatch')
         structured_dir = temp / 'installed-structured-jats'
         structured = json.loads(run(
-            str(cli), 'audit-jats', str(jats_source), '--document-id',
+            str(cli), 'audit-jats', str(ROOT / 'examples/synthetic-jats/article.xml'), '--document-id',
             'synthetic-jats', '--output-dir', str(structured_dir),
             '--include-structure', cwd=temp,
         ).stdout)
