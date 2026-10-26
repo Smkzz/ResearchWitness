@@ -20,6 +20,14 @@ counts/hashes must not be reused as later results. Agents can review and merge
 qualified engineering changes without routine human approval, but cannot replace
 missing evidence with confidence or bypass a security boundary.
 
+## Prospective registration draft (not sealed)
+
+[RW-04D's draft contract](../docs/RESEARCH_STUDY_REGISTRATION.md) validates
+study-design fields, constraints and an externally comparable SHA-256 digest.
+The source fixture is entirely synthetic; its stated aims, sample counts and
+method IDs do not constitute scientific evidence or a powered analysis.
+It has no authority to access protected holdings or claim a frozen study.
+
 ## New scientific benchmark
 
 [BENCHMARK_PROTOCOL.md](../docs/BENCHMARK_PROTOCOL.md) is an implementation specification,

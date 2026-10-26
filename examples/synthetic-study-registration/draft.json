@@ -1,0 +1,82 @@
+{
+  "schema_version": "rw-research-study-registration.v1",
+  "study_id": "synthetic-protocol-pilot-v1",
+  "designation": "pilot_only",
+  "research_question": "On declared synthetic work families, does bounded source-grounded checking improve detected discrepancies without raising emitted false alarms?",
+  "arms": [
+    {
+      "role": "baseline",
+      "implementation_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "proposal_kind": "deterministic_local",
+      "model_sha256": null,
+      "prompt_sha256": null
+    },
+    {
+      "role": "candidate",
+      "implementation_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "proposal_kind": "deterministic_local",
+      "model_sha256": null,
+      "prompt_sha256": null
+    }
+  ],
+  "sampling": {
+    "unit": "work_family",
+    "family_grouping": "group_versions_corrections_supplements_and_shared_datasets",
+    "selection_rule": "Select distinct synthetic families from a preregistered deterministic list before any scoring.",
+    "eligibility_rule": "Use only explicitly constructed synthetic count/percentage relations with source-linked simulated versions.",
+    "exclusion_rule": "Exclude any family whose interpretation cannot be grounded or whose source version is missing or duplicated.",
+    "minimum_positive_families": 2,
+    "minimum_negative_families": 3,
+    "minimum_negative_relationships": 6,
+    "sample_size_justification": "This is a software-only pilot with deliberately small family counts; it is not powered to demonstrate scientific improvement or superiority."
+  },
+  "endpoints": {
+    "primary": "eligible_positive_family_detection",
+    "safety": "eligible_negative_family_false_alarm_emission",
+    "registered_denominator": "all_selected_work_families",
+    "no_hidden_failures": true
+  },
+  "analysis": {
+    "paired_unit": "work_family",
+    "primary_test": "exact_paired_discordance",
+    "safety_test": "one_sided_negative_family_harm_bound",
+    "primary_alpha": {
+      "numerator": 1,
+      "denominator": 40
+    },
+    "safety_alpha": {
+      "numerator": 1,
+      "denominator": 40
+    },
+    "minimum_practical_gain": {
+      "numerator": 1,
+      "denominator": 10
+    },
+    "maximum_false_alarm_increase": {
+      "numerator": 1,
+      "denominator": 20
+    },
+    "missingness_policy": "report_bounds_or_inconclusive",
+    "multiplicity_policy": "preallocated_alpha_no_posthoc",
+    "uncertainty_plan": "Report discordant-family intervals and descriptive missing-outcome bounds without claiming statistical power from this pilot."
+  },
+  "resources": {
+    "max_elapsed_ms_per_work": 30000,
+    "max_calls_per_work": 0,
+    "max_cost_micro_eur_per_work": 0
+  },
+  "stopping": {
+    "max_development_revisions": 3,
+    "confirmatory_runs": 1,
+    "interim_sealed_looks": 0,
+    "invalid_run_policy": "preserve_and_report_no_reuse"
+  },
+  "data_governance": {
+    "custody_status": "not_qualified",
+    "study_material": "not_collected",
+    "identities_in_developer_ledger": false,
+    "exposed_examples_policy": "exclude_historical_and_developer_exposed",
+    "label_policy": "source_supported_positive_negative_and_unresolved",
+    "source_license_policy": "review_permissions_before_collection"
+  }
+}

@@ -84,6 +84,18 @@ Use a deterministic resampling seed if resampling is used. Report the actual
 sample size and uncertainty, including zero-event uncertainty. "Zero observed
 false alarms" is never a universal zero-error claim.
 
+## Prospective registration engineering
+
+The [RW-04D registration validator](RESEARCH_STUDY_REGISTRATION.md) formalizes
+an offline **draft** declaration and its canonical hash. Its companion
+[JSON Schema](../schemas/research-registration.v1.schema.json) documents the
+versioned contract; [the synthetic pilot](../examples/synthetic-study-registration/draft.json)
+illustrates it without using real papers or sealed labels. The output
+`VALID_DEVELOPMENT_DRAFT_NOT_SEALED` is **not** evidence of qualified custody,
+pre-outcome public timestamping, power calculation, independent validation or
+completed scientific evaluation. Only an independently held, time-anchored
+declaration frozen before result access can later become an actual preregistration.
+
 ## Sampling and success gates to freeze before evaluation
 
 The RW-04 agent must produce a versioned registration containing:
