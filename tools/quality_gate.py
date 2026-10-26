@@ -214,6 +214,24 @@ def main() -> int:
         ).stdout)
         if flow_replay['status'] != 'verified':
             raise RuntimeError('installed prose-flow replay mismatch')
+        stats_dir = temp / 'installed-se-statistics'
+        stats = json.loads(run(
+            str(cli), 'audit-jats', str(ROOT / 'examples/synthetic-jats/se-statistics.xml'),
+            '--document-id', 'synthetic-statistics', '--output-dir', str(stats_dir),
+            '--include-sd-se-n', cwd=temp,
+        ).stdout)
+        stats_report = json.loads((stats_dir / 'report.json').read_bytes())
+        se = stats_report['statistical_se_review']
+        if (not se['scan_complete'] or len(se['findings']) != 1
+                or se['findings'][0]['recomputed_se_at_display_precision'] != '3.0'
+                or stats_report['paper_error_established'] is not False):
+            raise RuntimeError('installed SD/SE/n source mapping smoke mismatch')
+        stats_replay = json.loads(run(
+            str(cli), 'replay-jats', str(stats_dir),
+            '--expected-manifest-sha256', stats['manifest_sha256'], cwd=temp,
+        ).stdout)
+        if stats_replay['status'] != 'verified':
+            raise RuntimeError('installed SD/SE/n replay mismatch')
         if smoke['paper_error_established'] or smoke['external_actions'] != 'OUT_OF_SCOPE':
             raise RuntimeError('scope invariant failed in installed wheel')
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)

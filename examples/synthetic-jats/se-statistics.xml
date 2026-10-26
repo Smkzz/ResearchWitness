@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article><body><table-wrap id="synthetic-statistics">
+<label>Table 1</label><caption><p>Invented independent observations; SE = SD/sqrt(n).</p></caption>
+<table><thead><tr><th>Measure</th><th>n</th><th>SD</th><th>SE</th></tr></thead>
+<tbody><tr><th scope="row">Score</th><td>4</td><td>6.0</td><td>2.9</td></tr></tbody></table>
+</table-wrap></body></article>

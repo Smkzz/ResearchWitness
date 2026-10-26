@@ -2,6 +2,22 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Optional source-mapped JATS SD/SE/n arithmetic - 2026-10-26
+
+- Adapt the narrow legacy statistics source checker to the current original-byte
+  JATS table projection, retaining source row/header mapping and fail-closed
+  ambiguity rules. Require a caption declaring independent observations and
+  the SE = SD / sqrt(n) relationship before comparing. Reject negated,
+  panel-only or missingness contexts, and use exact rational arithmetic to
+  check *both* displayed SD and SE rounding intervals before raising a
+  discrepancy candidate.
+- Add `audit-jats --include-sd-se-n`, source-anchored private JSON and escaped
+  HTML review, deterministic report/replay, an invented fixture, original and
+  new hard-negative regression tests and installed-wheel smoke checks.
+- No new trusted proof family, global scientific accuracy claim, PDF/custody,
+  network provider, author outreach, expenses or release.
+
+
 ### Opt-in JATS source-mapped single-paragraph flow review - 2026-10-26
 
 - Selectively reuse the narrow legacy PR #11 prose sample-flow adapter and

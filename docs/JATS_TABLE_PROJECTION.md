@@ -55,3 +55,10 @@ projection remains exactly table-only.
 The new [prose sample-flow contract](JATS_PROSE_FLOW_REVIEW.md) describes the
 separate opt-in `audit-jats --include-prose-flows` interpretation and its
 abstentions. It does not infer whole-paper scientific context.
+
+## Opt-in SD/SE/n calculations
+
+A separate [strict statistics source checker](JATS_SD_SE_N_REVIEW.md)
+uses the same original-byte table model only when the caption explicitly
+states both independent observations and SE = SD/sqrt(n). It never assumes
+that similarly named columns imply identical estimands or scientific scope.

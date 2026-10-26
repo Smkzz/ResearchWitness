@@ -79,7 +79,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/24",
         "https://github.com/Smkzz/ResearchWitness/pull/27",
         "https://github.com/Smkzz/ResearchWitness/pull/29",
-        "https://github.com/Smkzz/ResearchWitness/pull/30"
+        "https://github.com/Smkzz/ResearchWitness/pull/30",
+        "https://github.com/Smkzz/ResearchWitness/pull/31"
       ],
       "blocker": null,
       "completed_slices": [
@@ -124,9 +125,15 @@
           "scope": "opt-in bounded source-byte anchored single JATS body paragraph sample-flow mapping using legacy source adapter and existing arithmetic; no multi-paragraph source inference or paper truth",
           "implementation": "researchwitness/paper_flow_source.py",
           "tests": "tests/test_jats_prose_flow_source.py"
+        },
+        {
+          "id": "RW-01H",
+          "scope": "optional source-bound JATS independent-observations SE=SD/sqrt(n) arithmetic with explicit caption equation; no paper-level scientific adjudication",
+          "implementation": "researchwitness/paper_statistics_source.py",
+          "tests": "tests/test_jats_sd_se_n_source.py"
         }
       ],
-      "next_action": "Continue legacy PR #6-#11 source-mapped denominator provenance and SD/SE/N table adapters with the current original-byte parser; keep protected custody/PDF disabled. Verify RW-01G exact-head and post-merge CI."
+      "next_action": "Reconcile denominator provenance and any remaining legacy PR #6-#11 source adapters against the current original-byte JATS model; enforce explicit scope/rounding/refusal, no protected custody/PDF activation. Confirm RW-01H exact-head CI and post-merge checks."
     },
     {
       "id": "RW-02",

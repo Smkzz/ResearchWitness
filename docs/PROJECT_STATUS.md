@@ -12,6 +12,26 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01H: opt-in original-byte JATS SD/SE/n source review (candidate)
+
+The installed `audit-jats --include-sd-se-n` option reuses the narrowly
+scoped legacy `paper_statistics_source.py` checker on the existing immutable,
+original-byte table projection. It compares only a single-row source triple
+n, SD and SE with compatible column scope **and** a table caption explicitly
+stating independent observations and the formula SE = SD / sqrt(n).
+Adjusted, weighted, paired, clustered, repeated, negated, panel-specific or
+missingness contexts remain unreviewed/unsupported. The eligibility decision
+compares exact rounding intervals for both SD and SE; a difference compatible
+with some underlying values is **not** reported as a discrepancy. Original XML cell/row anchors are preserved;
+source hashes do not establish publisher authenticity. The default JATS
+percentage audit and earlier opt-in methods are unchanged.
+
+Results are unreviewed arithmetic candidates in a private JSON/escaped HTML
+bundle and replayed from preserved XML. See
+[RW-01H contract](JATS_SD_SE_N_REVIEW.md). This is partial RW-01; remaining
+denominator/source qualification and independent scientific study evidence
+are outstanding. No protected PDF/custody execution is activated.
+
 ## RW-01G: opt-in original-byte JATS prose sample-flow review (candidate)
 
 A new `audit-jats --include-prose-flows` option projects eligible, standalone

@@ -192,6 +192,28 @@ exclusions; skipped body paragraph counts are reported explicitly.
 Whole-article coverage and scientific correctness remain unestablished.
 See the [narrow review contract](docs/JATS_PROSE_FLOW_REVIEW.md).
 
+### Optional caption-declared SD/SE/n JATS review
+
+For explicitly captioned independent observations with the stated arithmetic
+rule **SE = SD / sqrt(n)**, the installed `audit-jats --include-sd-se-n`
+option compares the reported standard error with the computed value.
+Only supported, unadjusted, source-bound rows are considered. Use a fresh
+output directory under an existing parent:
+
+```text
+python -m researchwitness audit-jats examples/synthetic-jats/se-statistics.xml --document-id invented-se --output-dir work/se-review --include-sd-se-n
+python -m researchwitness replay-jats work/se-review --expected-manifest-sha256 MANIFEST_HASH_SAVED_OUTSIDE_BUNDLE
+```
+
+The invented example reports SE 2.9 for n=4, SD=6.0, for which that explicitly
+declared formula produces SE near 3.0. Both the displayed SD and SE may
+themselves be rounded; the checker reports a discrepancy only if **no**
+underlying values within their exact display intervals can satisfy the rule. It is **not** an accusation that a real study
+contains an error. The default JATS audit remains unchanged, and optional
+review results replay from original XML bytes. Without explicit formula and
+independence assumptions, or with complex/adjusted/weighted contexts, the
+checker abstains. See [the source and scientific scope](docs/JATS_SD_SE_N_REVIEW.md).
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available
