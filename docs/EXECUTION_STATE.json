@@ -81,7 +81,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/29",
         "https://github.com/Smkzz/ResearchWitness/pull/30",
         "https://github.com/Smkzz/ResearchWitness/pull/31",
-        "https://github.com/Smkzz/ResearchWitness/pull/32"
+        "https://github.com/Smkzz/ResearchWitness/pull/32",
+        "https://github.com/Smkzz/ResearchWitness/pull/33"
       ],
       "blocker": null,
       "completed_slices": [
@@ -138,9 +139,15 @@
           "scope": "opt-in original-byte source fact trace for existing percentage denominator choices, ambiguous scopes and competing values; not independently adjudicated denominator validity",
           "implementation": "researchwitness/jats_denominator_trace.py",
           "tests": "tests/test_jats_denominator_trace.py"
+        },
+        {
+          "id": "RW-01J",
+          "scope": "offline checkout-only source-pinned denominator-scope development reviewer packet and two record reconciliation; no authenticated real reviewer labels, completeness or scientific adjudication",
+          "implementation": "tools/denominator_scope_review.py",
+          "tests": "tests/test_denominator_scope_review.py"
         }
       ],
-      "next_action": "Independently verify scientific population/denominator scope with labelled real source excerpts before reconciling legacy PR #11 resolver; no arithmetic-fit selection or unqualified PDF/custody. RW-01I exact-head and post-merge CI required."
+      "next_action": "Secure legally usable real source/version captures and substantive, genuinely independent denominator-scope annotations; record reviewer exposure/modality and any disagreements. Compare the legacy PR #11 semantic resolver against these development-only labels before selective import. Do not open protected custody or infer correct bases from arithmetic. RW-01J exact-head and post-merge checks still required."
     },
     {
       "id": "RW-02",

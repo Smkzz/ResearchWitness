@@ -238,6 +238,21 @@ denominator determination. The detector's original arithmetic and abstention
 status is retained. A differing denominator may belong to a legitimate
 subgroup. See [the denominator evidence contract](docs/JATS_DENOMINATOR_TRACE.md).
 
+### Development denominator-scope reviewer packet
+
+The checkout-only offline `tools.denominator_scope_review` prepares a
+source-anchored denominator-fact packet that deliberately omits the existing
+detector's chosen numeric base and arithmetic verdict. Two complete reviewer
+declarations can then be reconciled while preserving conflicting source
+numbers, copied review rows, absent facts, disagreements and uncertainty.
+
+This is a **development annotation protocol only**. Identifiers and reviewer
+agreement are not authenticated independence or scientific truth. No real
+independently adjudicated dataset is supplied. See the
+[review contract](docs/DENOMINATOR_SCOPE_REVIEW.md) and
+[fictional example](examples/denominator-scope-review/README.md). Keep real
+licensed source and private review files out of public Git.
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available
