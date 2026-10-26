@@ -34,10 +34,16 @@ and replay contract. The report always states
   exclusion operands, all from **one** eligible body paragraph, and explicit
   disjoint/exhaustive/remainder or sequential/remainder language.
   Population, unit, group and timepoint must agree; mismatches or uncertain
-  exclusion overlap are unsupported/ambiguous.
+  exclusion overlap are unsupported/ambiguous. Positive disjoint/exhaustive
+  language must explicitly refer to the **exclusion groups**, not unrelated
+  diagnostic categories. Negated partition cues take precedence over nearby
+  affirmative words; no bare arithmetic match qualifies itself.
 - Front matter, abstracts, figures, table captions, footnotes, back matter,
-  nested paragraphs and unsupported complex inline markup are excluded.
-  The source model exposes eligible and excluded counts/warnings.
+  displayed quotations, list/definition fragments, nested paragraphs and
+  unsupported complex inline markup (including descendants of inline
+  emphasis tags) are excluded.
+  The source model exposes eligible and excluded counts/warnings in JSON
+  and explicitly counts excluded body paragraphs in HTML.
   The system never combines prose from two paragraphs, tables or sections
   to manufacture a proof.
 - The source parser has original input, XML depth/node and JATS resource

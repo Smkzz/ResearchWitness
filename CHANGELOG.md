@@ -11,7 +11,8 @@
   paragraph element byte spans, explicit abstentions, private JSON/escaped
   HTML and same-source recomputation on manifest-validated replay.
 - Preserve installed wheel/offline regression tests and synthetic positive,
-  negative, omitted-source, scope, overlap and tamper scenarios.
+  negative, omitted-source, scope, negated/unrelated partition wording,
+  displaced quotations, overflow, overlap and tamper scenarios.
 - Developer-exposed arithmetic review only; no paper error certification,
   source authentication, PDF or protected custody permission.
 

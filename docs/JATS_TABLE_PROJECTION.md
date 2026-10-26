@@ -48,7 +48,8 @@ scientific populations are authentic or comparable. Ineligible rows abstain.
 bounded `Paragraph` objects anchored to original XML **element**
 start/end offsets. Quotes remain whitespace-normalized; bytes are not
 guessed for individual projected words. It does not fill the document's
-scientific section hierarchy, text around figures, or captions. The default
+scientific section hierarchy, text around figures, displayed quotations
+or captions. Complex inline descendant markup is excluded wholesale. The default
 projection remains exactly table-only.
 
 The new [prose sample-flow contract](JATS_PROSE_FLOW_REVIEW.md) describes the

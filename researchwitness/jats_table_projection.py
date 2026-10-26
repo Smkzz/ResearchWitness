@@ -50,7 +50,8 @@ MAX_BODY_PARAGRAPHS = 2048
 _PROSE_EXCLUDED_ANCESTORS = frozenset({
     "front", "back", "abstract", "table-wrap", "table", "table-wrap-foot",
     "caption", "fig", "fig-group", "fn", "ref-list", "boxed-text",
-    "supplementary-material", "p",
+    "supplementary-material", "disp-quote", "disp-formula", "verse-group",
+    "list", "list-item", "def-list", "statement", "glossary", "p",
 })
 _PROSE_COMPLEX_CONTENT = frozenset({
     "xref", "inline-formula", "disp-formula", "graphic", "media",

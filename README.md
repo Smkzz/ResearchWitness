@@ -186,7 +186,9 @@ a balanced relation and one relation with missing exclusion assumptions.
 All are retained in the JSON; HTML candidates are escaped. Every normalized
 operand quote is bound to its **entire original XML paragraph** byte range,
 not a claim that a character projection supplies exact token byte offsets.
-Nested/caption/figure/abstract prose and multiple paragraphs are never joined.
+Nested/caption/figure/abstract/quoted prose and multiple paragraphs are never
+joined. Negated or unrelated partition claims never establish disjoint
+exclusions; skipped body paragraph counts are reported explicitly.
 Whole-article coverage and scientific correctness remain unestablished.
 See the [narrow review contract](docs/JATS_PROSE_FLOW_REVIEW.md).
 

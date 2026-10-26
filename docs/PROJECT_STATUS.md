@@ -23,7 +23,9 @@ projection; the attached byte range covers the **whole original paragraph
 element**, not the individual number token. Other prose and multi-paragraph
 relationships are excluded with visible limitations. Disjointness,
 exhaustiveness/sequential operation, group and timepoint must be explicit;
-unclear cases remain inconclusive or unsupported.
+quoted examples, negated exclusion partition cues and unrelated category
+descriptions are not promoted. Unclear cases remain inconclusive/unsupported.
+Body paragraphs excluded for context/complex markup are counted explicitly.
 
 Opt-in cases appear in the private JSON/escaped HTML report, and are replayed
 from preserved XML; the unchanged default audit remains percentage-only.

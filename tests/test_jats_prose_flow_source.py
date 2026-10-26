@@ -372,3 +372,56 @@ def test_cli_installed_option_and_default_remain_separate(tmp_path):
         [sys.executable, "-m", "researchwitness", "replay-jats", str(review)],
         cwd=root, text=True, capture_output=True, timeout=35)
     assert replay.returncode == 0, replay.stderr
+
+
+def test_explicit_negated_and_unrelated_partition_terms_do_not_qualify():
+    from researchwitness import jats_product
+
+    qualified = _explicit_flow(80)
+    variants = (
+        qualified.replace("were mutually exclusive", "were not mutually exclusive"),
+        qualified.replace("were mutually exclusive", "were neither mutually exclusive nor disjoint"),
+        qualified.replace("The exclusion categories were", "The diagnosis categories were"),
+    )
+    for text in variants:
+        raw = ("<article><body><p>" + text + "</p></body></article>").encode()
+        report = jats_product.make_report(raw, "invented", False,
+                                          include_prose_flows=True)
+        cases = report["sample_flow_review"]["cases"]
+        assert len(cases) == 1
+        assert cases[0]["flow"]["status"] == "FLOW_RELATION_AMBIGUOUS"
+        assert report["sample_flow_review"]["candidate_count"] == 0
+
+
+def test_displaced_quote_is_not_counted_as_primary_research_prose():
+    from researchwitness import jats_product
+
+    text = _explicit_flow(80)
+    raw = (
+        '<article><body><disp-quote><p>Illustrative example: ' + text +
+        '</p></disp-quote><sec><p>Unrelated results.</p></sec></body></article>'
+    ).encode()
+    report = jats_product.make_report(raw, "invented", False,
+                                      include_prose_flows=True)
+    flow = report["sample_flow_review"]
+    assert flow["candidate_count"] == 0
+    assert flow["relations_mapped"] == 0
+    assert flow["body_paragraphs_observed"] == 2
+    assert flow["body_paragraphs_excluded"] == 1
+    assert flow["whole_article_coverage_established"] is False
+
+
+def test_flow_relation_over_cap_refuses_before_creating_output(monkeypatch, tmp_path):
+    from researchwitness import jats_product, paper_flow_source
+
+    xml = tmp_path / "overlimit.xml"
+    xml.write_bytes(
+        ("<article><body><p>" + _explicit_flow(80) +
+         "</p><p>" + _explicit_flow(85) + "</p></body></article>").encode()
+    )
+    monkeypatch.setattr(paper_flow_source, "MAX_MAPPED_RELATIONS", 1)
+    out = tmp_path / "not-created"
+    import pytest
+    with pytest.raises(ValueError, match="relation limit"):
+        jats_product.audit_source(xml, out, "invented", include_prose_flows=True)
+    assert not out.exists()

@@ -70,8 +70,17 @@ _SEQUENTIAL = re.compile(
     re.IGNORECASE,
 )
 _CONFLICTING_RELATION = re.compile(
-    r"\b(?:may|might|could|can)\s+overlap\b|\bnot\s+(?:necessarily\s+)?disjoint\b|"
-    r"\bnot\s+exhaustive\b|\badditional\s+exclusions?\s+(?:may|were|are)\b",
+    r"\b(?:may|might|could|can)\s+(?:not\s+be\s+)?(?:overlap|disjoint)\b|"
+    r"\bnot\s+(?:necessarily\s+)?(?:disjoint|mutually\s+exclusive|"
+    r"non[ -]?overlapping|exhaustive)\b|"
+    r"\bneither\s+mutually\s+exclusive\b|\bnor\s+exhaustive\b|"
+    r"\badditional\s+exclusions?\s+(?:may|were|are)\b",
+    re.IGNORECASE,
+)
+_EXCLUSION_PARTITION_CUE = re.compile(
+    r"\b(?:exclusion\s+categories|exclusion\s+reasons|exclusions?|"
+    r"excluded\s+(?:groups?|categories?|sets?))\b.{0,100}?"
+    r"\b(?:mutually\s+exclusive|disjoint|non[ -]?overlapping)\b",
     re.IGNORECASE,
 )
 _GROUP = re.compile(
@@ -551,7 +560,12 @@ def _source_flow(paragraph: Paragraph) -> MappedSampleFlow | None:
             entities=provisional_entities,
         )
 
-    explicit_partition = disjoint is not None and exhaustive is not None and remainder is not None
+    # Positive partition terms must govern the EXCLUSIONS, not an unrelated
+    # diagnosis taxonomy elsewhere in the same paragraph. Negated terms
+    # above always override positive-looking fragments.
+    explicit_partition = (disjoint is not None and exhaustive is not None
+                          and remainder is not None
+                          and _EXCLUSION_PARTITION_CUE.search(relation_text) is not None)
     explicit_sequence = sequential is not None and remainder is not None
     if explicit_partition:
         cue_start = min(disjoint.start(), exhaustive.start(), remainder.start())

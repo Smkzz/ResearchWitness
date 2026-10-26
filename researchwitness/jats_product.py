@@ -139,6 +139,16 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
                 "schema_version": "rw-jats-prose-flow.v1",
                 "mode": "opt_in_single_body_paragraph_flow_review",
                 "eligible_body_paragraphs": len(projection.paragraphs),
+                "body_paragraphs_observed": next(
+                    int(note.partition(":")[2])
+                    for note in projection.extraction_warnings
+                    if note.startswith("body_paragraphs_observed:")
+                ),
+                "body_paragraphs_excluded": next(
+                    int(note.partition(":")[2])
+                    for note in projection.extraction_warnings
+                    if note.startswith("body_paragraphs_excluded:")
+                ),
                 "projected_source_warnings": list(projection.extraction_warnings),
                 "relations_mapped": len(flows),
                 "status_counts": dict(sorted(tally.items())),
@@ -239,7 +249,9 @@ def render_html(report: dict[str, Any]) -> bytes:
             "Candidates are unreviewed arithmetic discrepancies, not paper errors.</p>"
             "<p>Eligible paragraphs: " + str(review["eligible_body_paragraphs"]) +
             "; mapped relations: " + str(review["relations_mapped"]) +
-            "; candidates: " + str(review["candidate_count"]) + "</p>"
+            "; candidates: " + str(review["candidate_count"]) +
+            "; excluded body paragraphs: " + str(review["body_paragraphs_excluded"]) +
+            "</p>"
             "<table><thead><tr><th>Relation</th><th>Expected</th>"
             "<th>Printed</th><th>Source excerpt</th><th>Review</th></tr></thead>"
             "<tbody>" + "".join(flow_rows) + "</tbody></table>"
