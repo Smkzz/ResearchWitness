@@ -165,7 +165,8 @@
       "evidence": [
         "docs/IMPLEMENTATION_2026-10-24.md",
         "docs/IMPLEMENTATION_2026-10-25.md",
-        "https://github.com/Smkzz/ResearchWitness/pull/23"
+        "https://github.com/Smkzz/ResearchWitness/pull/23",
+        "https://github.com/Smkzz/ResearchWitness/pull/25"
       ],
       "blocker": null,
       "completed_slices": [
@@ -186,9 +187,15 @@
           "scope": "paired developer-exposed receipt comparison with missing-family bounds; no scientific inference",
           "implementation": "tools/paired_development_comparison.py",
           "tests": "tests/test_paired_development_comparison.py"
+        },
+        {
+          "id": "RW-04D",
+          "scope": "prospective study draft contract, synthetic pilot, strict validator and canonical digest, without actual freeze/custody",
+          "implementation": "tools/research_preregistration.py",
+          "tests": "tests/test_research_preregistration.py"
         }
       ],
-      "next_action": "Implement research registration schema, sealed-custody independent labels, and predeclared statistical design; do not turn paired declaration counts into scientific precision or recall."
+      "next_action": "Add independently grounded source/certificate evaluation interfaces and design a justified family-clustered power analysis; external sealed registration and custody remain unqualified."
     },
     {
       "id": "RW-05",

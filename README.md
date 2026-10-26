@@ -227,6 +227,16 @@ fallback. Mock tests do not lift the gate. See
 [PDF_SANDBOX_QUALIFICATION.md](docs/PDF_SANDBOX_QUALIFICATION.md); do not use developer
 aids on protected evaluation material.
 
+## Research protocol draft (offline)
+
+The checkout tool `python -m tools.research_preregistration` validates a
+prospective **study draft** with study/arm commitments, work-family sampling
+rules, primary detection and negative false-alarm endpoints, alpha allocation,
+resource caps, zero incremental spend and no interim sealed looks. A synthetic
+example is in `examples/synthetic-study-registration/draft.json`. See
+[the preregistration guide](docs/RESEARCH_STUDY_REGISTRATION.md).
+It neither runs a study nor verifies statistical power/independent custody.
+
 ## Real-paper validation and benchmark
 
 The executable historical fixtures include a 2007 elliptic-curve corrigendum over

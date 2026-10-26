@@ -25,6 +25,23 @@ This is partial RW-01 work. Rich legacy flow/ratio integrations and protected
 custody remain pending. Qualification belongs to the exact PR head; a proposal
 is not independent scientific accuracy evidence.
 
+## RW-04D — prospective preregistration draft (candidate)
+
+A new checkout-only offline `tools.research_preregistration` validator accepts
+strict versioned prospective study **drafts**, with an accompanying JSON Schema
+and entirely synthetic pilot fixture. It requires explicit work-family split,
+positive and false-alarm endpoints, predeclared paired tests, sample-size
+justification, separate alpha allocation, resource/time limits, a finite
+stopping plan, and a no-peeking/no-reuse policy. Its canonical digest may
+be matched to an externally kept hash.
+
+This validation **does not timestamp or freeze a study with an independent
+custodian**, verify source labels/sample-size power, see any holdout or authorize
+actual money use. It always returns a draft-only non-qualified receipt.
+RW-04, RW-03 custody and RW-05 scientific evidence remain unfinished. See
+[the registration contract](RESEARCH_STUDY_REGISTRATION.md) and
+[the benchmark specification](BENCHMARK_PROTOCOL.md).
+
 ## Paired development comparison slice - 2026-10-26
 
 RW-04C adds `tools.paired_development_comparison`, a checkout-only,

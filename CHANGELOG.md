@@ -2,6 +2,19 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Prospective study design contract (RW-04D) — 2026-10-26
+
+- Add strict offline future-study **draft** validation and canonical digest with
+  a public JSON Schema and entirely synthetic pilot declaration.
+- Require two pinned method arms, work-family sampling rules, separate primary
+  detection/safety false-alarm endpoints, preallocated alpha, missingness,
+  study cost/time limits, stop rules, explicit exposure and unqualified custody.
+- A valid draft is never called a frozen, adequately powered or independently
+  evaluated experiment. No sealed material, spending or external registration
+  is touched.
+
+
+
 ### Rich JATS table projection candidate - 2026-10-26
 
 - Add optional audit-jats --include-structure output of source-bound

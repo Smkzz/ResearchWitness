@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResearchWitness prospective study registration draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "study_id",
+    "designation",
+    "research_question",
+    "arms",
+    "sampling",
+    "endpoints",
+    "analysis",
+    "resources",
+    "stopping",
+    "data_governance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "rw-research-study-registration.v1"
+    },
+    "study_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$"
+    },
+    "designation": {
+      "enum": [
+        "pilot_only",
+        "confirmatory_intended"
+      ]
+    },
+    "research_question": {
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 2000
+    },
+    "arms": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "implementation_sha256",
+            "proposal_kind",
+            "model_sha256",
+            "prompt_sha256"
+          ],
+          "properties": {
+            "role": {
+              "const": "baseline"
+            },
+            "implementation_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "proposal_kind": {
+              "enum": [
+                "deterministic_local",
+                "authorized_cached_ai"
+              ]
+            },
+            "model_sha256": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sha256"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "prompt_sha256": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sha256"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "implementation_sha256",
+            "proposal_kind",
+            "model_sha256",
+            "prompt_sha256"
+          ],
+          "properties": {
+            "role": {
+              "const": "candidate"
+            },
+            "implementation_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "proposal_kind": {
+              "enum": [
+                "deterministic_local",
+                "authorized_cached_ai"
+              ]
+            },
+            "model_sha256": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sha256"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "prompt_sha256": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/sha256"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "sampling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit",
+        "family_grouping",
+        "selection_rule",
+        "eligibility_rule",
+        "exclusion_rule",
+        "minimum_positive_families",
+        "minimum_negative_families",
+        "minimum_negative_relationships",
+        "sample_size_justification"
+      ],
+      "properties": {
+        "unit": {
+          "const": "work_family"
+        },
+        "family_grouping": {
+          "const": "group_versions_corrections_supplements_and_shared_datasets"
+        },
+        "selection_rule": {
+          "$ref": "#/$defs/longText"
+        },
+        "eligibility_rule": {
+          "$ref": "#/$defs/longText"
+        },
+        "exclusion_rule": {
+          "$ref": "#/$defs/longText"
+        },
+        "minimum_positive_families": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "minimum_negative_families": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "minimum_negative_relationships": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "sample_size_justification": {
+          "type": "string",
+          "minLength": 35,
+          "maxLength": 2000
+        }
+      }
+    },
+    "endpoints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary",
+        "safety",
+        "registered_denominator",
+        "no_hidden_failures"
+      ],
+      "properties": {
+        "primary": {
+          "const": "eligible_positive_family_detection"
+        },
+        "safety": {
+          "const": "eligible_negative_family_false_alarm_emission"
+        },
+        "registered_denominator": {
+          "const": "all_selected_work_families"
+        },
+        "no_hidden_failures": {
+          "const": true
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paired_unit",
+        "primary_test",
+        "safety_test",
+        "primary_alpha",
+        "safety_alpha",
+        "minimum_practical_gain",
+        "maximum_false_alarm_increase",
+        "missingness_policy",
+        "multiplicity_policy",
+        "uncertainty_plan"
+      ],
+      "properties": {
+        "paired_unit": {
+          "const": "work_family"
+        },
+        "primary_test": {
+          "const": "exact_paired_discordance"
+        },
+        "safety_test": {
+          "const": "one_sided_negative_family_harm_bound"
+        },
+        "primary_alpha": {
+          "$ref": "#/$defs/positiveFraction"
+        },
+        "safety_alpha": {
+          "$ref": "#/$defs/positiveFraction"
+        },
+        "minimum_practical_gain": {
+          "$ref": "#/$defs/positiveFraction"
+        },
+        "maximum_false_alarm_increase": {
+          "$ref": "#/$defs/zeroFraction"
+        },
+        "missingness_policy": {
+          "const": "report_bounds_or_inconclusive"
+        },
+        "multiplicity_policy": {
+          "const": "preallocated_alpha_no_posthoc"
+        },
+        "uncertainty_plan": {
+          "type": "string",
+          "minLength": 40,
+          "maxLength": 2000
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_elapsed_ms_per_work",
+        "max_calls_per_work",
+        "max_cost_micro_eur_per_work"
+      ],
+      "properties": {
+        "max_elapsed_ms_per_work": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        },
+        "max_calls_per_work": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000
+        },
+        "max_cost_micro_eur_per_work": {
+          "const": 0
+        }
+      }
+    },
+    "stopping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_development_revisions",
+        "confirmatory_runs",
+        "interim_sealed_looks",
+        "invalid_run_policy"
+      ],
+      "properties": {
+        "max_development_revisions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "confirmatory_runs": {
+          "const": 1
+        },
+        "interim_sealed_looks": {
+          "const": 0
+        },
+        "invalid_run_policy": {
+          "const": "preserve_and_report_no_reuse"
+        }
+      }
+    },
+    "data_governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "custody_status",
+        "study_material",
+        "identities_in_developer_ledger",
+        "exposed_examples_policy",
+        "label_policy",
+        "source_license_policy"
+      ],
+      "properties": {
+        "custody_status": {
+          "const": "not_qualified"
+        },
+        "study_material": {
+          "const": "not_collected"
+        },
+        "identities_in_developer_ledger": {
+          "const": false
+        },
+        "exposed_examples_policy": {
+          "const": "exclude_historical_and_developer_exposed"
+        },
+        "label_policy": {
+          "const": "source_supported_positive_negative_and_unresolved"
+        },
+        "source_license_policy": {
+          "const": "review_permissions_before_collection"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "longText": {
+      "type": "string",
+      "minLength": 35,
+      "maxLength": 2000
+    },
+    "positiveFraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    },
+    "zeroFraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerator",
+        "denominator"
+      ],
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "denominator": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        }
+      }
+    }
+  }
+}
