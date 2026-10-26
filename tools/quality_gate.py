@@ -147,6 +147,20 @@ def main() -> int:
                                '--as-of', '2026-10-04', cwd=temp).stdout)
         if smoke['decision'] != 'FORMALIZATION_COUNTEREXAMPLE_VERIFIED':
             raise RuntimeError('installed-wheel smoke check failed')
+        # Verify the independent installed-wheel JATS path outside the checkout.
+        jats_dir = temp / 'installed-jats'
+        jats = json.loads(run(str(cli), 'audit-jats',
+                             str(ROOT / 'examples/synthetic-jats/article.xml'),
+                             '--document-id', 'synthetic-jats', '--output-dir', str(jats_dir),
+                             cwd=temp).stdout)
+        if jats['summary'] != {'arithmetic_matches': 1, 'mismatch_candidates': 1,
+                               'abstentions': 1}:
+            raise RuntimeError('installed JATS audit smoke mismatch')
+        replay = json.loads(run(str(cli), 'replay-jats', str(jats_dir),
+                                '--expected-manifest-sha256', jats['manifest_sha256'],
+                                cwd=temp).stdout)
+        if replay['status'] != 'verified' or replay['findings_replayed'] != 3:
+            raise RuntimeError('installed JATS replay smoke mismatch')
         if smoke['paper_error_established'] or smoke['external_actions'] != 'OUT_OF_SCOPE':
             raise RuntimeError('scope invariant failed in installed wheel')
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)
