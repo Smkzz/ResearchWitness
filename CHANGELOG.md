@@ -2,6 +2,16 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Paired development comparison candidate - 2026-10-26
+
+- Add a strict paired development-result comparer reusing the existing
+  receipt scorer, preserving unknown outcomes and all registered work families.
+- Require identical registered schedules, external commitments and resource
+  limits across arms. Report only descriptive missing-outcome bounds, not
+  statistical confidence, independent truth or an established superiority claim.
+- Add synthetic regressions for partial runs, rejected certificates, mismatched
+  budgets and pins, CLI output and repeatability.
+
 ### Installed offline JATS review candidate - 2026-10-26
 
 - Reuse the existing JATS parser inside the installed wheel, preserving old
