@@ -109,3 +109,27 @@ The existing operand-only `paper_statistics.recompute_two_by_two` remains
 the arithmetic engine. No richer arbitrary-paper analysis, adjustment
 assumptions or PDF/custody privilege is imported. The legacy denominator,
 statistics-source and prose-flow adapters remain to be reconciled separately.
+
+## RW-01G: narrow prose sample-flow source bridge
+
+`researchwitness/paper_flow_source.py` retains the reviewed legacy
+single-paragraph flow interpretation and current `paper_flow.py` arithmetic,
+but now receives paragraphs projected by
+`jats_table_projection.project_jats_tables(..., include_body_paragraphs=True)`.
+The projection uses the *current* original-byte `_jats_parser.py`, not
+the old normalizing `researchwitness.jats` parser. Paragraph text is
+normalized; each derived relation/operand retains the original **whole
+paragraph XML element** span, source SHA-256 and element path. It cannot
+pretend token-level byte offsets exist inside normalized text.
+
+Only standalone body paragraphs are eligible; front/back, abstracts,
+captions, footnotes, table cells, figures, complex inline markup and
+nested paragraphs do not silently become evidence. Paragraph and
+relation caps fail closed. No cross-paragraph inference or population
+independence from mere arithmetic exists. The installed CLI reuses one
+private manifest/replay path and keeps this optional, separate from
+provenance, protected custody and independent scientific adjudication.
+
+Legacy ratio, denominator provenance, broader sample-flow formats, public
+screening coverage and PR #12 UI/custody continue separately. No old
+source parser or broad legacy dispatcher was imported.

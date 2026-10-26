@@ -168,6 +168,30 @@ publisher authentication or author communication.
 
 See the [strict scope and evidence contract](docs/JATS_2X2_RATIO_REVIEW.md).
 
+### Optional source-mapped JATS prose sample-flow review
+
+The installed `audit-jats --include-prose-flows` option reviews *only* one
+source-linked body paragraph at a time for an explicit participant/record
+total, exclusions and included remainder. It reuses the existing bounded
+sample-flow arithmetic engine. No AI, cross-paragraph inference, second XML
+parser, publisher authentication, PDF runtime or external action is activated.
+
+```text
+python -m researchwitness audit-jats examples/synthetic-jats/prose-flow.xml --document-id synthetic-flow --output-dir work/prose-flow --include-prose-flows
+python -m researchwitness replay-jats work/prose-flow --expected-manifest-sha256 HASH_FROM_PRIOR_AUDIT
+```
+
+The entirely invented fixture includes an unreviewed arithmetic mismatch,
+a balanced relation and one relation with missing exclusion assumptions.
+All are retained in the JSON; HTML candidates are escaped. Every normalized
+operand quote is bound to its **entire original XML paragraph** byte range,
+not a claim that a character projection supplies exact token byte offsets.
+Nested/caption/figure/abstract/quoted prose and multiple paragraphs are never
+joined. Negated or unrelated partition claims never establish disjoint
+exclusions; skipped body paragraph counts are reported explicitly.
+Whole-article coverage and scientific correctness remain unestablished.
+See the [narrow review contract](docs/JATS_PROSE_FLOW_REVIEW.md).
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available

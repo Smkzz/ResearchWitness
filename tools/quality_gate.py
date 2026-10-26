@@ -195,6 +195,25 @@ def main() -> int:
                                   cwd=temp).stdout)
         if or_replay['status'] != 'verified':
             raise RuntimeError('installed 2x2 replay smoke mismatch')
+        flow_dir = temp / 'installed-prose-flow'
+        flow_result = json.loads(run(
+            str(cli), 'audit-jats',
+            str(ROOT / 'examples/synthetic-jats/prose-flow.xml'),
+            '--document-id', 'synthetic-flow', '--output-dir', str(flow_dir),
+            '--include-prose-flows', cwd=temp,
+        ).stdout)
+        flow_report = json.loads((flow_dir / 'report.json').read_bytes())
+        if (flow_report['sample_flow_review']['candidate_count'] != 1
+                or flow_report['sample_flow_review']['relations_mapped'] != 3
+                or flow_report['paper_error_established'] is not False):
+            raise RuntimeError('installed prose flow smoke mismatch')
+        flow_replay = json.loads(run(
+            str(cli), 'replay-jats', str(flow_dir),
+            '--expected-manifest-sha256', flow_result['manifest_sha256'],
+            cwd=temp,
+        ).stdout)
+        if flow_replay['status'] != 'verified':
+            raise RuntimeError('installed prose-flow replay mismatch')
         if smoke['paper_error_established'] or smoke['external_actions'] != 'OUT_OF_SCOPE':
             raise RuntimeError('scope invariant failed in installed wheel')
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)

@@ -2,6 +2,21 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Opt-in JATS source-mapped single-paragraph flow review - 2026-10-26
+
+- Selectively reuse the narrow legacy PR #11 prose sample-flow adapter and
+  current `paper_flow` arithmetic model, replacing its old XML parser dependency
+  with optional original-byte JATS body-paragraph projection.
+- Add `audit-jats --include-prose-flows` with all mapped results, source
+  paragraph element byte spans, explicit abstentions, private JSON/escaped
+  HTML and same-source recomputation on manifest-validated replay.
+- Preserve installed wheel/offline regression tests and synthetic positive,
+  negative, omitted-source, scope, negated/unrelated partition wording,
+  displaced quotations, overflow, overlap and tamper scenarios.
+- Developer-exposed arithmetic review only; no paper error certification,
+  source authentication, PDF or protected custody permission.
+
+
 ### Opt-in source-mapped unadjusted odds ratio review - 2026-10-26
 
 - Adapt the reviewed legacy PR #11 same-row crude 2×2 arithmetic detector

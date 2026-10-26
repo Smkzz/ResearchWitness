@@ -12,6 +12,28 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01G: opt-in original-byte JATS prose sample-flow review (candidate)
+
+A new `audit-jats --include-prose-flows` option projects eligible, standalone
+body `<p>` elements using the *same* bounded, original-byte parser used for
+tables. The narrow legacy one-paragraph sample-flow adapter and already
+integrated `check_flow_relation` are reused for explicit totals, exclusions and
+remaining cohorts. Each operand's text quote refers to a normalized
+projection; the attached byte range covers the **whole original paragraph
+element**, not the individual number token. Other prose and multi-paragraph
+relationships are excluded with visible limitations. Disjointness,
+exhaustiveness/sequential operation, group and timepoint must be explicit;
+quoted examples, negated exclusion partition cues and unrelated category
+descriptions are not promoted. Unclear cases remain inconclusive/unsupported.
+Body paragraphs excluded for context/complex markup are counted explicitly.
+
+Opt-in cases appear in the private JSON/escaped HTML report, and are replayed
+from preserved XML; the unchanged default audit remains percentage-only.
+This is still partial RW-01, not automatic research verification or
+independent source-truth qualification. See
+[JATS_PROSE_FLOW_REVIEW.md](JATS_PROSE_FLOW_REVIEW.md) and the
+[integration map](INTEGRATION_MAP.md).
+
 ## RW-01F: optional original-source 2×2 arithmetic (candidate)
 
 The installed `audit-jats --include-unadjusted-2x2` option maps bounded

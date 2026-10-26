@@ -10,7 +10,7 @@ from hashlib import sha256
 
 from . import _jats_parser as jats
 from .paper_document import (
-    HeaderCellReference, NumericAssertion, NumericValue, PaperDocument,
+    HeaderCellReference, NumericAssertion, NumericValue, PaperDocument, Paragraph,
     SourceAnchor, Table, TableCell, TableColumn, TableFootnote, TableRow,
     CellSpan,
 )
@@ -44,6 +44,65 @@ def _anchor(node: jats._Node, paths: dict[int, str], source_hash: str) -> Source
         source_format="jats_xml", element_path=paths[id(node)],
         quote=jats._text(node), start_byte=node.byte_start, end_byte=node.byte_end,
     )
+
+
+MAX_BODY_PARAGRAPHS = 2048
+_PROSE_EXCLUDED_ANCESTORS = frozenset({
+    "front", "back", "abstract", "table-wrap", "table", "table-wrap-foot",
+    "caption", "fig", "fig-group", "fn", "ref-list", "boxed-text",
+    "supplementary-material", "disp-quote", "disp-formula", "verse-group",
+    "list", "list-item", "def-list", "statement", "glossary", "p",
+})
+_PROSE_COMPLEX_CONTENT = frozenset({
+    "xref", "inline-formula", "disp-formula", "graphic", "media",
+    "table", "list", "fn", "p", "ext-link",
+})
+
+
+def _has_complex_inline_content(node: jats._Node) -> bool:
+    stack = list(node.children)
+    while stack:
+        child = stack.pop()
+        if jats._local_name(child.tag) in _PROSE_COMPLEX_CONTENT:
+            return True
+        stack.extend(child.children)
+    return False
+
+
+def _body_paragraphs(
+    root: jats._Node, paths: dict[int, str], source_hash: str,
+) -> tuple[tuple[Paragraph, ...], int, int]:
+    """Project only standalone prose in <body>, not captions or tables.
+
+    Source anchors identify the entire unmodified XML element. Quotes are
+    whitespace-normalized text and never alleged to be exact byte substrings.
+    Keep the number of skipped body paragraphs visible rather than silently
+    implying whole-document text coverage. The old JATS parser is not used.
+    """
+    paragraphs: list[Paragraph] = []
+    seen_body = 0
+    excluded = 0
+    for node in jats._descendants(root, "p"):
+        ancestors: list[str] = []
+        parent = node.parent
+        while parent is not None:
+            ancestors.append(jats._local_name(parent.tag))
+            parent = parent.parent
+        if "body" not in ancestors:
+            continue
+        seen_body += 1
+        if seen_body > MAX_BODY_PARAGRAPHS:
+            raise jats.JATSSourceError("JATS body-prose paragraph limit exceeded")
+        if (any(x in _PROSE_EXCLUDED_ANCESTORS for x in ancestors)
+                or _has_complex_inline_content(node)):
+            excluded += 1
+            continue
+        text = jats._text(node)
+        if not text:
+            excluded += 1
+            continue
+        paragraphs.append(Paragraph(text, _anchor(node, paths, source_hash)))
+    return tuple(paragraphs), seen_body, excluded
 
 
 def _refs(node: jats._Node) -> tuple[tuple[str, str], ...]:
@@ -277,7 +336,10 @@ def _table(
     )
 
 
-def project_jats_tables(source: bytes, detector_report: dict | None = None) -> PaperDocument:
+def project_jats_tables(
+    source: bytes, detector_report: dict | None = None,
+    *, include_body_paragraphs: bool = False,
+) -> PaperDocument:
     """Bounded typed table projection; original XML offsets remain byte-exact.
 
     Reuse the same parser and detector implementation as the installed JATS
@@ -371,11 +433,23 @@ def project_jats_tables(source: bytes, detector_report: dict | None = None) -> P
 
     title_node = next(iter(jats._descendants(root, "article-title")), None)
     title = jats._text(title_node) if title_node else ""
-    warnings = ("narrative_sections_and_figures_not_projected",
-                "table_projection_does_not_establish_denominator_scope_or_source_origin")
+    paragraphs: tuple[Paragraph, ...] = ()
+    prose_warnings: tuple[str, ...] = ()
+    if include_body_paragraphs:
+        paragraphs, body_seen, body_excluded = _body_paragraphs(root, paths, source_hash)
+        prose_warnings = (
+            f"body_paragraphs_observed:{body_seen}",
+            f"body_paragraphs_excluded:{body_excluded}",
+            "flow_prose_only_no_cross_paragraph_or_narrative_scope_inference",
+        )
+    warnings = (
+        "narrative_sections_and_figures_not_projected",
+        "table_projection_does_not_establish_denominator_scope_or_source_origin",
+        *prose_warnings,
+    )
     return PaperDocument(
         model_version=VERSION, source_file="source.xml",
         source_sha256=source_hash, source_format="jats_xml", title=title,
-        sections=(), paragraphs=(), tables=tuple(tables),
+        sections=(), paragraphs=paragraphs, tables=tuple(tables),
         numeric_assertions=tuple(assertions), extraction_warnings=warnings,
     )
