@@ -41,3 +41,16 @@ projection for exactly labelled single-row unadjusted odds ratios, without
 modifying its model. See [the 2×2 review contract](JATS_2X2_RATIO_REVIEW.md).
 Its strict structural acceptance is **not** an assertion that the paper's
 scientific populations are authentic or comparable. Ineligible rows abstain.
+
+## Optional standalone body-prose paragraphs
+
+`project_jats_tables(..., include_body_paragraphs=True)` also returns
+bounded `Paragraph` objects anchored to original XML **element**
+start/end offsets. Quotes remain whitespace-normalized; bytes are not
+guessed for individual projected words. It does not fill the document's
+scientific section hierarchy, text around figures, or captions. The default
+projection remains exactly table-only.
+
+The new [prose sample-flow contract](JATS_PROSE_FLOW_REVIEW.md) describes the
+separate opt-in `audit-jats --include-prose-flows` interpretation and its
+abstentions. It does not infer whole-paper scientific context.

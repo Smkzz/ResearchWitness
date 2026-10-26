@@ -61,13 +61,15 @@ def implementation_files() -> dict[str, str]:
         name: digest(read_regular(root / name, 128 * 1024))
         for name in ("_jats_parser.py", "_jats_math.py", "_jats_files.py",
                      "jats_product.py", "jats_table_projection.py", "paper_document.py",
-                     "paper_statistics.py", "paper_two_by_two_source.py")
+                     "paper_statistics.py", "paper_two_by_two_source.py",
+                     "paper_flow.py", "paper_flow_source.py")
     }
 
 
 def make_report(source: bytes, document_id: str, source_pin_present: bool,
                 *, include_structure: bool = False,
-                include_odds_ratio: bool = False) -> dict[str, Any]:
+                include_odds_ratio: bool = False,
+                include_prose_flows: bool = False) -> dict[str, Any]:
     if type(document_id) is not str or IDENTIFIER.fullmatch(document_id) is None:
         raise ValueError("Invalid document identifier")
     result = audit_jats_percentage_tables(source)
@@ -117,14 +119,44 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
             "PDF/OCR, sealed evaluation, network, AI providers and author contact are outside scope.",
         ],
     }
-    if include_structure or include_odds_ratio:
+    if include_structure or include_odds_ratio or include_prose_flows:
         from .jats_table_projection import project_jats_tables
-        projection = project_jats_tables(source, result)
+        projection = project_jats_tables(source, result,
+                                         include_body_paragraphs=include_prose_flows)
         if include_structure:
             report["table_projection"] = projection.to_dict()
         if include_odds_ratio:
             from .paper_two_by_two_source import check_jats_unadjusted_2x2_tables
             report["odds_ratio_review"] = check_jats_unadjusted_2x2_tables(projection)
+        if include_prose_flows:
+            from dataclasses import asdict
+            from .paper_flow_source import MAX_MAPPED_RELATIONS, map_jats_sample_flows
+            flows = map_jats_sample_flows(projection, limit=MAX_MAPPED_RELATIONS + 1)
+            if len(flows) > MAX_MAPPED_RELATIONS:
+                raise ValueError("Source-mapped sample-flow relation limit exceeded")
+            tally = Counter(flow.status for flow in flows)
+            report["sample_flow_review"] = {
+                "schema_version": "rw-jats-prose-flow.v1",
+                "mode": "opt_in_single_body_paragraph_flow_review",
+                "eligible_body_paragraphs": len(projection.paragraphs),
+                "projected_source_warnings": list(projection.extraction_warnings),
+                "relations_mapped": len(flows),
+                "status_counts": dict(sorted(tally.items())),
+                "candidate_count": tally["FLOW_ARITHMETIC_CANDIDATE"],
+                "cases": [
+                    {"relation_id": f"flow-{index:04d}", "review_state": "unreviewed",
+                     "scientific_error_status": "not_established", "flow": asdict(flow)}
+                    for index, flow in enumerate(flows, start=1)
+                ],
+                "whole_article_coverage_established": False,
+                "limitations": [
+                    "Only bounded single body paragraphs are scanned; no full paper coverage.",
+                    "Cross-paragraph facts and table/caption/figure context are not joined.",
+                    "A normalized quote is not an original-source token byte offset.",
+                    "Original XML element spans and hashes are source continuity, not independent scope proof.",
+                    "Unresolved relations abstain; arithmetic candidates remain unreviewed.",
+                ],
+            }
     return report
 
 
@@ -186,6 +218,34 @@ def render_html(report: dict[str, Any]) -> bytes:
             "<tbody>" + "".join(candidate_rows) + "</tbody></table>"
         )
         html = html.replace("</html>\n", disclosure + "</html>\n")
+    if "sample_flow_review" in report:
+        review = report["sample_flow_review"]
+        flow_rows = []
+        for case in review["cases"]:
+            mapped = case["flow"]
+            if mapped["status"] != "FLOW_ARITHMETIC_CANDIDATE":
+                continue
+            candidate = (mapped.get("arithmetic") or {}).get("candidate") or {}
+            cells = (case["relation_id"], str(candidate.get("expected_count", "?")),
+                     str(candidate.get("reported_count", "?")),
+                     mapped["relation_anchor"].get("quote") or "", "UNREVIEWED")
+            flow_rows.append("<tr>" + "".join(
+                "<td>" + escape(str(value), quote=True) + "</td>"
+                for value in cells
+            ) + "</tr>")
+        section = (
+            "<h2>Opt-in JATS prose sample-flow arithmetic</h2>"
+            "<p>Single eligible body paragraphs only. "
+            "Candidates are unreviewed arithmetic discrepancies, not paper errors.</p>"
+            "<p>Eligible paragraphs: " + str(review["eligible_body_paragraphs"]) +
+            "; mapped relations: " + str(review["relations_mapped"]) +
+            "; candidates: " + str(review["candidate_count"]) + "</p>"
+            "<table><thead><tr><th>Relation</th><th>Expected</th>"
+            "<th>Printed</th><th>Source excerpt</th><th>Review</th></tr></thead>"
+            "<tbody>" + "".join(flow_rows) + "</tbody></table>"
+            "<p>Whole-article flow coverage has not been established.</p>"
+        )
+        html = html.replace("</html>\n", section + "</html>\n")
     return html.encode("utf-8")
 
 
@@ -199,7 +259,8 @@ def write_new(path: Path, data: bytes) -> None:
 def audit_source(source: Path, output_dir: Path, document_id: str,
                  expected_source_sha256: str | None = None,
                  *, include_structure: bool = False,
-                 include_odds_ratio: bool = False) -> dict[str, Any]:
+                 include_odds_ratio: bool = False,
+                 include_prose_flows: bool = False) -> dict[str, Any]:
     if (expected_source_sha256 is not None and
             (type(expected_source_sha256) is not str or
              HASH.fullmatch(expected_source_sha256) is None)):
@@ -210,7 +271,8 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
     # Do all interpretation before touching output, which must be a new directory.
     report = make_report(data, document_id, expected_source_sha256 is not None,
                          include_structure=include_structure,
-                         include_odds_ratio=include_odds_ratio)
+                         include_odds_ratio=include_odds_ratio,
+                         include_prose_flows=include_prose_flows)
     report_bytes = canonical_json(report)
     html_bytes = render_html(report)
     if len(report_bytes) > MAX_REPORT_BYTES or len(html_bytes) > MAX_REPORT_BYTES:
@@ -283,9 +345,11 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
         raise ValueError("Invalid recorded source pin state")
     structured = "table_projection" in saved_report
     odds_ratio = "odds_ratio_review" in saved_report
+    prose_flows = "sample_flow_review" in saved_report
     new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before,
                              include_structure=structured,
-                             include_odds_ratio=odds_ratio)
+                             include_odds_ratio=odds_ratio,
+                             include_prose_flows=prose_flows)
     if (canonical_json(new_report) != contents[REPORT_NAME]
             or render_html(new_report) != contents[HTML_NAME]):
         raise ValueError("Independent replay disagrees with recorded result")

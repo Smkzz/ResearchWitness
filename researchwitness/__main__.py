@@ -83,6 +83,8 @@ def main(argv: list[str] | None = None) -> int:
                          help='Include bounded source-mapped tables (larger private report).')
     command.add_argument('--include-unadjusted-2x2', action='store_true',
                          help='Check explicit crude same-row odds ratios; scientific applicability unverified.')
+    command.add_argument('--include-prose-flows', action='store_true',
+                         help='Check explicit single-paragraph JATS body sample flows.')
 
     command = sub.add_parser('replay-jats')
     command.add_argument('bundle', type=Path)
@@ -106,7 +108,8 @@ def main(argv: list[str] | None = None) -> int:
                 result = (audit_source(args.source, args.output_dir, args.document_id,
                          args.expected_source_sha256,
                          include_structure=args.include_structure,
-                         include_odds_ratio=args.include_unadjusted_2x2) if args.command == 'audit-jats'
+                         include_odds_ratio=args.include_unadjusted_2x2,
+                         include_prose_flows=args.include_prose_flows) if args.command == 'audit-jats'
                           else replay_bundle(args.bundle, args.expected_manifest_sha256))
             except ValueError as exc:
                 raise Invalid(str(exc)) from exc

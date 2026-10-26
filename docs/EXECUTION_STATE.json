@@ -78,7 +78,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/22",
         "https://github.com/Smkzz/ResearchWitness/pull/24",
         "https://github.com/Smkzz/ResearchWitness/pull/27",
-        "https://github.com/Smkzz/ResearchWitness/pull/29"
+        "https://github.com/Smkzz/ResearchWitness/pull/29",
+        "https://github.com/Smkzz/ResearchWitness/pull/30"
       ],
       "blocker": null,
       "completed_slices": [
@@ -117,9 +118,15 @@
           "scope": "opt-in original-byte JATS source-mapped unadjusted 2x2 odds ratio arithmetic; no paper-level scientific adjudication",
           "implementation": "researchwitness/paper_two_by_two_source.py",
           "tests": "tests/test_jats_two_by_two_source.py"
+        },
+        {
+          "id": "RW-01G",
+          "scope": "opt-in bounded source-byte anchored single JATS body paragraph sample-flow mapping using legacy source adapter and existing arithmetic; no multi-paragraph source inference or paper truth",
+          "implementation": "researchwitness/paper_flow_source.py",
+          "tests": "tests/test_jats_prose_flow_source.py"
         }
       ],
-      "next_action": "Reconcile remaining source-mapped prose flow, denominator provenance and statistics adapters with the current original-byte JATS pipeline. Preserve all existing abstentions and protected-custody boundaries."
+      "next_action": "Continue legacy PR #6-#11 source-mapped denominator provenance and SD/SE/N table adapters with the current original-byte parser; keep protected custody/PDF disabled. Verify RW-01G exact-head and post-merge CI."
     },
     {
       "id": "RW-02",
