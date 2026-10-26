@@ -62,7 +62,8 @@ def implementation_files() -> dict[str, str]:
         for name in ("_jats_parser.py", "_jats_math.py", "_jats_files.py",
                      "jats_product.py", "jats_table_projection.py", "paper_document.py",
                      "paper_statistics.py", "paper_two_by_two_source.py",
-                     "paper_flow.py", "paper_flow_source.py", "paper_statistics_source.py")
+                     "paper_flow.py", "paper_flow_source.py", "paper_statistics_source.py",
+                     "jats_denominator_trace.py")
     }
 
 
@@ -70,7 +71,8 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
                 *, include_structure: bool = False,
                 include_odds_ratio: bool = False,
                 include_prose_flows: bool = False,
-                include_sd_se_n: bool = False) -> dict[str, Any]:
+                include_sd_se_n: bool = False,
+                include_denominator_trace: bool = False) -> dict[str, Any]:
     if type(document_id) is not str or IDENTIFIER.fullmatch(document_id) is None:
         raise ValueError("Invalid document identifier")
     result = audit_jats_percentage_tables(source)
@@ -120,6 +122,9 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
             "PDF/OCR, sealed evaluation, network, AI providers and author contact are outside scope.",
         ],
     }
+    if include_denominator_trace:
+        from .jats_denominator_trace import trace_denominators
+        report["denominator_evidence_trace"] = trace_denominators(source, result)
     if include_structure or include_odds_ratio or include_prose_flows or include_sd_se_n:
         from .jats_table_projection import project_jats_tables
         projection = project_jats_tables(source, result,
@@ -287,6 +292,49 @@ def render_html(report: dict[str, Any]) -> bytes:
             "".join(rows) + "</tbody></table>"
         )
         html = html.replace("</html>\n", section + "</html>\n")
+    if "denominator_evidence_trace" in report:
+        review = report["denominator_evidence_trace"]
+        trace_rows = []
+        for relation in review["relations"]:
+            source_facts = relation["denominator_facts"]
+            # HTML is a compact VIEW; JSON contains all anchored source facts.
+            displayed = source_facts[:8]
+            fact_text = "; ".join(
+                f"{fact['detector_provenance_role']}={fact['printed_integer']} at "
+                f"{fact['source_anchor']['element_path']}"
+                for fact in displayed
+            )
+            if len(source_facts) > len(displayed):
+                fact_text += f" (+{len(source_facts) - len(displayed)} facts; inspect JSON)"
+            columns = (
+                relation["relation_id"], relation["detector_status"],
+                relation.get("detector_reason") or "",
+                str(relation["detector_denominator"])
+                if relation["detector_denominator"] is not None else "?",
+                relation.get("detector_denominator_scope") or "unresolved",
+                ", ".join(relation["provenance_flags"]),
+                fact_text,
+            )
+            trace_rows.append("<tr>" + "".join(
+                "<td>" + escape(str(value), quote=True) + "</td>"
+                for value in columns
+            ) + "</tr>")
+        disclosure = (
+            "<h2>Opt-in source-referenced denominator trace</h2>"
+            "<p>Detector-selected bases and every visible source fact are "
+            "recorded in JSON. This is NOT independent population-scope validation.</p>"
+            "<p>Relations: " + str(review["relation_count"]) +
+            "; unresolved: " + str(review["unresolved_relation_count"]) +
+            "; conflicting fact values: " +
+            str(review["multiple_fact_values_relation_count"]) + "</p>"
+            "<table><thead><tr><th>Relation</th><th>Detector state</th>"
+            "<th>Reason</th><th>Base</th><th>Scope</th><th>Flags</th>"
+            "<th>Source facts (up to 8; full JSON)</th></tr></thead><tbody>"
+            + "".join(trace_rows) + "</tbody></table>"
+            "<p>Original XML element spans are not numeric-token offsets."
+            " Unresolved relations remain unresolved.</p>"
+        )
+        html = html.replace("</html>\n", disclosure + "</html>\n")
     return html.encode("utf-8")
 
 
@@ -302,7 +350,8 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
                  *, include_structure: bool = False,
                  include_odds_ratio: bool = False,
                  include_prose_flows: bool = False,
-                 include_sd_se_n: bool = False) -> dict[str, Any]:
+                 include_sd_se_n: bool = False,
+                 include_denominator_trace: bool = False) -> dict[str, Any]:
     if (expected_source_sha256 is not None and
             (type(expected_source_sha256) is not str or
              HASH.fullmatch(expected_source_sha256) is None)):
@@ -315,7 +364,8 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
                          include_structure=include_structure,
                          include_odds_ratio=include_odds_ratio,
                          include_prose_flows=include_prose_flows,
-                         include_sd_se_n=include_sd_se_n)
+                         include_sd_se_n=include_sd_se_n,
+                         include_denominator_trace=include_denominator_trace)
     report_bytes = canonical_json(report)
     html_bytes = render_html(report)
     if len(report_bytes) > MAX_REPORT_BYTES or len(html_bytes) > MAX_REPORT_BYTES:
@@ -390,11 +440,13 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
     odds_ratio = "odds_ratio_review" in saved_report
     prose_flows = "sample_flow_review" in saved_report
     sd_se_n = "statistical_se_review" in saved_report
+    denominator_trace = "denominator_evidence_trace" in saved_report
     new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before,
                              include_structure=structured,
                              include_odds_ratio=odds_ratio,
                              include_prose_flows=prose_flows,
-                             include_sd_se_n=sd_se_n)
+                             include_sd_se_n=sd_se_n,
+                             include_denominator_trace=denominator_trace)
     if (canonical_json(new_report) != contents[REPORT_NAME]
             or render_html(new_report) != contents[HTML_NAME]):
         raise ValueError("Independent replay disagrees with recorded result")

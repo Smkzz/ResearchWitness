@@ -12,6 +12,27 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-01I: original-byte denominator source evidence (candidate)
+
+The installed `audit-jats --include-denominator-trace` option makes the
+**current** JATS percentage detector's denominator decisions inspectable by
+linking its source facts back to original XML element byte ranges and stable
+paths. It does not independently resolve paper scopes, change which
+denominator the existing detector accepts, infer missing populations or
+promote a conditional computation into a verified scientific relationship.
+Competing values and unresolved results remain visible, with all source
+facts in private JSON and a bounded escaped HTML preview.
+
+Optional source-fact checks reparse unchanged XML and refuse fabricated
+numeric references. Bundle replay checks original source, implementation
+and recorded trace; an externally held manifest digest is still needed to
+detect coordinated replacement. See
+[JATS_DENOMINATOR_TRACE.md](JATS_DENOMINATOR_TRACE.md).
+
+RW-01 is still partial. The broader old PR #11 denominator resolver and
+source population adjudication remain to be reconciled separately; no
+protected evaluation or PDF/Windows custody gate is passed by this slice.
+
 ## RW-01H: opt-in original-byte JATS SD/SE/n source review (candidate)
 
 The installed `audit-jats --include-sd-se-n` option reuses the narrowly

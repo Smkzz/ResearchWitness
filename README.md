@@ -214,6 +214,30 @@ review results replay from original XML bytes. Without explicit formula and
 independence assumptions, or with complex/adjusted/weighted contexts, the
 checker abstains. See [the source and scientific scope](docs/JATS_SD_SE_N_REVIEW.md).
 
+### Original-byte denominator evidence trace (opt-in)
+
+The installed JATS detector already makes conservative percentage/denominator
+decisions. The additional `--include-denominator-trace` flag **does not change
+those decisions**: it emits a source-linked ledger showing the exact XML
+elements for each printed denominator fact and each existing result, including
+missing or contradictory numeric clues.
+
+```text
+researchwitness audit-jats examples/synthetic-jats/denominator-trace.xml --document-id synthetic-denominator --output-dir work/denominator-evidence --include-denominator-trace
+researchwitness replay-jats work/denominator-evidence --expected-manifest-sha256 EXTERNALLY_PRESERVED_DIGEST
+```
+
+The default percentage audit is unchanged; the private JSON contains *all*
+source-referenced facts and HTML a compact escaped preview (at most eight
+facts displayed per relation). Original XML and reported source spans are
+reparsed and validated on replay, so a newly invented denominator fact is
+not accepted simply because an attacker recomputes the bundle manifest.
+
+This is **not** an independent source-context, population, or statistical
+denominator determination. The detector's original arithmetic and abstention
+status is retained. A differing denominator may belong to a legitimate
+subgroup. See [the denominator evidence contract](docs/JATS_DENOMINATOR_TRACE.md).
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<article><body>
+<table-wrap id="synthetic-denom-a"><label>Table 1</label><caption><p>Analysis sample N=50.</p></caption>
+<table><thead><tr><th>Outcome</th><th>Patients, n (%) N=50</th></tr></thead><tbody>
+<tr><td>Matching count</td><td>4 (8.00%)</td></tr>
+</tbody></table></table-wrap>
+<table-wrap id="synthetic-denom-b"><label>Table 2</label>
+<table><thead><tr><th>Outcome</th><th>n/N (%)</th></tr></thead><tbody>
+<tr><td>Direct printed ratio</td><td>11/233 (1.8%)</td></tr>
+</tbody></table></table-wrap>
+<table-wrap id="synthetic-denom-c"><label>Table 3</label>
+<table><thead><tr><th>Outcome</th><th>n (%)</th></tr></thead><tbody>
+<tr><td>Unknown denominator</td><td>4 (8.00%)</td></tr>
+</tbody></table></table-wrap>
+</body></article>

@@ -232,6 +232,31 @@ def main() -> int:
         ).stdout)
         if stats_replay['status'] != 'verified':
             raise RuntimeError('installed SD/SE/n replay mismatch')
+        # Verify the audit-only denominator provenance ledger from an installed
+        # clean wheel, including unresolved relations and source replay.
+        provenance_dir = temp / 'installed-denominator-trace'
+        provenance = json.loads(run(
+            str(cli), 'audit-jats',
+            str(ROOT / 'examples/synthetic-jats/denominator-trace.xml'),
+            '--document-id', 'synthetic-denominator',
+            '--output-dir', str(provenance_dir), '--include-denominator-trace',
+            cwd=temp,
+        ).stdout)
+        trace = json.loads((provenance_dir / 'report.json').read_bytes())[
+            'denominator_evidence_trace'
+        ]
+        if (trace['relation_count'] != 3 or trace['unresolved_relation_count'] != 1
+                or trace['full_article_denominator_provenance_established'] is not False
+                or not any(f['detector_provenance_role'] == 'cell_ratio_denominator'
+                           for row in trace['relations'] for f in row['denominator_facts'])):
+            raise RuntimeError('installed denominator trace smoke mismatch')
+        provenance_replay = json.loads(run(
+            str(cli), 'replay-jats', str(provenance_dir),
+            '--expected-manifest-sha256', provenance['manifest_sha256'],
+            cwd=temp,
+        ).stdout)
+        if provenance_replay['status'] != 'verified':
+            raise RuntimeError('installed denominator trace replay smoke mismatch')
         if smoke['paper_error_established'] or smoke['external_actions'] != 'OUT_OF_SCOPE':
             raise RuntimeError('scope invariant failed in installed wheel')
         capabilities = json.loads(run(str(cli), 'capabilities', '--json', cwd=temp).stdout)
