@@ -87,6 +87,8 @@ def main(argv: list[str] | None = None) -> int:
                          help='Check explicit single-paragraph JATS body sample flows.')
     command.add_argument('--include-sd-se-n', action='store_true',
                          help='Check explicitly captioned independent-observation SE = SD / sqrt(n) JATS rows.')
+    command.add_argument('--include-denominator-trace', action='store_true',
+                         help='Preserve original-source evidence for existing denominator decisions without guessing scope.')
 
     command = sub.add_parser('replay-jats')
     command.add_argument('bundle', type=Path)
@@ -112,7 +114,8 @@ def main(argv: list[str] | None = None) -> int:
                          include_structure=args.include_structure,
                          include_odds_ratio=args.include_unadjusted_2x2,
                          include_prose_flows=args.include_prose_flows,
-                         include_sd_se_n=args.include_sd_se_n) if args.command == 'audit-jats'
+                         include_sd_se_n=args.include_sd_se_n,
+                         include_denominator_trace=args.include_denominator_trace) if args.command == 'audit-jats'
                           else replay_bundle(args.bundle, args.expected_manifest_sha256))
             except ValueError as exc:
                 raise Invalid(str(exc)) from exc

@@ -80,7 +80,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/27",
         "https://github.com/Smkzz/ResearchWitness/pull/29",
         "https://github.com/Smkzz/ResearchWitness/pull/30",
-        "https://github.com/Smkzz/ResearchWitness/pull/31"
+        "https://github.com/Smkzz/ResearchWitness/pull/31",
+        "https://github.com/Smkzz/ResearchWitness/pull/32"
       ],
       "blocker": null,
       "completed_slices": [
@@ -131,9 +132,15 @@
           "scope": "optional source-bound JATS independent-observations SE=SD/sqrt(n) arithmetic with explicit caption equation; no paper-level scientific adjudication",
           "implementation": "researchwitness/paper_statistics_source.py",
           "tests": "tests/test_jats_sd_se_n_source.py"
+        },
+        {
+          "id": "RW-01I",
+          "scope": "opt-in original-byte source fact trace for existing percentage denominator choices, ambiguous scopes and competing values; not independently adjudicated denominator validity",
+          "implementation": "researchwitness/jats_denominator_trace.py",
+          "tests": "tests/test_jats_denominator_trace.py"
         }
       ],
-      "next_action": "Reconcile denominator provenance and any remaining legacy PR #6-#11 source adapters against the current original-byte JATS model; enforce explicit scope/rounding/refusal, no protected custody/PDF activation. Confirm RW-01H exact-head CI and post-merge checks."
+      "next_action": "Independently verify scientific population/denominator scope with labelled real source excerpts before reconciling legacy PR #11 resolver; no arithmetic-fit selection or unqualified PDF/custody. RW-01I exact-head and post-merge CI required."
     },
     {
       "id": "RW-02",

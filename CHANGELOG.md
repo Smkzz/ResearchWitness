@@ -2,6 +2,21 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Source-anchored denominator evidence tracing (RW-01I) - 2026-10-26
+
+- Add an opt-in `audit-jats --include-denominator-trace` over the **existing**
+  bounded percentage detector, preserving resolved, conditional and
+  ambiguous outcomes without importing the legacy 46-KiB semantic resolver.
+- Recompute any supplied detector result against original XML before
+  tracing numeric source fact roles and original element byte/path anchors.
+  Reject missing/fabricated references, source version changes or overflow.
+- Add a private JSON audit ledger, escaped HTML preview, manifest-validated
+  replay, synthetic competing/direct/missing-denominator fixtures,
+  negative/tamper tests and clean installed-wheel smoke.
+- No assumption that equal numbers prove compatible population scopes;
+  no real-paper error claim, no trusted core family or custody privileges.
+
+
 ### Optional source-mapped JATS SD/SE/n arithmetic - 2026-10-26
 
 - Adapt the narrow legacy statistics source checker to the current original-byte

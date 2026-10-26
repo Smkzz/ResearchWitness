@@ -146,3 +146,22 @@ paired/repeated observations abstain. It does not infer study-level estimator
 semantics outside the table. The same report/replay path produces separately
 labelled private unreviewed candidates; the ten trusted verifier families
 remain unchanged. This does not qualify PR #11's entire stack.
+
+## RW-01I: inspect original-byte denominator evidence without importing a second resolver
+
+`researchwitness/jats_denominator_trace.py` calls the **existing**
+`_jats_parser.audit_jats_percentage_tables` and refuses any supplied
+detector result that does not exactly reproduce from the original XML.
+It indexes the same parsed XML elements with the same original-byte path
+logic used by `jats_table_projection`, then checks every denominator fact
+against the exact element span/normalized quote. It preserves each printed
+numeric value, provider role, scope label, status and unresolved reason.
+
+This is NOT a merge of legacy `denominator_provenance.py` (46+ KiB) or
+`paper_ratio.py`: their complex subgroup and model-semantic decisions are
+not presumed compatible with the current source parser. In particular,
+arithmetic fit is **never used** to choose a denominator, and a conflict
+flag means multiple *visible* values, not that the publication is erroneous.
+One unchanged default audit and one optional private report/replay path
+remain. Next RW-01 work is independent semantic scope reconciliation with
+labelled source examples and abstention evidence, not blind PR #11 adoption.
