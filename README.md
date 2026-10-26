@@ -284,6 +284,8 @@ private; real provider capture and custody gates remain unqualified.
 
 The checkout-only [RW-01L binding](docs/SOURCE_REVIEW_BINDING.md) checks that an RW-01K original-JATS capture manifest and an RW-01J denominator review packet refer to **exactly the same source bytes and declared version**. Optional completed source-linked review records remain unauthenticated development annotations, never protected or scientifically adjudicated labels.
 
+The checkout-only [RW-01N full development chain](docs/PMC_OAI_ENVELOPE.md#rw-01n-enforce-the-complete-declared-identity-chain) binds the raw PMC transfer, derived JATS, RW-01K manifest and RW-01J/L review packet with separately pinned hashes. It is a replay of declarations, not proof of acquisition, rights, independent adjudication or scientific validity.
+
 ## Agent intake format
 
 The agent supplies `audit.json` beside referenced source files. Schemas are available
