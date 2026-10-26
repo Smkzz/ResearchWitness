@@ -117,7 +117,6 @@ def test_rejected_certificate_still_counts_negative_alarm():
 
 def test_complete_pair_table_requires_complete_runs():
     registry, bp, br, cp, cr, pins = construct()
-    works = {w["work_id"]: w for w in registry["works"]}
     row = deepcopy(cr["results"][2])
     row["work_id"] = "n2"
     br["results"].insert(2, row)
