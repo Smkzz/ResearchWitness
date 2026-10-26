@@ -44,3 +44,39 @@ An inherited namespace such as xmlns:xlink may be injected to preserve expanded 
 Use the **derived** SHA-256 as RW-01K origin.expected_source_sha256, not the original envelope hash. Keep the RW-01M receipt and original response externally beside the private RW-01K manifest. Use the same derived article bytes for RW-01J review and RW-01L source-to-review binding. This version does **not** automatically verify the complete RW-01M-to-RW-01K chain. Publisher/source identity, actual rights, correction lineage, reviewer independence and scientific denominator interpretation still require separate evidence.
 
 Malformed, oversized, DTD/entity/XInclude-bearing, multiple-article, incompatible-namespace, ambiguous-license, correction/retraction, mismatched-ID and unavailable-response inputs are rejected or unsupported. Failed source attempts must remain in acquisition denominators, not quietly disappear. No real provider capture is included in public tests. Issue #35's independent source pilot and custody gates remain open.
+
+## RW-01N: enforce the complete declared identity chain
+
+After replaying the raw-to-derived response, create an RW-01K capture envelope
+using the **derived** JATS bytes, not the original OAI-PMH response. Set its
+retrieval route to `pmc_open_access`, capture URI to the literal OAI endpoint
+(no request query), declared captured time and licence/evidence declarations
+to the exact values in the private RW-01M transfer record, and source SHA to
+the derived-JATS SHA. Build an RW-01J reviewer packet from precisely those
+same derived bytes; preserve the external digests for each stage.
+
+The checkout-only RW-01N command validates the complete offline chain:
+
+    python -m tools.pmc_source_review_chain \
+      --raw-envelope PRIVATE_response.xml \
+      --transfer PRIVATE_transfer.json \
+      --derived-source PRIVATE_derived.xml \
+      --derivation-envelope PRIVATE_derivation_receipt.json \
+      --expected-derivation-sha256 EXTERNAL_DERIVATION_DIGEST \
+      --metadata PRIVATE_metadata.json \
+      --capture-envelope PRIVATE_capture.json \
+      --expected-capture-sha256 EXTERNAL_CAPTURE_DIGEST \
+      --packet-envelope PRIVATE_packet.json \
+      --expected-packet-sha256 EXTERNAL_PACKET_DIGEST
+
+Two locally supplied development reviewer records may additionally be passed
+with `--review-a` and `--review-b`, **together**. Existing RW-01L reconciliation
+rules and safety limits are reused unchanged.
+
+The summary includes the pinned raw envelope, derived source, capture and review
+hashes and aggregate review status. It never prints article text or reviewer
+rationales. Version/family identity remains an **operator declaration**, and
+metadata equality is not an external attestation, historical timestamp,
+publisher/rights verification, human review, scientific correctness or a sealed
+holdout permission. The command performs no network acquisition, privileged
+custody operation, external publishing or scientific evaluation.
