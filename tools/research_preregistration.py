@@ -128,19 +128,35 @@ def validate(registration: dict[str, Any], *,
     _require(endpoints["no_hidden_failures"] is True, "MISSING_CASE_POLICY")
 
     analysis = _fields(registration["analysis"],
-                       "paired_unit primary_test safety_test primary_alpha safety_alpha "
+                       "paired_unit primary_test primary_sidedness primary_estimand "
+                       "safety_test safety_bound_method safety_estimand "
+                       "success_decision_rule primary_alpha safety_alpha "
                        "minimum_practical_gain maximum_false_alarm_increase "
                        "missingness_policy multiplicity_policy uncertainty_plan")
     _require(analysis["paired_unit"] == "work_family", "PAIRED_UNIT")
     _require(analysis["primary_test"] == "exact_paired_discordance", "PRIMARY_TEST")
+    _require(analysis["primary_sidedness"] == "one_sided_candidate_improvement",
+             "PRIMARY_SIDEDNESS")
+    _require(analysis["primary_estimand"] ==
+             "candidate_minus_baseline_positive_family_detection",
+             "PRIMARY_ESTIMAND")
     _require(analysis["safety_test"] == "one_sided_negative_family_harm_bound",
              "SAFETY_TEST")
+    _require(analysis["safety_bound_method"] ==
+             "bonferroni_clopper_pearson_difference", "SAFETY_BOUND_METHOD")
+    _require(analysis["safety_estimand"] ==
+             "candidate_minus_baseline_negative_family_alarm_rate",
+             "SAFETY_ESTIMAND")
+    _require(analysis["success_decision_rule"] ==
+             "significant_and_practical_detection_gain_and_safe_upper_bound",
+             "SUCCESS_DECISION_RULE")
     primary_alpha = _fraction(analysis["primary_alpha"])
     safety_alpha = _fraction(analysis["safety_alpha"])
     _require(primary_alpha + safety_alpha <= Fraction(1, 20),
              "FAMILYWISE_ALPHA_EXCEEDED")
     _fraction(analysis["minimum_practical_gain"])
-    _fraction(analysis["maximum_false_alarm_increase"], allow_zero=True)
+    safety_margin = _fraction(analysis["maximum_false_alarm_increase"], allow_zero=True)
+    _require(safety_margin < 1, "VACUOUS_SAFETY_MARGIN")
     _require(analysis["missingness_policy"] == "report_bounds_or_inconclusive",
              "MISSINGNESS_POLICY")
     _require(analysis["multiplicity_policy"] == "preallocated_alpha_no_posthoc",

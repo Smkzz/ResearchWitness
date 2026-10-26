@@ -2,7 +2,7 @@
   "schema_version": "rw-research-study-registration.v1",
   "study_id": "synthetic-protocol-pilot-v1",
   "designation": "pilot_only",
-  "research_question": "On declared synthetic work families, does bounded source-grounded checking improve detected discrepancies without raising emitted false alarms?",
+  "research_question": "On declared synthetic work families, does bounded source-grounded checking improve positive-family detection while allowing at most five percentage points of negative-family false-alarm increase?",
   "arms": [
     {
       "role": "baseline",
@@ -58,7 +58,12 @@
     },
     "missingness_policy": "report_bounds_or_inconclusive",
     "multiplicity_policy": "preallocated_alpha_no_posthoc",
-    "uncertainty_plan": "Report discordant-family intervals and descriptive missing-outcome bounds without claiming statistical power from this pilot."
+    "uncertainty_plan": "Report discordant-family intervals and descriptive missing-outcome bounds without claiming statistical power from this pilot.",
+    "primary_sidedness": "one_sided_candidate_improvement",
+    "primary_estimand": "candidate_minus_baseline_positive_family_detection",
+    "safety_bound_method": "bonferroni_clopper_pearson_difference",
+    "safety_estimand": "candidate_minus_baseline_negative_family_alarm_rate",
+    "success_decision_rule": "significant_and_practical_detection_gain_and_safe_upper_bound"
   },
   "resources": {
     "max_elapsed_ms_per_work": 30000,
