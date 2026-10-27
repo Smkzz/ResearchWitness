@@ -378,6 +378,15 @@ example is in `examples/synthetic-study-registration/draft.json`. See
 [the preregistration guide](docs/RESEARCH_STUDY_REGISTRATION.md).
 It neither runs a study nor verifies statistical power/independent custody.
 
+The offline [RW-04E exact family analysis](docs/EXACT_FAMILY_ANALYSIS.md)
+replays a draft-pinned development paired comparison and calculates exact
+positive-family discordance plus a conservative negative-family
+false-alarm-increase bound. At the example's 0.025 safety alpha, 86 independent
+negative families with zero alarms in both arms are needed to clear a
+5-percentage-point harm margin; 15 families do not suffice. This is a numerical
+design feasibility result, **not** an independent scientific validation,
+registered experiment, actual power calculation or permission to use sealed data.
+
 ## Real-paper validation and benchmark
 
 The executable historical fixtures include a 2007 elliptic-curve corrigendum over

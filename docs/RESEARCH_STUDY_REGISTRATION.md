@@ -87,6 +87,19 @@ any deviations and never retune a used holdout. The present CLI does not
 submit or timestamp externally, and the connected software has not
 performed any sealed experiment.
 
+## RW-04E: executable development-only numerical checks
+
+The [exact family analysis](EXACT_FAMILY_ANALYSIS.md) executes the original
+draft's selected exact paired positive test and conservatively outward-bounded
+Clopper-Pearson negative-family harm constraint over declared RW-04C receipts.
+It independently replays the declaration/paired inputs, not source truth,
+sealed custody or chronological preregistration. A qualifying statistical
+calculation on invented data always retains `scientific_superiority_established=false`.
+Power and appropriate actual sample selection still require a separate
+pre-outcome design. In the zero/zero-alarm case with alpha 0.025 and tolerated
+5-point harm, at least 86 independent negative families are necessary, not
+the 15-family historical legacy minimum.
+
 ## Next packages
 
 RW-04: implement declared baseline source/certificate replay, independent

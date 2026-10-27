@@ -4,13 +4,26 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Observed pre-RW-01N main:** `fe6b68efe875e09dfc6bb8aee56aee698803a082`
+**Observed pre-RW-04E main:** `512eb903eb87ccd10657636b2d0215e5595522f9`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-04E: exact family-level statistical development diagnostics (candidate)
+
+The checkout-only `tools.exact_family_analysis` validates a pinned prospective
+study *draft*, then recomputes the RW-04C paired development comparison from
+the original declared registry/protocol/run inputs. The exact one-sided
+discordance test and outward-conservative Bonferroni Clopper-Pearson harm
+bound operate at declared work-family level and fail closed on unknown or
+incomplete data. They do not validate registered power, actual acquisition,
+labels, reviewer/custodian separation, source/certificate truth or scientific
+superiority. The illustrative 86-negative-family zero-alarm feasibility
+threshold is a mathematical design requirement under the example's assumptions,
+not an observed real-paper result. [Statistical protocol](EXACT_FAMILY_ANALYSIS.md).
 
 ## RW-01N: complete offline raw-PMC capture and review identity chain (candidate)
 

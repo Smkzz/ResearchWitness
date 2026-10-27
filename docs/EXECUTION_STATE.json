@@ -2,15 +2,15 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 1,
-  "updated_on": "2026-10-26",
+  "updated_on": "2026-10-27",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "fe6b68efe875e09dfc6bb8aee56aee698803a082",
-    "observed_on": "2026-10-26",
+    "observed_main_sha": "512eb903eb87ccd10657636b2d0215e5595522f9",
+    "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified main contains merged RW-01M PR #37 (postmerge checks tracked separately). RW-01N full-chain candidate requires its own exact-head checks; no real source capture or rights/custody authentication."
+    "note": "Verified main contains RW-01N PR #38 and successful post-merge CI and CodeQL. RW-04E development-only statistical diagnostic is a candidate requiring exact-head CI; no real PMC raw capture or independent scientific evaluation."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -262,9 +262,15 @@
           "scope": "prospective study draft contract, synthetic pilot, strict validator and canonical digest, without actual freeze/custody",
           "implementation": "tools/research_preregistration.py",
           "tests": "tests/test_research_preregistration.py"
+        },
+        {
+          "id": "RW-04E",
+          "scope": "candidate exact one-sided family discordance p-value and conservative Bonferroni CP family-level harm bound over pinned exposed RW-04C run declarations; no verified labels, power, custody or superiority",
+          "implementation": "tools/exact_family_analysis.py",
+          "tests": "tests/test_exact_family_analysis.py"
         }
       ],
-      "next_action": "Add independently grounded source/certificate evaluation interfaces and design a justified family-clustered power analysis; external sealed registration and custody remain unqualified."
+      "next_action": "Qualify RW-04E exact-head CI and post-merge main; then build a preregistered feasible independent-family sample-size/power scenario and source-supported certificate adapters. At alpha=.025 and harm margin .05, zero/zero false alarms require at least 86 negative families; actual sampling, independent labels and custody remain blocked evidence."
     },
     {
       "id": "RW-05",
