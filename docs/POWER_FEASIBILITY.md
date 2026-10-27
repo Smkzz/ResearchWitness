@@ -123,6 +123,17 @@ failure/null results when the thresholds cannot be reached. It always reports
 `protected_data_accessed=false` and
 `scientific_superiority_established=false`.
 
+## Next step implemented by RW-04G
+
+The [full paired negative alarm and joint-power model](JOINT_POWER_FEASIBILITY.md)
+now computes the safety pass probability for *all four* assumed
+within-family alarm patterns, not just the zero/zero special case.
+Under the invented scenario its result is 42.17% negative safety
+pass probability and **33.85% chance of passing both primary and
+safety endpoints** for 129 positives + 86 negatives. This still does
+not establish real independence, actual sample power, source labels,
+scientific improvement or protected-data authority.
+
 ## Next rigorous study design and data gates
 
 1. Obtain an authorized private, article-specific rights-cleared real-source
