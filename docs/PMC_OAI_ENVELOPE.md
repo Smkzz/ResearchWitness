@@ -80,3 +80,13 @@ metadata equality is not an external attestation, historical timestamp,
 publisher/rights verification, human review, scientific correctness or a sealed
 holdout permission. The command performs no network acquisition, privileged
 custody operation, external publishing or scientific evaluation.
+
+## Private pilot intake ledger (RW-01O1)
+
+When actual permission-cleared raw PMC responses exist in an already
+authorized environment, use [the private ledger](PMC_PILOT_LEDGER.md)
+to account for every selected source-family attempt and replay the
+RW-01M/N/K/J/L evidence chain. Unavailable, licence-blocked,
+parser-refused and pending-review cases remain in the denominator.
+No download, publisher authenticity, legal licence adjudication,
+reviewer-independence proof or sealed material access is enabled.
