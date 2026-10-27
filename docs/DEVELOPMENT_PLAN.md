@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `eade087e07ea6ddc10de670b644f8dbe214648be` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `526b87dd706384c50da6474faacb51781b3a47c0` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -85,6 +85,23 @@ regressions and reconciled PR disposition. **Done when:** both retained suites p
 at the resulting head, no duplicate conflicting audit path remains undocumented,
 and the installed distribution reproduces a positive, negative and abstention
 fixture outside the checkout. No new scientific-accuracy claim follows.
+
+### RW-01O1 — offline pilot denominator accounting (development only)
+
+The [private PMC pilot intake ledger](PMC_PILOT_LEDGER.md) is a bounded
+developer-exposed evidence-workflow protocol: every selected family and
+version/attempt remains visible through acquisition failure, rights
+exclusion, parser refusal or actual source-chain replay. Supplied private
+captured cases reuse RW-01M/N/K/J/L, reject stale pins, cross-version
+substitution, repeated source bytes and incomplete correction-family claims.
+It emits sanitized aggregate counts without publishing source identifiers
+or licensed full text. Two developer reviews do not authenticate
+scientific independence. The tool acquires **no** source and verifies
+**no** publisher or licence. RW-01O issue #35 and scientific RW-03/RW-05
+isolation/evidence gates remain open until independently grounded real data
+exists. If original retrieval remains unavailable, record the exact
+environment blocker and continue unrelated authorized work without
+changing security or cost policies.
 
 ## RW-02 - Source evidence and provenance
 
