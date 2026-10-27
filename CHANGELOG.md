@@ -2,6 +2,17 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-04E: exact family-level statistical development diagnostics — 2026-10-27
+
+- Add offline integer-exact paired discordance calculation and outward-conservative
+  Bonferroni Clopper-Pearson harm bound with separately validated preregistration
+  draft, arm resource/identity links and missingness safeguards.
+- Demonstrate that the example's 5-point safety margin requires at least 86
+  independent negative families with zero emitted alarms in both arms; the
+  historical 15-family minimum is not a sufficient sample-size gate.
+- Keep exposed/synthetic numerical thresholds distinct from independent source
+  truth, scientific improvement, sealed custody and post-outcome power claims.
+
 ### RW-01N: complete offline development-source identity replay — 2026-10-26
 
 - Bind the already-derived PMC JATS bytes to RW-01K private capture metadata and RW-01J/L source-scope review packets, checking separately pinned stage digests and exact source, route, time and licence declarations.
