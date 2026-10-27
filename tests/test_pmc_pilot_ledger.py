@@ -13,6 +13,7 @@ import pytest
 from tools import denominator_scope_review as scope
 from tools import pmc_oai_envelope as pmc
 from tools import pmc_pilot_ledger as pilot
+from tools import pmc_pilot_selection_frame as selection
 from tools import source_capture_manifest as capture
 from tools import verification_benchmark as vb
 
@@ -320,3 +321,202 @@ def test_cli_private_only_sanitized_output_and_stale_pin(tmp_path):
     no = subprocess.run(failed, cwd=ROOT, capture_output=True, timeout=30)
     assert no.returncode == 2
     assert json.loads(no.stderr)["code"] == "PILOT_LEDGER_EXTERNAL_PIN_MISMATCH"
+
+
+def selected_frame(tmp_path, rows):
+    """Invented frame: the live protocol requires an externally held prior pin."""
+    registered = []
+    for number, row in enumerate(rows):
+        files = row["files"]
+        if files is not None and "transfer" in files:
+            request = vb.parse_document((tmp_path / files["transfer"]).read_bytes())
+            oai = request["requested_identifier"]
+        else:
+            oai = "oai:pubmedcentral.nih.gov:" + str(90001 + number)
+        if files is not None and "metadata" in files:
+            metadata = vb.parse_document((tmp_path / files["metadata"]).read_bytes())
+            kind = metadata["kind"]
+            parent = metadata["parent_record_id"]
+        else:
+            kind, parent = "article", None
+        registered.append({
+            "record_id": row["record_id"],
+            "family_id": row["family_id"],
+            "version_id": row["version_id"],
+            "oai_identifier": oai,
+            "kind": kind,
+            "parent_record_id": parent,
+        })
+    return {
+        "schema_version": selection.VERSION,
+        "partition": "development_exposed",
+        "selection": "operator_declared_not_time_authenticated",
+        "records": registered,
+    }
+
+
+def framed(tmp_path, rows, frame=None):
+    if frame is None:
+        frame = selected_frame(tmp_path, rows)
+    value = ledger(rows)
+    return pilot.evaluate(
+        value, tmp_path, expected_ledger_sha256=vb.commitment(value),
+        selection_frame=frame, expected_frame_sha256=vb.commitment(frame),
+    )
+
+
+def test_framed_report_accounts_for_explicitly_unattempted_sources(tmp_path):
+    pending = negative("pending", "family-c")
+    pending.update(outcome="not_attempted", reason=None)
+    result = framed(tmp_path, [captured(tmp_path), negative(), pending])
+    assert result["schema_version"] == "rw-private-pmc-development-pilot-report.v2"
+    assert result["selected_record_count"] == 3
+    assert result["raw_to_review_chains_replayed"] == 1
+    assert result["outcomes"]["not_attempted"] == 1
+    assert result["selected_attempts_not_yet_run"] == 1
+    assert result["selected_attempts_with_declared_outcomes"] == 2
+    assert result["selection_frame_coverage"] == "all_selected_record_ids_accounted"
+    assert result["pre_outcome_frame_timing_authenticated"] is False
+    assert result["independent_scientific_labels_established"] is False
+    assert b"PMC12345" not in vb.canonical_bytes(result)
+
+
+def test_v1_selection_can_shrink_but_framed_selection_cannot(tmp_path):
+    rows = [
+        captured(tmp_path),
+        negative("second", "family-b"),
+        negative("third", "family-c"),
+    ]
+    frozen = selected_frame(tmp_path, rows)
+    assert evaluate(tmp_path, rows[:2])["selected_record_count"] == 2
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_COVERAGE_MISMATCH"):
+        framed(tmp_path, rows[:2], frozen)
+
+
+def test_pinned_frame_rejects_modified_and_recommitted_source_id(tmp_path):
+    rows = [captured(tmp_path), negative()]
+    declared = selected_frame(tmp_path, rows)
+    old = vb.commitment(declared)
+    declared["records"][0]["oai_identifier"] = "oai:pubmedcentral.nih.gov:43210"
+    doc = ledger(rows)
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_EXTERNAL_PIN_MISMATCH"):
+        pilot.evaluate(
+            doc, tmp_path, expected_ledger_sha256=vb.commitment(doc),
+            selection_frame=declared, expected_frame_sha256=old,
+        )
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_OAI_IDENTITY_MISMATCH"):
+        framed(tmp_path, rows, declared)
+
+
+def test_frame_lineage_must_match_source_capture(tmp_path):
+    rows = [
+        captured(tmp_path, rid="original", family="family-a", pmcid="12345"),
+        captured(tmp_path, rid="corr", family="family-a", pmcid="67890",
+                 version="v2", kind="correction", parent="original"),
+        negative(),
+    ]
+    frame = selected_frame(tmp_path, rows)
+    assert framed(tmp_path, rows, frame)["raw_to_review_chains_replayed"] == 2
+    frame["records"][1]["kind"] = "supplement"
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_SOURCE_LINEAGE_MISMATCH"):
+        framed(tmp_path, rows, frame)
+
+
+def test_frame_cannot_share_pmc_id_across_declared_families(tmp_path):
+    rows = [negative("a", "fa"), negative("b", "fb")]
+    frame = selected_frame(tmp_path, rows)
+    frame["records"][1]["oai_identifier"] = frame["records"][0]["oai_identifier"]
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_SOURCE_CROSSES_FAMILIES"):
+        framed(tmp_path, rows, frame)
+
+
+def test_selection_cycles_and_missing_parents_are_refused(tmp_path):
+    rows = [negative("a", "fa"), negative("b", "fa"), negative("c", "fb")]
+    rows[1]["version_id"] = "v2"
+    frame = selected_frame(tmp_path, rows)
+    frame["records"][1].update(
+        kind="revision", parent_record_id="a",
+        oai_identifier=frame["records"][0]["oai_identifier"],
+    )
+    assert len(selection.validate(
+        frame, expected_frame_sha256=vb.commitment(frame)
+    )) == 3
+    frame["records"][0].update(kind="revision", parent_record_id="b")
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_LINEAGE_CYCLE"):
+        selection.validate(frame, expected_frame_sha256=vb.commitment(frame))
+    frame["records"][0]["parent_record_id"] = "not-selected"
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_PARENT_NOT_SELECTED"):
+        selection.validate(frame, expected_frame_sha256=vb.commitment(frame))
+
+
+def test_not_attempted_cannot_claim_error_or_files(tmp_path):
+    row = negative("a", "fa")
+    row.update(outcome="not_attempted", reason=None)
+    assert framed(tmp_path, [row, negative("b", "fb")])[
+        "selected_attempts_not_yet_run"
+    ] == 1
+    row["reason"] = "timeout"
+    with pytest.raises(vb.BenchmarkError, match="PILOT_NOT_ATTEMPTED_FIELDS"):
+        framed(tmp_path, [row, negative("b", "fb")])
+
+
+def test_private_frame_rejects_protected_and_unsupported_authority_claims(tmp_path):
+    rows = [negative("a", "fa"), negative("b", "fb")]
+    frame = selected_frame(tmp_path, rows)
+    frame["partition"] = "sealed"
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_PROTECTED_PARTITION"):
+        framed(tmp_path, rows, frame)
+    frame["partition"] = "development_exposed"
+    frame["pre_outcome_registered"] = True
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_FIELDS"):
+        framed(tmp_path, rows, frame)
+
+
+def test_framed_parser_refusal_checks_preselected_oai_id(tmp_path):
+    raw = synthetic_oai().replace(
+        b"<GetRecord>", b'<!DOCTYPE unsafe SYSTEM "file:///etc/passwd"><GetRecord>',
+        1,
+    )
+    row = {
+        "record_id": "bad-source", "family_id": "family-one",
+        "version_id": "v1", "outcome": "parser_refused",
+        "reason": "ENVELOPE_DTD_OR_ENTITY",
+        "files": {
+            "raw_envelope": store(tmp_path, "bad-original", raw, xml=True),
+            "transfer": store(tmp_path, "bad-transfer-file", transfer(raw)),
+        }, "pins": None,
+    }
+    records = [row, negative()]
+    frame = selected_frame(tmp_path, records)
+    assert framed(tmp_path, records, frame)["outcomes"]["parser_refused"] == 1
+    frame["records"][0]["oai_identifier"] = "oai:pubmedcentral.nih.gov:98765"
+    with pytest.raises(vb.BenchmarkError, match="PILOT_FRAME_OAI_IDENTITY_MISMATCH"):
+        framed(tmp_path, records, frame)
+
+
+def test_new_framed_cli_and_external_pins(tmp_path):
+    rows = [captured(tmp_path), negative()]
+    frame = selected_frame(tmp_path, rows)
+    doc = ledger(rows)
+    f = tmp_path / "selected-frame.json"
+    ledger_path = tmp_path / "attempts.json"
+    f.write_bytes(vb.canonical_bytes(frame))
+    ledger_path.write_bytes(vb.canonical_bytes(doc))
+    command = [
+        sys.executable, "-m", "tools.pmc_pilot_selection_frame",
+        "--frame", str(f), "--expected-frame-sha256", vb.commitment(frame),
+        "--ledger", str(ledger_path), "--private-root", str(tmp_path),
+        "--expected-ledger-sha256", vb.commitment(doc),
+    ]
+    ok = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=30)
+    assert ok.returncode == 0, ok.stderr
+    assert b"\r\n" not in ok.stdout
+    assert json.loads(ok.stdout)["selection_frame_coverage"] == (
+        "all_selected_record_ids_accounted"
+    )
+    assert b"PMC12345" not in ok.stdout
+    bad = command[:]
+    bad[bad.index("--expected-frame-sha256") + 1] = "f" * 64
+    refused = subprocess.run(bad, cwd=ROOT, capture_output=True, timeout=30)
+    assert refused.returncode == 2
+    assert json.loads(refused.stderr)["code"] == "PILOT_FRAME_EXTERNAL_PIN_MISMATCH"

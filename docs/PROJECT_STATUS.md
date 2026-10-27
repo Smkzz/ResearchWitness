@@ -4,13 +4,33 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified main:** `2478f797b8c2be798cbbc413b6d352a84173adc4`
+**Verified pre-RW-01O2 main:** `bab540ac3f30fccb5159d7895365ef39fa27e1ea`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01O2: externally pinned outcome-free PMC selection frame (candidate)
+
+Engineering review found that a valid RW-01O1 source-attempt ledger hash
+covers only the rows **still present in that ledger**. A dropped source
+and newly pinned smaller ledger could pass its old tests. The new
+`tools.pmc_pilot_selection_frame` requires a separately committed,
+strict 2–5-family source/version/OAI-identifier selection frame and
+checks **every** subsequently reported attempt against it on the same
+replay read. Selected but untouched work is explicit `not_attempted`.
+The frame binds correction-parent/declared article kind and prevents
+multiple families from claiming the same PMC source ID.
+See [RW-01O2 contract](PMC_SELECTION_FRAME.md).
+
+The new path is an engineering *candidate* pending its own exact-head checks.
+It does **not** attest the chronology of selection, external publisher
+authenticity, per-article rights, real independent reviewer labels,
+original PMC acquisition, registered study power or scientific improvement.
+The actual [real-source pilot issue #35](https://github.com/Smkzz/ResearchWitness/issues/35)
+remains open.
 
 ## 2026-10-27 RW-01O1 exact technical acceptance (not scientific proof)
 

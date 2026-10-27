@@ -11,6 +11,28 @@ The pilot should record **2–5 declared distinct work families** and at most
 families). Attempts that were not acquired, not legally eligible, not parsed
 or not independently reviewed **must not disappear** from the original frame.
 
+## Selection bias hardening — RW-01O2
+
+A complete RW-01O1 **unframed** ledger only accounts for entries still
+present in that ledger. Its SHA-256 does not prevent an operator from
+dropping an awkward selected article and re-pinning the shorter set.
+The [RW-01O2 private selection frame](PMC_SELECTION_FRAME.md) introduces
+a separate, strict list of 2–5 declared families and their exact OAI
+source IDs, versions and lineage before any reported attempt. Use its
+**framed** CLI for the real development pilot. The later ledger must
+contain exactly one entry for every selected source/version; an
+unprocessed source uses the explicit `not_attempted` outcome with null
+reason/files/pins. For captured/parser-refused records, the previously
+selected OAI identifier must also match the actual transfer declaration.
+This prevents selective omission or source replacement *relative to the
+provided pinned frame*, but it does not authenticate the pre-outcome
+timing of that frame or publisher rights and identities.
+
+The legacy `python -m tools.pmc_pilot_ledger` command below remains
+an unframed v1 developer diagnostic and cannot assert a complete
+preselected sample. The frame and private identifiers are never
+committed to this public repository.
+
 ## Private inputs
 
 Use an already-authorized original-byte PMC acquisition environment, outside

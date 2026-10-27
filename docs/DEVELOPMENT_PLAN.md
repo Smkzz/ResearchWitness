@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `2478f797b8c2be798cbbc413b6d352a84173adc4` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `bab540ac3f30fccb5159d7895365ef39fa27e1ea` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -110,6 +110,22 @@ isolation/evidence gates remain open until independently grounded real data
 exists. If original retrieval remains unavailable, record the exact
 environment blocker and continue unrelated authorized work without
 changing security or cost policies.
+
+### RW-01O2 — independently pinned (not independently timed) source frame
+
+The [selection-frame contract](PMC_SELECTION_FRAME.md) repairs a source
+selection/omission loophole in RW-01O1: every article/version OAI ID
+chosen for a development pilot must occur in a **separately committed**
+private frame and subsequently be recorded in the source-attempt ledger.
+The framed v2 protocol rejects missing cases, different IDs, altered
+correction/supplement relations and duplicate article IDs across
+purportedly independent work families. `not_attempted` cases remain
+visible without fabricated provider failures. No new custody authority,
+network permissions, protected sample, paper content or paid resource
+is enabled. A digest alone does not prove that selection preceded
+outcomes. Authentic independent timestamping, real PMC acquisition,
+article-specific licence checks and actually separate substantive
+source reviews are still essential for RW-01O and later RW-03/RW-05.
 
 ## RW-02 - Source evidence and provenance
 

@@ -7,7 +7,7 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified main** is `2478f797b8c2be798cbbc413b6d352a84173adc4`
+The **verified main** is `bab540ac3f30fccb5159d7895365ef39fa27e1ea`
 (2026-10-27), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
@@ -21,6 +21,12 @@ for exact commit/check receipts and exposed limitations. The library remains
 development-source family outcomes and replays only actually supplied
 captured original-source chains. It cannot create or authenticate missing
 real provider, rights or scientific reviewer evidence.
+
+**RW-01O2 candidate:** [an outcome-free source frame](PMC_SELECTION_FRAME.md)
+can be pinned separately from the later source-attempt ledger, so
+declared PMC identifiers, versions and family relations cannot be
+silently dropped or substituted on replay. No pre-outcome timestamp or
+real source authenticity follows from SHA continuity alone.
 
 **First blocked scientific milestone:** [RW-01O](https://github.com/Smkzz/ResearchWitness/issues/35)
 requires actual approved PMC original-byte transfers, per-article reuse/lineage

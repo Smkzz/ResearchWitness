@@ -2,6 +2,17 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01O2: prevent post-outcome pilot source selection changes — 2026-10-27
+
+- Add separately pinned, strict outcome-free PMC source selection frame with
+  exact OAI identifiers, work-family/version and correction-parent lineage.
+- Require the entire private pilot ledger to account for every chosen record,
+  including explicit `not_attempted`, and match source/transfer metadata
+  on the **same replay read**, not a separate mutable preflight.
+- Preserve legacy unframed v1 development diagnostics while the framed v2
+  path rejects silent article substitution/omission. Frame digests do not
+  prove pre-outcome timing, rights, independent labels or real scientific power.
+
 ### RW-01O1: private PMC pilot original-evidence accounting — 2026-10-27
 
 - Add offline private-input ledger across 2–5 declared work families with
