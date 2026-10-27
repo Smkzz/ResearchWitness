@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "512eb903eb87ccd10657636b2d0215e5595522f9",
+    "observed_main_sha": "36c65c5d83a42c45e2797ca91993dad7879647e6",
     "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified main contains RW-01N PR #38 and successful post-merge CI and CodeQL. RW-04E development-only statistical diagnostic is a candidate requiring exact-head CI; no real PMC raw capture or independent scientific evaluation."
+    "note": "Observed verified main after RW-04E PR #39 squash merge. Exact-head CI 40487322350, CodeQL 40487322199, dependency 40487322084 and main CI 40487613265, CodeQL 40487613212 succeeded. Engineering checks and sample feasibility are not independent scientific evidence."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -85,7 +85,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/33",
         "https://github.com/Smkzz/ResearchWitness/pull/34",
         "https://github.com/Smkzz/ResearchWitness/issues/35",
-        "https://github.com/Smkzz/ResearchWitness/pull/37"
+        "https://github.com/Smkzz/ResearchWitness/pull/37",
+        "https://github.com/Smkzz/ResearchWitness/pull/38"
       ],
       "blocker": null,
       "completed_slices": [
@@ -163,18 +164,18 @@
         },
         {
           "id": "RW-01M",
-          "scope": "candidate offline PMC OAI-PMH GetRecord response span / inherited-namespace JATS derivation and replay; no actual provider transfer, legal rights or scientific source proof",
+          "scope": "merged engineering offline PMC OAI-PMH GetRecord response span / inherited-namespace JATS derivation and replay; no actual provider transfer, legal rights or scientific source proof",
           "implementation": "tools/pmc_oai_envelope.py",
           "tests": "tests/test_pmc_oai_envelope.py"
         },
         {
           "id": "RW-01N",
-          "scope": "candidate checkout-only chain from operator-supplied PMC raw envelope through derived JATS, source capture and review packet with cross-declaration checks; no authenticated acquisition, rights or scientific labels",
+          "scope": "merged engineering checkout-only chain from operator-supplied PMC raw envelope through derived JATS, source capture and review packet with cross-declaration checks; no authenticated acquisition, rights or scientific labels",
           "implementation": "tools/pmc_source_review_chain.py",
           "tests": "tests/test_pmc_oai_envelope.py"
         }
       ],
-      "next_action": "Qualify RW-01N exact-head CI, then collect actual permission-cleared original private PMC raw transfers and independent substantive development-scope labels; replay RW-01M/N with RW-01K/J/L. Remain blocked_evidence for sealed corpus and scientific comparison."
+      "next_action": "RW-01O issue #35: perform only an authorized private 2-5 family real PMC raw-response development pilot when the already-qualified retrieval and rights-review environment is available. Preserve actual transfer bytes/status, article-specific permissions, lineage, all refusals and separate substantive reviews; replay RW-01M/N/K/J/L. No live corpus was collected in this session. Continue RW-04 power design independently."
     },
     {
       "id": "RW-02",
@@ -235,7 +236,8 @@
         "docs/IMPLEMENTATION_2026-10-24.md",
         "docs/IMPLEMENTATION_2026-10-25.md",
         "https://github.com/Smkzz/ResearchWitness/pull/23",
-        "https://github.com/Smkzz/ResearchWitness/pull/25"
+        "https://github.com/Smkzz/ResearchWitness/pull/25",
+        "https://github.com/Smkzz/ResearchWitness/pull/39"
       ],
       "blocker": null,
       "completed_slices": [
@@ -265,12 +267,12 @@
         },
         {
           "id": "RW-04E",
-          "scope": "candidate exact one-sided family discordance p-value and conservative Bonferroni CP family-level harm bound over pinned exposed RW-04C run declarations; no verified labels, power, custody or superiority",
+          "scope": "merged and exact-head CI-qualified exact one-sided family discordance p-value and conservative Bonferroni CP family-level harm bound over pinned exposed RW-04C run declarations; no verified labels, power, custody or superiority",
           "implementation": "tools/exact_family_analysis.py",
           "tests": "tests/test_exact_family_analysis.py"
         }
       ],
-      "next_action": "Qualify RW-04E exact-head CI and post-merge main; then build a preregistered feasible independent-family sample-size/power scenario and source-supported certificate adapters. At alpha=.025 and harm margin .05, zero/zero false alarms require at least 86 negative families; actual sampling, independent labels and custody remain blocked evidence."
+      "next_action": "RW-04F: predeclare realistic paired positive-family discordance/effect assumptions and independently justify study power/sampling budget on development-only material, then connect source/certificate replay rather than receipt declarations. Safety alpha .025 with 5%-point zero/zero harm needs >=86 independent negative families; real provenance, positive power and custody remain unqualified."
     },
     {
       "id": "RW-05",
