@@ -7,7 +7,7 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified main** is `eade087e07ea6ddc10de670b644f8dbe214648be`
+The **verified main** is `526b87dd706384c50da6474faacb51781b3a47c0`
 (2026-10-27), which includes the selective RW-01A–N source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
@@ -15,6 +15,12 @@ JATS review aids and replayable evidence; no general paper truth or independent
 scientific accuracy is implied. See [PROJECT_STATUS.md](PROJECT_STATUS.md)
 for exact commit/check receipts and exposed limitations. The library remains
 `0.3.0.dev0` UNRELEASED, not an externally published product.
+
+**RW-01O1 private pilot accounting candidate:** the
+[offline intake ledger](PMC_PILOT_LEDGER.md) retains all attempted
+development-source family outcomes and replays only actually supplied
+captured original-source chains. It cannot create or authenticate missing
+real provider, rights or scientific reviewer evidence.
 
 **First blocked scientific milestone:** [RW-01O](https://github.com/Smkzz/ResearchWitness/issues/35)
 requires actual approved PMC original-byte transfers, per-article reuse/lineage

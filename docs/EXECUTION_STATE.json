@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "eade087e07ea6ddc10de670b644f8dbe214648be",
+    "observed_main_sha": "526b87dd706384c50da6474faacb51781b3a47c0",
     "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified protected main after RW-04G PR #42: exact-head CI 40495408427 (10/10, 1022 tests + 309 subtests on Ubuntu 3.12), CodeQL 40495408513, dependency 40495408772 and postmerge main CI 40495834136, CodeQL 40495834162 all succeeded. No real source evidence or research accuracy is established."
+    "note": "Verified latest main 526b87d has exact main CI and CodeQL success. RW-01O1 private source-ledger code is an unmerged engineering candidate; no authentic PMC transfer, rights or reviewer-independent source labels were acquired."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -173,9 +173,15 @@
           "scope": "merged engineering checkout-only chain from operator-supplied PMC raw envelope through derived JATS, source capture and review packet with cross-declaration checks; no authenticated acquisition, rights or scientific labels",
           "implementation": "tools/pmc_source_review_chain.py",
           "tests": "tests/test_pmc_oai_envelope.py"
+        },
+        {
+          "id": "RW-01O1",
+          "scope": "candidate checkout-only 2–5-family private PMC pilot denominator ledger; validates supplied raw-to-review source chains, duplicate family/version registry, parser refusals, negative source failures and legal exclusions; no actual source acquisition or independent adjudication",
+          "implementation": "tools/pmc_pilot_ledger.py",
+          "tests": "tests/test_pmc_pilot_ledger.py"
         }
       ],
-      "next_action": "RW-01O issue #35 remains open and scientifically blocked_external/blocked_evidence: acquire 2–5 permission-cleared development PMC OAI-PMH raw responses with actual transfer evidence via already approved runtime, validate article-specific licence/correction/version and independent scope reviews. Existing chat runner has DNS failure, and no original unmodified raw response is available. Do not use GitHub CI/web snippets as counterfeit original transfers."
+      "next_action": "Qualify RW-01O1 exact-head CI and merge. Then execute the actual 2–5 permitted raw PMC OAI-PMH response development pilot only with an already approved original-byte acquisition runtime and independently verified per-article reuse terms, capture all attempts, and obtain genuinely separate source-scope reviewer assessments. No protected data, chargeable provider, or alternate egress route is authorized; issue #35 remains open."
     },
     {
       "id": "RW-02",

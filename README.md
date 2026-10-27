@@ -270,6 +270,18 @@ regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
 and [synthetic example](examples/source-capture/README.md). This does not
 grant protected custody or confirmatory evaluation access.
 
+### Private real-source pilot denominator ledger (RW-01O1)
+
+The offline, checkout-only [PMC pilot intake ledger](docs/PMC_PILOT_LEDGER.md)
+requires every selected development article/version to be accounted for as
+unavailable, rights-excluded, explicitly parser-refused, fully source-chain
+replayed but review-pending, or paired developer-review-submitted. It reuses
+RW-01M/N/K/J/L byte/version/packet replay and registry checks for captured
+records, emits only aggregate counts and never silently removes failures.
+**No actual PMC response or scientifically independent paper label has
+been collected by this tool**; official provider acquisition, legal rights
+review and genuinely separated source adjudication remain external gates.
+
 ### Raw PMC OAI-PMH source-identity derivation (RW-01M)
 
 The checkout-only offline [PMC envelope adapter](docs/PMC_OAI_ENVELOPE.md)

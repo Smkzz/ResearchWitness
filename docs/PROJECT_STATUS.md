@@ -4,13 +4,29 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified main:** `eade087e07ea6ddc10de670b644f8dbe214648be`
+**Verified pre-RW-01O1 main:** `526b87dd706384c50da6474faacb51781b3a47c0`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01O1: private original-PMC pilot evidence-denominator ledger (candidate)
+
+The checkout-only `tools.pmc_pilot_ledger` validates a privately held
+selection/attempt ledger for 2–5 declared work families. It preserves
+unavailable/rights-excluded/refused attempts and validates actually supplied
+raw PMC-to-derived-JATS-to-capture-to-review chains against separately
+pinned digests and declared correction family registry. Only sanitized
+aggregate counts are printed. This closes an engineering accounting gap
+between individual RW-01M/N tools and a future real-source pilot.
+
+No actual original PMC transfer, article-specific legal clearance,
+independent scientific reviewer adjudication, protected corpus or real
+research-error detection is established. Code remains an engineering
+candidate until exact-head CI; [RW-01O issue #35](https://github.com/Smkzz/ResearchWitness/issues/35)
+is explicitly still open. [Private pilot contract](PMC_PILOT_LEDGER.md).
 
 ## 2026-10-27 RW-04G engineering qualification (not scientific validation)
 
