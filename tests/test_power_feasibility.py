@@ -190,7 +190,7 @@ def test_cli_is_canonical_and_rejects_stale_pin_and_extra_fields(tmp_path):
     name = tmp_path / "bad.json"
     name.write_bytes(vb.canonical_bytes(revised))
     no_extra = subprocess.run(
-        args[:5] + [str(name)] + args[6:],
+        args[:6] + [str(name)] + args[7:],
         cwd=ROOT, capture_output=True, timeout=30,
     )
     assert no_extra.returncode == 2
