@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `bab540ac3f30fccb5159d7895365ef39fa27e1ea` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `a1e35b6a39abcf58b42e42f6c53f295a33f088c0` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -111,9 +111,11 @@ exists. If original retrieval remains unavailable, record the exact
 environment blocker and continue unrelated authorized work without
 changing security or cost policies.
 
-### RW-01O2 — independently pinned (not independently timed) source frame
+### RW-01O2 — independently pinned (not independently timed) source frame (merged)
 
-The [selection-frame contract](PMC_SELECTION_FRAME.md) repairs a source
+The [selection-frame contract](PMC_SELECTION_FRAME.md), merged through
+[PR #46](https://github.com/Smkzz/ResearchWitness/pull/46) with green
+exact-head and postmerge engineering checks, repairs a source
 selection/omission loophole in RW-01O1: every article/version OAI ID
 chosen for a development pilot must occur in a **separately committed**
 private frame and subsequently be recorded in the source-attempt ledger.
