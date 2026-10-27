@@ -1,0 +1,11 @@
+{
+  "schema_version": "rw-development-power-scenario.v1",
+  "partition": "hypothetical_development_only",
+  "candidate_only_positive_probability": {"numerator": 1, "denominator": 4},
+  "baseline_only_positive_probability": {"numerator": 1, "denominator": 10},
+  "target_primary_power": {"numerator": 4, "denominator": 5},
+  "negative_joint_no_alarm_probability": {"numerator": 49, "denominator": 50},
+  "max_positive_families": 160,
+  "max_negative_families": 200,
+  "assumptions_basis": "invented_not_estimated_from_source"
+}
