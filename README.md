@@ -270,6 +270,18 @@ regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
 and [synthetic example](examples/source-capture/README.md). This does not
 grant protected custody or confirmatory evaluation access.
 
+### Preselected PMC source frame (RW-01O2)
+
+The [separately pinned private selection frame](docs/PMC_SELECTION_FRAME.md)
+binds exact PMC OAI identifiers, work family/version and correction lineage
+to the complete RW-01O1 attempt ledger. It **rejects omitted selected
+articles or silent source substitutions**, and explicitly records
+`not_attempted` entries instead of treating them as failed provider calls.
+The original unframed v1 ledger remains a limited development diagnostic;
+future real-source pilot reports use the framed v2 command. Neither a local
+SHA-256 commitment nor a matching record count authenticates the timing of
+selection, real publisher retrieval, permissions or scientific truth.
+
 ### Private real-source pilot denominator ledger (RW-01O1)
 
 The offline, checkout-only [PMC pilot intake ledger](docs/PMC_PILOT_LEDGER.md)
