@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `526b87dd706384c50da6474faacb51781b3a47c0` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `2478f797b8c2be798cbbc413b6d352a84173adc4` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -86,7 +86,15 @@ at the resulting head, no duplicate conflicting audit path remains undocumented,
 and the installed distribution reproduces a positive, negative and abstention
 fixture outside the checkout. No new scientific-accuracy claim follows.
 
-### RW-01O1 — offline pilot denominator accounting (development only)
+### RW-01O1 — offline pilot denominator accounting (merged)
+
+The engineering-only private pilot ledger merged via
+[PR #44](https://github.com/Smkzz/ResearchWitness/pull/44)
+after exact-head 10/10 CI, CodeQL and dependency evidence; post-merge
+main CI/CodeQL also passed. The **scientific** RW-01O source/rights/
+independent-review evidence gate remains open, and no source IDs or
+article full text were actually retrieved in this session.
+
 
 The [private PMC pilot intake ledger](PMC_PILOT_LEDGER.md) is a bounded
 developer-exposed evidence-workflow protocol: every selected family and
