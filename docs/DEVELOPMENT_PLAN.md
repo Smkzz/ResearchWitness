@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `1ceb0820112c1cea301e31a39c7d194f02fc7cf3` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `e7fff0cadac3972e0f3baac3ee11993c29fba05d` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -168,6 +168,26 @@ selection/exclusion accounting and an independently pre-outcome frozen
 protocol. RW-01O's first 2–5 real families are pilot-only. Do not lower
 RW-03/RW-05 custody gates or claim a groundbreaking scientific result
 without independently grounded real outcomes.
+
+### RW-04G — full paired negative harm power (hypothetical only)
+
+The new [joint family-power analysis](JOINT_POWER_FEASIBILITY.md) removes
+the earlier zero/zero-only shortcut by enumerating all four pairwise
+negative-arm alarm outcomes under **source-free fictional** probabilities.
+Every candidate/baseline alarm count pair is judged by the exact RW-04E
+Bonferroni Clopper-Pearson harm criterion. Combined study success uses
+the primary and negative safety probabilities **only** under explicit
+hypothetical independence of positive and negative work families.
+With the example's 129 positive + 86 negative families and stated
+invented rates, 80.28% primary success is compatible with only 33.85%
+chance of passing both endpoints. This overturns any claim that 215
+families inherently supplies an 80%-powered confirmatory study.
+Actual rate estimation, family-correlation and missingness sensitivity,
+privacy-preserving source adjudication and a genuine pre-outcome
+registration remain separate gates; the first authorized 2–5-source
+development pilot [RW-01O](https://github.com/Smkzz/ResearchWitness/issues/35)
+remains unperformed. No public report should call this a breakthrough
+in scientific error discovery.
 
 ## RW-05 - Independent evidence curation and sealed custody
 

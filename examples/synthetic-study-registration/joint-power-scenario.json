@@ -1,0 +1,17 @@
+{
+  "schema_version": "rw-joint-power-scenario.v1",
+  "partition": "hypothetical_development_only",
+  "positive_families": 129,
+  "negative_families": 86,
+  "candidate_only_positive_probability": {"numerator": 1, "denominator": 4},
+  "baseline_only_positive_probability": {"numerator": 1, "denominator": 10},
+  "negative_joint_outcomes": {
+    "neither_alarm": {"numerator": 49, "denominator": 50},
+    "candidate_only_alarm": {"numerator": 1, "denominator": 200},
+    "baseline_only_alarm": {"numerator": 1, "denominator": 100},
+    "both_alarm": {"numerator": 1, "denominator": 200}
+  },
+  "target_joint_power": {"numerator": 4, "denominator": 5},
+  "assumptions_basis": "invented_not_estimated_from_source",
+  "family_sampling_model": "iid_within_strata_independent_positive_and_negative"
+}

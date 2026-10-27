@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified pre-RW-04F main:** `1ceb0820112c1cea301e31a39c7d194f02fc7cf3`
+**Verified pre-RW-04G main:** `e7fff0cadac3972e0f3baac3ee11993c29fba05d`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,23 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-04F: hypothetical paired-family power design (candidate)
+## RW-04G: hypothetical paired-negative safety and joint power (candidate)
+
+The checkout-only `tools.joint_power_feasibility` calculates exact finite
+bivariate negative-family alarm-count distributions from four strict invented
+paired probabilities. The same conservative RW-04E harm-bound decision is
+then applied to **every** possible marginal candidate/baseline alarm
+count pair, yielding a hypothetical safety-pass probability. RW-04F's
+positive-family power is multiplied with this result **only** under an
+explicit cross-stratum independence assumption. The illustrative model
+gives 80.28% positive, 42.17% safety and 33.85% **combined** success
+for 129 positives + 86 negatives. This is mathematical study-design
+planning, not empirical evidence. The draft still lacks real-world rate
+estimates, missingness sensitivity, actual independent source labels,
+licence provenance, qualified custody and confirmed scientific power.
+See [joint-power protocol](JOINT_POWER_FEASIBILITY.md).
+
+## RW-04F: hypothetical paired-family power design (merged)
 
 The checkout-only `tools.power_feasibility` calculates exact primary-family
 paired-discordance rejection probabilities from bounded, explicitly

@@ -2,6 +2,17 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-04G: hypothetical paired negative safety and combined study power — 2026-10-27
+
+- Add bounded exact integer bivariate outcome calculation for all four
+  within-family negative alarm patterns, using the unchanged outward-conservative
+  RW-04E Bonferroni Clopper-Pearson family-level safety criterion.
+- Calculate the primary and negative safety pass chances separately, multiplying
+  them only under a declared hypothetical between-strata independence assumption.
+- Invented 129-positive/86-negative-family example: 80.28% primary pass,
+  42.17% negative safety pass, and just 33.85% combined success. None
+  of these numbers is an observed real-paper accuracy or scientific-power result.
+
 ### RW-04F: exact hypothetical family-level power design — 2026-10-27
 
 - Add bounded exact multinomial/binomial paired-discordance primary-test

@@ -115,6 +115,19 @@ silent together only about 17.6% of the time under the invented
 and independent custody remain unqualified; do not retroactively promote
 this draft into a real preregistration.
 
+## RW-04G: source-free full paired safety and combined power
+
+The [joint study planner](JOINT_POWER_FEASIBILITY.md) uses RW-04D's
+unchanged primary alpha, practical gain, Bonferroni Clopper-Pearson
+safety alpha and harm margin. Four invented within-negative-family
+alarm probabilities produce an **exact** paired marginal count
+distribution. The primary and negative safety power computations
+are combined only under an explicit invented cross-stratum
+independence assumption. The original 129-positive/86-negative
+illustration yields **33.85% combined** rather than 80% primary-only
+success probability. This is a software model, not real scientific
+power, an authenticated independent corpus or an actual preregistration.
+
 ## Next packages
 
 RW-04: implement declared baseline source/certificate replay, independent

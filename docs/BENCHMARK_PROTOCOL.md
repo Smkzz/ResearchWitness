@@ -122,6 +122,20 @@ dependence must be estimated on separately reviewed exposed development
 data and justified *before* the confirmatory freeze. Do not count a
 hypothetical 215-family total as a powered empirical protocol.
 
+## Paired negative safety and full joint hypothetical power
+
+The [RW-04G tool](JOINT_POWER_FEASIBILITY.md) closes a methodological
+*implementation* gap left by RW-04F: when four within-family alarm
+outcome probabilities are supplied, it enumerates the full bivariate
+candidate/baseline marginal alarm-count distribution and uses the same
+conservative RW-04E safety bound. The result can be combined with
+primary-family power under a separately stated, entirely hypothetical
+independence-of-strata assumption. In the invented 215-family example,
+the probability of **both** endpoints passing is only about 33.85%,
+not 80%. This is not empirical calibration, source-grounded error
+detection, real sampling power or an independently frozen protocol;
+actual pilot acquisition and separate evidence review are mandatory.
+
 ## Sampling and success gates to freeze before evaluation
 
 The RW-04 agent must produce a versioned registration containing:
