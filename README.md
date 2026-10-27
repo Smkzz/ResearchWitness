@@ -398,6 +398,16 @@ per-family probability of neither arm alarming, only about 17.6% of
 86-family samples have all zero alarms. No actual source labels,
 pre-outcome registration or scientific improvement are implied.
 
+The follow-on [RW-04G paired negative-alarm power engine](docs/JOINT_POWER_FEASIBILITY.md)
+computes the probability of passing the **actual conservative safety
+bound** from all four invented *paired* negative outcomes, then multiplies
+the primary and safety probabilities only under explicit hypothetical
+cross-stratum independence. In the source-free 129-positive/86-negative
+example, primary power is 80.28%, negative safety pass probability 42.17%,
+and the **joint success chance only 33.85%**. Thus 215 is not a powered
+real study design. No independently obtained source, label or study outcome
+was used or certified.
+
 ## Real-paper validation and benchmark
 
 The executable historical fixtures include a 2007 elliptic-curve corrigendum over
