@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a`, `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `36c65c5d83a42c45e2797ca91993dad7879647e6` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -27,12 +27,18 @@ valid research; relabeling it as success is not.
 
 ## What exists and what does not
 
-The baseline has ten bounded deterministic checker families, structured intake,
-replayable evidence bundles, reports/export, and separate checkout-only JATS and
-metadata tools. PRs #13, #17 and #18 are integrated. PRs #5-#12 are still drafts;
-#6-#11 contain a separate paper-audit stack and #12 adds a local preview/custody
-worker. They are not made available by this plan. PDF execution, Windows managed
-metadata ownership and protected evaluation still need their own qualification.
+Verified main retains the ten bounded deterministic checker families, structured
+intake, installed JATS arithmetic/audit aids, replayable evidence bundles and
+report/export. The safely merged RW-01A–N slices add offline developer source
+review, original PMC envelope/derived-JATS identity and source-review binding.
+RW-04A–E provide bounded development receipt replay, paired descriptive
+comparisons, preregistration *drafts* and exact positive/safety statistical
+diagnostics; [RW-04E details](EXACT_FAMILY_ANALYSIS.md). They have not captured
+or independently labelled a real original PMC paper or run Wave 3. PRs #5–#12
+remain draft historical stacks; their protected custody worker is not enabled.
+PDF execution, Windows managed metadata ownership and protected custody
+still require separate qualification. The next real-source evidence task is
+[RW-01O issue #35](https://github.com/Smkzz/ResearchWitness/issues/35).
 
 Reuse these implementations where sound. Do not rebuild their functions behind
 new names. Development experiments, old source reviews and frozen results remain
