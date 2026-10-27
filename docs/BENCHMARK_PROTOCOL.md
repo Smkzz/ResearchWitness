@@ -109,6 +109,19 @@ The example's legacy 15-work minimum cannot support a 5-point harm upper
 bound with zero observed false alarms; 86 independent negative families
 are required in that particular zero/zero scenario.
 
+## Finite primary-power scenario diagnostics
+
+The [RW-04F planner](POWER_FEASIBILITY.md) computes exact hypothetical
+paired-positive family rejection power from two declared mutually
+exclusive discordance rates; it does **not** establish power from synthetic
+or source-unreviewed tests. The negative-family calculation gives only
+the conservative zero/zero-alarm feasibility requirement and shows why
+the probability of observing no alarms matters. Full paired negative
+joint-alarm distribution, safety pass probability, missingness and work-family
+dependence must be estimated on separately reviewed exposed development
+data and justified *before* the confirmatory freeze. Do not count a
+hypothetical 215-family total as a powered empirical protocol.
+
 ## Sampling and success gates to freeze before evaluation
 
 The RW-04 agent must produce a versioned registration containing:

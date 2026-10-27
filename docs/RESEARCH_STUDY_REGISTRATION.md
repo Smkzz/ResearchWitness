@@ -100,6 +100,21 @@ pre-outcome design. In the zero/zero-alarm case with alpha 0.025 and tolerated
 5-point harm, at least 86 independent negative families are necessary, not
 the 15-family historical legacy minimum.
 
+## RW-04F: hypothetical family-level power calculation
+
+[RW-04F](POWER_FEASIBILITY.md) binds a separately pinned RW-04D study
+*draft* to a strict source-free invented probability scenario. It computes
+exact unconditional positive-family discordance-test power with the
+declared practical improvement constraint. The negative-family calculation
+addresses **only** zero/zero false-alarm feasibility, not the actual
+probability of passing the safety test with mixed alarm patterns. In the
+illustrative scenario, the first 80%-powered positive size is 129
+independent families; 86 zero/zero-safe negative families would be
+silent together only about 17.6% of the time under the invented
+0.98 per-family joint silence model. Combined power, empirical sampling
+and independent custody remain unqualified; do not retroactively promote
+this draft into a real preregistration.
+
 ## Next packages
 
 RW-04: implement declared baseline source/certificate replay, independent

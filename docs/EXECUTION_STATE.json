@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "36c65c5d83a42c45e2797ca91993dad7879647e6",
+    "observed_main_sha": "1ceb0820112c1cea301e31a39c7d194f02fc7cf3",
     "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Observed verified main after RW-04E PR #39 squash merge. Exact-head CI 40487322350, CodeQL 40487322199, dependency 40487322084 and main CI 40487613265, CodeQL 40487613212 succeeded. Engineering checks and sample feasibility are not independent scientific evidence."
+    "note": "Verified last main includes RW-04E PR #39 and docs PR #40; exact-head and postmerge CI/CodeQL passed. RW-04F is an unmerged hypothetical study design candidate; no real PMC source acquisition or independent power verification."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -175,7 +175,7 @@
           "tests": "tests/test_pmc_oai_envelope.py"
         }
       ],
-      "next_action": "RW-01O issue #35: perform only an authorized private 2-5 family real PMC raw-response development pilot when the already-qualified retrieval and rights-review environment is available. Preserve actual transfer bytes/status, article-specific permissions, lineage, all refusals and separate substantive reviews; replay RW-01M/N/K/J/L. No live corpus was collected in this session. Continue RW-04 power design independently."
+      "next_action": "RW-01O issue #35 remains open after earlier accidental closure: actual raw PMC OAI response acquisition requires an already approved and functioning original-byte retrieval environment, article-by-article rights provenance and truly separate source-scope review. No real licensed raw full text, publisher transfer or independent source ground truth was collected here."
     },
     {
       "id": "RW-02",
@@ -270,9 +270,15 @@
           "scope": "merged and exact-head CI-qualified exact one-sided family discordance p-value and conservative Bonferroni CP family-level harm bound over pinned exposed RW-04C run declarations; no verified labels, power, custody or superiority",
           "implementation": "tools/exact_family_analysis.py",
           "tests": "tests/test_exact_family_analysis.py"
+        },
+        {
+          "id": "RW-04F",
+          "scope": "candidate exact independent-family paired-positive power calculation and negative zero/zero safety feasibility from source-free invented assumptions; no empirical sample power, full safety joint power or scientific validation",
+          "implementation": "tools/power_feasibility.py",
+          "tests": "tests/test_power_feasibility.py"
         }
       ],
-      "next_action": "RW-04F: predeclare realistic paired positive-family discordance/effect assumptions and independently justify study power/sampling budget on development-only material, then connect source/certificate replay rather than receipt declarations. Safety alpha .025 with 5%-point zero/zero harm needs >=86 independent negative families; real provenance, positive power and custody remain unqualified."
+      "next_action": "Qualify and merge RW-04F exact-head CI, then obtain a lawful real development-only source cohort and independent substantive review via RW-01O. Build full paired negative-alarm safety power with explicit joint outcome rates and missingness before a frozen scientific sample-size recommendation."
     },
     {
       "id": "RW-05",

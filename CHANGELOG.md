@@ -2,6 +2,20 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-04F: exact hypothetical family-level power design — 2026-10-27
+
+- Add bounded exact multinomial/binomial paired-discordance primary-test
+  power search under explicitly invented positive-family probabilities, with
+  strict preregistration draft hash/alpha/practical-effect binding.
+- Derive the necessary zero/zero-alarm negative-family safety threshold by
+  exact rational inequality and display the probability of obtaining zero
+  alarms under an invented joint silence model. It does **not** certify
+  safety-test power or combined statistical power.
+- Record example: 129 positive families for a hypothetical 80%-powered
+  primary test and 86 negative families for zero/zero safety feasibility;
+  98% per-family joint silence yields only ~17.6% probability of all
+  86 remaining silent. No real sources, labels, custody or scientific claim.
+
 ### RW-04E: exact family-level statistical development diagnostics — 2026-10-27
 
 - Add offline integer-exact paired discordance calculation and outward-conservative

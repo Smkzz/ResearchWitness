@@ -387,6 +387,17 @@ negative families with zero alarms in both arms are needed to clear a
 design feasibility result, **not** an independent scientific validation,
 registered experiment, actual power calculation or permission to use sealed data.
 
+The separate [RW-04F hypothetical power planner](docs/POWER_FEASIBILITY.md)
+uses exact paired-discordance probabilities rather than equating a minimum
+test count with adequate study power. In the invented 25%-versus-10%
+candidate-only/baseline-only scenario, reaching 80% primary-test power
+with a 10-point practical improvement target first requires **129 independent
+positive families**. The zero/zero-alarm safety minimum of 86 negative
+families is **not** an 80%-powered safety plan: with a hypothetical 98%
+per-family probability of neither arm alarming, only about 17.6% of
+86-family samples have all zero alarms. No actual source labels,
+pre-outcome registration or scientific improvement are implied.
+
 ## Real-paper validation and benchmark
 
 The executable historical fixtures include a 2007 elliptic-curve corrigendum over

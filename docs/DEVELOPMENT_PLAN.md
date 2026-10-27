@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `36c65c5d83a42c45e2797ca91993dad7879647e6` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `1ceb0820112c1cea301e31a39c7d194f02fc7cf3` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -151,6 +151,23 @@ scoring tests and an experiment-registration template. **Done when:** deliberate
 wrong denominators, missing cases, duplicated work families, corrupted certificates,
 and mislabeled abstentions cannot silently improve the score; synthetic replay is
 repeatable and a different agent can reproduce the aggregate result.
+
+### RW-04F — statistical power feasibility without fabricated evidence
+
+The bounded [hypothetical power planner](POWER_FEASIBILITY.md) takes
+source-free paired-positive discordance assumptions and computes the exact
+chance of meeting RW-04E's one-sided positive test **and** practical gain,
+plus the minimum *zero/zero-alarm* negative-family size required by the
+declared conservative safety bound. It does not compute safety-test power
+from incomplete marginal assumptions. Exemplary 129 positive plus 86
+negative families are not a qualified real enrolment target; at 98% invented
+joint silence, 86 negative families have only about 17.6% chance of no
+alarms. A real scientific study needs justified development-exposed effect
+and false-alarm distributions, a complete paired negative harm power model,
+selection/exclusion accounting and an independently pre-outcome frozen
+protocol. RW-01O's first 2–5 real families are pilot-only. Do not lower
+RW-03/RW-05 custody gates or claim a groundbreaking scientific result
+without independently grounded real outcomes.
 
 ## RW-05 - Independent evidence curation and sealed custody
 
