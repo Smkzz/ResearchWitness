@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified pre-RW-01O1 main:** `526b87dd706384c50da6474faacb51781b3a47c0`
+**Verified main:** `2478f797b8c2be798cbbc413b6d352a84173adc4`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,26 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-01O1: private original-PMC pilot evidence-denominator ledger (candidate)
+## 2026-10-27 RW-01O1 exact technical acceptance (not scientific proof)
+
+RW-01O1 [PR #44](https://github.com/Smkzz/ResearchWitness/pull/44)
+passed all nine OS/Python jobs plus Release gate **10/10** on the exact
+qualified code commit `b291c930561b9300c9f23558d465c435359e49b4`:
+[CI 40507534319](https://github.com/Smkzz/ResearchWitness/actions/runs/40507534319)
+reported **1,037 tests + 315 subtests** on Ubuntu Python 3.12.
+[CodeQL 40507534336](https://github.com/Smkzz/ResearchWitness/actions/runs/40507534336)
+and [dependency evidence 40507534318](https://github.com/Smkzz/ResearchWitness/actions/runs/40507534318)
+passed. Protected main squash-merged to
+`2478f797b8c2be798cbbc413b6d352a84173adc4`, and the
+[post-merge CI 40507826285](https://github.com/Smkzz/ResearchWitness/actions/runs/40507826285)
+and [CodeQL 40507826264](https://github.com/Smkzz/ResearchWitness/actions/runs/40507826264)
+passed independently at that SHA.
+
+These are **synthetic software acceptance checks**, not independently
+retrieved provider bytes or scientific source reviews. No release was
+published; `0.3.0.dev0` remains UNRELEASED.
+
+## RW-01O1: private original-PMC pilot evidence-denominator ledger (merged)
 
 The checkout-only `tools.pmc_pilot_ledger` validates a privately held
 selection/attempt ledger for 2–5 declared work families. It preserves
@@ -24,8 +43,7 @@ between individual RW-01M/N tools and a future real-source pilot.
 
 No actual original PMC transfer, article-specific legal clearance,
 independent scientific reviewer adjudication, protected corpus or real
-research-error detection is established. Code remains an engineering
-candidate until exact-head CI; [RW-01O issue #35](https://github.com/Smkzz/ResearchWitness/issues/35)
+research-error detection is established. Engineering code passed exact-head and post-merge CI; [RW-01O issue #35](https://github.com/Smkzz/ResearchWitness/issues/35)
 is explicitly still open. [Private pilot contract](PMC_PILOT_LEDGER.md).
 
 ## 2026-10-27 RW-04G engineering qualification (not scientific validation)
