@@ -17,6 +17,7 @@ from researchwitness import _jats_parser as jats
 from tools import denominator_scope_review as scope
 from tools import pmc_oai_envelope as pmc
 from tools import pmc_source_review_chain as chain
+from tools import pmc_pilot_selection_frame as selection
 from tools import source_capture_manifest as capture
 from tools import verification_benchmark as vb
 from tools.offline_files import read_regular
@@ -29,7 +30,7 @@ MAX_DISTINCT_FAMILIES = 5
 NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\Z", re.ASCII)
 OUTCOMES = frozenset({
     "acquisition_unavailable", "rights_excluded", "parser_refused",
-    "captured_pending_review", "development_reviews_submitted",
+    "captured_pending_review", "development_reviews_submitted", "not_attempted",
 })
 REASONS = {
     "acquisition_unavailable": frozenset({
@@ -92,7 +93,9 @@ def _document(root: Path, name: Any, limit: int, used: set[str]) -> dict[str, An
 
 
 def evaluate(ledger: dict[str, Any], private_root: Path, *,
-             expected_ledger_sha256: str) -> dict[str, Any]:
+             expected_ledger_sha256: str,
+             selection_frame: dict[str, Any] | None = None,
+             expected_frame_sha256: str | None = None) -> dict[str, Any]:
     """Replay supplied private inputs and report only aggregate development states."""
     vb.parse_document(vb.canonical_bytes(ledger))
     require(vb.commitment(ledger) == capture.digest(expected_ledger_sha256),
@@ -107,6 +110,17 @@ def evaluate(ledger: dict[str, Any], private_root: Path, *,
     records = ledger["records"]
     require(type(records) is list and 2 <= len(records) <= MAX_RECORDS,
             "PILOT_RECORD_COUNT")
+    require((selection_frame is None) == (expected_frame_sha256 is None),
+            "PILOT_FRAME_ARGUMENTS")
+    frame_index = (selection.validate(
+        selection_frame, expected_frame_sha256=expected_frame_sha256,
+    ) if selection_frame is not None else None)
+    if frame_index is not None:
+        require(all(type(row) is dict and type(row.get("record_id")) is str
+                    for row in records), "PILOT_RECORD_FIELDS")
+        require(len(records) == len(frame_index)
+                and {row["record_id"] for row in records} == set(frame_index),
+                "PILOT_FRAME_COVERAGE_MISMATCH")
     root = _private_root(private_root)
 
     keys: set[str] = set()
@@ -130,11 +144,20 @@ def evaluate(ledger: dict[str, Any], private_root: Path, *,
         keys.add(rid)
         versions.add((family, version))
         families.add(family)
+        frame_entry = frame_index[rid] if frame_index is not None else None
+        if frame_entry is not None:
+            require(family == frame_entry["family_id"]
+                    and version == frame_entry["version_id"],
+                    "PILOT_FRAME_DECLARED_IDENTITY_MISMATCH")
         outcome = row["outcome"]
         require(type(outcome) is str and outcome in OUTCOMES,
                 "PILOT_OUTCOME_INVALID")
         reason = row["reason"]
         outcomes[outcome] += 1
+        if outcome == "not_attempted":
+            require(reason is None and row["files"] is None
+                    and row["pins"] is None, "PILOT_NOT_ATTEMPTED_FIELDS")
+            continue
         if outcome in {"acquisition_unavailable", "rights_excluded"}:
             require(reason in REASONS[outcome] and row["files"] is None
                     and row["pins"] is None, "PILOT_NEGATIVE_EVIDENCE_FIELDS")
@@ -149,6 +172,10 @@ def evaluate(ledger: dict[str, Any], private_root: Path, *,
             raw = _read(root, f["raw_envelope"], pmc.MAX_ENVELOPE_BYTES, used_paths)
             transfer = _document(root, f["transfer"], pmc.MAX_TRANSFER_BYTES,
                                  used_paths)
+            if frame_entry is not None:
+                require(transfer.get("requested_identifier") ==
+                        frame_entry["oai_identifier"],
+                        "PILOT_FRAME_OAI_IDENTITY_MISMATCH")
             try:
                 pmc.derive(raw, transfer)
             except (ValueError, TypeError, RecursionError) as exc:
@@ -171,6 +198,10 @@ def evaluate(ledger: dict[str, Any], private_root: Path, *,
                 "PILOT_REVIEW_COMPLETENESS")
         raw = _read(root, f["raw_envelope"], pmc.MAX_ENVELOPE_BYTES, used_paths)
         transfer = _document(root, f["transfer"], pmc.MAX_TRANSFER_BYTES, used_paths)
+        if frame_entry is not None:
+            require(transfer.get("requested_identifier") ==
+                    frame_entry["oai_identifier"],
+                    "PILOT_FRAME_OAI_IDENTITY_MISMATCH")
         source = _read(root, f["derived_source"], jats.MAX_SOURCE_BYTES, used_paths)
         derivation = _document(root, f["derivation_envelope"],
                                pmc.MAX_RECEIPT_BYTES, used_paths)
@@ -188,6 +219,11 @@ def evaluate(ledger: dict[str, Any], private_root: Path, *,
                 and metadata["work_family_id"] == family
                 and metadata["version_id"] == version,
                 "PILOT_DECLARED_IDENTITY_MISMATCH")
+        if frame_entry is not None:
+            require(metadata.get("kind") == frame_entry["kind"]
+                    and metadata.get("parent_record_id") ==
+                    frame_entry["parent_record_id"],
+                    "PILOT_FRAME_SOURCE_LINEAGE_MISMATCH")
         outcome_report = chain.bind_chain(
             raw, transfer, source, derivation, metadata, captured, packet,
             **pins, review_a=left, review_b=right,
@@ -213,7 +249,7 @@ def evaluate(ledger: dict[str, Any], private_root: Path, *,
         registry_hash = vb.commitment(registry)
         capture.validate_registry(registry,
                                   expected_registry_sha256=registry_hash)
-    return {
+    report = {
         "schema_version": REPORT_VERSION,
         "status": "DECLARED_DEVELOPMENT_PILOT_EVIDENCE_NOT_ADJUDICATED",
         "pilot_ledger_sha256": vb.commitment(ledger),
@@ -240,8 +276,30 @@ def evaluate(ledger: dict[str, Any], private_root: Path, *,
             "Developer reviewer records are declarations; two records do not prove independence.",
             "All negative outcomes are operator-declared and cannot be independently replayed.",
             "No original paper, private identifier or reviewer rationale is included in this report.",
+            "Unframed v1 input cannot establish the preselected source population.",
         ],
     }
+    if frame_index is not None:
+        report.update({
+            "schema_version": "rw-private-pmc-development-pilot-report.v2",
+            "status": "DECLARED_FRAME_FULLY_ACCOUNTED_NOT_TIME_AUTHENTICATED",
+            "selection_frame_sha256": vb.commitment(selection_frame),
+            "selection_frame_coverage": "all_selected_record_ids_accounted",
+            "selected_attempts_not_yet_run": outcomes.get("not_attempted", 0),
+            "selected_attempts_with_declared_outcomes":
+                len(records) - outcomes.get("not_attempted", 0),
+            "source_identifiers_and_lineage_match_frame": True,
+            "pre_outcome_frame_timing_authenticated": False,
+        })
+        report["limitations"] = [
+            limitation for limitation in report["limitations"]
+            if limitation !=
+            "Unframed v1 input cannot establish the preselected source population."
+        ] + [
+            "A matching externally pinned frame is not independently timestamped.",
+            "No proof exists that the frame preceded article or method outcome access.",
+        ]
+    return report
 
 
 def main(argv: list[str] | None = None) -> int:
