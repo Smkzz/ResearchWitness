@@ -96,6 +96,19 @@ pre-outcome public timestamping, power calculation, independent validation or
 completed scientific evaluation. Only an independently held, time-anchored
 declaration frozen before result access can later become an actual preregistration.
 
+## Development-only exact statistical diagnostics
+
+[RW-04E](EXACT_FAMILY_ANALYSIS.md) implements the selected positive-family
+exact discordance test and conservative Bonferroni CP negative-family harm
+bound on already exposed RW-04C receipt declarations. It requires the full
+registered denominators, exact arm identities and equal resource budgets;
+missing and unresolved eligible families yield inconclusive statistics.
+Numerical thresholds alone do not authenticate records, evidence
+independence, valid sampling power, qualified custody or scientific accuracy.
+The example's legacy 15-work minimum cannot support a 5-point harm upper
+bound with zero observed false alarms; 86 independent negative families
+are required in that particular zero/zero scenario.
+
 ## Sampling and success gates to freeze before evaluation
 
 The RW-04 agent must produce a versioned registration containing:
