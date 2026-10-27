@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "1ceb0820112c1cea301e31a39c7d194f02fc7cf3",
+    "observed_main_sha": "e7fff0cadac3972e0f3baac3ee11993c29fba05d",
     "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified last main includes RW-04E PR #39 and docs PR #40; exact-head and postmerge CI/CodeQL passed. RW-04F is an unmerged hypothetical study design candidate; no real PMC source acquisition or independent power verification."
+    "note": "RW-04F merged in PR #41; exact-head 10/10 CI, CodeQL and dependency checks passed and postmerge main CI/CodeQL passed. RW-04G paired-safety model is candidate only. All inputs remain invented, no real source/label/custody."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -237,7 +237,8 @@
         "docs/IMPLEMENTATION_2026-10-25.md",
         "https://github.com/Smkzz/ResearchWitness/pull/23",
         "https://github.com/Smkzz/ResearchWitness/pull/25",
-        "https://github.com/Smkzz/ResearchWitness/pull/39"
+        "https://github.com/Smkzz/ResearchWitness/pull/39",
+        "https://github.com/Smkzz/ResearchWitness/pull/41"
       ],
       "blocker": null,
       "completed_slices": [
@@ -273,12 +274,18 @@
         },
         {
           "id": "RW-04F",
-          "scope": "candidate exact independent-family paired-positive power calculation and negative zero/zero safety feasibility from source-free invented assumptions; no empirical sample power, full safety joint power or scientific validation",
+          "scope": "merged exact-head qualified exact independent-family paired-positive power calculation and negative zero/zero safety feasibility from source-free invented assumptions; no empirical sample power, full safety joint power or scientific validation",
           "implementation": "tools/power_feasibility.py",
           "tests": "tests/test_power_feasibility.py"
+        },
+        {
+          "id": "RW-04G",
+          "scope": "candidate exact bivariate negative alarm-count safety pass probability plus positive/safety joint probability from strictly invented independent-family assumptions; no empirical power or scientific discovery",
+          "implementation": "tools/joint_power_feasibility.py",
+          "tests": "tests/test_joint_power_feasibility.py"
         }
       ],
-      "next_action": "Qualify and merge RW-04F exact-head CI, then obtain a lawful real development-only source cohort and independent substantive review via RW-01O. Build full paired negative-alarm safety power with explicit joint outcome rates and missingness before a frozen scientific sample-size recommendation."
+      "next_action": "Qualify and merge RW-04G exact-head and postmerge checks; next perform controlled sensitivity analyses with missingness, correlated families and uncertain four-outcome alarm rates. RW-01O still needs genuine privately acquired PMC transfer bytes, article-specific licence checks and separate substantive source reviews."
     },
     {
       "id": "RW-05",
