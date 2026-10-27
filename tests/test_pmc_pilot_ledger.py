@@ -432,6 +432,7 @@ def test_frame_cannot_share_pmc_id_across_declared_families(tmp_path):
 
 def test_selection_cycles_and_missing_parents_are_refused(tmp_path):
     rows = [negative("a", "fa"), negative("b", "fa"), negative("c", "fb")]
+    rows[1]["version_id"] = "v2"
     frame = selected_frame(tmp_path, rows)
     frame["records"][1].update(
         kind="revision", parent_record_id="a",
