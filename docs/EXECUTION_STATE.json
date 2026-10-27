@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "e7fff0cadac3972e0f3baac3ee11993c29fba05d",
+    "observed_main_sha": "eade087e07ea6ddc10de670b644f8dbe214648be",
     "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "RW-04F merged in PR #41; exact-head 10/10 CI, CodeQL and dependency checks passed and postmerge main CI/CodeQL passed. RW-04G paired-safety model is candidate only. All inputs remain invented, no real source/label/custody."
+    "note": "Verified protected main after RW-04G PR #42: exact-head CI 40495408427 (10/10, 1022 tests + 309 subtests on Ubuntu 3.12), CodeQL 40495408513, dependency 40495408772 and postmerge main CI 40495834136, CodeQL 40495834162 all succeeded. No real source evidence or research accuracy is established."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -175,7 +175,7 @@
           "tests": "tests/test_pmc_oai_envelope.py"
         }
       ],
-      "next_action": "RW-01O issue #35 remains open after earlier accidental closure: actual raw PMC OAI response acquisition requires an already approved and functioning original-byte retrieval environment, article-by-article rights provenance and truly separate source-scope review. No real licensed raw full text, publisher transfer or independent source ground truth was collected here."
+      "next_action": "RW-01O issue #35 remains open and scientifically blocked_external/blocked_evidence: acquire 2–5 permission-cleared development PMC OAI-PMH raw responses with actual transfer evidence via already approved runtime, validate article-specific licence/correction/version and independent scope reviews. Existing chat runner has DNS failure, and no original unmodified raw response is available. Do not use GitHub CI/web snippets as counterfeit original transfers."
     },
     {
       "id": "RW-02",
@@ -238,7 +238,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/23",
         "https://github.com/Smkzz/ResearchWitness/pull/25",
         "https://github.com/Smkzz/ResearchWitness/pull/39",
-        "https://github.com/Smkzz/ResearchWitness/pull/41"
+        "https://github.com/Smkzz/ResearchWitness/pull/41",
+        "https://github.com/Smkzz/ResearchWitness/pull/42"
       ],
       "blocker": null,
       "completed_slices": [
@@ -280,12 +281,12 @@
         },
         {
           "id": "RW-04G",
-          "scope": "candidate exact bivariate negative alarm-count safety pass probability plus positive/safety joint probability from strictly invented independent-family assumptions; no empirical power or scientific discovery",
+          "scope": "merged, exact-head CI-qualified exact bivariate negative alarm-count safety pass probability plus positive/safety joint probability from strictly invented independent-family assumptions; no empirical power or scientific discovery",
           "implementation": "tools/joint_power_feasibility.py",
           "tests": "tests/test_joint_power_feasibility.py"
         }
       ],
-      "next_action": "Qualify and merge RW-04G exact-head and postmerge checks; next perform controlled sensitivity analyses with missingness, correlated families and uncertain four-outcome alarm rates. RW-01O still needs genuine privately acquired PMC transfer bytes, article-specific licence checks and separate substantive source reviews."
+      "next_action": "Prioritize RW-01O issue #35 permitted original PMC raw-byte acquisition and independently grounded development reviewer labels in an already authorized retrieval environment. Only then estimate positive discordances, four paired negative alarm rates and family dependence. RW-04H can add exposed-only missingness/sensitivity analysis without accessing protected data. The 215-family hypothetical scenario has only 33.85% joint target chance, NOT an empirically powered real study."
     },
     {
       "id": "RW-05",

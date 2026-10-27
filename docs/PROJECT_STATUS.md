@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified pre-RW-04G main:** `e7fff0cadac3972e0f3baac3ee11993c29fba05d`
+**Verified main:** `eade087e07ea6ddc10de670b644f8dbe214648be`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,28 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-04G: hypothetical paired-negative safety and joint power (candidate)
+## 2026-10-27 RW-04G engineering qualification (not scientific validation)
+
+RW-04G [PR #42](https://github.com/Smkzz/ResearchWitness/pull/42)
+passed all nine Python 3.11–3.13 / Linux, Windows and macOS jobs plus Release
+gate **10/10** on its exact proposed head
+`7fd69d84eedbd1c86e4db1d950dcbb57ff6e4194`:
+[CI 40495408427](https://github.com/Smkzz/ResearchWitness/actions/runs/40495408427)
+reported **1,022 passed tests and 309 subtests** on Ubuntu Python 3.12.
+[CodeQL 40495408513](https://github.com/Smkzz/ResearchWitness/actions/runs/40495408513)
+and [dependency evidence 40495408772](https://github.com/Smkzz/ResearchWitness/actions/runs/40495408772)
+passed. The protected squash merge `eade087e07ea6ddc10de670b644f8dbe214648be`
+then independently passed
+[main CI 40495834136](https://github.com/Smkzz/ResearchWitness/actions/runs/40495834136)
+and [main CodeQL 40495834162](https://github.com/Smkzz/ResearchWitness/actions/runs/40495834162).
+
+This is a synthetic/exact arithmetic *software* acceptance only; no real
+PMC source, empirical four-category alarm rate, independent scientific label,
+power-qualified confirmatory frame, protected-custody authorization or
+scientific-error discovery is established. Version remains `0.3.0.dev0`,
+UNRELEASED; the real-source pilot RW-01O stays open.
+
+## RW-04G: hypothetical paired-negative safety and joint power (merged)
 
 The checkout-only `tools.joint_power_feasibility` calculates exact finite
 bivariate negative-family alarm-count distributions from four strict invented

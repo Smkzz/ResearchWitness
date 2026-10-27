@@ -7,12 +7,22 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The observed pre-plan main is `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a` (2026-10-17).
-PR #13, post-merge documentation #17 and intake/export hardening #18 are integrated.
-There is a dependency-free verifier with ten bounded families, intake and evidence
-replay/export, plus installed bounded JATS arithmetic and guarded checkout metadata tools.
-See [PROJECT_STATUS.md](PROJECT_STATUS.md) for identities and observed checks.
-No published package, general paper checker or independent accuracy is implied.
+The **verified main** is `eade087e07ea6ddc10de670b644f8dbe214648be`
+(2026-10-27), which includes the selective RW-01A–N source/JATS integrations
+and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
+The verifier still has ten bounded deterministic families, installed offline
+JATS review aids and replayable evidence; no general paper truth or independent
+scientific accuracy is implied. See [PROJECT_STATUS.md](PROJECT_STATUS.md)
+for exact commit/check receipts and exposed limitations. The library remains
+`0.3.0.dev0` UNRELEASED, not an externally published product.
+
+**First blocked scientific milestone:** [RW-01O](https://github.com/Smkzz/ResearchWitness/issues/35)
+requires actual approved PMC original-byte transfers, per-article reuse/lineage
+verification and genuinely separate source-grounded development reviews.
+No raw source was acquired by the present work environment. RW-04G shows that
+215 invented families with 80.28% primary power can still have only
+33.85% chance of **joint** primary/safety pass in the assumed model.
+It does not qualify real sample power or replace missing source evidence.
 
 ## Integration work
 
