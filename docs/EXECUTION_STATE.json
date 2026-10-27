@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "2478f797b8c2be798cbbc413b6d352a84173adc4",
+    "observed_main_sha": "bab540ac3f30fccb5159d7895365ef39fa27e1ea",
     "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified protected main RW-01O1 PR #44: CI 40507534319 10/10 with 1037+315 Ubuntu 3.12 checks, CodeQL 40507534336, dependency 40507534318, postmerge main CI 40507826285 and CodeQL 40507826264 succeeded. No real PMC original response, rights verification or independent scientific label obtained."
+    "note": "Verified protected main after PR #45 has postmerge CI and CodeQL successes; RW-01O2 source selection frame is an unmerged candidate. No real original PMC transfer, right or independently adjudicated scientific scope exists."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -180,9 +180,15 @@
           "scope": "merged, exact-head CI-qualified checkout-only 2–5-family private PMC pilot denominator ledger; validates supplied raw-to-review source chains, duplicate family/version registry, parser refusals, negative source failures and legal exclusions; no actual source acquisition or independent adjudication",
           "implementation": "tools/pmc_pilot_ledger.py",
           "tests": "tests/test_pmc_pilot_ledger.py"
+        },
+        {
+          "id": "RW-01O2",
+          "scope": "candidate separate outcome-free privately pinned selection frame for 2-5 work families with exact OAI IDs, version/lineage, full later ledger coverage and explicit not_attempted; fixes undetectable post-selection omission relative to frame; does not authenticate selection chronology, publisher/rights or scientific labels",
+          "implementation": "tools/pmc_pilot_selection_frame.py",
+          "tests": "tests/test_pmc_pilot_ledger.py"
         }
       ],
-      "next_action": "RW-01O issue #35 is OPEN and blocked_evidence/blocked_external for real scientific verification: use an ALREADY authorized networked PMC original-byte acquisition environment (not the network-disabled LocalControl sandbox), privately capture 2-5 licensed OAI full-text response entities + actual transport/time/rights/lineage evidence, replay them via tools.pmc_pilot_ledger and get independently source-grounded reviewer labels. Source and reviewer authenticity cannot be inferred from hashes or model personas. Keep project money 0 and protected-custody gates unqualified."
+      "next_action": "Qualify RW-01O2 exact-head CI and merge, then in an already-approved private retrieval environment actually acquire 2-5 PMC original GetRecord response entities, independently verify licences/source versions, preserve complete frame+attempts and obtain genuinely separated source-scope review. An externally held SHA is NOT proof of pre-outcome selection time. RW-01O issue #35 and custody scientific Wave3 stay blocked for real evidence."
     },
     {
       "id": "RW-02",
