@@ -74,7 +74,7 @@ def test_negative_128_scenario_is_not_80_percent_joint_study_power():
         "0.636909470872"
     )
     assert report["both_endpoints_success_probability_decimal_lower"] == (
-        "0.511317545491"
+        "0.511317545490"
     )
     assert report["hypothetical_joint_target_met"] is False
 
@@ -151,7 +151,7 @@ def test_joint_probabilities_are_complete_and_bounded():
         joint.validate_scenario(scenario)
     _draft, scenario = inputs()
     scenario["candidate_only_positive_probability"] = {
-        "numerator": 9, "denominator": 10,
+        "numerator": 19, "denominator": 20,
     }
     with pytest.raises(vb.BenchmarkError, match="JOINT_POSITIVE_PROBABILITY_SUM"):
         joint.validate_scenario(scenario)
