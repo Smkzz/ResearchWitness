@@ -2,6 +2,18 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01O1: private PMC pilot original-evidence accounting — 2026-10-27
+
+- Add offline private-input ledger across 2–5 declared work families with
+  acquisition failures, licence exclusions and replay-verified parser refusals.
+  Every source-captured entry replays the full RW-01M/N/K/J/L raw-to-review
+  chain, and the captured-family registry checks duplicate source bytes
+  and declared correction/supplement lineage.
+- Preserve unreviewed/missing study outcomes and produce sanitized aggregate
+  accounting without paper IDs, source text or reviewer rationale.
+- Source origin, actual rights, review independence and scientific error
+  detection remain expressly unverified. Tests are synthetic only.
+
 ### RW-04G: hypothetical paired negative safety and combined study power — 2026-10-27
 
 - Add bounded exact integer bivariate outcome calculation for all four
