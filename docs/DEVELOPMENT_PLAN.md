@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `e7fff0cadac3972e0f3baac3ee11993c29fba05d` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `eade087e07ea6ddc10de670b644f8dbe214648be` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -31,9 +31,12 @@ Verified main retains the ten bounded deterministic checker families, structured
 intake, installed JATS arithmetic/audit aids, replayable evidence bundles and
 report/export. The safely merged RW-01A–N slices add offline developer source
 review, original PMC envelope/derived-JATS identity and source-review binding.
-RW-04A–E provide bounded development receipt replay, paired descriptive
-comparisons, preregistration *drafts* and exact positive/safety statistical
-diagnostics; [RW-04E details](EXACT_FAMILY_ANALYSIS.md). They have not captured
+RW-04A–G provide bounded development receipts, paired descriptive
+comparisons, prospective *drafts*, exact positive/safety statistical
+diagnostics and source-free hypothetical joint-power planning;
+see [RW-04E](EXACT_FAMILY_ANALYSIS.md),
+[RW-04F](POWER_FEASIBILITY.md) and
+[RW-04G](JOINT_POWER_FEASIBILITY.md). They have not captured
 or independently labelled a real original PMC paper or run Wave 3. PRs #5–#12
 remain draft historical stacks; their protected custody worker is not enabled.
 PDF execution, Windows managed metadata ownership and protected custody
