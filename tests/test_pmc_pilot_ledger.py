@@ -498,13 +498,13 @@ def test_new_framed_cli_and_external_pins(tmp_path):
     frame = selected_frame(tmp_path, rows)
     doc = ledger(rows)
     f = tmp_path / "selected-frame.json"
-    l = tmp_path / "attempts.json"
+    ledger_path = tmp_path / "attempts.json"
     f.write_bytes(vb.canonical_bytes(frame))
-    l.write_bytes(vb.canonical_bytes(doc))
+    ledger_path.write_bytes(vb.canonical_bytes(doc))
     command = [
         sys.executable, "-m", "tools.pmc_pilot_selection_frame",
         "--frame", str(f), "--expected-frame-sha256", vb.commitment(frame),
-        "--ledger", str(l), "--private-root", str(tmp_path),
+        "--ledger", str(ledger_path), "--private-root", str(tmp_path),
         "--expected-ledger-sha256", vb.commitment(doc),
     ]
     ok = subprocess.run(command, cwd=ROOT, capture_output=True, timeout=30)
