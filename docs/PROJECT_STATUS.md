@@ -1,10 +1,10 @@
 # Project status
 
-**As of:** 2026-10-26  
+**As of:** 2026-10-27  
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Observed pre-RW-04E main:** `512eb903eb87ccd10657636b2d0215e5595522f9`
+**Verified main baseline:** `36c65c5d83a42c45e2797ca91993dad7879647e6`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,25 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-04E: exact family-level statistical development diagnostics (candidate)
+## 2026-10-27 exact-head engineering qualification
+
+RW-04E [PR #39](https://github.com/Smkzz/ResearchWitness/pull/39)
+qualified on its exact proposed head `82efd6ee8b4add5cf65b80a409aeaa524e58f993`:
+[CI 40487322350](https://github.com/Smkzz/ResearchWitness/actions/runs/40487322350)
+passed all nine Python/OS jobs and Release gate (10/10). Ubuntu Python
+3.12 reported **989 tests + 300 subtests passed**.
+[CodeQL 40487322199](https://github.com/Smkzz/ResearchWitness/actions/runs/40487322199)
+and [dependency evidence 40487322084](https://github.com/Smkzz/ResearchWitness/actions/runs/40487322084)
+also passed.
+
+Main is the protected squash merge `36c65c5d83a42c45e2797ca91993dad7879647e6`.
+Post-merge [CI 40487613265](https://github.com/Smkzz/ResearchWitness/actions/runs/40487613265)
+and [CodeQL 40487613212](https://github.com/Smkzz/ResearchWitness/actions/runs/40487613212)
+passed independently at that SHA. No scientific accuracy, acquisition,
+rights, qualified custody, sample-size power or protected-data access is
+inferred from these checks. The current release remains `UNRELEASED`.
+
+## RW-04E: exact family-level statistical development diagnostics (merged)
 
 The checkout-only `tools.exact_family_analysis` validates a pinned prospective
 study *draft*, then recomputes the RW-04C paired development comparison from
@@ -25,7 +43,7 @@ superiority. The illustrative 86-negative-family zero-alarm feasibility
 threshold is a mathematical design requirement under the example's assumptions,
 not an observed real-paper result. [Statistical protocol](EXACT_FAMILY_ANALYSIS.md).
 
-## RW-01N: complete offline raw-PMC capture and review identity chain (candidate)
+## RW-01N: complete offline raw-PMC capture and review identity chain (merged)
 
 The checkout-only `tools.pmc_source_review_chain` checks three separately pinned
 stage envelopes: original PMC response to derived JATS (RW-01M), derived source
@@ -36,7 +54,7 @@ No real provider transfer is authenticated, legal reuse independently assessed,
 work-family independence established, scientific label adjudicated or protected
 holdout accessed. See [RW-01N private workflow](PMC_OAI_ENVELOPE.md#rw-01n-enforce-the-complete-declared-identity-chain).
 
-## RW-01M: offline PMC OAI-PMH envelope-to-source bridge (candidate)
+## RW-01M: offline PMC OAI-PMH envelope-to-source bridge (merged)
 
 The checkout-only `tools.pmc_oai_envelope` prepares deterministic raw-envelope,
 original-article-span and separately derived-JATS commitments for an
