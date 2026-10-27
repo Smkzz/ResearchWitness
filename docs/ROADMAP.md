@@ -7,7 +7,7 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified main** is `bab540ac3f30fccb5159d7895365ef39fa27e1ea`
+The **verified main** is `a1e35b6a39abcf58b42e42f6c53f295a33f088c0`
 (2026-10-27), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
@@ -22,7 +22,7 @@ development-source family outcomes and replays only actually supplied
 captured original-source chains. It cannot create or authenticate missing
 real provider, rights or scientific reviewer evidence.
 
-**RW-01O2 candidate:** [an outcome-free source frame](PMC_SELECTION_FRAME.md)
+**RW-01O2 merged and technically qualified:** [an outcome-free source frame](PMC_SELECTION_FRAME.md)
 can be pinned separately from the later source-attempt ledger, so
 declared PMC identifiers, versions and family relations cannot be
 silently dropped or substituted on replay. No pre-outcome timestamp or
