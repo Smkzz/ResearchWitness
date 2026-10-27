@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "bab540ac3f30fccb5159d7895365ef39fa27e1ea",
+    "observed_main_sha": "a1e35b6a39abcf58b42e42f6c53f295a33f088c0",
     "observed_on": "2026-10-27",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified protected main after PR #45 has postmerge CI and CodeQL successes; RW-01O2 source selection frame is an unmerged candidate. No real original PMC transfer, right or independently adjudicated scientific scope exists."
+    "note": "RW-01O2 PR #46 merged at a1e35b6: exact-head CI 40588470149 (10/10; 1047 tests + 319 subtests), CodeQL 40588470430, dependency 40588470226, post-merge CI 40588807993 and CodeQL 40588807961 all green. No original PMC bytes or independent scientific data acquired."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -87,7 +87,8 @@
         "https://github.com/Smkzz/ResearchWitness/issues/35",
         "https://github.com/Smkzz/ResearchWitness/pull/37",
         "https://github.com/Smkzz/ResearchWitness/pull/38",
-        "https://github.com/Smkzz/ResearchWitness/pull/44"
+        "https://github.com/Smkzz/ResearchWitness/pull/44",
+        "https://github.com/Smkzz/ResearchWitness/pull/46"
       ],
       "blocker": null,
       "completed_slices": [
@@ -183,12 +184,12 @@
         },
         {
           "id": "RW-01O2",
-          "scope": "candidate separate outcome-free privately pinned selection frame for 2-5 work families with exact OAI IDs, version/lineage, full later ledger coverage and explicit not_attempted; fixes undetectable post-selection omission relative to frame; does not authenticate selection chronology, publisher/rights or scientific labels",
+          "scope": "merged, exact-head CI-qualified separate outcome-free privately pinned selection frame for 2-5 work families with exact OAI IDs, version/lineage, full later ledger coverage and explicit not_attempted; fixes undetectable post-selection omission relative to frame; does not authenticate selection chronology, publisher/rights or scientific labels",
           "implementation": "tools/pmc_pilot_selection_frame.py",
           "tests": "tests/test_pmc_pilot_ledger.py"
         }
       ],
-      "next_action": "Qualify RW-01O2 exact-head CI and merge, then in an already-approved private retrieval environment actually acquire 2-5 PMC original GetRecord response entities, independently verify licences/source versions, preserve complete frame+attempts and obtain genuinely separated source-scope review. An externally held SHA is NOT proof of pre-outcome selection time. RW-01O issue #35 and custody scientific Wave3 stay blocked for real evidence."
+      "next_action": "Scientific RW-01O issue #35 remains OPEN (blocked_external/blocked_evidence). In a separately authorized private networked environment acquire original PMC GetRecord bodies/status and article-specific rights for 2–5 preselected development-exposed families; preserve outcome-free frame SHA and timing evidence, all not_attempted/unavailable cases, version/lineage links and genuinely separated source-grounded reviews. Run tools.pmc_pilot_selection_frame to prevent source substitutions/omissions, then compare a genuinely frozen baseline on exposed labels only. Frame hash does not prove preregistration chronology. Protected custody and Wave3 remain unqualified."
     },
     {
       "id": "RW-02",

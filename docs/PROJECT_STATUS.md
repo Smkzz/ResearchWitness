@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified pre-RW-01O2 main:** `bab540ac3f30fccb5159d7895365ef39fa27e1ea`
+**Verified main:** `a1e35b6a39abcf58b42e42f6c53f295a33f088c0`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,7 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-01O2: externally pinned outcome-free PMC selection frame (candidate)
+## RW-01O2: separately pinned PMC selection frame (merged)
 
 Engineering review found that a valid RW-01O1 source-attempt ledger hash
 covers only the rows **still present in that ledger**. A dropped source
@@ -25,7 +25,18 @@ The frame binds correction-parent/declared article kind and prevents
 multiple families from claiming the same PMC source ID.
 See [RW-01O2 contract](PMC_SELECTION_FRAME.md).
 
-The new path is an engineering *candidate* pending its own exact-head checks.
+The engineering implementation is **merged and exact-head qualified**.
+[PR #46](https://github.com/Smkzz/ResearchWitness/pull/46) at head
+`396e3245c6f1c39fd529cca98f121d89ea1a806c` passed
+[CI 40588470149](https://github.com/Smkzz/ResearchWitness/actions/runs/40588470149)
+with 10/10 jobs (**1,047 tests + 319 subtests** on Ubuntu Python 3.12),
+[CodeQL 40588470430](https://github.com/Smkzz/ResearchWitness/actions/runs/40588470430)
+and [dependency evidence 40588470226](https://github.com/Smkzz/ResearchWitness/actions/runs/40588470226).
+The squash merge `a1e35b6a39abcf58b42e42f6c53f295a33f088c0`
+then passed the independent
+[post-merge CI 40588807993](https://github.com/Smkzz/ResearchWitness/actions/runs/40588807993)
+and [CodeQL 40588807961](https://github.com/Smkzz/ResearchWitness/actions/runs/40588807961)
+at the exact merged SHA.
 It does **not** attest the chronology of selection, external publisher
 authenticity, per-article rights, real independent reviewer labels,
 original PMC acquisition, registered study power or scientific improvement.
