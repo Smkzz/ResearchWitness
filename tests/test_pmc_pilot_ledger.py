@@ -175,10 +175,7 @@ def test_replayed_private_capture_and_unavailable_family_have_honest_counts(tmp_
     serialized = vb.canonical_bytes(outcome)
     assert b"PMC12345" not in serialized
     assert b"Example" not in serialized
-    assert outcome == evaluate(tmp_path, [
-        negative(),  # same cases, changed order changes pinned commitment only
-        # source files cannot be replayed twice by a different file manifest
-    ][:1]) if False else outcome
+    assert outcome["scientific_detection_improvement_established"] is False
 
 
 def test_entirely_blocked_pilot_keeps_full_denominator_without_data_claim(tmp_path):
