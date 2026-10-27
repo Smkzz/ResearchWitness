@@ -4,13 +4,32 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified main baseline:** `36c65c5d83a42c45e2797ca91993dad7879647e6`
+**Verified pre-RW-04F main:** `1ceb0820112c1cea301e31a39c7d194f02fc7cf3`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-04F: hypothetical paired-family power design (candidate)
+
+The checkout-only `tools.power_feasibility` calculates exact primary-family
+paired-discordance rejection probabilities from bounded, explicitly
+**invented** assumptions tied to an existing RW-04D study *draft*. It also
+calculates the smallest zero/zero-alarm negative-family count that can satisfy
+RW-04E's conservative safety margin, **without** claiming the statistical
+power of the negative safety test. In the example, primary assumptions
+a=0.25/b=0.10 and alpha=0.025 require 129 independent positives for 80%
+primary power. The previous 86 negative-family zero/zero threshold gives
+only a ~17.6% chance of observing no alarms in 86 families when the invented
+joint no-alarm probability is 0.98 per family.
+
+These are mathematical scenario outcomes, **not** independent real-paper
+labels, source acquisition, scientific superiority, practical sample-size
+power verification, or an actual preregistration. The pilot RW-01O remains
+an open [evidence issue](https://github.com/Smkzz/ResearchWitness/issues/35).
+See [power scenario design](POWER_FEASIBILITY.md).
 
 ## 2026-10-27 exact-head engineering qualification
 
