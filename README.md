@@ -270,6 +270,25 @@ regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
 and [synthetic example](examples/source-capture/README.md). This does not
 grant protected custody or confirmatory evaluation access.
 
+### Pinned Europe PMC historical source recovery (RW-01Q1)
+
+The [offline-first historical source-recovery tool](docs/HISTORICAL_SOURCE_RECOVERY.md)
+and [13-record hash index](examples/historical-source-recovery/wave1-source-index.json)
+make the **October 5, 2026 developer-exposed** wave-1 JATS article
+snapshots explicitly recoverable and verifiable *only* against their
+original exact source-byte length and SHA-256. The index contains
+nine original-paper identities and four correction identities, **not
+full paper text or independent labels**. Normal audit mode uses no
+network and does not write sources. Actual provider recovery is
+explicitly opt-in, allows only the official Europe PMC HTTPS XML
+endpoint, blocks redirects, caps requests and rejects changed
+publication bodies rather than relabeling them as the old version.
+No egress permission, copyright licence, old transport authenticity
+or scientific performance is granted by this utility. The actual
+[RW-01Q same-source research comparison](https://github.com/Smkzz/ResearchWitness/issues/50)
+remains `blocked_evidence` until real permitted source bytes and
+independently grounded context reviews become available.
+
 ### Real-paper development evidence and honest current scope
 
 [The 2026-10-06 real-paper evidence review](docs/HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
