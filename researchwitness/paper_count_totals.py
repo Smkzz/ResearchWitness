@@ -38,7 +38,9 @@ def _count(text: str) -> int | None:
 
 
 def _headers(table: Table) -> bool:
-    if len(table.columns) != 2:
+    # Recognize intended count headers even when a malformed span creates
+    # extra projected columns: this is UNSUPPORTED, not NOT_APPLICABLE.
+    if len(table.columns) < 2:
         return False
     labels = [" ".join(" ".join(col.header_hierarchy).split()).casefold()
               for col in table.columns]
@@ -70,7 +72,8 @@ def _case(table: Table) -> dict[str, Any]:
             _UNSAFE_CONTEXT.search(table.label)):
         output["reason"] = "SOURCE_SCOPE_CONFLICT"
         return output
-    if (table.structure_status != "mapped_not_adjudicated"
+    if (len(table.columns) != 2
+            or table.structure_status != "mapped_not_adjudicated"
             or table.spans or table.footnotes):
         output["reason"] = "UNRESOLVED_TABLE_STRUCTURE_OR_FOOTNOTES"
         return output
