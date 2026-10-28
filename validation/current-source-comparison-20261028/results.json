@@ -1,0 +1,627 @@
+{
+  "schema_version": "rw-provider-display-descriptive-results.v3",
+  "started_at_utc": "2026-10-28T15:12:22.923243Z",
+  "finished_at_utc": "2026-10-28T15:12:25.138335Z",
+  "code_commit": "7115c0a7fc2db073d1d7bb90a3afe586454b1a36",
+  "wheel_sha256": "15887dcab7fea1374ac5dcaf3d2a3d0c1e66e2afc421e119b7619406ea30283a",
+  "orchestrator_sha256": "eef56f87856c0f3d83e2e07909544e5c5e1bbfdb5e8d9c82c9097aa6bbff1539",
+  "protocol_sha256": "e60054d5a67d8dd14cf366219fb006a1d4b5772977c90759a3519498344f58db",
+  "registration_sha256": "5d0dfaa4825944c102e3fba8a292e45e7ba269199dd1d15e520e45719746c8d0",
+  "previous_protocol_sha256": "29c765c0d74209a33d2601760cf88af5f77152f461955bc23d0b4efb1f546de5",
+  "v2_termination_sha256": "08d803911dd90eb5eb5d651df27120ddcf8402275717872c366c1c86392c4849",
+  "registered_acquisition_records": 13,
+  "registered_article_records": 9,
+  "registered_correction_records": 4,
+  "original_count": 0,
+  "historical_original_recovery_count": 0,
+  "original_http_entity_identity_established": false,
+  "operator_execute_action_count": 5,
+  "provider_http_request_total": null,
+  "provider_http_count_status": "unknown_unobservable",
+  "derived_capture_dispositions": {
+    "capture_transfer_failed": 1,
+    "captured": 4,
+    "not_attempted": 8
+  },
+  "derived_capture_pins_validated_before_execution": [
+    {
+      "admitted_for_methods": true,
+      "bytes": 121935,
+      "capture_json_sha256": "bd6215d537b8fcff84d4cca8107ce96110e47369c776b448e6de6debe9edb967",
+      "pmcid": "PMC11845954",
+      "sha256": "594ea878750c19c0251296cb9fe86da1f80562f099b24bf756853ba9662b1f0e",
+      "version_classification": "current_provider_display_derivative_not_original_response"
+    },
+    {
+      "admitted_for_methods": false,
+      "bytes": 8204,
+      "capture_json_sha256": "97ebf6eda8c3739a4de5851bfdeb27622371832c1d6b14ba2602c4b398a43ff4",
+      "pmcid": "PMC12063958",
+      "sha256": "b0682a24421d913b6de557a273a1ebae61b5c80a44940742ffe7e8f863856b2d",
+      "version_classification": "current_provider_display_derivative_not_original_response"
+    },
+    {
+      "admitted_for_methods": true,
+      "bytes": 141678,
+      "capture_json_sha256": "a83e8cab7ca96dee196f1f0912d987a823fe840c1cc748945a394377bd0c234a",
+      "pmcid": "PMC4339301",
+      "sha256": "4bc9c4672fbf25ebf7a2efc9d78ab95088ffc799f7639d2e889a2791359a069b",
+      "version_classification": "current_provider_display_derivative_not_original_response"
+    },
+    {
+      "admitted_for_methods": false,
+      "bytes": 30139,
+      "capture_json_sha256": "262740af1a569c30010ca7f6d2e5225108d700e6f9bc73407427231c402816ed",
+      "pmcid": "PMC4877730",
+      "sha256": "863b7ce07cbb773aebc4d76c8f59225886523edfa73aa882239bc86dd3e95299",
+      "version_classification": "current_provider_display_derivative_not_original_response"
+    }
+  ],
+  "installed_bytes_unchanged_at_end": true,
+  "paired_descriptive_results": [
+    {
+      "comparison_available": true,
+      "pmcid": "PMC11845954",
+      "provisional_count_comparison": {
+        "baseline_candidate_events": 2,
+        "baseline_only_identified_events": 0,
+        "candidate_added_identified_events": 0,
+        "candidate_candidate_events": 2,
+        "identified_event_overlap": 2,
+        "percentage_counts_identical": true,
+        "scientific_target_detection_credit": "not_adjudicated"
+      },
+      "raw_counts_available": true,
+      "unverified_reasons": [],
+      "verified_comparison_available": true,
+      "verified_descriptive_comparison": {
+        "baseline_candidate_events": 2,
+        "baseline_only_identified_events": 0,
+        "candidate_added_identified_events": 0,
+        "candidate_candidate_events": 2,
+        "identified_event_overlap": 2,
+        "percentage_counts_identical": true,
+        "scientific_target_detection_credit": "not_adjudicated"
+      }
+    },
+    {
+      "comparison_available": true,
+      "pmcid": "PMC4339301",
+      "provisional_count_comparison": {
+        "baseline_candidate_events": 0,
+        "baseline_only_identified_events": 0,
+        "candidate_added_identified_events": 0,
+        "candidate_candidate_events": 0,
+        "identified_event_overlap": 0,
+        "percentage_counts_identical": true,
+        "scientific_target_detection_credit": "not_adjudicated"
+      },
+      "raw_counts_available": true,
+      "unverified_reasons": [],
+      "verified_comparison_available": true,
+      "verified_descriptive_comparison": {
+        "baseline_candidate_events": 0,
+        "baseline_only_identified_events": 0,
+        "candidate_added_identified_events": 0,
+        "candidate_candidate_events": 0,
+        "identified_event_overlap": 0,
+        "percentage_counts_identical": true,
+        "scientific_target_detection_credit": "not_adjudicated"
+      }
+    }
+  ],
+  "arm_subprocess_elapsed_seconds": {
+    "baseline": 1.0465119889995549,
+    "candidate": 1.0882426769994709
+  },
+  "elapsed_seconds": 2.2151240599996527,
+  "paper_error_established": false,
+  "scientific_labels": "unadjudicated",
+  "precision_recall_false_alarm_rates_or_p_values": null,
+  "sealed_or_confirmatory": false,
+  "marginal_spend_eur": 0,
+  "limitations": [
+    "Convenience sample and historical targets already exposed; no independent preregistration.",
+    "Inputs are exact UTF-8 derivatives of visible provider pre.textContent, not original HTTP entities or historical recoveries.",
+    "All source byte anchors refer to retained display derivatives only. UI formatting is part of the input pipeline.",
+    "Selected controls are not certified negatives; all missing/refused records remain visible.",
+    "Reports retain unreviewed candidates; replay success does not adjudicate publication errors.",
+    "This trusted-workspace subprocess runner is not qualified protected custody or OS egress isolation.",
+    "Only initiated Swagger Execute actions are counted; actual provider HTTP totals remain unknown. Rights/capture provenance declarations are not independent attestations."
+  ],
+  "full_private_summary_sha256": "db6fa8573944b6139d1cdf4ea3bddf3c15f32f5b2db0962ed76300b525b74599",
+  "pre_method_commit": "b4f2ebf390ad3e4c0817badb2144339011516338",
+  "article_arm_results": [
+    {
+      "pmcid": "PMC11845954",
+      "arm": "baseline",
+      "source_sha256": "594ea878750c19c0251296cb9fe86da1f80562f099b24bf756853ba9662b1f0e",
+      "representation": "provider_rendered_pre_text_utf8",
+      "version_classification": "current_provider_display_derivative_not_original_response",
+      "descriptive_counts": {
+        "candidate_event_ids": [
+          "percentage:1b314d1e1df363a2f4ea7b6802792af2de53fc24b8fa16227e4eee3bcca50ff5",
+          "percentage:2d0540102e24466607a29d4684af67c19ac2745ed49c1f0708e4efd1385e51fe"
+        ],
+        "denominator_trace": {
+          "multiple_fact_values_relation_count": 0,
+          "relation_count": 18,
+          "unresolved_relation_count": 8
+        },
+        "independent_scientific_labels_available": false,
+        "observed_unreviewed_candidate_events": 2,
+        "optional_checkers": {
+          "count_total_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "odds_ratio_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "prisma_flow_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "sample_flow_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "statistical_se_review": {
+            "candidate_count": null,
+            "enabled": false
+          }
+        },
+        "paper_error_established": false,
+        "percentage": {
+          "abstentions": 8,
+          "arithmetic_matches": 8,
+          "mismatch_candidates": 2
+        },
+        "percentage_status_counts": {
+          "arithmetic_match": 8,
+          "arithmetic_mismatch_candidate": 2,
+          "scope_ambiguous": 8
+        },
+        "processing": {
+          "extracted_text_sha256": "392f601aee8156fdc8428da9eb328f015a1530c1145ba456c8f0a8f744037ef5",
+          "extraction_profile": "jats-normalized-text-v1",
+          "relationships_detected": 18,
+          "status": "completed",
+          "tables_inspected": 4
+        },
+        "table_structure_status_counts": {
+          "mapped_not_adjudicated": 4
+        },
+        "whole_paper_coverage_established": false
+      },
+      "saved_report_bytes": 249594,
+      "saved_report_sha256": "3e42ce71be68d6379458abc57103fd79de721ffa7424b3034936997fe92dd6cf",
+      "audit_status": "completed",
+      "audit_returncode": 0,
+      "audit_elapsed_seconds": 0.2682619759998488,
+      "replay_status": "completed",
+      "replay_returncode": 0,
+      "replay_verification_status": "verified",
+      "manifest_sha256": "b4e80aebe4bd5005e86eaab0284f08c3f4a0842253fb29170e96a1efe512edd0"
+    },
+    {
+      "pmcid": "PMC11845954",
+      "arm": "candidate",
+      "source_sha256": "594ea878750c19c0251296cb9fe86da1f80562f099b24bf756853ba9662b1f0e",
+      "representation": "provider_rendered_pre_text_utf8",
+      "version_classification": "current_provider_display_derivative_not_original_response",
+      "descriptive_counts": {
+        "candidate_event_ids": [
+          "percentage:1b314d1e1df363a2f4ea7b6802792af2de53fc24b8fa16227e4eee3bcca50ff5",
+          "percentage:2d0540102e24466607a29d4684af67c19ac2745ed49c1f0708e4efd1385e51fe"
+        ],
+        "denominator_trace": {
+          "multiple_fact_values_relation_count": 0,
+          "relation_count": 18,
+          "unresolved_relation_count": 8
+        },
+        "independent_scientific_labels_available": false,
+        "observed_unreviewed_candidate_events": 2,
+        "optional_checkers": {
+          "count_total_review": {
+            "candidate_count": 0,
+            "candidate_event_identities_complete": true,
+            "candidate_event_identity_count": 0,
+            "checked_table_count": 0,
+            "enabled": true,
+            "status_counts": {
+              "COUNT_TOTAL_MATCH": 0,
+              "COUNT_TOTAL_MISMATCH_CANDIDATE": 0,
+              "NOT_APPLICABLE": 4,
+              "UNSUPPORTED": 0
+            },
+            "tables_seen": 4,
+            "whole_article_coverage_established": false
+          },
+          "odds_ratio_review": {
+            "applicable_objects": 0,
+            "candidate_count": 0,
+            "checked_objects": 0,
+            "eligible_objects": 0,
+            "enabled": true,
+            "potential_objects": 0,
+            "scan_complete": true,
+            "skip_reasons": {},
+            "skipped_objects": 0,
+            "status_counts": {
+              "NOT_APPLICABLE": 4
+            },
+            "tables_seen": 4
+          },
+          "prisma_flow_review": {
+            "body_paragraphs_excluded": 27,
+            "body_paragraphs_observed": 44,
+            "candidate_count": 0,
+            "candidate_event_identities_complete": true,
+            "candidate_event_identity_count": 0,
+            "eligible_body_paragraphs": 17,
+            "enabled": true,
+            "relations_mapped": 0,
+            "status_counts": {},
+            "whole_article_coverage_established": false
+          },
+          "sample_flow_review": {
+            "body_paragraphs_excluded": 27,
+            "body_paragraphs_observed": 44,
+            "candidate_count": 0,
+            "candidate_event_identities_complete": true,
+            "candidate_event_identity_count": 0,
+            "eligible_body_paragraphs": 17,
+            "enabled": true,
+            "relations_mapped": 0,
+            "status_counts": {},
+            "whole_article_coverage_established": false
+          },
+          "statistical_se_review": {
+            "candidate_count": 0,
+            "checked_objects": 0,
+            "checked_rows": 0,
+            "enabled": true,
+            "potential_objects": 0,
+            "scan_complete": true,
+            "skip_reasons": {
+              "NO_RECOGNIZED_OPERAND_HEADER": 4
+            },
+            "skipped_objects": 0,
+            "status_counts": {
+              "NOT_APPLICABLE": 4
+            },
+            "tables_seen": 4
+          }
+        },
+        "paper_error_established": false,
+        "percentage": {
+          "abstentions": 8,
+          "arithmetic_matches": 8,
+          "mismatch_candidates": 2
+        },
+        "percentage_status_counts": {
+          "arithmetic_match": 8,
+          "arithmetic_mismatch_candidate": 2,
+          "scope_ambiguous": 8
+        },
+        "processing": {
+          "extracted_text_sha256": "392f601aee8156fdc8428da9eb328f015a1530c1145ba456c8f0a8f744037ef5",
+          "extraction_profile": "jats-normalized-text-v1",
+          "relationships_detected": 18,
+          "status": "completed",
+          "tables_inspected": 4
+        },
+        "table_structure_status_counts": {
+          "mapped_not_adjudicated": 4
+        },
+        "whole_paper_coverage_established": false
+      },
+      "saved_report_bytes": 277044,
+      "saved_report_sha256": "1e673018dc6a26ec4af3bb5e0aa25021bcab53dc12dbfcbcaff01042111d0994",
+      "audit_status": "completed",
+      "audit_returncode": 0,
+      "audit_elapsed_seconds": 0.23011412899995776,
+      "replay_status": "completed",
+      "replay_returncode": 0,
+      "replay_verification_status": "verified",
+      "manifest_sha256": "d0a2a94315a0df3ee1c78df2de5cc8891b1f6d4e04fb3a1fc930dcba53a3f919"
+    },
+    {
+      "pmcid": "PMC4339301",
+      "arm": "baseline",
+      "source_sha256": "4bc9c4672fbf25ebf7a2efc9d78ab95088ffc799f7639d2e889a2791359a069b",
+      "representation": "provider_rendered_pre_text_utf8",
+      "version_classification": "current_provider_display_derivative_not_original_response",
+      "descriptive_counts": {
+        "candidate_event_ids": [],
+        "denominator_trace": {
+          "multiple_fact_values_relation_count": 0,
+          "relation_count": 140,
+          "unresolved_relation_count": 139
+        },
+        "independent_scientific_labels_available": false,
+        "observed_unreviewed_candidate_events": 0,
+        "optional_checkers": {
+          "count_total_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "odds_ratio_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "prisma_flow_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "sample_flow_review": {
+            "candidate_count": null,
+            "enabled": false
+          },
+          "statistical_se_review": {
+            "candidate_count": null,
+            "enabled": false
+          }
+        },
+        "paper_error_established": false,
+        "percentage": {
+          "abstentions": 139,
+          "arithmetic_matches": 1,
+          "mismatch_candidates": 0
+        },
+        "percentage_status_counts": {
+          "arithmetic_match": 1,
+          "scope_ambiguous": 139
+        },
+        "processing": {
+          "extracted_text_sha256": "bf51ea6eb15cc2220d64aaae76c2ef2ca72fe96210314e6a60fdd67e0a2df1f6",
+          "extraction_profile": "jats-normalized-text-v1",
+          "relationships_detected": 140,
+          "status": "completed",
+          "tables_inspected": 3
+        },
+        "table_structure_status_counts": {
+          "ambiguous": 1,
+          "mapped_not_adjudicated": 2
+        },
+        "whole_paper_coverage_established": false
+      },
+      "saved_report_bytes": 1497082,
+      "saved_report_sha256": "ebf9d3e86618b7b9f1a19ef3cb05a5eabbca53f63b01056c6016057d9402d3c7",
+      "audit_status": "completed",
+      "audit_returncode": 0,
+      "audit_elapsed_seconds": 0.2650057459995878,
+      "replay_status": "completed",
+      "replay_returncode": 0,
+      "replay_verification_status": "verified",
+      "manifest_sha256": "52a0ea7a510835e65e243fa870c1c64b7d434a3fea412be4d78bcc28a9d342fa"
+    },
+    {
+      "pmcid": "PMC4339301",
+      "arm": "candidate",
+      "source_sha256": "4bc9c4672fbf25ebf7a2efc9d78ab95088ffc799f7639d2e889a2791359a069b",
+      "representation": "provider_rendered_pre_text_utf8",
+      "version_classification": "current_provider_display_derivative_not_original_response",
+      "descriptive_counts": {
+        "candidate_event_ids": [],
+        "denominator_trace": {
+          "multiple_fact_values_relation_count": 0,
+          "relation_count": 140,
+          "unresolved_relation_count": 139
+        },
+        "independent_scientific_labels_available": false,
+        "observed_unreviewed_candidate_events": 0,
+        "optional_checkers": {
+          "count_total_review": {
+            "candidate_count": 0,
+            "candidate_event_identities_complete": true,
+            "candidate_event_identity_count": 0,
+            "checked_table_count": 0,
+            "enabled": true,
+            "status_counts": {
+              "COUNT_TOTAL_MATCH": 0,
+              "COUNT_TOTAL_MISMATCH_CANDIDATE": 0,
+              "NOT_APPLICABLE": 3,
+              "UNSUPPORTED": 0
+            },
+            "tables_seen": 3,
+            "whole_article_coverage_established": false
+          },
+          "odds_ratio_review": {
+            "applicable_objects": 0,
+            "candidate_count": 0,
+            "checked_objects": 0,
+            "eligible_objects": 0,
+            "enabled": true,
+            "potential_objects": 0,
+            "scan_complete": true,
+            "skip_reasons": {},
+            "skipped_objects": 0,
+            "status_counts": {
+              "NOT_APPLICABLE": 3
+            },
+            "tables_seen": 3
+          },
+          "prisma_flow_review": {
+            "body_paragraphs_excluded": 34,
+            "body_paragraphs_observed": 63,
+            "candidate_count": 0,
+            "candidate_event_identities_complete": true,
+            "candidate_event_identity_count": 0,
+            "eligible_body_paragraphs": 29,
+            "enabled": true,
+            "relations_mapped": 0,
+            "status_counts": {},
+            "whole_article_coverage_established": false
+          },
+          "sample_flow_review": {
+            "body_paragraphs_excluded": 34,
+            "body_paragraphs_observed": 63,
+            "candidate_count": 0,
+            "candidate_event_identities_complete": true,
+            "candidate_event_identity_count": 0,
+            "eligible_body_paragraphs": 29,
+            "enabled": true,
+            "relations_mapped": 0,
+            "status_counts": {},
+            "whole_article_coverage_established": false
+          },
+          "statistical_se_review": {
+            "candidate_count": 0,
+            "checked_objects": 0,
+            "checked_rows": 0,
+            "enabled": true,
+            "potential_objects": 0,
+            "scan_complete": true,
+            "skip_reasons": {
+              "NO_RECOGNIZED_OPERAND_HEADER": 3
+            },
+            "skipped_objects": 0,
+            "status_counts": {
+              "NOT_APPLICABLE": 3
+            },
+            "tables_seen": 3
+          }
+        },
+        "paper_error_established": false,
+        "percentage": {
+          "abstentions": 139,
+          "arithmetic_matches": 1,
+          "mismatch_candidates": 0
+        },
+        "percentage_status_counts": {
+          "arithmetic_match": 1,
+          "scope_ambiguous": 139
+        },
+        "processing": {
+          "extracted_text_sha256": "bf51ea6eb15cc2220d64aaae76c2ef2ca72fe96210314e6a60fdd67e0a2df1f6",
+          "extraction_profile": "jats-normalized-text-v1",
+          "relationships_detected": 140,
+          "status": "completed",
+          "tables_inspected": 3
+        },
+        "table_structure_status_counts": {
+          "ambiguous": 1,
+          "mapped_not_adjudicated": 2
+        },
+        "whole_paper_coverage_established": false
+      },
+      "saved_report_bytes": 1532426,
+      "saved_report_sha256": "786d42f47ee1db0fb73618941a116e5f190e82816a98a6ee127e328be453849c",
+      "audit_status": "completed",
+      "audit_returncode": 0,
+      "audit_elapsed_seconds": 0.3060837220000394,
+      "replay_status": "completed",
+      "replay_returncode": 0,
+      "replay_verification_status": "verified",
+      "manifest_sha256": "29d62930efb167cceeabf9ec166483acc4a4548bfafd48d5993b0c771e7b6d13"
+    }
+  ],
+  "source_dispositions": [
+    {
+      "pmcid": "PMC10337294",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC11148689",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "capture_transfer_failed",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "The DOM reported 236409 UTF-16 units but the browser evaluation transfer truncated its text at 200011 units with [Truncated]. No complete XML input was written; no second DOM read, new Execute, repair or replacement occurred."
+    },
+    {
+      "pmcid": "PMC11845954",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "captured",
+      "admitted_for_methods": true
+    },
+    {
+      "pmcid": "PMC12063958",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC11845954",
+      "derived_capture_status": "captured",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Correction context only, not an additional independent article input."
+    },
+    {
+      "pmcid": "PMC4339301",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "captured",
+      "admitted_for_methods": true
+    },
+    {
+      "pmcid": "PMC4877730",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC4339301",
+      "derived_capture_status": "captured",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Correction context only, not an additional independent article input."
+    },
+    {
+      "pmcid": "PMC5134271",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC5842619",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC5134271",
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC6902756",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC6991292",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC6902756",
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC7929738",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC8032656",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC9130452",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    }
+  ],
+  "sanitization": "No fulltext, captured display payload, source quote, private review payload, or credential is included. Counts and byte commitments are public metadata; the complete evidence capsule is retained separately."
+}

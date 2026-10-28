@@ -194,6 +194,30 @@ sources cannot form a fresh sealed cohort. RW-01O still separately
 requires *PMC OAI-PMH original GetRecord envelopes*, not these
 Europe PMC `fullTextXML` JATS snapshots.
 
+### RW-01Q2 — bounded provider-display diagnostic (observed; original gate open)
+
+An actual frozen-method diagnostic ran on two current provider-display
+derivatives at code `7115c0a`, with four successful audit/replay pairs of
+operations (two articles times two configurations). The
+[pre-method commitments and observed results](REAL_SOURCE_ACQUISITION_2026-10-28.md)
+preserve all 13 original-source dispositions, four completed display captures,
+one failed control transfer and eight unattempted records. Original recovery
+remains **0/13**. The new representation is explicitly derived visible XML text;
+it is not substituted for original JATS or PMC OAI-PMH envelopes.
+
+Both configurations emitted the same two vitiligo percentage candidates and
+zero J-EINSTEIN candidates. All five optional mechanisms added zero checked
+relationships and zero candidate events. J-EINSTEIN had 139 scope abstentions
+out of 140 extracted relationships, and source-context review found unresolved
+local table-section denominator evidence. These observations prioritize actual
+source applicability over adding unrelated features. They do not establish
+independent labels, full-paper coverage, control specificity or superiority.
+
+This separate diagnostic is complete. RW-01Q's original-source/independent-review
+acceptance criteria and RW-01O's original-envelope requirement remain unchanged.
+Do not tune the frozen run, repair its inputs, omit its failed control or count
+the two article configurations as independent samples.
+
 ### RW-01Q — measure real exposed-source coverage before another feature
 
 **Priority: source-grounded evidence rather than more synthetic-only gates.**
