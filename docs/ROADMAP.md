@@ -7,7 +7,7 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified pre-RW-01R main** is `c7e1b7c98a571122d9272237e547c2f0dfeee733`
+The **verified main** is `73cbe833343cb42975d9c0e59353b0bfb26628e0`
 (2026-10-28), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
@@ -36,7 +36,7 @@ development results of 2/16 correction-eligible issues and 33/33
 incomplete JATS papers belong to an **unmerged older branch**; they
 must not be reported as measured main performance.
 
-**RW-01R new count-only total checker candidate:**
+**RW-01R count-only total checker merged and technically qualified:**
 [exact category totals](JATS_COUNT_TOTALS.md) are checked only in a
 JATS 2-column table explicitly declaring mutually exclusive and
 exhaustive participant categories. This is new source-to-candidate
