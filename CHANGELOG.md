@@ -2,6 +2,18 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01R: explicit source-anchored count-only participant table totals — 2026-10-28
+
+- Add a narrowly scoped opt-in source-mapped integer sum check for exactly
+  two-column JATS participant category tables with an explicit
+  mutually-exclusive-and-exhaustive statement and a final unique Total row.
+- Reject unresolved layout, category overlap, footnotes, weighted/adjusted
+  contexts, missingness, malformed counts and ambiguous population grouping.
+- Provide original XML cell anchors, guarded candidate-only HTML and
+  source/manifest-bound replay through `audit-jats --include-count-totals`.
+- No real-paper sensitivity, independently checked corrections or protected
+  source power is established by synthetic/engineering tests.
+
 ### RW-01P: installed source-mapped PRISMA arithmetic review — 2026-10-28
 
 - Selectively port the previously scoped explicit PRISMA record-removal mapper

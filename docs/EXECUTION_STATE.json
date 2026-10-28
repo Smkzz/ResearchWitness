@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "e71a81f4ec670e25cc3c25eb93800c2899edc913",
+    "observed_main_sha": "c7e1b7c98a571122d9272237e547c2f0dfeee733",
     "observed_on": "2026-10-28",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "RW-01P PR #48 merged, exact-head CI 40609081228 passed 10/10, Ubuntu Python 3.12 1058 tests plus 323 subtests, CodeQL 40609081250 and dependency 40609081311 passed, and postmerge main CI 40609291106 and CodeQL 40609291112 passed. Historical exposed 9-/33-paper datasets are archived old-branch results, NOT current-main quality or independent scientific evidence."
+    "note": "Verified protected main c7e1b7c has postmerge CI and CodeQL success. RW-01R is unmerged source-mapped count-only table check candidate, not real-paper improvement. LocalControl read-only inventory found 0 .xml/.jats/.nxml under 329 directories in C:\\\\Projects\\\\ResearchWitness; historical manifests are hashes not source bytes."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -195,9 +195,15 @@
           "scope": "merged exact-head CI-qualified installed optional current-parser JATS PRISMA single-body-paragraph records-identified minus duplicates-removed equals records-screened arithmetic with original XML byte-element anchors, CLI/HTML/replay and explicit unsupported cases; no real-paper evaluation or scientific adjudication",
           "implementation": "researchwitness/paper_prisma_flow.py",
           "tests": "tests/test_installed_jats_prisma_flow.py"
+        },
+        {
+          "id": "RW-01R",
+          "scope": "candidate installed opt-in exact count-only total of explicitly disjoint exhaustive participant categories from unambiguous JATS table with original XML cell anchors and complete offline replay; no empirical applicability or paper-error proof",
+          "implementation": "researchwitness/paper_count_totals.py",
+          "tests": "tests/test_installed_jats_count_totals.py"
         }
       ],
-      "next_action": "RW-01Q: seek actual source-pinned real development-only Europe PMC/JATS material from existing October 2026 archives/approved retrieval in a private authorized environment; preserve all source/rights exclusions and preselected version families; run a fixed current installed-vs-frozen baseline same-source comparison, get genuinely separate substantive source review. Archived 33 docs/16 correction issues old draft had only 2 eligible and 8 unmatched of 12 candidates, no confirmed errors. RW-01O issue #35 remains OPEN for new original PMC OAI GetRecord bytes and independent rights/provider evidence. No paid calls or sealed custody."
+      "next_action": "First qualify and merge RW-01R exact-head, then prioritize RW-01Q same-source research using authenticated, permission-cleared raw JATS bytes and independently reviewed labels. Bounded read-only current project checkout inventory (329 directories) found 0 original XML/JATS/NXML files; do not treat old manifest hashes or public snippets as original transfer bytes. Keep source selection/failed attempts and source mechanism eligibility complete; issue #35 for PMC OAI source remains open. Zero payment or protected-data authority."
     },
     {
       "id": "RW-02",

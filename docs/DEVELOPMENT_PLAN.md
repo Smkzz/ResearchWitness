@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `e71a81f4ec670e25cc3c25eb93800c2899edc913` (2026-10-28), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `c7e1b7c98a571122d9272237e547c2f0dfeee733` (2026-10-28), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -177,6 +177,31 @@ unresolved cases and source-validated false alarms separately.
 If no original source can be accessed, record `blocked_external`
 and preserve the last validated engineering state rather than inventing
 a study or weakening origin/rights rules.
+
+### RW-01R — strictly conditioned count-only table totals (candidate)
+
+The [opt-in count-total checker](JATS_COUNT_TOTALS.md) extends the
+**installed** JATS audit beyond percentages, addressing a known
+*unsupported mechanism class* in earlier source-pinned correction
+manifests. It only sums one explicitly mutually-exclusive-and-
+exhaustive set of participant category integers against the final
+source-reported Total, requiring a bounded clean 2-column table
+and unambiguous headers. No footnotes, missingness, group overlap,
+adjusted/weighted values, merged cells or inferred category scope.
+Original XML cell element anchors, candidate-only reporting, exact
+arithmetic and full bundle replay must be qualified together.
+
+On 2026-10-28, a bounded read-only inventory of 329 directories in
+the pre-existing `C:\\Projects\\ResearchWitness` checkout reported
+zero XML/JATS/NXML source files. Historical case metadata contain
+original hash commitments, not the original bodies. This is
+`blocked_evidence` for the **RW-01Q real-paper comparison**, not
+licence to fetch copyrighted material through CI or route around the
+LocalControl network gate. Other already authorized private caches
+may exist but were not established by the inventory. Keep the older
+2/16 eligible-correction figure tied solely to the unmerged October 6
+development branch, and treat the present mechanism as **unmeasured**
+on real paper corrections.
 
 ## RW-02 - Source evidence and provenance
 

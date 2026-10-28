@@ -4,13 +4,40 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified main:** `e71a81f4ec670e25cc3c25eb93800c2899edc913`
+**Verified pre-RW-01R main:** `c7e1b7c98a571122d9272237e547c2f0dfeee733`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01R: explicit JATS table count-total review (engineering candidate)
+
+The current installed JATS audit gains opt-in
+`--include-count-totals`: integer sum of at least two distinct participant
+categories versus their final Total row, only for a clean exact two-column
+table that *explicitly* states categories are mutually exclusive and
+exhaustive. Original XML cell bytes and source digest remain pinned; the
+new report/HTML is independently replayed. Overlapping responses,
+noninteger counts, unsupported spans, missing-data, footnotes and
+unresolved scope abstain, not "pass". Findings remain `unreviewed`,
+`scientific_error_established=false`.
+
+Archived real-paper correction categories include count-only typos and
+demographic categories, but the sources were not found in the already
+authorized local project checkout. A read-only search of 329 directories
+under `C:\\Projects\\ResearchWitness` found **zero** files ending
+`.xml`, `.jats` or `.nxml`. No original saved XML bytes,
+article-specific rights, source version or same-source current-version
+performance was established. The verified historical SHA manifests
+are **not** the original bodies. This does not imply that other
+operator-authorized source stores were exhaustively searched.
+
+The current code must pass exact-head CI before merging.
+[RW-01R scope](JATS_COUNT_TOTALS.md);
+[RW-01Q same-source real validation](https://github.com/Smkzz/ResearchWitness/issues/50)
+remains open and cannot be replaced by synthetic qualification.
 
 ## 2026-10-28 verified engineering acceptance of RW-01P
 
