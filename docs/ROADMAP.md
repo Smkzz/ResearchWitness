@@ -7,7 +7,7 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified main** is `e71a81f4ec670e25cc3c25eb93800c2899edc913`
+The **verified pre-RW-01R main** is `c7e1b7c98a571122d9272237e547c2f0dfeee733`
 (2026-10-28), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
@@ -35,6 +35,15 @@ replayable, not a whole-paper/diagram checker. Historical October 6
 development results of 2/16 correction-eligible issues and 33/33
 incomplete JATS papers belong to an **unmerged older branch**; they
 must not be reported as measured main performance.
+
+**RW-01R new count-only total checker candidate:**
+[exact category totals](JATS_COUNT_TOTALS.md) are checked only in a
+JATS 2-column table explicitly declaring mutually exclusive and
+exhaustive participant categories. This is new source-to-candidate
+functionality, not an empirical performance finding. The 2026-10-28
+read-only local ResearchWitness checkout inventory had zero original
+XML/JATS/NXML files; the real-paper RW-01Q comparison therefore remains
+`blocked_evidence` here.
 
 **Historical real-paper development evidence:** the
 [archived exposure record](HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
