@@ -5,7 +5,7 @@ software's measured scientific performance. This is a historical *exposed
 development* record, **not** a new study, blind holdout, independent publisher
 verification, source-label adjudication or research breakthrough.
 
-**Current main after RW-01P:** `e71a81f4ec670e25cc3c25eb93800c2899edc913`.
+**Verified main before source-recovery candidate:** `387320de5763e9d3705e2d096f0cd354e4eb8737`.
 **Package:** `0.3.0.dev0` UNRELEASED. The present installed code was
 **not** run against the archived original source bytes in this session.
 
@@ -77,6 +77,19 @@ and its original source bytes were not newly obtained or reprocessed.
 Do not merge the old PR #5–#12 stack wholesale, relax real-paper
 eligibility to increase apparent recall, or reclassify the old
 developer-exposed correction cases as new untouched holdouts.
+
+## Exact historical wave-1 source restoration prerequisite
+
+The newly preserved [nine-original/four-correction metadata index](../examples/historical-source-recovery/wave1-source-index.json)
+and [offline-first recovery instructions](HISTORICAL_SOURCE_RECOVERY.md)
+allow the **already exposed** October 5 Europe PMC JATS bytes to be
+accepted only if actual private XML exactly matches their old source
+SHA-256 and byte lengths. Modern provider response versions that have
+drifted must not be substituted for these snapshots; actual fulltexts
+have **not** been recovered in the current environment. This is
+not source-origin authentication or independently timestamped
+pre-outcome selection and does not furnish the separate RW-01O
+PMC OAI-PMH raw GetRecord envelopes.
 
 ## Smallest scientifically meaningful continuation
 
