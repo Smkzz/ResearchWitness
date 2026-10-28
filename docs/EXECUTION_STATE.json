@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "c7e1b7c98a571122d9272237e547c2f0dfeee733",
+    "observed_main_sha": "73cbe833343cb42975d9c0e59353b0bfb26628e0",
     "observed_on": "2026-10-28",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified protected main c7e1b7c has postmerge CI and CodeQL success. RW-01R is unmerged source-mapped count-only table check candidate, not real-paper improvement. LocalControl read-only inventory found 0 .xml/.jats/.nxml under 329 directories in C:\\\\Projects\\\\ResearchWitness; historical manifests are hashes not source bytes."
+    "note": "RW-01R PR #51 merged to main 73cbe83. Exact head 3b103bee CI 40661750774 passed 10/10 with 1080 tests+331 subtests Ubuntu 3.12, CodeQL 40661750816 and dependency 40661750792 passed; independent postmerge main CI 40662162735 and CodeQL 40662162659 passed. No real-paper comparison: local source inventory 329 dirs 0 original .xml/.jats/.nxml."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -90,7 +90,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/44",
         "https://github.com/Smkzz/ResearchWitness/pull/46",
         "https://github.com/Smkzz/ResearchWitness/pull/48",
-        "docs/HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md"
+        "docs/HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md",
+        "https://github.com/Smkzz/ResearchWitness/pull/51"
       ],
       "blocker": null,
       "completed_slices": [
@@ -198,12 +199,12 @@
         },
         {
           "id": "RW-01R",
-          "scope": "candidate installed opt-in exact count-only total of explicitly disjoint exhaustive participant categories from unambiguous JATS table with original XML cell anchors and complete offline replay; no empirical applicability or paper-error proof",
+          "scope": "merged, exact-head CI-qualified installed opt-in exact count-only total of explicitly disjoint exhaustive participant categories from unambiguous JATS table with original XML cell anchors and complete offline replay; no empirical applicability or paper-error proof",
           "implementation": "researchwitness/paper_count_totals.py",
           "tests": "tests/test_installed_jats_count_totals.py"
         }
       ],
-      "next_action": "First qualify and merge RW-01R exact-head, then prioritize RW-01Q same-source research using authenticated, permission-cleared raw JATS bytes and independently reviewed labels. Bounded read-only current project checkout inventory (329 directories) found 0 original XML/JATS/NXML files; do not treat old manifest hashes or public snippets as original transfer bytes. Keep source selection/failed attempts and source mechanism eligibility complete; issue #35 for PMC OAI source remains open. Zero payment or protected-data authority."
+      "next_action": "Highest priority RW-01Q: authorized original source-body access and independently ground-truthed development work families. Current registered local ResearchWitness checkout inventory has 0 XML/JATS/NXML across 329 directories; no matched current-versus-frozen baseline run possible without actual original bytes. Inspect already authorized source caches without widening egress. Use same source bytes and a complete preselected family denominator; document negative results. RW-01O PMC OAI original-byte issue #35 stays open. Stop adding synthetic-only tests without a specific user-facing mechanism gap. No paid or protected-data authority."
     },
     {
       "id": "RW-02",
