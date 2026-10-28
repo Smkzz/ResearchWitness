@@ -106,6 +106,9 @@ def review_section_denominators(data: bytes) -> dict[str, Any]:
             # Reject all nonrectangular body layouts. A rowspan inherited from
             # an earlier row can otherwise shift a later column invisibly.
             if any(not _single_cell_columns(_cells(row)) for row in body):
+                rows_seen += len(body)
+                if rows_seen > MAX_ROWS:
+                    raise JATSSourceError("Too many table rows")
                 skipped_unscoped += len(body)
                 continue
             active: tuple[str, list[int], list[Any]] | None = None
