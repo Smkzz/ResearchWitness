@@ -1,10 +1,10 @@
 # Project status
 
-**As of:** 2026-10-27  
+**As of:** 2026-10-28  
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified pre-RW-01P main:** `19eddd8c7eab49262fa12854fcfb01f1c743b8ca`
+**Verified main:** `e71a81f4ec670e25cc3c25eb93800c2899edc913`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,41 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-01P: installed opt-in PRISMA record-flow JATS mapper (candidate)
+## 2026-10-28 verified engineering acceptance of RW-01P
+
+RW-01P [PR #48](https://github.com/Smkzz/ResearchWitness/pull/48)
+qualified on exact proposed head
+`c2dc7cba720e0696774a85ca1c64da424a7bae20`:
+[CI 40609081228](https://github.com/Smkzz/ResearchWitness/actions/runs/40609081228)
+passed **all 10 OS/Python/release jobs**, with **1,058 pytest cases
+and 323 subtests** passing under Ubuntu Python 3.12.
+[CodeQL 40609081250](https://github.com/Smkzz/ResearchWitness/actions/runs/40609081250)
+and [Dependency evidence 40609081311](https://github.com/Smkzz/ResearchWitness/actions/runs/40609081311)
+also passed. Squash-merged protected main
+`e71a81f4ec670e25cc3c25eb93800c2899edc913` independently passed
+[CI 40609291106](https://github.com/Smkzz/ResearchWitness/actions/runs/40609291106)
+and [CodeQL 40609291112](https://github.com/Smkzz/ResearchWitness/actions/runs/40609291112).
+No source re-acquisition, real-paper benchmark or independent scientific
+label validation occurred in these checks. Version remains UNRELEASED.
+
+### Historic development-exposed real-paper evidence, preserved separately
+
+A new [historical evidence record](HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
+grounds three **incomparable** October 2026 legacy experiments: an old
+JATS-to-Markdown 9-paper development set (3/4 selected correction
+mechanisms rediscovered after hardening), an original-byte **unmerged
+branch** 33-document capability replay with 1/16 eligible correction
+issues, and a subsequent unmerged branch 2/16 eligible on those same
+sources. In the 2/16 replay, all 33 papers had incomplete coverage
+and 8 of 12 candidate items remained unmatched/unadjudicated.
+These are historical/posthoc development findings, not present-main
+precision/recall, new detections, eligible PRISMA-positive evidence,
+a sealed experiment or source licence certificates.
+The next empirical task is **same-source, frozen-method** development
+replay on authentic, permission-cleared local original bytes and separately
+grounded source-context interpretation; issue #35 remains open.
+
+## RW-01P: installed opt-in PRISMA record-flow JATS mapper (merged)
 
 Found archived actual-development evidence on a **2026-10-06 unmerged
 branch**: 33 real JATS documents, 16 correction-backed issue families
@@ -31,8 +65,7 @@ installed source-preserving JATS audit path, using opt-in
 `--include-prisma-flows`, original XML paragraph anchors,
 candidate-only disclosure, deterministic bundle replay and conservative
 source-ambiguity abstentions. It does **not** join multi-paragraph
-counts or read PRISMA diagrams/PDFs, and is a code candidate requiring
-exact-head CI/CodeQL, not an observed real-paper gain.
+counts or read PRISMA diagrams/PDFs, and is merged, **exact-head qualified** but not an observed real-paper gain.
 See [the implementation scope](JATS_PRISMA_FLOW.md).
 
 ## RW-01O2: separately pinned PMC selection frame (merged)
