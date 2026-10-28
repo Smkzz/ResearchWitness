@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `19eddd8c7eab49262fa12854fcfb01f1c743b8ca` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `e71a81f4ec670e25cc3c25eb93800c2899edc913` (2026-10-28), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -129,7 +129,7 @@ outcomes. Authentic independent timestamping, real PMC acquisition,
 article-specific licence checks and actually separate substantive
 source reviews are still essential for RW-01O and later RW-03/RW-05.
 
-### RW-01P — installed source-mapped PRISMA record-flow check (candidate)
+### RW-01P — installed source-mapped PRISMA record-flow check (merged)
 
 Archived 2026-10-06 development data from the *separate unmerged*
 paper-audit capability branch comprise 33 original JATS source
@@ -140,7 +140,10 @@ had incomplete coverage; no independent paper-error finding or
 sealed test was achieved. Those counts do **not** validate present
 main or general accuracy.
 
-[RW-01P](JATS_PRISMA_FLOW.md) selectively ports the guarded
+[RW-01P](JATS_PRISMA_FLOW.md) was merged through
+[PR #48](https://github.com/Smkzz/ResearchWitness/pull/48)
+after 10/10 exact-head CI plus CodeQL/dependency evidence and separately
+passing postmerge main CI/CodeQL. It selectively ports the guarded
 `paper_prisma_flow` source mapper from the historical PR #11 into
 the **current installed JATS CLI**, preserving strict original XML
 byte-element anchors, full opt-in replay and candidate-only disclosure.
@@ -151,8 +154,29 @@ PDF/OCR, claim source authenticity, or run untouched validation before
 RW-03/RW-05 safety and independent-source gates pass. Next actual
 science advancement must compare frozen versions on a source-pinned,
 permission-cleared *development-exposed* real-paper cohort with
-independent source-scoped labels. Qualify source-only implementation
-separately from real-world outcome evidence.
+independent source-scoped labels. The
+[historical development evidence ledger](HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
+documents old 9- and 33-source exposed-paper evaluation artifacts
+separately from present-main performance.
+
+### RW-01Q — measure real exposed-source coverage before another feature
+
+**Priority: source-grounded evidence rather than more synthetic-only gates.**
+Check existing preserved Europe PMC source/hash manifests and whether
+their original full-text XML bytes are already held in an authorized
+private environment. Do not substitute public webpages, recomputed XML,
+PDF extraction or a network-enabled CI job for provider-original
+PMC OAI-PMH response bytes. Where source access/rights legitimately
+permit, construct a complete development-exposed selection frame, keep
+all unavailable/rights-blocked/ambiguous families, **freeze both current
+installed and baseline binaries**, replay the same original JATS inputs
+under fixed method budgets, and independently reconcile correction
+versions, candidate contexts and negative labels. Report mechanism
+coverage, eligibility denominator, incomplete scope, candidate events,
+unresolved cases and source-validated false alarms separately.
+If no original source can be accessed, record `blocked_external`
+and preserve the last validated engineering state rather than inventing
+a study or weakening origin/rights rules.
 
 ## RW-02 - Source evidence and provenance
 
