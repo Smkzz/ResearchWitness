@@ -62,8 +62,8 @@ def implementation_files() -> dict[str, str]:
         for name in ("_jats_parser.py", "_jats_math.py", "_jats_files.py",
                      "jats_product.py", "jats_table_projection.py", "paper_document.py",
                      "paper_statistics.py", "paper_two_by_two_source.py",
-                     "paper_flow.py", "paper_flow_source.py", "paper_statistics_source.py",
-                     "jats_denominator_trace.py")
+                     "paper_flow.py", "paper_flow_source.py", "paper_prisma_flow.py",
+                     "paper_statistics_source.py", "jats_denominator_trace.py")
     }
 
 
@@ -71,6 +71,7 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
                 *, include_structure: bool = False,
                 include_odds_ratio: bool = False,
                 include_prose_flows: bool = False,
+                include_prisma_flows: bool = False,
                 include_sd_se_n: bool = False,
                 include_denominator_trace: bool = False) -> dict[str, Any]:
     if type(document_id) is not str or IDENTIFIER.fullmatch(document_id) is None:
@@ -125,10 +126,13 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
     if include_denominator_trace:
         from .jats_denominator_trace import trace_denominators
         report["denominator_evidence_trace"] = trace_denominators(source, result)
-    if include_structure or include_odds_ratio or include_prose_flows or include_sd_se_n:
+    if (include_structure or include_odds_ratio or include_prose_flows
+            or include_prisma_flows or include_sd_se_n):
         from .jats_table_projection import project_jats_tables
-        projection = project_jats_tables(source, result,
-                                         include_body_paragraphs=include_prose_flows)
+        projection = project_jats_tables(
+            source, result,
+            include_body_paragraphs=include_prose_flows or include_prisma_flows,
+        )
         if include_structure:
             report["table_projection"] = projection.to_dict()
         if include_odds_ratio:
@@ -176,6 +180,45 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
                     "Unresolved relations abstain; arithmetic candidates remain unreviewed.",
                 ],
             }
+    if include_prisma_flows:
+        from .paper_prisma_flow import MAX_RELATIONS, map_jats_prisma_relations
+        mapped = map_jats_prisma_relations(projection, limit=MAX_RELATIONS + 1)
+        if len(mapped) > MAX_RELATIONS:
+            raise ValueError("Source-mapped PRISMA relation limit exceeded")
+        statuses = Counter(item.status for item in mapped)
+        observed = next(
+            int(note.partition(":")[2]) for note in projection.extraction_warnings
+            if note.startswith("body_paragraphs_observed:")
+        )
+        excluded = next(
+            int(note.partition(":")[2]) for note in projection.extraction_warnings
+            if note.startswith("body_paragraphs_excluded:")
+        )
+        report["prisma_flow_review"] = {
+            "schema_version": "rw-jats-prisma-flow.v1",
+            "mode": "opt_in_labelled_single_body_paragraph_flow",
+            "eligible_body_paragraphs": len(projection.paragraphs),
+            "body_paragraphs_observed": observed,
+            "body_paragraphs_excluded": excluded,
+            "source_warnings": list(projection.extraction_warnings),
+            "relations_mapped": len(mapped),
+            "status_counts": dict(sorted(statuses.items())),
+            "candidate_count": statuses["PRISMA_FLOW_ARITHMETIC_CANDIDATE"],
+            "cases": [
+                {"relation_id": f"prisma-{i:04d}",
+                 "review_state": "unreviewed",
+                 "scientific_error_status": "not_established",
+                 "relation": record.to_dict()}
+                for i, record in enumerate(mapped, start=1)
+            ],
+            "whole_article_coverage_established": False,
+            "limitations": [
+                "Only explicit PRISMA record-removal equations within one standalone body paragraph are checked.",
+                "Records, reports, studies, database overlaps, diagram stages and narrative joins are not conflated.",
+                "Original XML paragraph element spans are not token-level byte offsets.",
+                "Results are arithmetic candidates without source truth or scientific adjudication.",
+            ],
+        }
     return report
 
 
@@ -216,6 +259,39 @@ def render_html(report: dict[str, Any]) -> bytes:
         "<p><small>Offline. No source authentication, scientific adjudication,"
         " or external action performed.</small></p></html>\n"
     )
+    if "prisma_flow_review" in report:
+        review = report["prisma_flow_review"]
+        prisma_rows = []
+        for case in review["cases"]:
+            relation = case["relation"]
+            if relation["status"] != "PRISMA_FLOW_ARITHMETIC_CANDIDATE":
+                continue
+            source_quotes = relation["source_anchors"]
+            quote = source_quotes[-1]["source_anchor"]["quote"] if source_quotes else ""
+            columns = (
+                case["relation_id"], relation["records_identified_exact"],
+                relation["duplicates_removed_exact"],
+                relation["records_screened_exact"],
+                relation["expected_screened_exact"], quote,
+            )
+            prisma_rows.append("<tr>" + "".join(
+                "<td>" + escape(str(value), quote=True) + "</td>"
+                for value in columns
+            ) + "</tr>")
+        section = (
+            "<h2>Opt-in PRISMA record-flow review</h2>"
+            "<p>Only one explicit JATS body paragraph; unreviewed candidates, not confirmed paper errors.</p>"
+            "<p>Mapped relations: " + str(review["relations_mapped"])
+            + "; candidates: " + str(review["candidate_count"])
+            + "; excluded body paragraphs: " + str(review["body_paragraphs_excluded"])
+            + "</p>"
+            "<table><thead><tr><th>Relation</th><th>Identified</th><th>Duplicates</th>"
+            "<th>Screened</th><th>Expected</th><th>Source excerpt</th>"
+            "</tr></thead><tbody>" + "".join(prisma_rows)
+            + "</tbody></table>"
+            "<p>Whole-article PRISMA coverage and scientific interpretation remain unverified.</p>"
+        )
+        html = html.replace("</html>\n", section + "</html>\n")
     if "odds_ratio_review" in report:
         review = report["odds_ratio_review"]
         candidate_rows = []
@@ -350,6 +426,7 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
                  *, include_structure: bool = False,
                  include_odds_ratio: bool = False,
                  include_prose_flows: bool = False,
+                 include_prisma_flows: bool = False,
                  include_sd_se_n: bool = False,
                  include_denominator_trace: bool = False) -> dict[str, Any]:
     if (expected_source_sha256 is not None and
@@ -364,6 +441,7 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
                          include_structure=include_structure,
                          include_odds_ratio=include_odds_ratio,
                          include_prose_flows=include_prose_flows,
+                         include_prisma_flows=include_prisma_flows,
                          include_sd_se_n=include_sd_se_n,
                          include_denominator_trace=include_denominator_trace)
     report_bytes = canonical_json(report)
@@ -439,12 +517,14 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
     structured = "table_projection" in saved_report
     odds_ratio = "odds_ratio_review" in saved_report
     prose_flows = "sample_flow_review" in saved_report
+    prisma_flows = "prisma_flow_review" in saved_report
     sd_se_n = "statistical_se_review" in saved_report
     denominator_trace = "denominator_evidence_trace" in saved_report
     new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before,
                              include_structure=structured,
                              include_odds_ratio=odds_ratio,
                              include_prose_flows=prose_flows,
+                             include_prisma_flows=prisma_flows,
                              include_sd_se_n=sd_se_n,
                              include_denominator_trace=denominator_trace)
     if (canonical_json(new_report) != contents[REPORT_NAME]
