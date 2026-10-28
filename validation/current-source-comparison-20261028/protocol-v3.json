@@ -1,0 +1,537 @@
+{
+  "arms": [
+    {
+      "entrypoint": [
+        "python",
+        "-m",
+        "researchwitness",
+        "audit-jats"
+      ],
+      "evidence_flags_change_detected_relationships": false,
+      "flags": [
+        "--include-structure",
+        "--include-denominator-trace"
+      ],
+      "id": "baseline",
+      "scientific_detector": "installed_default_percentage_only"
+    },
+    {
+      "entrypoint": [
+        "python",
+        "-m",
+        "researchwitness",
+        "audit-jats"
+      ],
+      "flags": [
+        "--include-structure",
+        "--include-denominator-trace",
+        "--include-unadjusted-2x2",
+        "--include-prose-flows",
+        "--include-prisma-flows",
+        "--include-count-totals",
+        "--include-sd-se-n"
+      ],
+      "id": "candidate",
+      "scientific_detector": "same_percentage_check_plus_all_five_existing_opt_in_mechanisms"
+    }
+  ],
+  "code_commitment": {
+    "commit": "7115c0a7fc2db073d1d7bb90a3afe586454b1a36",
+    "git_tree": "91e05588e9a071082f230149d2a46541e4179b00",
+    "installed_code_and_methods_unchanged": true,
+    "new_executor_must_be_separately_hashed_before_execution": true,
+    "package_version": "0.3.0.dev0",
+    "release": "UNRELEASED",
+    "repository": "Smkzz/ResearchWitness",
+    "wheel_sha256": "15887dcab7fea1374ac5dcaf3d2a3d0c1e66e2afc421e119b7619406ea30283a"
+  },
+  "counterhypothesis": "The optional mechanisms provide no additional applicable coverage on these displayed article derivatives; they may abstain or add processing cost.",
+  "created_at_utc": "2026-10-28T14:57:39Z",
+  "created_time_source": "clock.curr_time observation before this record was written; not independent preregistration",
+  "derivation_contract": {
+    "capture_json_fields": [
+      "schema_version",
+      "text",
+      "utf16_units",
+      "requested_pmcid",
+      "request_url",
+      "http_status",
+      "selector",
+      "read_property",
+      "pre_visible",
+      "captured_at_utc",
+      "capture_method",
+      "dom_text_reads",
+      "chunk_size_utf16",
+      "chunks",
+      "tool_responses",
+      "tool_result_ids",
+      "tool_result_ids_exposed"
+    ],
+    "capture_json_schema": "rw-visible-provider-pre-capture.v1",
+    "capture_method": "visible_pre_textContent_once_then_lossless_json_chunks",
+    "capture_timestamps": "Operator/browser observations, not independently trusted publication or preregistration timestamps.",
+    "chunk_fields": [
+      "offset_utf16",
+      "length_utf16",
+      "text"
+    ],
+    "chunk_size_utf16": 16000,
+    "chunk_transfer": "Read the complete visible pre.textContent once into a browser variable. Emit metadata and deterministic ordered slices of that same string through the documented tool. Mechanically retain complete tool response objects. Join slices as UTF-16 code units without model transcription, then encode the complete string as UTF-8 once.",
+    "dom_text_reads_per_capture": 1,
+    "no_dtd_entity_removal_or_added_xml_declaration": true,
+    "no_model_rewrite_truncation_trimming_normalization_serialization_or_repair": true,
+    "read_property": "textContent",
+    "representation": "provider_rendered_pre_text_utf8",
+    "required_file_binding": "Capture JSON SHA, exact whole text UTF-16 length, exact whole text UTF-8 byte length/SHA, and retained .xml bytes must reconcile. The .xml must equal capture.text.encode(utf-8) byte for byte.",
+    "retained_content_role": "A provider-display derivative. A coincidentally equal historical hash cannot qualify original recovery in this experiment.",
+    "selector_requirement": "One specifically selected visible response-body pre element associated with the observed request PMCID/URL and completed response; do not extract HTML serialization, surrounding page text, headers or a different response.",
+    "source_anchor_scope": "All audit byte anchors refer only to the retained derivative, never asserted original provider response offsets.",
+    "surrogate_rule": "Slices can split a surrogate pair. Preserve and rejoin UTF-16 code units before strict decoding of the whole string; never encode an isolated surrogate as altered replacement text.",
+    "tool_response_rule": "Preserve every complete returned metadata/chunk object unchanged in tool_responses. The validator parses their text payloads and compares metadata/chunks with the retained capture. No tool-result identifiers may be invented; [] with tool_result_ids_exposed=false is valid when the tool exposes none.",
+    "version_classification": "current_provider_display_derivative_not_original_response"
+  },
+  "derived_acquisition": {
+    "action_ledger_fields": [
+      "sequence",
+      "requested_pmcid",
+      "action",
+      "at_utc",
+      "page_url"
+    ],
+    "action_literal": "SwaggerExecute",
+    "budget_unit": "operator_initiated_SwaggerExecute_action",
+    "capture_dispositions": [
+      "not_attempted",
+      "rights_unresolved",
+      "rights_excluded",
+      "provider_error",
+      "visible_text_unavailable",
+      "capture_transfer_failed",
+      "identity_unresolved",
+      "captured"
+    ],
+    "incremental_spend_eur": 0,
+    "maximum_execute_actions": 5,
+    "maximum_execute_actions_per_source": 1,
+    "no_privilege_account_policy_egress_or_billing_change": true,
+    "provider_http_count_status": "unknown_unobservable",
+    "provider_http_request_total": null,
+    "required_source_order": [
+      "PMC4339301",
+      "PMC4877730",
+      "PMC11845954",
+      "PMC12063958",
+      "PMC11148689"
+    ],
+    "retry_or_replacement": false,
+    "rights_before_execute": "Record source-specific permission/CC license evidence before the action. Missing rights remain unresolved; skip without replacing the source and preserve its denominator.",
+    "route": "Existing permitted official Europe PMC Swagger UI, ordinary documented browser actions and read-only DOM API only.",
+    "scope_of_budget": "Counts explicitly initiated Execute actions only; makes no claim about browser caching, redirects, automatic requests or exact provider HTTP traffic. Non-fetching reads and transfer of an already captured string do not count as new Execute actions."
+  },
+  "execution": {
+    "capture_records": "All thirteen frame records remain explicit. Exactly captured and rights/identity-cleared selected articles must all be admitted; captured corrections are context only. No outcome-driven omission.",
+    "combined_total_timeout_seconds": 240,
+    "execute_now": false,
+    "failure_rule": "Run the frozen parser on exact derivatives. Retain parser refusals, timeouts, malformed/oversized outputs and unverified replay. Never replace an attempt after cleaning its input.",
+    "invocations_per_admitted_article_per_arm": 1,
+    "marginal_spend_eur": 0,
+    "max_source_bytes": 8388608,
+    "max_total_input_bytes": 67108864,
+    "method_source_order": "Lexicographic PMCID order of all admitted derived article inputs, as in the v2 method schedule.",
+    "per_arm_total_timeout_seconds": 120,
+    "per_article_arm_order": [
+      "baseline",
+      "candidate"
+    ],
+    "per_invocation_timeout_seconds": 30,
+    "posix_resource_caps": "The copied executor declares 512 MiB address space, 32-second CPU soft limit, 16 MiB per written file and disabled core dumps; these are process caps, not an egress sandbox or custody qualification.",
+    "provider_calls_during_methods": 0,
+    "registration_before_any_method_output": true,
+    "registration_identity_fields": [
+      "protocol",
+      "previous_protocol",
+      "termination_receipt",
+      "code",
+      "runtime",
+      "orchestrator_sha256",
+      "arm_flags",
+      "limits"
+    ],
+    "registration_schema": "rw-provider-display-execution-registration.v3",
+    "replay_per_produced_bundle": 1,
+    "retry_retuning_or_source_repair": false,
+    "verified_pair_rule": "Both successful return-zero audits, both successful pinned verified replays, valid parsed summaries and unchanged installed bytes. Provisional outputs remain separately visible."
+  },
+  "history": {
+    "previous_executor": {
+      "path": "/workspace/scratch/47dda9aee22a/experiment_protocol/run_current_source_comparison.py",
+      "sha256": "fc26c271f5a7607651405a434bed179796c821109bbd928e6113ce68e527e534"
+    },
+    "stopped_routes": [
+      "view-source browser scheme policy block",
+      "official PMC S3 metadata browser ERR_BLOCKED_BY_CLIENT"
+    ],
+    "stopped_routes_remain_stopped": true,
+    "v1_v2_and_prior_executor_unchanged": true,
+    "v2_disposition": "terminated_before_method_execution; no original retained files and unobservable exact provider request total",
+    "v2_protocol": {
+      "path": "/workspace/scratch/47dda9aee22a/experiment_protocol/current_source_descriptive_protocol_v2.json",
+      "sha256": "29c765c0d74209a33d2601760cf88af5f77152f461955bc23d0b4efb1f546de5"
+    },
+    "v2_termination_receipt": {
+      "path": "/workspace/scratch/47dda9aee22a/experiment_protocol/v2_termination_receipt.json",
+      "sha256": "08d803911dd90eb5eb5d651df27120ddcf8402275717872c366c1c86392c4849"
+    }
+  },
+  "partition_and_claims": {
+    "historical_original_recovery_count": 0,
+    "historical_target_labels_already_exposed": true,
+    "independent_preoutcome_timestamp_established": false,
+    "independent_scientific_labels_available": false,
+    "method_outcomes_observed_before_protocol": false,
+    "no_original_evidence_gate_waived": true,
+    "original_count": 0,
+    "original_http_entity_identity_established": false,
+    "partition": "developer_exposed",
+    "provider_displays_and_transport_failures_previously_observed": true,
+    "sealed_or_confirmatory": false
+  },
+  "protocol_id": "RW-01Q-PROVIDER-DISPLAY-DERIVED-DIAGNOSTIC-2026-10-28-v3",
+  "purpose": "Measure the frozen installed methods on exactly retained UTF-8 derivatives of real article XML text visibly displayed by the permitted Europe PMC Swagger interface. This is not acquisition of original provider response entities or a historical-source recovery experiment.",
+  "question": "On identical explicitly derived provider-display inputs, what arithmetic relationships, candidate events, abstentions and failures do percentage-only versus the existing five optional mechanisms produce?",
+  "reporting": {
+    "allowed_claim": "A bounded descriptive observation of frozen software behavior on the same exact retained provider-display derivatives of exposed real article content.",
+    "family_accounting": "Corrections are attached to their parents; no row/correction inflation. The related historical Egilsson records remain related, not independent.",
+    "forbidden_claims": [
+      "original_source_recovery",
+      "original_HTTP_entity_capture",
+      "historical_transport_reconstruction",
+      "independent_scientific_error_detection_breakthrough",
+      "general_precision_recall_or_false_positive_rate",
+      "RW_01Q_original_source_gate_completion",
+      "RW_01O_OAI_GetRecord_completion",
+      "Wave_3_completion",
+      "protected_custody_qualification"
+    ],
+    "precision_recall_false_positive_rates_superiority_tests": "not_estimated",
+    "public_outputs": "Sanitized aggregate counts, protocol/code identities and limitations only; no source fulltext, capture payloads, private source reviews, accusations or author contact.",
+    "required": [
+      "All thirteen original acquisition dispositions with original_count=0",
+      "All thirteen derived capture dispositions separately",
+      "Actual initiated Execute actions and unknown provider HTTP total",
+      "Actual derived source hashes and capture JSON commitments",
+      "Paired per-checker coverage, matches, abstentions, candidate events, failures and elapsed resource use",
+      "Verified versus provisional paired outcomes",
+      "UI formatting and extraction as a study limitation"
+    ],
+    "scientific_labels": "unadjudicated; historical corrections do not automatically label a derivative or current version",
+    "selected_controls": "Not independently certified negatives.",
+    "stop": "Finish after the fixed once-per-source acquisition actions and once-per-arm article attempts/replays, or stop earlier if exact permitted transfer cannot be achieved. Negative and inconclusive results are valid."
+  },
+  "schema_version": "rw-provider-display-protocol.v3",
+  "source_frame": {
+    "fixed_derived_capture_order": [
+      "PMC4339301",
+      "PMC4877730",
+      "PMC11845954",
+      "PMC12063958",
+      "PMC11148689"
+    ],
+    "historical_index_path": "examples/historical-source-recovery/wave1-source-index.json",
+    "historical_index_sha256": "d0a3ee22f15868f9c97b4cdf8faa866211f753f562a33370b610a67549958f95",
+    "original_acquisition_dispositions": [
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC10337294",
+        "source_kind": "article",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC11148689",
+        "source_kind": "article",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "attempt_observed_no_original_retained",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC11845954",
+        "source_kind": "article",
+        "termination_observation_indices": [
+          5,
+          6
+        ]
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": "PMC11845954",
+        "pmcid": "PMC12063958",
+        "source_kind": "correction",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "attempt_observed_no_original_retained",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC4339301",
+        "source_kind": "article",
+        "termination_observation_indices": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "attempt_observed_no_original_retained",
+        "original_file_retained": false,
+        "parent_pmcid": "PMC4339301",
+        "pmcid": "PMC4877730",
+        "source_kind": "correction",
+        "termination_observation_indices": [
+          3,
+          4
+        ]
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC5134271",
+        "source_kind": "article",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": "PMC5134271",
+        "pmcid": "PMC5842619",
+        "source_kind": "correction",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC6902756",
+        "source_kind": "article",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": "PMC6902756",
+        "pmcid": "PMC6991292",
+        "source_kind": "correction",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC7929738",
+        "source_kind": "article",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC8032656",
+        "source_kind": "article",
+        "termination_observation_indices": []
+      },
+      {
+        "historical_original_recovered": false,
+        "original_acquisition_disposition": "no_original_capture_or_source_attempt_established_by_termination_receipt",
+        "original_file_retained": false,
+        "parent_pmcid": null,
+        "pmcid": "PMC9130452",
+        "source_kind": "article",
+        "termination_observation_indices": []
+      }
+    ],
+    "original_dispositions_must_not_be_reclassified_from_a_derived_hash": true,
+    "original_hashes_are_reference_metadata_only_in_this_experiment": true,
+    "records": [
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 124217,
+        "historical_expected_sha256": "3ad153137e965d0addbc246068b671097d8929e45a617621ac74e3ffd040c0cd",
+        "initial_request_position": null,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10337294/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC10337294",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 106358,
+        "historical_expected_sha256": "30f8758cf988689376d8d7175ee1ee688408e386dd7d03db83b90dc91c570ab4",
+        "initial_request_position": 5,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11148689/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC11148689",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 68656,
+        "historical_expected_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+        "initial_request_position": 3,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11845954/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC11845954",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 5352,
+        "historical_expected_sha256": "cb73763e32597e0ebc3307fe723e8189b14e9a6da7165ca809a1ed475c6f8e6d",
+        "initial_request_position": 4,
+        "method_input_role": "correction_context_only",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC12063958/fullTextXML",
+        "parent_pmcid": "PMC11845954",
+        "pmcid": "PMC12063958",
+        "scientific_label": "unadjudicated",
+        "source_kind": "correction"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 79487,
+        "historical_expected_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+        "initial_request_position": 1,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4339301/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC4339301",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 18775,
+        "historical_expected_sha256": "57a9ddf0f2c601a30467748f7b30fb9271795b0a04b4507a9b65bc425afa6377",
+        "initial_request_position": 2,
+        "method_input_role": "correction_context_only",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4877730/fullTextXML",
+        "parent_pmcid": "PMC4339301",
+        "pmcid": "PMC4877730",
+        "scientific_label": "unadjudicated",
+        "source_kind": "correction"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 88263,
+        "historical_expected_sha256": "c4a686c2fac31d7be83af4c17ed1de5e413e7faca18541f0503d247c5c03b149",
+        "initial_request_position": null,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5134271/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC5134271",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 18387,
+        "historical_expected_sha256": "1837b5ae4dbfdf50f59c3881869d2610e832ca31a02e5268cea9677f9e799c1a",
+        "initial_request_position": null,
+        "method_input_role": "correction_context_only",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5842619/fullTextXML",
+        "parent_pmcid": "PMC5134271",
+        "pmcid": "PMC5842619",
+        "scientific_label": "unadjudicated",
+        "source_kind": "correction"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 146746,
+        "historical_expected_sha256": "e2ee9fa85dbfd8b4b5b0e9f85d1b81138ec2442fb62949b3e676f31636e3038f",
+        "initial_request_position": null,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6902756/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC6902756",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY; version unspecified in JATS snapshot",
+        "historical_expected_bytes": 5225,
+        "historical_expected_sha256": "d67d223297ce5c53d4ef8346fd53822783b0514ac0060d09a2996ea8f560530e",
+        "initial_request_position": null,
+        "method_input_role": "correction_context_only",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6991292/fullTextXML",
+        "parent_pmcid": "PMC6902756",
+        "pmcid": "PMC6991292",
+        "scientific_label": "unadjudicated",
+        "source_kind": "correction"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 97388,
+        "historical_expected_sha256": "8769872b9ca4ff9ea07abe6afa1ea60ffdaed669321d6753671d60e11301eb70",
+        "initial_request_position": null,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7929738/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC7929738",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 50718,
+        "historical_expected_sha256": "f53ee4af3922a6301ad8dfada0ceeb2b3d14edcb9bc1d83fee43117fe02554a4",
+        "initial_request_position": null,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8032656/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC8032656",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      },
+      {
+        "historical_declared_license": "CC BY 4.0",
+        "historical_expected_bytes": 86813,
+        "historical_expected_sha256": "cc0abdc1786f485ed363b36310713936ccbb47b82489ade53f8b2b7af8bbbdf6",
+        "initial_request_position": null,
+        "method_input_role": "article_input",
+        "official_source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9130452/fullTextXML",
+        "parent_pmcid": null,
+        "pmcid": "PMC9130452",
+        "scientific_label": "unadjudicated",
+        "source_kind": "article"
+      }
+    ],
+    "registered_articles": 9,
+    "registered_corrections": 4,
+    "registered_source_records": 13
+  },
+  "status": "frozen_acquisition_and_method_design_requires_separately_pinned_execution_registration"
+}

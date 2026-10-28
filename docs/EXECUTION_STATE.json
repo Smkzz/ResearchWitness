@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "6131bccef55e1fe3c2d789e50821c7f51aafb2aa",
+    "observed_main_sha": "7115c0a7fc2db073d1d7bb90a3afe586454b1a36",
     "observed_on": "2026-10-28",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "RW-01Q1 PR #53 merged at 6131bcc. Exact head 0d7d52e CI 40681162504 passed 10/10, Ubuntu Python 3.12 1102 tests+337 subtests, CodeQL 40681162471 and dependency 40681162539 passed; postmerge main CI 40681472187 and CodeQL 40681472250 passed. No historical XML/JATS bodies recovered; empirical comparison remains blocked_evidence."
+    "note": "Main head refreshed at 7115c0a before the study. Existing RW-01Q1 engineering receipts remain in PROJECT_STATUS. The same installed 7115c0a code completed a separately declared two-article provider-display diagnostic with four verified audit/replay results and zero added opt-in relationships/candidates. Original recovery remains 0/13 and independent scientific performance is unestablished."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -21,7 +21,7 @@
     "authorized_incremental_spend_eur": 0,
     "scientific_or_security_gates_waived": false
   },
-  "next_task": "RW-01",
+  "next_task": "RW-04",
   "allowed_states": [
     "todo",
     "ready",
@@ -66,7 +66,7 @@
       "depends_on": [],
       "required_capability_gates": [],
       "role": "integration",
-      "status": "ready",
+      "status": "blocked_evidence",
       "owner": null,
       "branch": null,
       "base_sha": null,
@@ -92,9 +92,27 @@
         "https://github.com/Smkzz/ResearchWitness/pull/48",
         "docs/HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md",
         "https://github.com/Smkzz/ResearchWitness/pull/51",
-        "https://github.com/Smkzz/ResearchWitness/pull/53"
+        "https://github.com/Smkzz/ResearchWitness/pull/53",
+        "docs/REAL_SOURCE_ACQUISITION_2026-10-28.md",
+        "validation/current-source-comparison-20261028/pre-method-commitment.json",
+        "validation/current-source-comparison-20261028/results.json",
+        "https://github.com/Smkzz/ResearchWitness/commit/b4f2ebf390ad3e4c0817badb2144339011516338"
       ],
-      "blocker": null,
+      "blocker": {
+        "category": "evidence",
+        "failed_operation": "Recover exact historical provider XML bodies and establish independent source-context evaluation.",
+        "evidence": [
+          "docs/REAL_SOURCE_ACQUISITION_2026-10-28.md",
+          "validation/current-source-comparison-20261028/results.json"
+        ],
+        "safe_alternatives_attempted": [
+          "Bounded accessible archive and historical repository/artifact searches.",
+          "Ordinary authorized provider XML/export browser operations; blocked routes stopped.",
+          "Separately frozen provider-display derivative experiment: four captures, one failed control transfer, two articles executed, zero added optional-check coverage."
+        ],
+        "unlock_condition": "Permission-cleared original files matching the historical source pins, or separately identified current original responses, plus actually independent source-context adjudication. RW-01O additionally requires original PMC OAI-PMH GetRecord envelopes. A display derivative or more synthetic tests does not satisfy these requirements.",
+        "next_unblocked_package": "RW-04 remains available for study planning only; it cannot supply the missing originals or independent labels."
+      },
       "completed_slices": [
         {
           "id": "RW-01A",
@@ -209,9 +227,24 @@
           "scope": "merged and exact-head CI-qualified exact 2026-10-05 Europe PMC historical source metadata index of 9 original JATS/4 corrections and offline read-only source-cache audit plus strictly guarded, explicitly authorized allowlisted sequential HTTPS recovery; no historical raw bodies recovered and no source origin, licence or independent scientific label established",
           "implementation": "tools/recover_legacy_europepmc_sources.py",
           "tests": "tests/test_recover_legacy_europepmc_sources.py"
+        },
+        {
+          "id": "RW-01Q2",
+          "scope": "Completed bounded frozen-code nested-feature diagnostic on two exact current provider-display derivatives; four audits and four pinned replays succeeded, zero extra eligible relationships/candidates. Four captures, one failed control and all thirteen original records retained; zero originals recovered, no independent scientific validation.",
+          "record": "docs/REAL_SOURCE_ACQUISITION_2026-10-28.md",
+          "results": "validation/current-source-comparison-20261028/results.json",
+          "pre_method_commit": "b4f2ebf390ad3e4c0817badb2144339011516338"
         }
       ],
-      "next_action": "RW-01Q issue #50 still OPEN: operate tools.recover_legacy_europepmc_sources with the committed 13-record historical index and independently retained raw hash, in a private pre-approved environment. Default offline audit first, then only if source-specific rights and provider egress ALREADY approved attempt bounded official HTTPS; never bypass LocalControl network guard. A changed current Europe PMC fullTextXML body MUST NOT replace old Oct 2026 hash. Once exact raw source bytes exist, run fixed same-source baseline vs installed audit with genuine independent correction/source-context labels and count all unavailable families. RW-01O #35 still separately requires original PMC OAI-PMH envelopes. Zero new cost, no sealed custody."
+      "next_action": "Preserve the completed negative added-feature comparison. Obtain actual original responses and independently adjudicated source context before scientific scoring. The observed development gaps are prose percentage coverage, explicit percentage context and local table-section denominator scope; do not reinterpret a tuned follow-up as this frozen experiment. Issues #50 and #35 remain open.",
+      "write_scope": [
+        "docs/REAL_SOURCE_ACQUISITION_2026-10-28.md",
+        "docs/EXECUTION_STATE.json",
+        "docs/PROJECT_STATUS.md",
+        "docs/DEVELOPMENT_PLAN.md",
+        "validation/current-source-comparison-20261028",
+        "CHECKSUMS.sha256"
+      ]
     },
     {
       "id": "RW-02",

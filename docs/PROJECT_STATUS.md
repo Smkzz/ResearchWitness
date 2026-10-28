@@ -4,13 +4,39 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified main:** `6131bccef55e1fe3c2d789e50821c7f51aafb2aa`
+**Verified baseline main:** `7115c0a7fc2db073d1d7bb90a3afe586454b1a36`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-10-28 RW-01Q2: actual derived-source comparison completed
+
+The unchanged installed `7115c0a` code was run on **two current Europe PMC
+display derivatives**, after a public pre-method commitment. Four complete
+captures were retained: two articles and their two correction records. The
+selected control failed complete text transfer and remains missing. All 13
+historical source records remain accounted for; **original recovery is 0/13**.
+
+All four article/configuration runs completed and all four bundles passed
+pinned replay. The percentage-only baseline and the same implementation with
+all five existing opt-ins produced identical results: vitiligo had 8 arithmetic
+matches, 2 mismatch candidates and 8 abstentions; J-EINSTEIN had 1 match,
+0 mismatch candidates and 139 abstentions. **The optional mechanisms added no
+checked arithmetic relationships or candidates on these retained inputs.**
+The two vitiligo candidates correspond to locations in an already exposed
+correction. J-EINSTEIN exposed missing prose coverage and unresolved local
+table-section scope; its zero candidates do not establish correctness.
+
+[Acquisition, results and interpretation](REAL_SOURCE_ACQUISITION_2026-10-28.md)
+and [sanitized machine-readable evidence](../validation/current-source-comparison-20261028/results.json)
+record the input transformation, failed control, frozen identities, replay and
+limits. This is an observed development diagnostic, not an original-response
+benchmark, independent scientific evaluation, new error discovery or measured
+general superiority. RW-01Q #50 and RW-01O #35 remain open. No scientific
+implementation changed and `0.3.0.dev0` remains UNRELEASED.
 
 ## 2026-10-28 RW-01Q1 source recovery engineering acceptance
 
