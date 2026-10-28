@@ -1,0 +1,163 @@
+{
+  "schema_version": "rw-historical-europepmc-source-index.v1",
+  "partition": "exposed_development_historical_not_sealed",
+  "source_manifest": {
+    "repository": "Smkzz/ResearchWitness",
+    "ref": "6843593ff443d4a44c48d15a76949b323d0951ca",
+    "path": "validation/paper-audit-wave-1/cases.json",
+    "sha256": "f626061019cafddb25164abe647fa127f3843ef8f1187bbbbf94398a8c19134d",
+    "retrieved_date": "2026-10-05"
+  },
+  "restrictions": {
+    "historical_hash_is_not_publisher_authentication": true,
+    "article_licence_not_independently_verified": true,
+    "source_correction_labels_not_independent": true,
+    "newly_retrieved_body_does_not_prove_original_transport_event": true,
+    "historical_exposed_only": true
+  },
+  "records": [
+    {
+      "pmcid": "PMC10337294",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC10337294.xml",
+      "expected_bytes": 124217,
+      "expected_sha256": "3ad153137e965d0addbc246068b671097d8929e45a617621ac74e3ffd040c0cd",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC10337294/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC11148689",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC11148689.xml",
+      "expected_bytes": 106358,
+      "expected_sha256": "30f8758cf988689376d8d7175ee1ee688408e386dd7d03db83b90dc91c570ab4",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11148689/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC11845954",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC11845954.xml",
+      "expected_bytes": 68656,
+      "expected_sha256": "8e758e95cfc0834f96732495d9c26c5a5cc9b3dd9972f8216f5512093be336f7",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11845954/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC12063958",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC11845954",
+      "filename": "PMC12063958.xml",
+      "expected_bytes": 5352,
+      "expected_sha256": "cb73763e32597e0ebc3307fe723e8189b14e9a6da7165ca809a1ed475c6f8e6d",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC12063958/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC4339301",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC4339301.xml",
+      "expected_bytes": 79487,
+      "expected_sha256": "ae41e19aaf618ad9f316b6a27fa48db87e97fc100af1b64d37744a46e31a5246",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4339301/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC4877730",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC4339301",
+      "filename": "PMC4877730.xml",
+      "expected_bytes": 18775,
+      "expected_sha256": "57a9ddf0f2c601a30467748f7b30fb9271795b0a04b4507a9b65bc425afa6377",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC4877730/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC5134271",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC5134271.xml",
+      "expected_bytes": 88263,
+      "expected_sha256": "c4a686c2fac31d7be83af4c17ed1de5e413e7faca18541f0503d247c5c03b149",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5134271/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC5842619",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC5134271",
+      "filename": "PMC5842619.xml",
+      "expected_bytes": 18387,
+      "expected_sha256": "1837b5ae4dbfdf50f59c3881869d2610e832ca31a02e5268cea9677f9e799c1a",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC5842619/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC6902756",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC6902756.xml",
+      "expected_bytes": 146746,
+      "expected_sha256": "e2ee9fa85dbfd8b4b5b0e9f85d1b81138ec2442fb62949b3e676f31636e3038f",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6902756/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC6991292",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC6902756",
+      "filename": "PMC6991292.xml",
+      "expected_bytes": 5225,
+      "expected_sha256": "d67d223297ce5c53d4ef8346fd53822783b0514ac0060d09a2996ea8f560530e",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC6991292/fullTextXML",
+      "declared_license": "CC BY; version unspecified in JATS snapshot",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC7929738",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC7929738.xml",
+      "expected_bytes": 97388,
+      "expected_sha256": "8769872b9ca4ff9ea07abe6afa1ea60ffdaed669321d6753671d60e11301eb70",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC7929738/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC8032656",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC8032656.xml",
+      "expected_bytes": 50718,
+      "expected_sha256": "f53ee4af3922a6301ad8dfada0ceeb2b3d14edcb9bc1d83fee43117fe02554a4",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC8032656/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    },
+    {
+      "pmcid": "PMC9130452",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "filename": "PMC9130452.xml",
+      "expected_bytes": 86813,
+      "expected_sha256": "cc0abdc1786f485ed363b36310713936ccbb47b82489ade53f8b2b7af8bbbdf6",
+      "source_url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC9130452/fullTextXML",
+      "declared_license": "CC BY 4.0",
+      "declared_retrieval_date": "2026-10-05"
+    }
+  ]
+}

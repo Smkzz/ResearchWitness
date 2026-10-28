@@ -2,6 +2,21 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01Q1: exact historical Europe PMC source recovery (pre-empirical) — 2026-10-28
+
+- Preserve the original public October 5 JATS manifest's **13 exact
+  source-hash/byte commitments** (nine originals, four corrections) in
+  a source-free exposed-development recovery index.
+- Add zero-network default private-cache auditing. Optional bounded
+  provider recovery requires pre-existing egress and article rights,
+  accepts only official HTTPS and unchanged historical original-body
+  SHA/length, refuses redirects and forbids silent overwrites.
+- Report all missing, drifted, rights-ambiguous, blocked and recovered
+  cases while keeping complete historical sample and no new science claim.
+- Actual original provider bodies could not be recovered in the
+  current network-disabled environment. RW-01Q real-paper validation,
+  independent source labels and RW-01O PMC raw envelopes remain open.
+
 ### RW-01R: explicit source-anchored count-only participant table totals — 2026-10-28
 
 - Add a narrowly scoped opt-in source-mapped integer sum check for exactly

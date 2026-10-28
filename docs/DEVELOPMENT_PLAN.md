@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `73cbe833343cb42975d9c0e59353b0bfb26628e0` (2026-10-28), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `387320de5763e9d3705e2d096f0cd354e4eb8737` (2026-10-28), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -158,6 +158,34 @@ independent source-scoped labels. The
 [historical development evidence ledger](HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
 documents old 9- and 33-source exposed-paper evaluation artifacts
 separately from present-main performance.
+
+### RW-01Q1 — recover exact old developer-exposed JATS source bytes
+
+[Exact historic source recovery](HISTORICAL_SOURCE_RECOVERY.md)
+consolidates the prior public 2026-10-05 *source-only metadata* into a
+13-record pin (nine original articles plus four correction notices),
+bound to old public
+`validation/paper-audit-wave-1/cases.json` SHA
+`f626061019cafddb25164abe647fa127f3843ef8f1187bbbbf94398a8c19134d`.
+Its own raw index SHA is
+`d0a3ee22f15868f9c97b4cdf8faa866211f753f562a33370b610a67549958f95`.
+The offline source-cache audit never writes or accesses a network.
+A bounded provider retrieval path is strictly **opt-in within an
+already approved networked environment with externally verified
+rights**: official Europe PMC HTTPS, no redirects/arbitrary URLs,
+max five serial requests, exact original 2026 body SHA and length,
+no overwrite, no altered-version substitution, sanitized receipts.
+This is an operational unblocking candidate, not actual retrieval
+or permission to bypass the existing LocalControl network sandbox.
+
+RW-01Q remains `blocked_evidence` until real historical original
+bytes and independent correction/source-context reviews exist.
+Once recovered, run current/baseline on *identical* bytes, preserve
+all registered source omissions, and report correction-mechanism
+coverage separately from candidate precision. Historical exposed
+sources cannot form a fresh sealed cohort. RW-01O still separately
+requires *PMC OAI-PMH original GetRecord envelopes*, not these
+Europe PMC `fullTextXML` JATS snapshots.
 
 ### RW-01Q — measure real exposed-source coverage before another feature
 

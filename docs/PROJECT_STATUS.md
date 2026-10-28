@@ -4,13 +4,44 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified main:** `73cbe833343cb42975d9c0e59353b0bfb26628e0`
+**Verified pre-RW-01Q1 main:** `387320de5763e9d3705e2d096f0cd354e4eb8737`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01Q1: original historical source recovery (engineering candidate)
+
+A read-only LocalControl check of the **authorized** local
+`C:\Projects\ResearchWitness` tree found no original XML/JATS/NXML
+source files across 329 folders / 1,291 files; there were no
+recognized source ZIP/TAR/7z caches and no same-project sibling
+directories. The model-side runtime also cannot resolve
+`www.ebi.ac.uk`; web lookup of the exact fullTextXML resource was
+unavailable. No original paper fulltext was retrieved.
+
+The historical wave-1 **metadata** are preserved at old public Git
+SHA `6843593ff443d4a44c48d15a76949b323d0951ca`:
+original manifest raw SHA
+`f626061019cafddb25164abe647fa127f3843ef8f1187bbbbf94398a8c19134d`.
+New [13-record source index](../examples/historical-source-recovery/wave1-source-index.json)
+raw SHA
+`d0a3ee22f15868f9c97b4cdf8faa866211f753f562a33370b610a67549958f95`.
+The [offline-first exact recovery tool](HISTORICAL_SOURCE_RECOVERY.md)
+checks existing private original bodies, and in a *separately already
+approved* retrieval environment can attempt strict single-provider
+HTTPS recovery without overwriting drifted current versions. This
+**candidate** requires its own exact-head CI/CodeQL and can never
+qualify scientific labels or protected custody.
+
+The actual old JATS bytes, article licence adjudication, original
+2026 transfer proof and independently grounded paper labels remain
+absent. [RW-01Q issue #50](https://github.com/Smkzz/ResearchWitness/issues/50)
+and [RW-01O issue #35](https://github.com/Smkzz/ResearchWitness/issues/35)
+stay open. Europe PMC `fullTextXML` is **not** PMC OAI-PMH
+original GetRecord envelope.
 
 ## RW-01R: explicit JATS table count-total review (merged)
 
@@ -27,7 +58,7 @@ unresolved scope abstain, not "pass". Findings remain `unreviewed`,
 Archived real-paper correction categories include count-only typos and
 demographic categories, but the sources were not found in the already
 authorized local project checkout. A read-only search of 329 directories
-under `C:\\Projects\\ResearchWitness` found **zero** files ending
+under `C:\Projects\ResearchWitness` found **zero** files ending
 `.xml`, `.jats` or `.nxml`. No original saved XML bytes,
 article-specific rights, source version or same-source current-version
 performance was established. The verified historical SHA manifests

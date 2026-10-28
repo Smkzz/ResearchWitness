@@ -7,7 +7,7 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified main** is `73cbe833343cb42975d9c0e59353b0bfb26628e0`
+The **verified pre-RW-01Q1 main** is `387320de5763e9d3705e2d096f0cd354e4eb8737`
 (2026-10-28), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
@@ -44,6 +44,15 @@ functionality, not an empirical performance finding. The 2026-10-28
 read-only local ResearchWitness checkout inventory had zero original
 XML/JATS/NXML files; the real-paper RW-01Q comparison therefore remains
 `blocked_evidence` here.
+
+**RW-01Q1 historical source-recovery candidate:**
+The [exposed 13-source index and offline cache verifier](HISTORICAL_SOURCE_RECOVERY.md)
+preserve 2026-10-05 Europe PMC body hashes/byte lengths.
+The optional provider recovery may run **only** under pre-existing
+permitted egress and independently checked article rights, and must
+not overwrite a changed/absent original with a different version.
+The current environment has not recovered any original raw
+research XML; RW-01Q remains blocked for the actual same-source test.
 
 **Historical real-paper development evidence:** the
 [archived exposure record](HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
