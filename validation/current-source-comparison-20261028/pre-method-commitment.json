@@ -1,0 +1,194 @@
+{
+  "schema_version": "rw-provider-display-public-pre-method-commitment.v1",
+  "registered_at_utc": "2026-10-28T15:11:09Z",
+  "method_invocations_at_commitment": 0,
+  "registration_sha256": "5d0dfaa4825944c102e3fba8a292e45e7ba269199dd1d15e520e45719746c8d0",
+  "protocol_sha256": "e60054d5a67d8dd14cf366219fb006a1d4b5772977c90759a3519498344f58db",
+  "runner_sha256": "eef56f87856c0f3d83e2e07909544e5c5e1bbfdb5e8d9c82c9097aa6bbff1539",
+  "code_commit": "7115c0a7fc2db073d1d7bb90a3afe586454b1a36",
+  "wheel_sha256": "15887dcab7fea1374ac5dcaf3d2a3d0c1e66e2afc421e119b7619406ea30283a",
+  "arm_flags": {
+    "baseline": [
+      "--include-structure",
+      "--include-denominator-trace"
+    ],
+    "candidate": [
+      "--include-structure",
+      "--include-denominator-trace",
+      "--include-unadjusted-2x2",
+      "--include-prose-flows",
+      "--include-prisma-flows",
+      "--include-count-totals",
+      "--include-sd-se-n"
+    ]
+  },
+  "ordered_article_schedule": [
+    "PMC11845954",
+    "PMC4339301"
+  ],
+  "operator_execute_actions": [
+    {
+      "sequence": 1,
+      "requested_pmcid": "PMC4339301",
+      "action": "SwaggerExecute",
+      "at_utc": "2026-10-28T14:58:54Z",
+      "page_url": "https://europepmc.org/RestfulWebService#/Europe%20PMC%20Articles%20RESTful%20API/fullTextXML"
+    },
+    {
+      "sequence": 2,
+      "requested_pmcid": "PMC4877730",
+      "action": "SwaggerExecute",
+      "at_utc": "2026-10-28T15:01:54Z",
+      "page_url": "https://europepmc.org/RestfulWebService#/Europe%20PMC%20Articles%20RESTful%20API/fullTextXML"
+    },
+    {
+      "sequence": 3,
+      "requested_pmcid": "PMC11845954",
+      "action": "SwaggerExecute",
+      "at_utc": "2026-10-28T15:02:30Z",
+      "page_url": "https://europepmc.org/RestfulWebService#/Europe%20PMC%20Articles%20RESTful%20API/fullTextXML"
+    },
+    {
+      "sequence": 4,
+      "requested_pmcid": "PMC12063958",
+      "action": "SwaggerExecute",
+      "at_utc": "2026-10-28T15:03:19Z",
+      "page_url": "https://europepmc.org/RestfulWebService#/Europe%20PMC%20Articles%20RESTful%20API/fullTextXML"
+    },
+    {
+      "sequence": 5,
+      "requested_pmcid": "PMC11148689",
+      "action": "SwaggerExecute",
+      "at_utc": "2026-10-28T15:03:49Z",
+      "page_url": "https://europepmc.org/RestfulWebService#/Europe%20PMC%20Articles%20RESTful%20API/fullTextXML"
+    }
+  ],
+  "source_frame_count": 13,
+  "original_recovered_count": 0,
+  "provider_http_request_total": null,
+  "provider_http_count_status": "unknown_unobservable",
+  "partition": "developer_exposed",
+  "independent_scientific_validation": false,
+  "records": [
+    {
+      "pmcid": "PMC10337294",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC11148689",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "capture_transfer_failed",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "The DOM reported 236409 UTF-16 units but the browser evaluation transfer truncated its text at 200011 units with [Truncated]. No complete XML input was written; no second DOM read, new Execute, repair or replacement occurred."
+    },
+    {
+      "pmcid": "PMC11845954",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "captured",
+      "admitted_for_methods": true,
+      "sha256": "594ea878750c19c0251296cb9fe86da1f80562f099b24bf756853ba9662b1f0e",
+      "bytes": 121935,
+      "capture_json_sha256": "bd6215d537b8fcff84d4cca8107ce96110e47369c776b448e6de6debe9edb967"
+    },
+    {
+      "pmcid": "PMC12063958",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC11845954",
+      "derived_capture_status": "captured",
+      "admitted_for_methods": false,
+      "sha256": "b0682a24421d913b6de557a273a1ebae61b5c80a44940742ffe7e8f863856b2d",
+      "bytes": 8204,
+      "capture_json_sha256": "97ebf6eda8c3739a4de5851bfdeb27622371832c1d6b14ba2602c4b398a43ff4",
+      "method_nonadmission_reason": "Correction context only, not an additional independent article input."
+    },
+    {
+      "pmcid": "PMC4339301",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "captured",
+      "admitted_for_methods": true,
+      "sha256": "4bc9c4672fbf25ebf7a2efc9d78ab95088ffc799f7639d2e889a2791359a069b",
+      "bytes": 141678,
+      "capture_json_sha256": "a83e8cab7ca96dee196f1f0912d987a823fe840c1cc748945a394377bd0c234a"
+    },
+    {
+      "pmcid": "PMC4877730",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC4339301",
+      "derived_capture_status": "captured",
+      "admitted_for_methods": false,
+      "sha256": "863b7ce07cbb773aebc4d76c8f59225886523edfa73aa882239bc86dd3e95299",
+      "bytes": 30139,
+      "capture_json_sha256": "262740af1a569c30010ca7f6d2e5225108d700e6f9bc73407427231c402816ed",
+      "method_nonadmission_reason": "Correction context only, not an additional independent article input."
+    },
+    {
+      "pmcid": "PMC5134271",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC5842619",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC5134271",
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC6902756",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC6991292",
+      "source_kind": "correction",
+      "parent_pmcid": "PMC6902756",
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC7929738",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC8032656",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    },
+    {
+      "pmcid": "PMC9130452",
+      "source_kind": "article",
+      "parent_pmcid": null,
+      "derived_capture_status": "not_attempted",
+      "admitted_for_methods": false,
+      "method_nonadmission_reason": "Outside the fixed five-source derived-capture subset; no source request or replacement."
+    }
+  ],
+  "limitations": [
+    "Provider-display UTF-8 derivatives are not original HTTP response bodies.",
+    "The selected control failed complete transfer and is not an observed negative.",
+    "Published correction targets were already exposed; this is descriptive, not confirmatory.",
+    "All method outputs, including failures and zero added coverage, must remain reported."
+  ]
+}
