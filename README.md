@@ -283,6 +283,20 @@ checker improves real error detection. The next priority is permission-cleared
 original-source acquisition and an independently grounded **same-source
 development comparison**, not a synthetic-only accuracy claim.
 
+### Opt-in JATS participant category totals (RW-01R)
+
+`researchwitness audit-jats --include-count-totals` now optionally checks
+the exact integer sum of **source-declared mutually exclusive and exhaustive**
+participant categories against an explicit final `Total` row in a clean
+two-column JATS table. Every operand is bound to the original XML cell bytes
+and the check is replayed with the installed source/manifest bundle.
+Missingness, ambiguous scope, overlapping categories, footnotes and complex
+tables **abstain**. A mismatched total is an *unreviewed candidate*, never
+proof that a published paper is wrong. See
+[the narrow count-total contract](docs/JATS_COUNT_TOTALS.md).
+The older October 2026 exposed correction labels have **not** been rerun or
+reclassified as eligible for this new mechanism.
+
 ### Installed PRISMA review of explicit JATS record flow (RW-01P)
 
 `researchwitness audit-jats --include-prisma-flows` now optionally checks a
