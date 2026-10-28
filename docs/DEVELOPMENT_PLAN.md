@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `c7e1b7c98a571122d9272237e547c2f0dfeee733` (2026-10-28), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `73cbe833343cb42975d9c0e59353b0bfb26628e0` (2026-10-28), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -178,7 +178,13 @@ If no original source can be accessed, record `blocked_external`
 and preserve the last validated engineering state rather than inventing
 a study or weakening origin/rights rules.
 
-### RW-01R — strictly conditioned count-only table totals (candidate)
+### RW-01R — strictly conditioned count-only table totals (merged)
+
+[PR #51](https://github.com/Smkzz/ResearchWitness/pull/51) is now
+merged. Its exact-head 10/10 CI, CodeQL and dependency evidence
+passed; independent main CI/CodeQL also passed. The product feature is
+qualified for **synthetic engineering correctness only**, not for
+real-paper sensitivity, scientific adjudication or an independent holdout.
 
 The [opt-in count-total checker](JATS_COUNT_TOTALS.md) extends the
 **installed** JATS audit beyond percentages, addressing a known
