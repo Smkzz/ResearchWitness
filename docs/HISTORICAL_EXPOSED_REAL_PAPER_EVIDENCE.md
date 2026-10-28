@@ -5,7 +5,7 @@ software's measured scientific performance. This is a historical *exposed
 development* record, **not** a new study, blind holdout, independent publisher
 verification, source-label adjudication or research breakthrough.
 
-**Verified main before source-recovery candidate:** `387320de5763e9d3705e2d096f0cd354e4eb8737`.
+**Verified main after RW-01Q1 source-recovery code:** `6131bccef55e1fe3c2d789e50821c7f51aafb2aa`.
 **Package:** `0.3.0.dev0` UNRELEASED. The present installed code was
 **not** run against the archived original source bytes in this session.
 

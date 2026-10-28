@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "387320de5763e9d3705e2d096f0cd354e4eb8737",
+    "observed_main_sha": "6131bccef55e1fe3c2d789e50821c7f51aafb2aa",
     "observed_on": "2026-10-28",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified main 387320d has postmerge CI and CodeQL success. RW-01Q1 exact old Europe PMC 13-source index plus default offline guard is unmerged candidate. Old JATS bytes remain unavailable (read-only 329 dirs/1291 files, no XML or archive; model-side DNS fails); no academic source performance can be established."
+    "note": "RW-01Q1 PR #53 merged at 6131bcc. Exact head 0d7d52e CI 40681162504 passed 10/10, Ubuntu Python 3.12 1102 tests+337 subtests, CodeQL 40681162471 and dependency 40681162539 passed; postmerge main CI 40681472187 and CodeQL 40681472250 passed. No historical XML/JATS bodies recovered; empirical comparison remains blocked_evidence."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -91,7 +91,8 @@
         "https://github.com/Smkzz/ResearchWitness/pull/46",
         "https://github.com/Smkzz/ResearchWitness/pull/48",
         "docs/HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md",
-        "https://github.com/Smkzz/ResearchWitness/pull/51"
+        "https://github.com/Smkzz/ResearchWitness/pull/51",
+        "https://github.com/Smkzz/ResearchWitness/pull/53"
       ],
       "blocker": null,
       "completed_slices": [
@@ -205,12 +206,12 @@
         },
         {
           "id": "RW-01Q1",
-          "scope": "candidate exact 2026-10-05 Europe PMC historical source metadata index of 9 original JATS/4 corrections and offline read-only source-cache audit plus strictly guarded, explicitly authorized allowlisted sequential HTTPS recovery; no historical raw bodies recovered and no source origin, licence or independent scientific label established",
+          "scope": "merged and exact-head CI-qualified exact 2026-10-05 Europe PMC historical source metadata index of 9 original JATS/4 corrections and offline read-only source-cache audit plus strictly guarded, explicitly authorized allowlisted sequential HTTPS recovery; no historical raw bodies recovered and no source origin, licence or independent scientific label established",
           "implementation": "tools/recover_legacy_europepmc_sources.py",
           "tests": "tests/test_recover_legacy_europepmc_sources.py"
         }
       ],
-      "next_action": "Qualify RW-01Q1 exact-head CI, then in an ALREADY authorized network-enabled private source environment verify each article's actual reuse permission and recover exact wave1 original bytes by old checksum only, with no file overwrite or changed-version substitution. Recovered Europe PMC JATS is not PMC OAI envelope. Run current JATS and frozen baseline against same restored developer-exposed source bytes, with genuine independent source-context labels. If no authorized runtime, record blocked_external and leave RW-01Q issue #50/RW-01O #35 open. Zero new billing/egress/protected custody."
+      "next_action": "RW-01Q issue #50 still OPEN: operate tools.recover_legacy_europepmc_sources with the committed 13-record historical index and independently retained raw hash, in a private pre-approved environment. Default offline audit first, then only if source-specific rights and provider egress ALREADY approved attempt bounded official HTTPS; never bypass LocalControl network guard. A changed current Europe PMC fullTextXML body MUST NOT replace old Oct 2026 hash. Once exact raw source bytes exist, run fixed same-source baseline vs installed audit with genuine independent correction/source-context labels and count all unavailable families. RW-01O #35 still separately requires original PMC OAI-PMH envelopes. Zero new cost, no sealed custody."
     },
     {
       "id": "RW-02",
