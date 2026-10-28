@@ -63,7 +63,7 @@ def implementation_files() -> dict[str, str]:
                      "jats_product.py", "jats_table_projection.py", "paper_document.py",
                      "paper_statistics.py", "paper_two_by_two_source.py",
                      "paper_flow.py", "paper_flow_source.py", "paper_prisma_flow.py",
-                     "paper_statistics_source.py", "jats_denominator_trace.py")
+                     "paper_statistics_source.py", "paper_count_totals.py", "jats_denominator_trace.py")
     }
 
 
@@ -72,6 +72,7 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
                 include_odds_ratio: bool = False,
                 include_prose_flows: bool = False,
                 include_prisma_flows: bool = False,
+                include_count_totals: bool = False,
                 include_sd_se_n: bool = False,
                 include_denominator_trace: bool = False) -> dict[str, Any]:
     if type(document_id) is not str or IDENTIFIER.fullmatch(document_id) is None:
@@ -127,7 +128,7 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
         from .jats_denominator_trace import trace_denominators
         report["denominator_evidence_trace"] = trace_denominators(source, result)
     if (include_structure or include_odds_ratio or include_prose_flows
-            or include_prisma_flows or include_sd_se_n):
+            or include_prisma_flows or include_count_totals or include_sd_se_n):
         from .jats_table_projection import project_jats_tables
         projection = project_jats_tables(
             source, result,
@@ -180,6 +181,9 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
                     "Unresolved relations abstain; arithmetic candidates remain unreviewed.",
                 ],
             }
+    if include_count_totals:
+        from .paper_count_totals import check_explicit_participant_totals
+        report["count_total_review"] = check_explicit_participant_totals(projection)
     if include_prisma_flows:
         from .paper_prisma_flow import MAX_RELATIONS, map_jats_prisma_relations
         mapped = map_jats_prisma_relations(projection, limit=MAX_RELATIONS + 1)
@@ -259,6 +263,37 @@ def render_html(report: dict[str, Any]) -> bytes:
         "<p><small>Offline. No source authentication, scientific adjudication,"
         " or external action performed.</small></p></html>\n"
     )
+    if "count_total_review" in report:
+        count_review = report["count_total_review"]
+        candidate_rows = []
+        for case in count_review["cases"]:
+            if case["status"] != "COUNT_TOTAL_MISMATCH_CANDIDATE":
+                continue
+            columns = (
+                case["table_id"], case["computed_total_exact"],
+                case["reported_total_exact"], case["difference_exact"],
+                case["total_anchor"]["quote"] if case["total_anchor"] else "",
+            )
+            candidate_rows.append("<tr>" + "".join(
+                "<td>" + escape(str(value), quote=True) + "</td>"
+                for value in columns
+            ) + "</tr>")
+        section = (
+            "<h2>Opt-in explicit participant count-total review</h2>"
+            "<p>Only source-declared mutually exclusive and exhaustive categories;"
+            " unreviewed arithmetic candidates, not confirmed research errors.</p>"
+            "<p>Checked tables: " + str(count_review["checked_table_count"])
+            + "; candidate totals: " + str(count_review["candidate_count"])
+            + "; unsupported tables: "
+            + str(count_review["status_counts"]["UNSUPPORTED"]) + "</p>"
+            "<table><thead><tr><th>Table</th><th>Category sum</th>"
+            "<th>Printed total</th><th>Difference</th><th>Source excerpt</th>"
+            "</tr></thead><tbody>" + "".join(candidate_rows)
+            + "</tbody></table>"
+            "<p>Applicability is based on supplied source declarations, not"
+            " independently authenticated population scope.</p>"
+        )
+        html = html.replace("</html>\n", section + "</html>\n")
     if "prisma_flow_review" in report:
         review = report["prisma_flow_review"]
         prisma_rows = []
@@ -427,6 +462,7 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
                  include_odds_ratio: bool = False,
                  include_prose_flows: bool = False,
                  include_prisma_flows: bool = False,
+                 include_count_totals: bool = False,
                  include_sd_se_n: bool = False,
                  include_denominator_trace: bool = False) -> dict[str, Any]:
     if (expected_source_sha256 is not None and
@@ -442,6 +478,7 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
                          include_odds_ratio=include_odds_ratio,
                          include_prose_flows=include_prose_flows,
                          include_prisma_flows=include_prisma_flows,
+                         include_count_totals=include_count_totals,
                          include_sd_se_n=include_sd_se_n,
                          include_denominator_trace=include_denominator_trace)
     report_bytes = canonical_json(report)
@@ -518,6 +555,7 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
     odds_ratio = "odds_ratio_review" in saved_report
     prose_flows = "sample_flow_review" in saved_report
     prisma_flows = "prisma_flow_review" in saved_report
+    count_totals = "count_total_review" in saved_report
     sd_se_n = "statistical_se_review" in saved_report
     denominator_trace = "denominator_evidence_trace" in saved_report
     new_report = make_report(contents[SOURCE_NAME], manifest["document_id"], pinned_before,
@@ -525,6 +563,7 @@ def replay_bundle(bundle: Path, expected_manifest_sha256: str | None = None) -> 
                              include_odds_ratio=odds_ratio,
                              include_prose_flows=prose_flows,
                              include_prisma_flows=prisma_flows,
+                             include_count_totals=count_totals,
                              include_sd_se_n=sd_se_n,
                              include_denominator_trace=denominator_trace)
     if (canonical_json(new_report) != contents[REPORT_NAME]
