@@ -23,7 +23,7 @@ import sys
 import time
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from tools import verification_benchmark as vb
 from tools.offline_files import read_regular
@@ -186,6 +186,18 @@ def _receipt(record: dict[str, Any], *, observed_at_utc: str,
     }
 
 
+class _NoRedirect(HTTPRedirectHandler):
+    """Do not send a second request to any host via a provider redirect."""
+
+    def redirect_request(self, req: Any, fp: Any, code: int, msg: str,
+                         headers: Any, newurl: str) -> None:
+        return None
+
+
+def _official_open(request: Request, *, timeout: int) -> Any:
+    return build_opener(_NoRedirect).open(request, timeout=timeout)
+
+
 def _recover_one(root: Path, record: dict[str, Any],
                  opener: Callable[..., Any]) -> str:
     """One bounded, allowlisted provider request; never write a version drift."""
@@ -238,7 +250,7 @@ def _recover_one(root: Path, record: dict[str, Any],
 def recover(index: dict[str, Any], root: Path, *, expected_index_sha256: str,
             exact_index_bytes: bytes, network_authorized: bool = False,
             max_network_requests: int = 1, only_pmcid: str | None = None,
-            opener: Callable[..., Any] = urlopen,
+            opener: Callable[..., Any] = _official_open,
             pause: Callable[[float], Any] = time.sleep) -> dict[str, Any]:
     """Audit existing exact copies or run a bounded explicit authorized recovery.
 
@@ -269,7 +281,7 @@ def recover(index: dict[str, Any], root: Path, *, expected_index_sha256: str,
                 status = "NOT_ATTEMPTED_REQUEST_CAP"
             else:
                 if attempted:
-                    pause(0.4)  # Sequential, well below the PMC OAI rate limit.
+                    pause(0.4)  # Sequential official Europe PMC requests, never concurrent.
                 attempted += 1
                 status = _recover_one(private, record, opener)
         outcomes.append({"pmcid": record["pmcid"],
