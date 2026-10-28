@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified pre-RW-01Q1 main:** `387320de5763e9d3705e2d096f0cd354e4eb8737`
+**Verified main:** `6131bccef55e1fe3c2d789e50821c7f51aafb2aa`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,31 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-01Q1: original historical source recovery (engineering candidate)
+## 2026-10-28 RW-01Q1 source recovery engineering acceptance
+
+[RW-01Q1 PR #53](https://github.com/Smkzz/ResearchWitness/pull/53)
+qualified at exact code head `0d7d52e22bd68baf5fe938858482dd7c5a96eb64`:
+[CI 40681162504](https://github.com/Smkzz/ResearchWitness/actions/runs/40681162504)
+**10/10** across Python3.11–3.13 × Ubuntu/macOS/Windows plus release;
+Ubuntu/Python 3.12 **1,102 tests + 337 subtests**;
+[CodeQL 40681162471](https://github.com/Smkzz/ResearchWitness/actions/runs/40681162471)
+and [dependency evidence 40681162539](https://github.com/Smkzz/ResearchWitness/actions/runs/40681162539)
+both succeeded. Protected main squash merge
+`6131bccef55e1fe3c2d789e50821c7f51aafb2aa`
+then passed independent
+[postmerge CI 40681472187](https://github.com/Smkzz/ResearchWitness/actions/runs/40681472187)
+(10/10 jobs) and
+[CodeQL 40681472250](https://github.com/Smkzz/ResearchWitness/actions/runs/40681472250).
+Version still `0.3.0.dev0`, UNRELEASED.
+
+**Scientific source acquisition NOT achieved:** none of the 13
+historical original provider XML response bodies were recovered;
+no article-specific licence adjudication, historical transfer
+timestamp, independent scientific label, new research error or
+same-source comparative result is established. A successful
+synthetic offline CI test is not an observed real corpus restoration.
+
+## RW-01Q1: original historical source recovery (merged, technically accepted)
 
 A read-only LocalControl check of the **authorized** local
 `C:\Projects\ResearchWitness` tree found no original XML/JATS/NXML
@@ -32,9 +56,9 @@ raw SHA
 The [offline-first exact recovery tool](HISTORICAL_SOURCE_RECOVERY.md)
 checks existing private original bodies, and in a *separately already
 approved* retrieval environment can attempt strict single-provider
-HTTPS recovery without overwriting drifted current versions. This
-**candidate** requires its own exact-head CI/CodeQL and can never
-qualify scientific labels or protected custody.
+HTTPS recovery without overwriting drifted current versions. This **merged engineering tool** passed exact-head and
+postmerge CI/CodeQL. No scientific labels or protected custody were
+qualified.
 
 The actual old JATS bytes, article licence adjudication, original
 2026 transfer proof and independently grounded paper labels remain
