@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `387320de5763e9d3705e2d096f0cd354e4eb8737` (2026-10-28), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `6131bccef55e1fe3c2d789e50821c7f51aafb2aa` (2026-10-28), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -159,7 +159,14 @@ independent source-scoped labels. The
 documents old 9- and 33-source exposed-paper evaluation artifacts
 separately from present-main performance.
 
-### RW-01Q1 — recover exact old developer-exposed JATS source bytes
+### RW-01Q1 — recover exact old developer-exposed JATS source bytes (merged)
+
+[PR #53](https://github.com/Smkzz/ResearchWitness/pull/53)
+has merged after exact-head CI 10/10, CodeQL and dependency
+qualification; postmerge main CI/CodeQL passed separately.
+This was **operational tooling only**; original historic publisher
+bodies were not available to download and RW-01Q remains
+`blocked_evidence` for actual source-connected scoring.
 
 [Exact historic source recovery](HISTORICAL_SOURCE_RECOVERY.md)
 consolidates the prior public 2026-10-05 *source-only metadata* into a
