@@ -160,7 +160,7 @@ def test_stable_installed_optional_review_and_bundle_replay(tmp_path):
     html = jats_product.render_html(report)
     assert b"PRISMA record-flow review" in html
     assert b"Whole-article PRISMA coverage" in html
-    assert b"confirmed paper error" not in html
+    assert b"unreviewed candidates, not confirmed paper errors" in html
     file = tmp_path / "example.xml"
     file.write_bytes(source)
     bundle = tmp_path / "report-bundle"
