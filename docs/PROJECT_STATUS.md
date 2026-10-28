@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified pre-RW-01R main:** `c7e1b7c98a571122d9272237e547c2f0dfeee733`
+**Verified main:** `73cbe833343cb42975d9c0e59353b0bfb26628e0`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,7 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-01R: explicit JATS table count-total review (engineering candidate)
+## RW-01R: explicit JATS table count-total review (merged)
 
 The current installed JATS audit gains opt-in
 `--include-count-totals`: integer sum of at least two distinct participant
@@ -34,7 +34,18 @@ performance was established. The verified historical SHA manifests
 are **not** the original bodies. This does not imply that other
 operator-authorized source stores were exhaustively searched.
 
-The current code must pass exact-head CI before merging.
+**Qualified engineering implementation:** [PR #51](https://github.com/Smkzz/ResearchWitness/pull/51)
+exact head `3b103bee0232cb1e97228fda500521302a434460`
+passed [CI 40661750774](https://github.com/Smkzz/ResearchWitness/actions/runs/40661750774)
+10/10 OS/Python + Release checks, including **1,080 pytest
+and 331 subtests** (Ubuntu 3.12), and
+[CodeQL 40661750816](https://github.com/Smkzz/ResearchWitness/actions/runs/40661750816)
+plus [dependency evidence 40661750792](https://github.com/Smkzz/ResearchWitness/actions/runs/40661750792).
+Squash-merged protected main `73cbe833343cb42975d9c0e59353b0bfb26628e0`
+then passed separate [postmerge CI 40662162735](https://github.com/Smkzz/ResearchWitness/actions/runs/40662162735)
+and [CodeQL 40662162659](https://github.com/Smkzz/ResearchWitness/actions/runs/40662162659).
+These are synthetic/software checks only; no real correction-source
+detection performance has been established.
 [RW-01R scope](JATS_COUNT_TOTALS.md);
 [RW-01Q same-source real validation](https://github.com/Smkzz/ResearchWitness/issues/50)
 remains open and cannot be replaced by synthetic qualification.
