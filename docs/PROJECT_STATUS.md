@@ -15,7 +15,7 @@ independent scientific performance or qualify PDF/custody execution.
 ## RW-01Q1: original historical source recovery (engineering candidate)
 
 A read-only LocalControl check of the **authorized** local
-`C:\\Projects\\ResearchWitness` tree found no original XML/JATS/NXML
+`C:\Projects\ResearchWitness` tree found no original XML/JATS/NXML
 source files across 329 folders / 1,291 files; there were no
 recognized source ZIP/TAR/7z caches and no same-project sibling
 directories. The model-side runtime also cannot resolve
@@ -58,7 +58,7 @@ unresolved scope abstain, not "pass". Findings remain `unreviewed`,
 Archived real-paper correction categories include count-only typos and
 demographic categories, but the sources were not found in the already
 authorized local project checkout. A read-only search of 329 directories
-under `C:\\Projects\\ResearchWitness` found **zero** files ending
+under `C:\Projects\ResearchWitness` found **zero** files ending
 `.xml`, `.jats` or `.nxml`. No original saved XML bytes,
 article-specific rights, source version or same-source current-version
 performance was established. The verified historical SHA manifests
