@@ -1,7 +1,6 @@
 """Synthetic-only tests for historical Europe PMC original-byte recovery."""
 from __future__ import annotations
 
-from copy import deepcopy
 from hashlib import sha256
 import json
 from pathlib import Path
