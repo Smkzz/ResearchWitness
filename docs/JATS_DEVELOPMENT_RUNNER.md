@@ -23,6 +23,21 @@ of the abstention. These closely related invented examples are not independent
 papers or measurements of scientific precision/recall. No network/provider call
 is needed. Existing outputs are never overwritten or automatically retried.
 
+## Optional installed PRISMA source review
+
+The [RW-01P PRISMA checker](JATS_PRISMA_FLOW.md) is available as an
+independent opt-in to the installed `audit-jats` source-review bundle:
+`--include-prisma-flows`. It checks only explicitly labelled
+`records identified - duplicates removed = records screened`
+relationships within **one** standalone original-JATS body paragraph
+of systematic-review context, retaining original full XML element byte
+offsets, normalized phrase quotes and source digest. Unsupported stage
+or scope context does not become arithmetic. The saved report and HTML
+are independently regenerated on `replay-jats`; a green replay does
+not authenticate a publisher, rights, work-family labels or a paper error.
+The registered *percentage* runner below is not implicitly upgraded
+to a PRISMA benchmark, and its old frozen receipts remain unchanged.
+
 ## Canonical evidence bridge
 
 `researchwitness/paper_document.py` preserves the immutable upstream model from

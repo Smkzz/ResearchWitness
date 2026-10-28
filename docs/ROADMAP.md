@@ -7,7 +7,7 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified main** is `a1e35b6a39abcf58b42e42f6c53f295a33f088c0`
+The **verified pre-RW-01P main** is `19eddd8c7eab49262fa12854fcfb01f1c743b8ca`
 (2026-10-27), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
@@ -27,6 +27,14 @@ can be pinned separately from the later source-attempt ledger, so
 declared PMC identifiers, versions and family relations cannot be
 silently dropped or substituted on replay. No pre-outcome timestamp or
 real source authenticity follows from SHA continuity alone.
+
+**Installed source coverage RW-01P candidate:** the
+[narrow PRISMA record-flow JATS checker](JATS_PRISMA_FLOW.md) is
+opt-in, candidate-only, source-byte anchored and independently
+replayable, not a whole-paper/diagram checker. Historical October 6
+development results of 2/16 correction-eligible issues and 33/33
+incomplete JATS papers belong to an **unmerged older branch**; they
+must not be reported as measured main performance.
 
 **First blocked scientific milestone:** [RW-01O](https://github.com/Smkzz/ResearchWitness/issues/35)
 requires actual approved PMC original-byte transfers, per-article reuse/lineage

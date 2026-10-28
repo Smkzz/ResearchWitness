@@ -2,6 +2,17 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-01P: installed source-mapped PRISMA arithmetic review — 2026-10-28
+
+- Selectively port the previously scoped explicit PRISMA record-removal mapper
+  from unmerged PR #11 through the current strict original-byte JATS model.
+- Add opt-in `audit-jats --include-prisma-flows`, source-mapped whole-paragraph
+  byte spans, bounded exact stage arithmetic, HTML candidate disclosure and
+  independent source/manifest replay; avoid any trusted-core expansion.
+- Ambiguous stages, multiple database contexts, unsupported syntax, diagrams
+  and cross-paragraph joins remain unsupported/abstained. No real-paper
+  improvement, external rights, independent labels or holdout has been proven.
+
 ### RW-01O2: prevent post-outcome pilot source selection changes — 2026-10-27
 
 - Add separately pinned, strict outcome-free PMC source selection frame with

@@ -85,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
                          help='Check explicit crude same-row odds ratios; scientific applicability unverified.')
     command.add_argument('--include-prose-flows', action='store_true',
                          help='Check explicit single-paragraph JATS body sample flows.')
+    command.add_argument('--include-prisma-flows', action='store_true',
+                         help='Review explicit single-paragraph PRISMA record-flow arithmetic; candidate-only.')
     command.add_argument('--include-sd-se-n', action='store_true',
                          help='Check explicitly captioned independent-observation SE = SD / sqrt(n) JATS rows.')
     command.add_argument('--include-denominator-trace', action='store_true',
@@ -114,6 +116,7 @@ def main(argv: list[str] | None = None) -> int:
                          include_structure=args.include_structure,
                          include_odds_ratio=args.include_unadjusted_2x2,
                          include_prose_flows=args.include_prose_flows,
+                         include_prisma_flows=args.include_prisma_flows,
                          include_sd_se_n=args.include_sd_se_n,
                          include_denominator_trace=args.include_denominator_trace) if args.command == 'audit-jats'
                           else replay_bundle(args.bundle, args.expected_manifest_sha256))

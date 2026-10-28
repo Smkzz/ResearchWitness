@@ -4,7 +4,7 @@
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
-**Observed software baseline:** `a1e35b6a39abcf58b42e42f6c53f295a33f088c0` (2026-10-27), `0.3.0.dev0`, UNRELEASED
+**Observed software baseline:** `19eddd8c7eab49262fa12854fcfb01f1c743b8ca` (2026-10-27), `0.3.0.dev0`, UNRELEASED
 
 This is an executable development plan, not evidence that its future components
 already exist. The earlier conversational label "v4" describes an ambition, not
@@ -128,6 +128,31 @@ is enabled. A digest alone does not prove that selection preceded
 outcomes. Authentic independent timestamping, real PMC acquisition,
 article-specific licence checks and actually separate substantive
 source reviews are still essential for RW-01O and later RW-03/RW-05.
+
+### RW-01P — installed source-mapped PRISMA record-flow check (candidate)
+
+Archived 2026-10-06 development data from the *separate unmerged*
+paper-audit capability branch comprise 33 original JATS source
+documents and 16 correction-backed issue families; only 2/16 were
+eligible under the old branch's narrow source-mapped contracts. Of
+17 selected controls, none raised a candidate, but all 33 papers
+had incomplete coverage; no independent paper-error finding or
+sealed test was achieved. Those counts do **not** validate present
+main or general accuracy.
+
+[RW-01P](JATS_PRISMA_FLOW.md) selectively ports the guarded
+`paper_prisma_flow` source mapper from the historical PR #11 into
+the **current installed JATS CLI**, preserving strict original XML
+byte-element anchors, full opt-in replay and candidate-only disclosure.
+Only explicit within-one-paragraph PRISMA record-removal arithmetic
+is eligible; incompatible database, record/report/study or flow
+context must abstain. Do not import legacy XML normalization, activate
+PDF/OCR, claim source authenticity, or run untouched validation before
+RW-03/RW-05 safety and independent-source gates pass. Next actual
+science advancement must compare frozen versions on a source-pinned,
+permission-cleared *development-exposed* real-paper cohort with
+independent source-scoped labels. Qualify source-only implementation
+separately from real-world outcome evidence.
 
 ## RW-02 - Source evidence and provenance
 

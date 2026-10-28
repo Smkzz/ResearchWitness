@@ -4,13 +4,36 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified main:** `a1e35b6a39abcf58b42e42f6c53f295a33f088c0`
+**Verified pre-RW-01P main:** `19eddd8c7eab49262fa12854fcfb01f1c743b8ca`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-01P: installed opt-in PRISMA record-flow JATS mapper (candidate)
+
+Found archived actual-development evidence on a **2026-10-06 unmerged
+branch**: 33 real JATS documents, 16 correction-backed issue families
+of which only 2 were eligible under that branch's supported source
+contracts, 2/2 eligible detected, 0/17 selected controls with
+candidates, and 33/33 papers had incomplete table coverage.
+No correction-backed PRISMA positive was eligible and no scientific
+error was independently established. These **post-hoc exposed**
+development figures describe the old draft, **not** present main
+performance or a blinded study. The original licensed full-text
+bodies were not copied or newly obtained here.
+
+The first actionable scope improvement selectively ports the old
+narrow PRISMA explicit record-removal mapping into the currently
+installed source-preserving JATS audit path, using opt-in
+`--include-prisma-flows`, original XML paragraph anchors,
+candidate-only disclosure, deterministic bundle replay and conservative
+source-ambiguity abstentions. It does **not** join multi-paragraph
+counts or read PRISMA diagrams/PDFs, and is a code candidate requiring
+exact-head CI/CodeQL, not an observed real-paper gain.
+See [the implementation scope](JATS_PRISMA_FLOW.md).
 
 ## RW-01O2: separately pinned PMC selection frame (merged)
 
