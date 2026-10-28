@@ -116,7 +116,7 @@ is not automatically requested.
 ## Present operator evidence
 
 On 28 October 2026, a bounded read-only scan of
-`C:\\Projects\\ResearchWitness` found **no original XML/JATS/NXML**
+`C:\Projects\ResearchWitness` found **no original XML/JATS/NXML**
 (329 directories, 1,291 ordinary files scanned, no recognized source
 archives), while this conversation's model-side runtime failed DNS for
 `www.ebi.ac.uk` and the exact official XML URL could not be
