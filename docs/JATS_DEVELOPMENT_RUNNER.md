@@ -23,6 +23,19 @@ of the abstention. These closely related invented examples are not independent
 papers or measurements of scientific precision/recall. No network/provider call
 is needed. Existing outputs are never overwritten or automatically retried.
 
+## Optional JATS participant total arithmetic (RW-01R)
+
+The [source-mapped category total checker](JATS_COUNT_TOTALS.md) is
+available as `researchwitness audit-jats --include-count-totals`.
+It is a separate opt-in review of clean JATS tables **explicitly**
+declaring mutually exclusive and exhaustive participant categories
+and a final `Total`. The exact integer sum and original XML cell
+element spans are included in the private report, escaped HTML and
+source/manifest replay. All other kinds of row total and
+scientifically unverified scope abstain. This neither changes the
+registered percentage runner's frozen results nor adds a scientific
+benchmark sample.
+
 ## Optional installed PRISMA source review
 
 The [RW-01P PRISMA checker](JATS_PRISMA_FLOW.md) is available as an
