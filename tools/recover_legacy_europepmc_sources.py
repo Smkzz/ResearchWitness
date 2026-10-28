@@ -129,7 +129,8 @@ def validate_index(index: dict[str, Any], *, expected_index_sha256: str,
         require(type(record["declared_license"]) is str
                 and 1 <= len(record["declared_license"]) <= 160
                 and type(record["declared_retrieval_date"]) is str
-                and DATE.fullmatch(record["declared_retrieval_date"]) is not None,
+                and DATE.fullmatch(record["declared_retrieval_date"]) is not None
+                and record["declared_retrieval_date"] == manifest["retrieved_date"],
                 "RECOVERY_DECLARED_RIGHTS_OR_DATE")
         output[pmcid] = record
     for record in records:
