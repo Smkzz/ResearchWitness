@@ -270,6 +270,20 @@ regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
 and [synthetic example](examples/source-capture/README.md). This does not
 grant protected custody or confirmatory evaluation access.
 
+### Installed PRISMA review of explicit JATS record flow (RW-01P)
+
+`researchwitness audit-jats --include-prisma-flows` now optionally checks a
+narrow **single original JATS body paragraph** explicitly listing records
+identified, duplicates removed and records screened in PRISMA/systematic-review
+context. The exact integer relation is `identified - duplicates = screened`.
+The original XML paragraph element bytes, normalized quote and source hash
+remain linked in the report and independently replayed in the evidence
+bundle. Unsupported contexts abstain; mismatches are **unreviewed candidates,
+not confirmed research errors**. This selectively ports an older unmerged
+development source mapper without replacing the bounded current parser.
+See [PRISMA workflow and limitations](docs/JATS_PRISMA_FLOW.md). No general
+PRISMA diagram, full-paper or scientific-quality assurance is implied.
+
 ### Preselected PMC source frame (RW-01O2)
 
 The [separately pinned private selection frame](docs/PMC_SELECTION_FRAME.md)
