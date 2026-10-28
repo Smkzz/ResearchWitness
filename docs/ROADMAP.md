@@ -7,8 +7,8 @@ not a second independently maintained task list.
 
 ## Main — 0.3.0.dev0 (UNRELEASED)
 
-The **verified pre-RW-01P main** is `19eddd8c7eab49262fa12854fcfb01f1c743b8ca`
-(2026-10-27), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
+The **verified main** is `e71a81f4ec670e25cc3c25eb93800c2899edc913`
+(2026-10-28), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
 and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
 The verifier still has ten bounded deterministic families, installed offline
 JATS review aids and replayable evidence; no general paper truth or independent
@@ -28,13 +28,22 @@ declared PMC identifiers, versions and family relations cannot be
 silently dropped or substituted on replay. No pre-outcome timestamp or
 real source authenticity follows from SHA continuity alone.
 
-**Installed source coverage RW-01P candidate:** the
+**Installed source coverage RW-01P merged and CI-qualified:** the
 [narrow PRISMA record-flow JATS checker](JATS_PRISMA_FLOW.md) is
 opt-in, candidate-only, source-byte anchored and independently
 replayable, not a whole-paper/diagram checker. Historical October 6
 development results of 2/16 correction-eligible issues and 33/33
 incomplete JATS papers belong to an **unmerged older branch**; they
 must not be reported as measured main performance.
+
+**Historical real-paper development evidence:** the
+[archived exposure record](HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
+preserves the distinct old JATS→Markdown and direct JATS results
+without conflating them with present-main measured performance.
+RW-01Q first requires authorized original fulltext access and an
+independent same-source exposed-development comparison. Historic
+33-document coverage was incomplete; a new synthetic-only check
+does not resolve this science bottleneck.
 
 **First blocked scientific milestone:** [RW-01O](https://github.com/Smkzz/ResearchWitness/issues/35)
 requires actual approved PMC original-byte transfers, per-article reuse/lineage

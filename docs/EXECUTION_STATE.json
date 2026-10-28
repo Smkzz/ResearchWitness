@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "19eddd8c7eab49262fa12854fcfb01f1c743b8ca",
+    "observed_main_sha": "e71a81f4ec670e25cc3c25eb93800c2899edc913",
     "observed_on": "2026-10-28",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified protected main 19eddd8 has successful CI and CodeQL; RW-01P PRISMA original-byte JATS opt-in feature is a candidate pending exact-head CI. Historical 33-source, 2/16 correction-eligible dataset refers to separate unmerged Oct 6 development branch, not current main scientific performance."
+    "note": "RW-01P PR #48 merged, exact-head CI 40609081228 passed 10/10, Ubuntu Python 3.12 1058 tests plus 323 subtests, CodeQL 40609081250 and dependency 40609081311 passed, and postmerge main CI 40609291106 and CodeQL 40609291112 passed. Historical exposed 9-/33-paper datasets are archived old-branch results, NOT current-main quality or independent scientific evidence."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -88,7 +88,9 @@
         "https://github.com/Smkzz/ResearchWitness/pull/37",
         "https://github.com/Smkzz/ResearchWitness/pull/38",
         "https://github.com/Smkzz/ResearchWitness/pull/44",
-        "https://github.com/Smkzz/ResearchWitness/pull/46"
+        "https://github.com/Smkzz/ResearchWitness/pull/46",
+        "https://github.com/Smkzz/ResearchWitness/pull/48",
+        "docs/HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md"
       ],
       "blocker": null,
       "completed_slices": [
@@ -190,12 +192,12 @@
         },
         {
           "id": "RW-01P",
-          "scope": "candidate installed optional current-parser JATS PRISMA single-body-paragraph records-identified minus duplicates-removed equals records-screened arithmetic with original XML byte-element anchors, CLI/HTML/replay and explicit unsupported cases; no real-paper evaluation or scientific adjudication",
+          "scope": "merged exact-head CI-qualified installed optional current-parser JATS PRISMA single-body-paragraph records-identified minus duplicates-removed equals records-screened arithmetic with original XML byte-element anchors, CLI/HTML/replay and explicit unsupported cases; no real-paper evaluation or scientific adjudication",
           "implementation": "researchwitness/paper_prisma_flow.py",
           "tests": "tests/test_installed_jats_prisma_flow.py"
         }
       ],
-      "next_action": "Qualify RW-01P exact-head CI/CodeQL/dependency evidence and postmerge main, then prioritize actual source-pinned development test of installed current JATS features on legally captured real sources with independently reviewed labels; old Oct 6 draft branch coverage was only 2/16 eligible corrections but must NOT be extrapolated to main. Scientific RW-01O issue #35 remains open for real original PMC capture and custodian/reviewer evidence."
+      "next_action": "RW-01Q: seek actual source-pinned real development-only Europe PMC/JATS material from existing October 2026 archives/approved retrieval in a private authorized environment; preserve all source/rights exclusions and preselected version families; run a fixed current installed-vs-frozen baseline same-source comparison, get genuinely separate substantive source review. Archived 33 docs/16 correction issues old draft had only 2 eligible and 8 unmatched of 12 candidates, no confirmed errors. RW-01O issue #35 remains OPEN for new original PMC OAI GetRecord bytes and independent rights/provider evidence. No paid calls or sealed custody."
     },
     {
       "id": "RW-02",

@@ -96,6 +96,14 @@ the report, HTML or manifest has changed.
 
 ## Historical real-paper evidence is not a new benchmark
 
+See the [separate archival evidence ledger](HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
+for the earlier exposed 9- and 33-JATS-paper development cohorts,
+eligibility denominators, candidate resolution gaps, and strict difference
+between old unmerged branches and the installed RW-01P code. The
+original fulltext source bytes and new independent source labels were
+not obtained or rereplayed in the current session.
+
+
 An archived **October 6, 2026** unmerged capability-branch development
 evaluation processed 33 JATS source documents and 16 correction-backed
 issues. The broader branch classified only **2/16** issues as eligible

@@ -270,6 +270,19 @@ regression corpus. See the [capture contract](docs/SOURCE_CAPTURE_LINEAGE.md)
 and [synthetic example](examples/source-capture/README.md). This does not
 grant protected custody or confirmatory evaluation access.
 
+### Real-paper development evidence and honest current scope
+
+[The 2026-10-06 real-paper evidence review](docs/HISTORICAL_EXPOSED_REAL_PAPER_EVIDENCE.md)
+separates a 9-paper rendered-JATS-to-Markdown development screen from
+33-source direct JATS experimental-branch replays. In the later **old,
+unmerged** source-mapped branch only 2 of 16 known correction-backed issues
+were eligible for checking; 33 of 33 documents had incomplete coverage,
+and 8 of 12 candidate items remained unresolved. These post-hoc exposed
+results are not current-main precision/recall or proof that a new PRISMA
+checker improves real error detection. The next priority is permission-cleared
+original-source acquisition and an independently grounded **same-source
+development comparison**, not a synthetic-only accuracy claim.
+
 ### Installed PRISMA review of explicit JATS record flow (RW-01P)
 
 `researchwitness audit-jats --include-prisma-flows` now optionally checks a
