@@ -2,6 +2,21 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-04H: hypothetical study dependence and missingness bounds — 2026-10-29
+
+- Add a fully offline, source-free bounded rational tool computing sharp
+  Fréchet bounds on a joint endpoint success chance, without assuming
+  independence of positive and negative endpoint events.
+- Add an exact binomial complete-family quota planner with conservative
+  union-bound cross-stratum guarantee under explicitly **invented**,
+  independent-within-stratum missingness; no power/retention multiplication.
+- Document 22.45%–42.17% marginal-based bounds versus the earlier 33.85%
+  independence scenario, and illustrative 152+102 enrolled families for
+  129+86 complete families at invented 10% loss.
+- Seven new synthetic focused tests, no empirical source, protected data,
+  source-truth labels, rights qualification or scientific validation. PR #57
+  exact-head and postmerge checks passed; package remains UNRELEASED.
+
 ### RW-01Q1: exact historical Europe PMC source recovery (pre-empirical) — 2026-10-28
 
 - Preserve the original public October 5 JATS manifest's **13 exact
