@@ -2,15 +2,15 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 1,
-  "updated_on": "2026-10-28",
+  "updated_on": "2026-10-29",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "7115c0a7fc2db073d1d7bb90a3afe586454b1a36",
-    "observed_on": "2026-10-28",
+    "observed_main_sha": "fc9cfcb543d204e1be693ba03fa57922145e3320",
+    "observed_on": "2026-10-29",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Main head refreshed at 7115c0a before the study. Existing RW-01Q1 engineering receipts remain in PROJECT_STATUS. The same installed 7115c0a code completed a separately declared two-article provider-display diagnostic with four verified audit/replay results and zero added opt-in relationships/candidates. Original recovery remains 0/13 and independent scientific performance is unestablished."
+    "note": "Engineering base includes merged RW-01S source-section hypotheses and RW-04H hypothetical dependence/missingness sensitivity. PR #57 exact-head CI 10/10, CodeQL and Dependency evidence passed; postmerge main CI/CodeQL passed. Developer-exposed known-case coverage is not a new paper discovery. Historical original Europe PMC XML remains 0/13; independent research labels, original PMC OAI-PMH envelopes, scientific performance and protected custody are unqualified."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -353,9 +353,15 @@
           "scope": "merged, exact-head CI-qualified exact bivariate negative alarm-count safety pass probability plus positive/safety joint probability from strictly invented independent-family assumptions; no empirical power or scientific discovery",
           "implementation": "tools/joint_power_feasibility.py",
           "tests": "tests/test_joint_power_feasibility.py"
+        },
+        {
+          "id": "RW-04H",
+          "scope": "merged exact bounded hypothetical Fréchet joint endpoint ranges and independent-within-stratum attrition quota sensitivity; no real source-based power or accuracy proof",
+          "implementation": "tools/study_sensitivity.py",
+          "tests": "tests/test_study_sensitivity.py"
         }
       ],
-      "next_action": "Prioritize RW-01O issue #35 permitted original PMC raw-byte acquisition and independently grounded development reviewer labels in an already authorized retrieval environment. Only then estimate positive discordances, four paired negative alarm rates and family dependence. RW-04H can add exposed-only missingness/sensitivity analysis without accessing protected data. The 215-family hypothetical scenario has only 33.85% joint target chance, NOT an empirically powered real study."
+      "next_action": "Prefer real permitted RW-01O #35 original PMC acquisition, article-specific rights/version review and genuinely independent source-context adjudication before source-based effect, paired harm or missingness-rate estimation. RW-01Q #50 also remains blocked at 0/13 historical original Europe PMC XML. Do not multiply hypothetical quota completion by endpoint power or turn RW-04H into a scientific result; avoid further source-free simulation layers without new grounded inputs."
     },
     {
       "id": "RW-05",

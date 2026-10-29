@@ -374,6 +374,21 @@ development pilot [RW-01O](https://github.com/Smkzz/ResearchWitness/issues/35)
 remains unperformed. No public report should call this a breakthrough
 in scientific error discovery.
 
+### RW-04H — joint event-dependence and missing-family sensitivity
+
+[RW-04H](STUDY_SENSITIVITY.md) provides a source-free, exact rational and
+bounded hypothetical utility to expose the earlier RW-04G **cross-endpoint
+independence** premise. Given only marginal endpoint pass chances, it returns
+sharp Fréchet joint bounds. Separately, its exact binomial quota planner
+assumes independent retention **within** each positive/negative stratum and
+allocates the joint quota failure budget by union bound, requiring no
+independence **between** the strata. It does **not** multiply quota
+completion with endpoint power, estimate missingness from real studies or
+repair the original PMC evidence/custody gaps. The 129+86 complete-family
+example under 10% *invented* loss requires 152+102 enrolled to give a
+95%-or-better conservative joint-quota completion bound. These are
+planning mathematics, **not** measured ResearchWitness superiority.
+
 ## RW-05 - Independent evidence curation and sealed custody
 
 **Owner role:** isolated custodian plus source-review agent. **Depends on:** RW-02,

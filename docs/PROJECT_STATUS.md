@@ -1,16 +1,58 @@
 # Project status
 
-**As of:** 2026-10-28  
+**As of:** 2026-10-29  
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified baseline main:** `7115c0a7fc2db073d1d7bb90a3afe586454b1a36`
+**Verified engineering baseline main:** `fc9cfcb543d204e1be693ba03fa57922145e3320`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-10-29 RW-04H: bounded hypothetical dependence and missingness
+
+[PR #57](https://github.com/Smkzz/ResearchWitness/pull/57) merged to protected
+main `fc9cfcb543d204e1be693ba03fa57922145e3320`. Exact proposed head
+`4f7bbb0e2a8a912ab9657c0a15ce1104237c71e1` passed
+[CI 40800732784](https://github.com/Smkzz/ResearchWitness/actions/runs/40800732784)
+(10/10 OS/Python/release jobs, Ubuntu/Python 3.12 **1,119 tests + 340 subtests**),
+[CodeQL 40800732780](https://github.com/Smkzz/ResearchWitness/actions/runs/40800732780)
+and [Dependency evidence 40800732999](https://github.com/Smkzz/ResearchWitness/actions/runs/40800732999).
+Independently after merge, [main CI 40800960061](https://github.com/Smkzz/ResearchWitness/actions/runs/40800960061)
+and [main CodeQL 40800959974](https://github.com/Smkzz/ResearchWitness/actions/runs/40800959974)
+completed successfully at the merged SHA.
+
+The checkout-only [RW-04H sensitivity tool](STUDY_SENSITIVITY.md) distinguishes
+joint endpoint independence from sharp Fréchet bounds and provides exactly
+calculated, bounded binomial family-retention quotas under **invented**
+independent-within-stratum missingness. At illustrative rounded marginal
+endpoint pass rates 80.28% and 42.17%, the joint endpoint chance lies from
+**22.45% to 42.17%** without an inter-endpoint independence premise; the
+previous **33.85%** is only the conditional independence example. At an
+invented 10% missing-family probability, **152 positive + 102 negative
+enrolled families** are sufficient to exceed a 95% lower bound for collecting
+**129 + 86 complete families**, assuming within-stratum independent losses.
+This is a **completion-probability** guarantee under that model, not research
+power, scientific performance or a recommendation based on real attrition.
+
+[RW-01S / PR #56](https://github.com/Smkzz/ResearchWitness/pull/56) also
+merged previously as `ea472bd485e934c23ac6c0d248d2f2c0e95c0a47`:
+its **optional** table-section denominator hypotheses recovered one
+already-known corrected J-EINSTEIN location in a 21-pair **developer-exposed**
+diagnostic, not a blinded error discovery or trusted core score change.
+
+**Scientific blockers unchanged:** historical Europe PMC original XML
+source recovery is **0/13**; a current provider-display derivative does not
+establish original response bytes. Original PMC OAI-PMH GetRecord envelopes,
+article-specific rights review, independent source-context adjudication,
+real paired paper comparisons, protected custody and research accuracy remain
+unqualified. [RW-01Q #50](https://github.com/Smkzz/ResearchWitness/issues/50)
+and [RW-01O #35](https://github.com/Smkzz/ResearchWitness/issues/35)
+remain open. Package `0.3.0.dev0` is still **UNRELEASED**; do not extend
+source-free simulations merely to claim scientific progress.
 
 ## 2026-10-28 RW-01Q2: actual derived-source comparison completed
 
