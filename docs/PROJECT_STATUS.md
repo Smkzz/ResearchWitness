@@ -1,16 +1,35 @@
 # Project status
 
-**As of:** 2026-10-29  
+**As of:** 2026-10-30  
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified engineering baseline main:** `fc9cfcb543d204e1be693ba03fa57922145e3320`
+**Verified engineering baseline main:** `55be13f144916f4e1cdf4ea6edf9295e7319a3a6`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-10-30: public quantum preprint correction metadata and pilot handoff
+
+A [separate external correction-lineage case](PUBLIC_CORRECTION_VERSION_CASE.md)
+records that the public arXiv:2404.12790v2 version history reports a
+corrected general observational classical bound and dependent robustness
+figures, with conclusions described as unchanged. This is **author-reported
+preprint revision metadata**: not an installed ResearchWitness discovery,
+journal-level erratum verification, independent scientific review, or
+priority-of-discovery evidence. No private mathematical script or
+correspondence is disclosed.
+
+An [external source and independent-review handoff](INDEPENDENT_PILOT_HANDOFF.md)
+now spells out exactly what an authorized source operator, two genuinely
+separate subject-matter reviewers and the project coordinator must supply
+to unblock RW-01O #35 / RW-01Q #50. It does not appoint reviewers,
+authorize new egress, bypass custody, or enable spending. Historical
+Europe PMC XML original recovery remains **0/13**; original PMC OAI-PMH
+GetRecord envelopes and independent paper labels remain unavailable.
 
 ## 2026-10-29 RW-04H: bounded hypothetical dependence and missingness
 
