@@ -2,6 +2,17 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### Public correction and independent pilot handoff — 2026-10-30
+
+- Record a public version-history update for arXiv:2404.12790v2,
+  expressly separating an author-reported correction from an
+  independently checked mathematical proof, a journal erratum and
+  installed ResearchWitness product evidence.
+- Publish an actionable zero-spend pilot handoff for original-source
+  operators and genuinely separate source/correction reviewers.
+  No private correspondence, script, licensed full-text or research
+  labels are added; the 0/13 historical source and custody gates remain.
+
 ### RW-04H: hypothetical study dependence and missingness bounds — 2026-10-29
 
 - Add a fully offline, source-free bounded rational tool computing sharp
