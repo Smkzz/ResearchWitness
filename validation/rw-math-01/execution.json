@@ -1,0 +1,45 @@
+{
+  "schema_version": "rw-math-work-package.v1",
+  "task_id": "RW-MATH-01",
+  "parent_plan_id": "RW-PLAN-2026-10-24",
+  "basis": "Owner approved a separate internal mathematical-certificate lane on 2026-10-31; no external researcher or outreach required for formal-model verification.",
+  "status": "in_review",
+  "base_main_sha": "bf244f36c3207c280ab0bce7b93ff2dd0cb331e1",
+  "branch": "research/rw-math-01-exact-certificates-20261031",
+  "owner": "current-session-coordinator",
+  "authority": {
+    "new_billing_enabled": false,
+    "new_permissions": false,
+    "protected_custody_access": false,
+    "external_contact": false
+  },
+  "scope": [
+    "optional installed exact bilinear model verifier",
+    "separate AI integer reference",
+    "synthetic transfer examples",
+    "bounded optional numerical proposer",
+    "adversarial tests and documentation"
+  ],
+  "local_evidence": {
+    "focused_tests_passed": 81,
+    "full_tests_passed": 1201,
+    "subtests_passed": 346,
+    "private_known_case_leaves": 13989,
+    "private_case_in_public_repo": false,
+    "source_archive_public_link_regression_passed": true
+  },
+  "qualification_required": [
+    "exact-head OS/Python matrix and Release gate",
+    "CodeQL",
+    "dated dependency evidence",
+    "postmerge main CI and CodeQL"
+  ],
+  "next_action": "Inspect this branch/PR exact head and checks, resolve genuine failures without weakening assertions, then merge routinely if qualified. Do not infer a public research accuracy claim or unfreeze historical evidence.",
+  "not_established": [
+    "automatic paper-to-model correspondence",
+    "new scientific discovery",
+    "independent human validation",
+    "general end-to-end detection accuracy"
+  ],
+  "status_basis": "Candidate premerge record; final hosted qualification and completion receipts belong to the associated pull request conversation."
+}

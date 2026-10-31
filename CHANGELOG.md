@@ -2,6 +2,22 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-MATH-01: reusable exact optimization certificates — 2026-10-31
+
+- Add an optional installed, solver-free rational checker for supplied bounded
+  linear/bilinear models, complete dyadic partitions and dual certificates.
+- Add a separately AI-authored integer reference checker with bottom-up coverage,
+  exact feasible-point verification and six synthetic transfer examples.
+- Add bounded checkout-only SciPy proposal search; every admitted proof is checked
+  exactly, with failures and exhausted budgets reported as inconclusive.
+- Cover input pins, unsupported inputs, file/link safety, optimized Python,
+  repinned corruptions, false optimality, residual arithmetic and coverage holes.
+- See [the supported contract](docs/EXACT_OPTIMIZATION_CERTIFICATES.md) and
+  [qualification scope](validation/rw-math-01/README.md). No private research
+  sources, correspondence, proof corpus, external outreach or new dependencies
+  are included. This is not automatic paper interpretation or scientific
+  accuracy validation; the package remains UNRELEASED.
+
 ### Public correction and independent pilot handoff — 2026-10-30
 
 - Record a public version-history update for arXiv:2404.12790v2,
