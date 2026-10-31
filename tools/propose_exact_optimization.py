@@ -152,7 +152,7 @@ def propose_bytes(model_bytes: bytes, claimed_upper: str, *,
               "model_sha256": expected_model_sha256,
               "claimed_upper": claimed_upper, "leaf_count": len(leaves)}
     report = exact.verify_records(model, header, leaves, model_sha256=expected_model_sha256)
-    proof = exact.canonical_bytes(header) + b"".join(exact.canonical_bytes(l) for l in leaves)
+    proof = exact.canonical_bytes(header) + b"".join(exact.canonical_bytes(leaf) for leaf in leaves)
     exact.require(len(proof) <= exact.MAX_PROOF_BYTES, "PROOF_BYTE_LIMIT")
     return proof, {
         "status": "exact_certificate_produced", "visited_nodes": nodes, "solver_calls": solves,

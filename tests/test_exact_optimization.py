@@ -119,8 +119,8 @@ def test_partition_attack_not_merely_volume(mutation):
     elif mutation == "equal_volume":
         leaves[:] = leaves[:3] + [examples.bound([i, j], [i+1, j+1])
                                   for i in (0, 1) for j in (0, 1)]
-        assert sum((l["upper"][0]-l["lower"][0])*(l["upper"][1]-l["lower"][1])
-                   for l in leaves) == 16
+        assert sum((leaf["upper"][0]-leaf["lower"][0])*(leaf["upper"][1]-leaf["lower"][1])
+                   for leaf in leaves) == 16
     elif mutation == "noncanonical":
         leaves[:] = [examples.bound([0, 0], [1, 4]), examples.bound([1, 0], [4, 4])]
     f["header"]["leaf_count"] = len(leaves)
