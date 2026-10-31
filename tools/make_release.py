@@ -21,6 +21,7 @@ TOP_FILES = {
     'CHANGELOG.md', 'CITATION.cff',
     'CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'LICENSE', 'NOTICE.md',
     'README.md', 'SECURITY.md', 'SUPPORT.md', 'pyproject.toml', 'CHECKSUMS.sha256',
+    'RESEARCHWITNESS_NEXT_CAMPAIGN_REPORT.md',
 }
 TOP_DIRS = {'.github', 'researchwitness', 'schemas', 'examples', 'benchmarks', 'prompts', 'tests', 'tools', 'docs', 'evidence', 'validation'}
 EXCLUDED_PARTS = {'.git', '.pytest_cache', '__pycache__', 'build', 'dist', 'researchwitness.egg-info'}

@@ -69,6 +69,19 @@ class ReleaseInventoryTests(unittest.TestCase):
         self.assertNotIn("researchwitness-0.test/validation/untracked-private.json", names)
         self.assertNotIn("researchwitness-0.test/validation/ignored-private.json", names)
 
+    def test_linked_public_campaign_report_is_included_but_other_root_files_are_not(self) -> None:
+        report_name = "RESEARCHWITNESS_NEXT_CAMPAIGN_REPORT.md"
+        (self.root / report_name).write_text("# Public historical record\n", encoding="utf-8")
+        (self.root / "PRIVATE_REVIEW.md").write_text("private", encoding="utf-8")
+        subprocess.run(["git", "add", report_name, "PRIVATE_REVIEW.md"],
+                       cwd=self.root, check=True)
+        output = self.root / "source.zip"
+        make_release.write_source_zip(output, "0.test")
+        with zipfile.ZipFile(output) as archive:
+            names = set(archive.namelist())
+            self.assertIn("researchwitness-0.test/" + report_name, names)
+            self.assertNotIn("researchwitness-0.test/PRIVATE_REVIEW.md", names)
+
     def test_source_zip_is_byte_for_byte_reproducible(self) -> None:
         output_dir = self.root / "dist"
         output_dir.mkdir()
