@@ -389,6 +389,21 @@ example under 10% *invented* loss requires 152+102 enrolled to give a
 95%-or-better conservative joint-quota completion bound. These are
 planning mathematics, **not** measured ResearchWitness superiority.
 
+### RW-04I — replay actual accepted development evidence (merged)
+
+This optional strict evidence bridge, described in
+[DEVELOPMENT_ARTIFACT_REPLAY.md](DEVELOPMENT_ARTIFACT_REPLAY.md), was
+implemented through [PR #72](https://github.com/Smkzz/ResearchWitness/pull/72)
+on the parallel source-bound mathematical lane. It requires a canonical
+RW-MATH-02 source block and actual exact point refuting the stated formal
+upper bound for each recorded accepted development certificate; no declaration
+alone can satisfy this replay. All source identities and the complete run are
+pinned, original work/family denominators remain unchanged, and negative alarm
+emission is retained even when evidence is rejected. Other checker families
+and non-accepted receipts remain explicitly **declarations only** in this
+v1 adapter. It does not establish source authenticity, paper error, independent
+labels, scientific accuracy or the protected evaluation infrastructure.
+
 ## RW-05 - Independent evidence curation and sealed custody
 
 **Owner role:** isolated custodian plus source-review agent. **Depends on:** RW-02,

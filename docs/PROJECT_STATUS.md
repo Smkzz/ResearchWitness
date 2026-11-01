@@ -4,13 +4,39 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified engineering baseline main:** `ceca3c3453071a1606a7c46caf6e870402e78d1f`
+**Verified engineering baseline main:** `e9fb168f5a6fa6fa3dc0367758b9895b984f3bcf`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-11-01: RW-04I replays accepted development proof receipts
+
+[RW-04I / PR #72](https://github.com/Smkzz/ResearchWitness/pull/72)
+merged to main as `e9fb168f5a6fa6fa3dc0367758b9895b984f3bcf`.
+The exact proposed head `54312bd3b56ddedb3e812bd35499ba311fc14aae`
+passed 13/13 checks (nine OS/Python jobs, Release gate, CodeQL and dependency
+evidence). Main [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41336847318)
+and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41336847339)
+are recorded separately after the merge. Both were **successful (11/11 completed checks)** on the merged main commit.
+
+The optional [RW-04I replay](DEVELOPMENT_ARTIFACT_REPLAY.md) closes one
+specific development-accounting loophole: a receipt declaring mathematical
+acceptance must be supported by actually replayed source bytes, the exact
+source-compiled mathematical model, and a strict rational refuting point.
+A missing, changed or non-refuting accepted receipt aborts an audited score.
+The existing legacy scorer still reports supplied declarations; RW-04I
+returns its complete work/family denominators and emitted alarms without
+improving them by dropping failures or unknowns.
+
+All new tests are synthetic engineering checks (20 new regression tests;
+163 local focused/source-claim/receipt tests). This is **not** verification
+of original published-paper error, source authenticity, independent labels,
+scientific performance or sealed evaluation. Historic original Europe PMC XML
+recovery remains 0/13 and the RW-01O/Q source-evidence blockers remain.
+The package remains `0.3.0.dev0` UNRELEASED.
 
 ## 2026-11-01: RW-MATH-03 and RW-MATH-04 accepted on main
 
