@@ -16,6 +16,10 @@
   accusation, source/custody waiver, or new runtime dependency.
 - Package remains UNRELEASED. Source-origin authentication and complete
   scientific claim understanding are not established.
+- [PR #70](https://github.com/Smkzz/ResearchWitness/pull/70) merged as
+  `ceca3c3453071a1606a7c46caf6e870402e78d1f` after exact-head 13/13 and postmerge main
+  11/11 checks. No release, paper-level attribution or scientific claim.
+
 
 
 ### RW-MATH-03: unmarked literal sentence screening — 2026-11-01
