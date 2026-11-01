@@ -599,7 +599,10 @@ context, publisher origin, publication errors or new-paper discovery accuracy.
 
 ## RW-MATH-04 - Strict source-declared literal context
 
-**Status:** in review, [issue #69](https://github.com/Smkzz/ResearchWitness/issues/69).
+**Status:** done; [PR #70](https://github.com/Smkzz/ResearchWitness/pull/70)
+merged on main `ceca3c3453071a1606a7c46caf6e870402e78d1f`, exact-head 13/13 and
+postmerge main 11/11 checks. The source role declaration is not
+authenticated author context or a scientific evaluation.
 **Depends on:** RW-MATH-03. [Contract](PROSE_ATTRIBUTION.md).
 
 A new optional three-line, versioned self-declared context source profile marks

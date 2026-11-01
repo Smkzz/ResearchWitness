@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "696ad7c5ed3f8b3767262733dd457edc30f748d3",
+    "observed_main_sha": "ceca3c3453071a1606a7c46caf6e870402e78d1f",
     "observed_on": "2026-11-01",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "RW-MATH-03 PR #64 merged with exact-head 13/13 checks and postmerge CI/CodeQL. Its literal mathematical evidence is not attribution of paper claims; source/original custody and scientific truth gates remain unresolved. RW-MATH-04 is a separate proposed source-declared context candidate, not validated by the previous PR."
+    "note": "RW-MATH-03 PR #64 and RW-MATH-04 PR #70 merged. RW-MATH-04 had exact-head 13/13 hosted checks and independent postmerge main 11/11. Main Ubuntu 3.12 1384 tests + 366 subtests, installed core coverage 93%. Feature distinguishes only source-declared roles, not genuine author intent, publisher origin or scientific paper error. Historic Europe PMC original XML 0/13; protected custody and independent scientific performance remain unqualified."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -601,19 +601,26 @@
       ],
       "required_capability_gates": [],
       "role": "source-context-development",
-      "status": "in_review",
-      "owner": "current-session-coordinator",
-      "branch": "research/rw-math-04-declared-context-20261101",
-      "base_sha": "696ad7c5ed3f8b3767262733dd457edc30f748d3",
-      "lease_expires_at_utc": "2026-11-02T20:00:00Z",
+      "status": "done",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-math-04---strict-source-declared-literal-context",
       "evidence": [
         "https://github.com/Smkzz/ResearchWitness/issues/69",
+        "https://github.com/Smkzz/ResearchWitness/pull/70",
+        "https://github.com/Smkzz/ResearchWitness/commit/ceca3c3453071a1606a7c46caf6e870402e78d1f",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41318840973",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41318840786",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41318840942",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41319047368",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41319047491",
         "docs/PROSE_ATTRIBUTION.md",
         "tests/test_prose_attribution.py"
       ],
       "blocker": null,
-      "next_action": "Exact-head CI/review required; after merge, separately record postmerge receipts and preserve unresolved author/rights/scientific gates."
+      "next_action": "Accepted bounded engineering slice: PR head passed 13/13 checks; independent postmerge main passed 11/11. Preserve unknown original author intent, rights, full-paper meaning, and no paper-error verdict. Resume RW-04 scientific measurement planning and original-source RW-01O/Q evidence separately."
     }
   ]
 }

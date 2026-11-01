@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified engineering baseline main:** `696ad7c5ed3f8b3767262733dd457edc30f748d3`
+**Verified engineering baseline main:** `ceca3c3453071a1606a7c46caf6e870402e78d1f`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,7 +12,7 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## 2026-11-01: RW-MATH-03 merged; RW-MATH-04 development candidate
+## 2026-11-01: RW-MATH-03 and RW-MATH-04 accepted on main
 
 [RW-MATH-03 / PR #64](https://github.com/Smkzz/ResearchWitness/pull/64)
 merged as `696ad7c5ed3f8b3767262733dd457edc30f748d3`, with 13/13
@@ -21,14 +21,23 @@ The optional [literal mathematical scanner](PROSE_MATH_CANDIDATES.md) proves
 or refutes only narrowly recognized universal affine inequalities. Surrounding
 prose and authorial attribution remain expressly unresolved.
 
-[RW-MATH-04 / issue #69](https://github.com/Smkzz/ResearchWitness/issues/69)
-is a separate [opt-in declared-context candidate](PROSE_ATTRIBUTION.md).
-It records only exact byte-bound source *declarations* of asserted, quoted,
-negated, hypothetical or corrected literal sentences. A label does not
-authenticate a publisher, source intent or scientific publication error.
-This branch is not qualified by the earlier PR's green CI; new exact-head
-checks are required. Historical PMC original recovery remains 0/13 and
-independent scientific accuracy remains unknown.
+[RW-MATH-04 / PR #70](https://github.com/Smkzz/ResearchWitness/pull/70)
+merged as `ceca3c3453071a1606a7c46caf6e870402e78d1f` with exact-head **13/13** hosted
+checks ([CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41318840973),
+[CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41318840786),
+[dependency review](https://github.com/Smkzz/ResearchWitness/actions/runs/41318840942)).
+Separate [main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41319047368)
+and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41319047491)
+passed **11/11** checks on the merged SHA. Main Ubuntu/Python 3.12 ran
+**1,384 tests + 366 subtests**, installed verifier-core coverage **93%**.
+
+The optional [declared-context profile](PROSE_ATTRIBUTION.md) distinguishes
+the same mathematically refuted literal sentence in an explicitly declared
+assertion versus a quotation in the same source. Mathematical proof results
+are unchanged; declared roles do **not** authenticate publisher or author
+intent. Original historical PMC recovery remains **0/13**, publication errors
+and general scientific accuracy are not established, and the package is
+still UNRELEASED.
 
 ## 2026-11-01: mathematical lane and source-claim compilation
 
