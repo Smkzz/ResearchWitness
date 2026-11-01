@@ -1,0 +1,11 @@
+This entire document is invented engineering test data, not a real scientific paper.
+RW-MATH-CONTEXT-BEGIN v1 id=declared_claim role=asserted
+For all real x in [0,1], x <= 1/2.
+RW-MATH-CONTEXT-END v1 id=declared_claim
+
+This identical sentence is an explicitly declared example, not an author assertion.
+RW-MATH-CONTEXT-BEGIN v1 id=declared_quote role=quoted
+For all real x in [0,1], x <= 1/2.
+RW-MATH-CONTEXT-END v1 id=declared_quote
+
+Unmarked prose, qualifications and the origin of any real publication remain unverified.

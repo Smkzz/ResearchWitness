@@ -586,3 +586,17 @@ in [PROJECT_STATUS.md](docs/PROJECT_STATUS.md); historical evidence stays unchan
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE) and [NOTICE.md](NOTICE.md).
+
+## Source-declared sentence attribution (RW-MATH-04)
+
+The optional [context-attribution layer](docs/PROSE_ATTRIBUTION.md) accepts an
+**exact three-line declaration** around one existing RW-MATH-03 literal
+sentence, labeling it asserted, quoted, negated, hypothetical or corrected
+**only as a source declaration**. In the synthetic
+[example](examples/prose-attribution-v1/illustrative-source.txt), the same
+mathematically false sentence appears as both a declared assertion and a
+quotation. Exact mathematical evidence is identical but its declared
+context differs. Neither label authenticates an author or reports a paper
+error. Run `python -m researchwitness.prose_attribution scan --source FILE
+--expected-source-sha256 SHA` and follow the separately pinned replay
+instructions. This is an opt-in engineering aid, not automatic paper analysis.

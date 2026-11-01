@@ -1,6 +1,6 @@
 # Autonomous development plan
 
-**Plan:** `RW-PLAN-2026-10-24` / revision 2
+**Plan:** `RW-PLAN-2026-10-24` / revision 3
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
@@ -587,6 +587,34 @@ version/hints/model/proof/point swap and parser-injection rejections, clean-whee
 execution and all required exact-head CI/CodeQL/dependency/postmerge checks.
 Do not call this arbitrary-paper understanding, independent scientific review,
 research superiority, or completed RW-06.
+
+## RW-MATH-03 - Narrow unmarked mathematical sentence screening
+
+**Status:** done, [PR #64](https://github.com/Smkzz/ResearchWitness/pull/64),
+main `696ad7c5ed3f8b3767262733dd457edc30f748d3`. The
+[contract](PROSE_MATH_CANDIDATES.md) permits exact source-byte-bound literal
+inequalities in ordinary English over one to three bounded independent real
+variables. Exact mathematics does not establish speaker identity, surrounding
+context, publisher origin, publication errors or new-paper discovery accuracy.
+
+## RW-MATH-04 - Strict source-declared literal context
+
+**Status:** in review, [issue #69](https://github.com/Smkzz/ResearchWitness/issues/69).
+**Depends on:** RW-MATH-03. [Contract](PROSE_ATTRIBUTION.md).
+
+A new optional three-line, versioned self-declared context source profile marks
+exactly one unchanged literal mathematical line as asserted, quoted, negated,
+hypothetical or corrected. Preserve original UTF-8 source and marker byte spans,
+source/sentence hashes, caller-held external pins and unchanged mathematical
+models/certificates. Nonmarked lines, free prose and unstated premises remain
+unadjudicated. A source declaration is not proof of authorial intent.
+
+**Acceptance:** the same false sentence in two marked roles **in the same**
+source produces identical rational proof results and distinctly scoped
+attribution labels; nested/overlapping/malformed/cross-version context markers
+and tampered reports fail closed. Require exact-head OS/Python CI, release
+gate, CodeQL and dependency evidence plus postmerge main verification. Keep
+paper-error, empirical/rights, original PMC and custody gates unchanged.
 
 ## Evidence, review and independence
 

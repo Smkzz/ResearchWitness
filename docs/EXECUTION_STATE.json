@@ -1,16 +1,16 @@
 {
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
-  "plan_revision": 2,
+  "plan_revision": 3,
   "updated_on": "2026-11-01",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "ac3272fba5eaa4f99918452e7022fb4e6ebba4bd",
+    "observed_main_sha": "696ad7c5ed3f8b3767262733dd457edc30f748d3",
     "observed_on": "2026-11-01",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Merged RW-MATH-01 #61 and source-bound controlled-markup RW-MATH-02 #62; exact-head PR checks 13/13 and independent postmerge main CI/CodeQL 11/11 for #62. 1,296 tests + 355 subtests recorded on local final source; two source-bound proof fixtures and one exact formal counterexample. Never infer arbitrary-paper interpretation or scientific error discovery. Historical Europe PMC original XML recovery 0/13; real reviewer labels/custody not qualified. Version 0.3.0.dev0 remains UNRELEASED."
+    "note": "RW-MATH-03 PR #64 merged with exact-head 13/13 checks and postmerge CI/CodeQL. Its literal mathematical evidence is not attribution of paper claims; source/original custody and scientific truth gates remain unresolved. RW-MATH-04 is a separate proposed source-declared context candidate, not validated by the previous PR."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -570,6 +570,50 @@
         "https://github.com/Smkzz/ResearchWitness/actions/runs/41280517159"
       ],
       "next_action": "Engineering slice accepted and merged, 13/13 exact-head PR checks and 11/11 postmerge main checks. Any further natural-language or paper-context model bridge must be a distinct bounded slice with versioned grammar and source-to-model integrity tests; RW-01/RW-02 evidence gates and RW-06 dependencies remain unchanged."
+    },
+    {
+      "id": "RW-MATH-03",
+      "title": "Narrow unmarked mathematical sentence screening",
+      "priority": 2,
+      "depends_on": [
+        "RW-MATH-02"
+      ],
+      "required_capability_gates": [],
+      "role": "mathematical-literal-source-screen",
+      "status": "done",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-math-03---narrow-unmarked-mathematical-sentence-screening",
+      "evidence": [
+        "https://github.com/Smkzz/ResearchWitness/pull/64",
+        "docs/PROSE_MATH_CANDIDATES.md"
+      ],
+      "next_action": "Literal results cannot establish author assertions or paper errors; RW-MATH-04 is a separate bounded lane."
+    },
+    {
+      "id": "RW-MATH-04",
+      "title": "Strict source-declared context attribution for literal claims",
+      "priority": 2,
+      "depends_on": [
+        "RW-MATH-03"
+      ],
+      "required_capability_gates": [],
+      "role": "source-context-development",
+      "status": "in_review",
+      "owner": "current-session-coordinator",
+      "branch": "research/rw-math-04-declared-context-20261101",
+      "base_sha": "696ad7c5ed3f8b3767262733dd457edc30f748d3",
+      "lease_expires_at_utc": "2026-11-02T20:00:00Z",
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-math-04---strict-source-declared-literal-context",
+      "evidence": [
+        "https://github.com/Smkzz/ResearchWitness/issues/69",
+        "docs/PROSE_ATTRIBUTION.md",
+        "tests/test_prose_attribution.py"
+      ],
+      "blocker": null,
+      "next_action": "Exact-head CI/review required; after merge, separately record postmerge receipts and preserve unresolved author/rights/scientific gates."
     }
   ]
 }

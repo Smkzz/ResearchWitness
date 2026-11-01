@@ -2,6 +2,22 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-MATH-04: source-declared literal context — 2026-11-01
+
+- Add an opt-in three-line, exact-byte source declaration for one unchanged
+  RW-MATH-03 inequality: asserted, quoted, negated, hypothetical or corrected.
+  Roles remain self-declared, never authenticated author or publication intent.
+- Preserve identical rational mathematical results and certificate for the
+  same asserted/quoted sentence. Reparse matching source-byte/line anchors;
+  reject nested/partial/malformed markers, stale external pins and tampered
+  private-report replay.
+- Add fabricated same-document negative control, adversarial syntax/hash tests,
+  and clean installed-wheel smoke. No paid service, private paper, publication
+  accusation, source/custody waiver, or new runtime dependency.
+- Package remains UNRELEASED. Source-origin authentication and complete
+  scientific claim understanding are not established.
+
+
 ### RW-MATH-03: unmarked literal sentence screening — 2026-11-01
 
 - Add an optional offline screen for exact, self-contained universal inequalities
