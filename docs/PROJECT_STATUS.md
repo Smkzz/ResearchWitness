@@ -1,16 +1,42 @@
 # Project status
 
-**As of:** 2026-10-30  
+**As of:** 2026-11-01
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified engineering baseline main:** `55be13f144916f4e1cdf4ea6edf9295e7319a3a6`
+**Verified engineering baseline main:** `47223afdcf755314b8091c927147a8174bc1d085`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-11-01: mathematical lane and source-claim compilation
+
+[RW-MATH-01 PR #61](https://github.com/Smkzz/ResearchWitness/pull/61) merged
+on 31 October as `47223afdcf755314b8091c927147a8174bc1d085`.
+Its exact-head 13 checks (9 OS/Python, Release gate, CodeQL, dependency review)
+and independent postmerge 11 checks (9 OS/Python, Release gate and CodeQL)
+passed. On main Ubuntu/Python 3.12, 1,201 tests + 346 subtests passed;
+installed core coverage was 93%. The exact rational verifier accepts
+externally pinned bilinear-model proof certificates and a separately AI-authored
+reference checker agrees on synthetic engineering inputs. A020 private known-
+case replay is not an untouched independent scientific benchmark.
+
+**New RW-MATH-02 parallel candidate:** [source-bound compiler](SOURCE_CLAIM_COMPILER.md)
+accepts only explicit bounded-real mathematical markup, maps it to the exact
+model with original UTF-8 source byte anchors, and can replay a complete
+model-bound certificate or a checked formal counterexample. Unmarked paper
+prose, omitted assumptions, external source authenticity, scientific accuracy
+and original PMC evidence are not supported. Hosted qualification for this
+**new branch** is separate from RW-MATH-01's green receipts; do not count this
+status paragraph as acceptance before its own exact-head checks complete.
+
+RW-01O #35 / RW-01Q #50 remain open; original historical Europe PMC recovery
+is still 0/13 and independent source-context labels are unavailable. Package
+version remains `0.3.0.dev0`, UNRELEASED. No external researcher, paper author,
+provider account or paid service was contacted by the new mathematical lane.
 
 ## 2026-10-30: public quantum preprint correction metadata and pilot handoff
 

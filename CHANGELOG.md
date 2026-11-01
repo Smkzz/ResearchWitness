@@ -2,6 +2,23 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-MATH-02: bounded source claim compilation and replay — 2026-11-01
+
+- Add the installed, source-byte-anchored controlled-markup claim compiler for
+  explicit bounded-real affine objectives, linear constraints and bilinear
+  product relations; preserve exact UTF-8 spans and candidate identity.
+- Replay source, hints, canonical model and a complete exact rational proof
+  with distinct externally supplied hashes and strict claim-bound binding.
+  Also verify exact feasible points that refute a formal bound.
+- Reject unsupported ordinary prose, approximate/ambiguous expressions,
+  negation/comments, unsupported AST nodes, substitutions, stale pins and
+  missing/incorrect source or proof identities. No dynamic evaluation or
+  installed runtime dependency is introduced.
+- Include synthetic positive/refutable/unsupported fixtures and independent
+  mathematical-verifier reuse. No original source, private proof corpus,
+  protected labels, scientific accuracy, new egress or external outreach.
+  Source-block compilation is a proposal, not article-level interpretation.
+
 ### RW-MATH-01: reusable exact optimization certificates — 2026-10-31
 
 - Add an optional installed, solver-free rational checker for supplied bounded

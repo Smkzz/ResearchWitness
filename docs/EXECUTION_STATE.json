@@ -1,16 +1,16 @@
 {
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
-  "plan_revision": 1,
-  "updated_on": "2026-10-29",
+  "plan_revision": 2,
+  "updated_on": "2026-11-01",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "fc9cfcb543d204e1be693ba03fa57922145e3320",
-    "observed_on": "2026-10-29",
+    "observed_main_sha": "47223afdcf755314b8091c927147a8174bc1d085",
+    "observed_on": "2026-11-01",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Engineering base includes merged RW-01S source-section hypotheses and RW-04H hypothetical dependence/missingness sensitivity. PR #57 exact-head CI 10/10, CodeQL and Dependency evidence passed; postmerge main CI/CodeQL passed. Developer-exposed known-case coverage is not a new paper discovery. Historical original Europe PMC XML remains 0/13; independent research labels, original PMC OAI-PMH envelopes, scientific performance and protected custody are unqualified."
+    "note": "Verified merged RW-MATH-01 PR #61 at main 47223af: 13 exact-head and 11 postmerge checks passed. RW-MATH-02 is an optional parallel in-review controlled source-to-model slice; RW-01/RW-02 original-source/independent scientific evidence blockers remain unchanged, historic XML 0/13. Research accuracy and protected custody are not qualified."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -521,6 +521,49 @@
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-12---research-release-and-maintenance-closure",
       "evidence": [],
       "blocker": null
+    },
+    {
+      "priority": 2,
+      "required_capability_gates": [],
+      "role": "mathematical-verification",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
+      "blocker": null,
+      "id": "RW-MATH-01",
+      "title": "Reusable exact mathematical optimization certificates",
+      "depends_on": [],
+      "status": "done",
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-math-01---reusable-exact-optimization-certificate-verifier",
+      "evidence": [
+        "https://github.com/Smkzz/ResearchWitness/pull/61",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41238568122",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41238568110",
+        "docs/EXACT_OPTIMIZATION_CERTIFICATES.md"
+      ]
+    },
+    {
+      "priority": 2,
+      "required_capability_gates": [],
+      "role": "source-to-model-development",
+      "owner": "current-session-coordinator",
+      "branch": "research/rw-math02-source-claim-compiler-20261101",
+      "base_sha": "47223afdcf755314b8091c927147a8174bc1d085",
+      "lease_expires_at_utc": "2026-11-02T00:10:06Z",
+      "blocker": null,
+      "id": "RW-MATH-02",
+      "title": "Controlled source claim compilation and proof replay",
+      "depends_on": [
+        "RW-MATH-01"
+      ],
+      "status": "in_review",
+      "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-math-02---controlled-source-claim-compilation-and-replay",
+      "evidence": [
+        "docs/SOURCE_CLAIM_COMPILER.md",
+        "tests/test_source_claims.py"
+      ],
+      "next_action": "Qualify new branch exact-head via CI/CodeQL/dependency review, merge only on success and recheck main. Do not claim arbitrary-paper semantic interpretation or scientific error truth."
     }
   ]
 }

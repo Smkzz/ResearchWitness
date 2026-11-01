@@ -44,6 +44,17 @@ unmerged paper-audit/UI/custody stack. Real PDF extraction and Windows managed
 metadata acquisition remain unavailable until their boundaries are qualified.
 Scientific Wave 3 and sealed confirmatory evaluation have not run.
 
+## Strict source-to-math candidate workflow (RW-MATH-02)
+
+The installed [source-claim compiler](docs/SOURCE_CLAIM_COMPILER.md) accepts only
+explicit bounded-real mathematical blocks in exact UTF-8 source bytes. It
+can deterministically compile these **candidates** to the existing rational
+optimization checker, replay a complete source→model→upper-certificate proof,
+or verify a source-bound *formal-model counterexample*. It does **not** infer
+unsupported paper prose, authenticate sources or certify publication errors.
+Synthetic [examples](examples/source-claim-v1/README.md) and explicit refusal
+cases are provided. Version remains `0.3.0.dev0` UNRELEASED.
+
 ## Current MVP loop
 
 ```text

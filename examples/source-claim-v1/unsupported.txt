@@ -1,0 +1,2 @@
+The weighted result is approximately bounded by 11 after unspecified adjustment.
+No valid RW-MATH block appears here. The software must not infer an exact bound.

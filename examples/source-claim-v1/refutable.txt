@@ -1,0 +1,7 @@
+RW-MATH-BEGIN v1
+domain: bounded_real
+variables: x[0,1]
+maximize: x
+constraints: none
+upper_bound: 1/2
+RW-MATH-END
