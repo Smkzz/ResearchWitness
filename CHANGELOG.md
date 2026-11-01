@@ -2,6 +2,22 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-04I: replay accepted development proof receipts — 2026-11-01
+
+- Add an optional checkout-only evidence-bound mode that re-derives the
+  exact RW-MATH-02 source formalization and checks each claimed accepted
+  **formal-refutation point** against the installed rational verifier.
+- Require independently supplied registry/protocol/run pins; source, candidate
+  and point byte pins; a single explicitly marked source block; and exact
+  source-block identity. Missing/invalid evidence refuses an audited score.
+- Preserve the RW-04A score's original registered work-family denominators,
+  incomplete/abstained cases and emitted negative-family alarms unchanged.
+- Add synthetic mutation, boundary, CLI and optimized-Python regression tests.
+  No independent source labels, private corpus, scientific accuracy, general
+  paper attribution, paid provider, protected evaluation or release is claimed.
+  See [the v1 contract](docs/DEVELOPMENT_ARTIFACT_REPLAY.md).
+
+
 ### RW-MATH-04: source-declared literal context — 2026-11-01
 
 - Add an opt-in three-line, exact-byte source declaration for one unchanged
