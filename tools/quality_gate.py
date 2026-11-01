@@ -242,6 +242,49 @@ def main() -> int:
                 or prose_replayed['candidate_count'] != 3
                 or prose_replayed['source_context_verified'] is not False):
             raise RuntimeError('installed literal prose math replay regression')
+        # RW-MATH-04: same exact false literal in a declared assertion
+        # and quotation, without asserting authorial intent or paper error.
+        attribution_source = ROOT / 'examples/prose-attribution-v1/illustrative-source.txt'
+        attribution_path = temp / 'source-declared-attribution.json'
+        declared = json.loads(run(
+            str(python), '-m', 'researchwitness.prose_attribution', 'scan',
+            '--source', str(attribution_source),
+            '--expected-source-sha256', sha256(attribution_source),
+            '--output', str(attribution_path), cwd=temp,
+        ).stdout)
+        parsed = json.loads(attribution_path.read_bytes())
+        blocks = parsed['context_blocks']
+        if (declared['status'] != 'source_declared_context_report_saved'
+                or len(blocks) != 2
+                or blocks[0]['math'] != blocks[1]['math']
+                or blocks[0]['interpretation'] != 'declared_asserted_literal_refuted'
+                or blocks[1]['interpretation'] != 'declared_quoted_literal_refuted'
+                or blocks[0]['math']['counterexample_margin'] != '1/2'
+                or any(b['paper_error_established'] is not False
+                       or b['author_intent_authenticated'] is not False for b in blocks)
+                or parsed['whole_paper_meaning_verified'] is not False):
+            raise RuntimeError('installed context-attribution negative control failed')
+        replayed = json.loads(run(
+            str(python), '-m', 'researchwitness.prose_attribution', 'replay',
+            '--source', str(attribution_source),
+            '--expected-source-sha256', sha256(attribution_source),
+            '--report', str(attribution_path),
+            '--expected-report-sha256', sha256(attribution_path), cwd=temp,
+        ).stdout)
+        if (replayed['status'] != 'source_declared_context_replayed'
+                or replayed['context_block_count'] != 2
+                or replayed['author_attribution_verified'] is not False):
+            raise RuntimeError('installed source-declared attribution replay failed')
+        changed_source = temp / 'source-context-swap.txt'
+        changed_source.write_bytes(attribution_source.read_bytes().replace(
+            b'role=quoted', b'role=asserted'))
+        refused = subprocess.run([
+            str(python), '-m', 'researchwitness.prose_attribution', 'scan',
+            '--source', str(changed_source),
+            '--expected-source-sha256', sha256(attribution_source),
+        ], cwd=temp, capture_output=True, text=True, check=False)
+        if refused.returncode != 2 or refused.stdout:
+            raise RuntimeError('installed context source-swap was accepted')
         # Verify the independent installed-wheel JATS path outside the checkout.
         jats_dir = temp / 'installed-jats'
         jats = json.loads(run(str(cli), 'audit-jats',

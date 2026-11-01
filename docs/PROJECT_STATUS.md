@@ -4,13 +4,31 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified engineering baseline main:** `ac3272fba5eaa4f99918452e7022fb4e6ebba4bd`
+**Verified engineering baseline main:** `696ad7c5ed3f8b3767262733dd457edc30f748d3`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-11-01: RW-MATH-03 merged; RW-MATH-04 development candidate
+
+[RW-MATH-03 / PR #64](https://github.com/Smkzz/ResearchWitness/pull/64)
+merged as `696ad7c5ed3f8b3767262733dd457edc30f748d3`, with 13/13
+exact-head checks and separate successful postmerge main CI/CodeQL.
+The optional [literal mathematical scanner](PROSE_MATH_CANDIDATES.md) proves
+or refutes only narrowly recognized universal affine inequalities. Surrounding
+prose and authorial attribution remain expressly unresolved.
+
+[RW-MATH-04 / issue #69](https://github.com/Smkzz/ResearchWitness/issues/69)
+is a separate [opt-in declared-context candidate](PROSE_ATTRIBUTION.md).
+It records only exact byte-bound source *declarations* of asserted, quoted,
+negated, hypothetical or corrected literal sentences. A label does not
+authenticate a publisher, source intent or scientific publication error.
+This branch is not qualified by the earlier PR's green CI; new exact-head
+checks are required. Historical PMC original recovery remains 0/13 and
+independent scientific accuracy remains unknown.
 
 ## 2026-11-01: mathematical lane and source-claim compilation
 
