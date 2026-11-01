@@ -1,0 +1,7 @@
+RW-MATH-BEGIN v1
+domain: bounded_real
+variables: x[-1,2]; y[0,3]
+maximize: 3*x + 2*y + 5
+constraints: x + y <= 2
+upper_bound: 11
+RW-MATH-END

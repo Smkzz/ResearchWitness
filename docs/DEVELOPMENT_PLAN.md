@@ -1,6 +1,6 @@
 # Autonomous development plan
 
-**Plan:** `RW-PLAN-2026-10-24` / revision 1  
+**Plan:** `RW-PLAN-2026-10-24` / revision 2
 **Adopted:** 2026-10-24  
 **Authority:** the owner's instruction to plan and continue through autonomous AI agents  
 **Execution:** [AGENTS.md](../AGENTS.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json)  
@@ -541,6 +541,50 @@ release matches its documentation, all claimed capabilities have receipts, and t
 scientific report states success, failure or uncertainty without embellishment.
 If RW-11 is blocked, keep the honest RW-09 preview available; do not call the
 research milestone complete. No new spending or safety authority is implied.
+
+## RW-MATH-01 - Reusable exact optimization certificate verifier
+
+**Status:** done as an **independent parallel mathematical software lane** (not
+completion of empirical RW-01/RW-02 or RW-06). [PR #61](https://github.com/Smkzz/ResearchWitness/pull/61)
+was merged to protected main at `47223afdcf755314b8091c927147a8174bc1d085`
+with 13/13 exact-head checks and 11/11 postmerge main checks passing.
+It supplies solver-free exact rational model certificates, a second integer
+implementation, and six deliberately synthetic transfer examples.
+Its known-case A020 replay is development-exposed mathematical evidence,
+not general scientific detection accuracy. [Contract](EXACT_OPTIMIZATION_CERTIFICATES.md).
+
+**Next boundary:** source-to-model correspondence is not proved by a mathematical
+certificate. Keep the source identity, strict extraction rules, mathematical
+proof and scientific truth/report authority separate.
+
+## RW-MATH-02 - Controlled source claim compilation and replay
+
+**Status:** in review as a bounded *parallel* engineering slice, allowed to
+progress despite RW-01/RW-02 empirical evidence blockers. It does **not**
+promote general RW-06 to ready or waive its dependencies. No original paper
+or sealed corpus is accessed. [Contract](SOURCE_CLAIM_COMPILER.md).
+
+Start with complete explicit `RW-MATH-BEGIN v1` mathematical blocks in a
+byte-pinned UTF-8 text document. Require the domain, bounded real variables,
+affine objective, exact linear/bilinear constraints and claimed rational upper
+bound to be stated with supported strict grammar. Reject unmarked prose,
+negation, rounded quantities, broad assumptions or inferred units instead of
+silently replacing them. Preserve half-open byte anchors on exact source bytes.
+
+Derive a canonical model and candidate from the source, with separate optional
+proof-strategy hints that cannot change semantics; bind all stages to exact
+external SHA-256 pins. Provide two end-to-end outcomes: replay all parts of a
+universal upper certificate with the RW-MATH-01 verifier, or check an explicit
+feasible counterexample that violates the claimed formal upper bound. Report
+unread context, source origin, experimental/scientific relevance and publication
+error as **unestablished**. External contact and billing remain out of scope.
+
+**Acceptance:** two structurally different positive source→model→proof fixtures,
+one exact formal counterexample, explicit unsupported-source outcome, source-
+version/hints/model/proof/point swap and parser-injection rejections, clean-wheel
+execution and all required exact-head CI/CodeQL/dependency/postmerge checks.
+Do not call this arbitrary-paper understanding, independent scientific review,
+research superiority, or completed RW-06.
 
 ## Evidence, review and independence
 

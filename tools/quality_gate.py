@@ -147,6 +147,71 @@ def main() -> int:
                                '--as-of', '2026-10-04', cwd=temp).stdout)
         if smoke['decision'] != 'FORMALIZATION_COUNTEREXAMPLE_VERIFIED':
             raise RuntimeError('installed-wheel smoke check failed')
+        # RW-MATH-02: exercise source -> typed model -> exact certificate from
+        # the installed wheel OUTSIDE the checkout. All sources are synthetic.
+        from researchwitness.exact_optimization import canonical_bytes
+        from tools.optimization_examples import bilinear_half
+        claims = ROOT / 'examples/source-claim-v1'
+        source_path = claims / 'bilinear.txt'
+        hints_path = claims / 'bilinear-hints.json'
+        model_path = temp / 'source-claim-model.json'
+        candidate_path = temp / 'source-claim-candidate.json'
+        exact_compile = json.loads(run(
+            str(python), '-m', 'researchwitness.source_claim_workflow', 'compile',
+            '--source', str(source_path), '--expected-source-sha256', sha256(source_path),
+            '--hints', str(hints_path), '--expected-hints-sha256', sha256(hints_path),
+            '--output-model', str(model_path), '--output-candidate', str(candidate_path),
+            cwd=temp,
+        ).stdout)
+        if exact_compile['mathematical_proof'] != 'not_supplied':
+            raise RuntimeError('installed source compiler incorrectly claims proof')
+        fixture = bilinear_half()
+        if json.loads(model_path.read_text(encoding='utf-8')) != fixture['model']:
+            raise RuntimeError('source compiled to a different exact mathematical model')
+        cert_path = temp / 'synthetic-bilinear-proof.jsonl'
+        cert_path.write_bytes(canonical_bytes(fixture['header']) + b''.join(
+            canonical_bytes(leaf) for leaf in fixture['leaves']))
+        verified = json.loads(run(
+            str(python), '-m', 'researchwitness.source_claim_workflow', 'verify',
+            '--source', str(source_path), '--expected-source-sha256', sha256(source_path),
+            '--hints', str(hints_path), '--expected-hints-sha256', sha256(hints_path),
+            '--model', str(model_path), '--expected-model-sha256', sha256(model_path),
+            '--candidate', str(candidate_path), '--expected-candidate-sha256', sha256(candidate_path),
+            '--certificate', str(cert_path), '--expected-certificate-sha256', sha256(cert_path),
+            cwd=temp,
+        ).stdout)
+        if (verified['mathematical_model_upper_bound'] != '1/4'
+                or not verified['source_span_rederived_exactly']
+                or verified['paper_error_established'] is not False):
+            raise RuntimeError('installed source-to-model exact proof mismatch')
+        false_src = claims / 'refutable.txt'
+        false_model = temp / 'source-false-model.json'
+        false_candidate = temp / 'source-false-candidate.json'
+        run(str(python), '-m', 'researchwitness.source_claim_workflow', 'compile',
+            '--source', str(false_src), '--expected-source-sha256', sha256(false_src),
+            '--output-model', str(false_model), '--output-candidate', str(false_candidate),
+            cwd=temp)
+        point_path = claims / 'refutable-point.json'
+        refuted = json.loads(run(
+            str(python), '-m', 'researchwitness.source_claim_workflow', 'refute',
+            '--source', str(false_src), '--expected-source-sha256', sha256(false_src),
+            '--model', str(false_model), '--expected-model-sha256', sha256(false_model),
+            '--candidate', str(false_candidate), '--expected-candidate-sha256', sha256(false_candidate),
+            '--point', str(point_path), '--expected-point-sha256', sha256(point_path),
+            cwd=temp,
+        ).stdout)
+        if (refuted['strict_violation_margin'] != '1/2'
+                or refuted['paper_error_established'] is not False):
+            raise RuntimeError('installed formal counterexample mismatch')
+        unsupported = claims / 'unsupported.txt'
+        unsupported_probe = subprocess.run([
+            str(python), '-m', 'researchwitness.source_claim_workflow', 'compile',
+            '--source', str(unsupported), '--expected-source-sha256', sha256(unsupported),
+            '--output-model', str(temp / 'unsupported-model.json'),
+            '--output-candidate', str(temp / 'unsupported-candidate.json'),
+        ], cwd=temp, capture_output=True, text=True, check=False)
+        if unsupported_probe.returncode != 2 or unsupported_probe.stdout:
+            raise RuntimeError('installed compiler accepted unsupported scientific prose')
         # Verify the independent installed-wheel JATS path outside the checkout.
         jats_dir = temp / 'installed-jats'
         jats = json.loads(run(str(cli), 'audit-jats',

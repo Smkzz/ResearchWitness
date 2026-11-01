@@ -1,0 +1,9 @@
+Synthetic research note: the following exact mathematical statement is an example.
+RW-MATH-BEGIN v1
+domain: bounded_real
+variables: x[0,1]; y[0,1]; z[0,1]
+maximize: z
+constraints: x + y == 1; z == x*y
+upper_bound: 1/4
+RW-MATH-END
+No unmarked paragraph is interpreted by this version of the compiler.
