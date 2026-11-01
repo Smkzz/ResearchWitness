@@ -4,7 +4,7 @@
 **Version:** `0.3.0.dev0`  
 **Release:** UNRELEASED  
 **Branch:** `main`  
-**Verified engineering baseline main:** `47223afdcf755314b8091c927147a8174bc1d085`
+**Verified engineering baseline main:** `ac3272fba5eaa4f99918452e7022fb4e6ebba4bd`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -24,14 +24,26 @@ externally pinned bilinear-model proof certificates and a separately AI-authored
 reference checker agrees on synthetic engineering inputs. A020 private known-
 case replay is not an untouched independent scientific benchmark.
 
-**New RW-MATH-02 parallel candidate:** [source-bound compiler](SOURCE_CLAIM_COMPILER.md)
-accepts only explicit bounded-real mathematical markup, maps it to the exact
-model with original UTF-8 source byte anchors, and can replay a complete
-model-bound certificate or a checked formal counterexample. Unmarked paper
-prose, omitted assumptions, external source authenticity, scientific accuracy
-and original PMC evidence are not supported. Hosted qualification for this
-**new branch** is separate from RW-MATH-01's green receipts; do not count this
-status paragraph as acceptance before its own exact-head checks complete.
+**RW-MATH-02 accepted on protected main:** [PR #62](https://github.com/Smkzz/ResearchWitness/pull/62)
+merged as `ac3272fba5eaa4f99918452e7022fb4e6ebba4bd` after **13/13**
+exact-head checks (9 Python/OS jobs, Release gate, CodeQL, dated dependency
+review) and **11/11** postmerge main checks. [PR CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41280371978),
+[PR CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41280371973),
+[main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41280517178) and
+[main CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41280517159)
+are separately pinned to their actual heads. The new
+[source-bound compiler](SOURCE_CLAIM_COMPILER.md) accepts only explicit
+bounded-real mathematical markup and exact source UTF-8 byte anchors. It
+reconstructs the model for solver-free certificate replay or a checked
+formal counterexample. It does **not** verify surrounding unmarked paper prose,
+automatic semantic interpretation, unrecorded premises, publisher identity,
+mathematical-model-to-science correspondence or a real publication error.
+
+The accepted candidate's targeted regression suite covered **95 tests** and
+the local final source quality gate reported **1,296 tests and 355 subtests**,
+500/500 synthetic conformance and 3/3 historical fixture replays. These are
+engineering tests, not scientific precision/recall or sealed benchmark evidence.
+RW-06 remains `todo` because RW-01 and RW-02 dependencies are not satisfied.
 
 RW-01O #35 / RW-01Q #50 remain open; original historical Europe PMC recovery
 is still 0/13 and independent source-context labels are unavailable. Package

@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "47223afdcf755314b8091c927147a8174bc1d085",
+    "observed_main_sha": "ac3272fba5eaa4f99918452e7022fb4e6ebba4bd",
     "observed_on": "2026-11-01",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "Verified merged RW-MATH-01 PR #61 at main 47223af: 13 exact-head and 11 postmerge checks passed. RW-MATH-02 is an optional parallel in-review controlled source-to-model slice; RW-01/RW-02 original-source/independent scientific evidence blockers remain unchanged, historic XML 0/13. Research accuracy and protected custody are not qualified."
+    "note": "Merged RW-MATH-01 #61 and source-bound controlled-markup RW-MATH-02 #62; exact-head PR checks 13/13 and independent postmerge main CI/CodeQL 11/11 for #62. 1,296 tests + 355 subtests recorded on local final source; two source-bound proof fixtures and one exact formal counterexample. Never infer arbitrary-paper interpretation or scientific error discovery. Historical Europe PMC original XML recovery 0/13; real reviewer labels/custody not qualified. Version 0.3.0.dev0 remains UNRELEASED."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -547,23 +547,29 @@
       "priority": 2,
       "required_capability_gates": [],
       "role": "source-to-model-development",
-      "owner": "current-session-coordinator",
-      "branch": "research/rw-math02-source-claim-compiler-20261101",
-      "base_sha": "47223afdcf755314b8091c927147a8174bc1d085",
-      "lease_expires_at_utc": "2026-11-02T00:10:06Z",
+      "owner": null,
+      "branch": null,
+      "base_sha": null,
+      "lease_expires_at_utc": null,
       "blocker": null,
       "id": "RW-MATH-02",
       "title": "Controlled source claim compilation and proof replay",
       "depends_on": [
         "RW-MATH-01"
       ],
-      "status": "in_review",
+      "status": "done",
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-math-02---controlled-source-claim-compilation-and-replay",
       "evidence": [
         "docs/SOURCE_CLAIM_COMPILER.md",
-        "tests/test_source_claims.py"
+        "tests/test_source_claims.py",
+        "https://github.com/Smkzz/ResearchWitness/pull/62",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41280371978",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41280371973",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41280371989",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41280517178",
+        "https://github.com/Smkzz/ResearchWitness/actions/runs/41280517159"
       ],
-      "next_action": "Qualify new branch exact-head via CI/CodeQL/dependency review, merge only on success and recheck main. Do not claim arbitrary-paper semantic interpretation or scientific error truth."
+      "next_action": "Engineering slice accepted and merged, 13/13 exact-head PR checks and 11/11 postmerge main checks. Any further natural-language or paper-context model bridge must be a distinct bounded slice with versioned grammar and source-to-model integrity tests; RW-01/RW-02 evidence gates and RW-06 dependencies remain unchanged."
     }
   ]
 }
