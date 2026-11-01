@@ -413,13 +413,16 @@ FALSE_BOUND=(b"RW-MATH-BEGIN v1\ndomain: bounded_real\n"
 def test_source_bound_false_claim_requires_exact_feasible_counterexample(tmp_path, capsys):
     # First compile as an unverified candidate, then show mathematically exact
     # refutation without an optimizer or an external author/publisher assertion.
-    src=tmp_path/"source.txt"; src.write_bytes(FALSE_BOUND)
-    model=tmp_path/"model.json"; candidate=tmp_path/"candidate.json"
+    src=tmp_path/"source.txt"
+    src.write_bytes(FALSE_BOUND)
+    model=tmp_path/"model.json"
+    candidate=tmp_path/"candidate.json"
     args=["compile","--source",str(src),"--expected-source-sha256",digest(FALSE_BOUND),
           "--output-model",str(model),"--output-candidate",str(candidate)]
     assert workflow.main(args)==0
     assert json.loads(capsys.readouterr().out)["mathematical_proof"]=="not_supplied"
-    point=tmp_path/"point.json"; point.write_bytes(eo.canonical_bytes(["1"]))
+    point=tmp_path/"point.json"
+    point.write_bytes(eo.canonical_bytes(["1"]))
     refute=["refute","--source",str(src),"--expected-source-sha256",digest(FALSE_BOUND),
             "--model",str(model),"--candidate",str(candidate),"--point",str(point),
             "--expected-model-sha256",digest(model.read_bytes()),
@@ -453,17 +456,22 @@ def _parse_refute_args(args):
             fields[x[2:].replace("-","_")]=args[i+1]
     for name in ("source","model","candidate","point"):
         fields[name]=Path(fields[name])
-    fields["hints"]=None;fields["expected_hints_sha256"]=None
+    fields["hints"]=None
+    fields["expected_hints_sha256"]=None
     fields["block_index"]=int(fields.get("block_index",0))
     return argparse.Namespace(**fields)
 
 
 def test_refutation_stale_point_pin_and_tampered_source_fail(tmp_path):
-    src=tmp_path/"s"; src.write_bytes(FALSE_BOUND)
+    src=tmp_path/"s"
+    src.write_bytes(FALSE_BOUND)
     cand,mod=compiled(FALSE_BOUND)
-    model=tmp_path/"m";model.write_bytes(eo.canonical_bytes(mod))
-    candidate=tmp_path/"c";candidate.write_bytes(eo.canonical_bytes(cand))
-    point=tmp_path/"p";point.write_bytes(eo.canonical_bytes(["1"]))
+    model=tmp_path/"m"
+    model.write_bytes(eo.canonical_bytes(mod))
+    candidate=tmp_path/"c"
+    candidate.write_bytes(eo.canonical_bytes(cand))
+    point=tmp_path/"p"
+    point.write_bytes(eo.canonical_bytes(["1"]))
     args=_parse_refute_args(["refute","--source",str(src),
           "--expected-source-sha256",digest(FALSE_BOUND),
           "--model",str(model),"--candidate",str(candidate),"--point",str(point),
@@ -475,6 +483,7 @@ def test_refutation_stale_point_pin_and_tampered_source_fail(tmp_path):
     args.expected_point_sha256=digest(point.read_bytes())
     assert workflow.refute_from_paths(args)["strict_violation_margin"]=="1/2"
     new=FALSE_BOUND.replace(b"upper_bound: 1/2", b"upper_bound: 2")
-    src.write_bytes(new);args.expected_source_sha256=digest(new)
+    src.write_bytes(new)
+    args.expected_source_sha256=digest(new)
     with pytest.raises(sc.UnsupportedClaim,match="SOURCE_CANDIDATE_REDERIVATION_MISMATCH"):
         workflow.refute_from_paths(args)
