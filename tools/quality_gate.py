@@ -212,6 +212,36 @@ def main() -> int:
         ], cwd=temp, capture_output=True, text=True, check=False)
         if unsupported_probe.returncode != 2 or unsupported_probe.stdout:
             raise RuntimeError('installed compiler accepted unsupported scientific prose')
+        # RW-MATH-03: prove and refute only literal mathematical sentences
+        # with exact source bytes; never promote contextual paper truth.
+        prose_source = ROOT / 'examples/prose-math-v1/illustrative-source.txt'
+        prose_report_path = temp / 'prose-math-report.json'
+        prose_scan = json.loads(run(
+            str(python), '-m', 'researchwitness.prose_math', 'scan',
+            '--source', str(prose_source),
+            '--expected-source-sha256', sha256(prose_source),
+            '--output', str(prose_report_path), cwd=temp,
+        ).stdout)
+        prose_report = json.loads(prose_report_path.read_bytes())
+        if (prose_scan['status'] != 'saved_candidate_screen'
+                or prose_report['scan']['literal_candidates'] != 3
+                or [entry['math']['formal_result'] for entry in prose_report['candidates']]
+                != ['model_bound_supported', 'model_bound_refuted', 'model_bound_supported']
+                or prose_report['scientific_accuracy_established'] is not False
+                or any(entry['math']['paper_error_established'] is not False
+                       for entry in prose_report['candidates'])):
+            raise RuntimeError('installed literal prose math screening regression')
+        prose_replayed = json.loads(run(
+            str(python), '-m', 'researchwitness.prose_math', 'replay',
+            '--source', str(prose_source),
+            '--expected-source-sha256', sha256(prose_source),
+            '--report', str(prose_report_path),
+            '--expected-report-sha256', sha256(prose_report_path), cwd=temp,
+        ).stdout)
+        if (prose_replayed['status'] != 'exact_replay_complete'
+                or prose_replayed['candidate_count'] != 3
+                or prose_replayed['source_context_verified'] is not False):
+            raise RuntimeError('installed literal prose math replay regression')
         # Verify the independent installed-wheel JATS path outside the checkout.
         jats_dir = temp / 'installed-jats'
         jats = json.loads(run(str(cli), 'audit-jats',
