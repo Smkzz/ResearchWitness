@@ -1,0 +1,6 @@
+This is an invented development demonstration, not an actual paper.
+For every real x in [0, 1], 2*x + 1 <= 3.
+The next line is deliberately offered as a false example, not a real author's claim.
+For all real x in [0,1], x <= 1/2.
+For every real x in [-1,2] and real y in [0,3], 3*x+2*y+5 <= 17.
+An adjusted or weighted statistic cannot be inferred from these source lines.

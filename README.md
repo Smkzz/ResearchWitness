@@ -55,6 +55,27 @@ unsupported paper prose, authenticate sources or certify publication errors.
 Synthetic [examples](examples/source-claim-v1/README.md) and explicit refusal
 cases are provided. Version remains `0.3.0.dev0` UNRELEASED.
 
+## Conservative unmarked mathematical candidate screening (RW-MATH-03)
+
+The optional [literal-sentence scanner](docs/PROSE_MATH_CANDIDATES.md) can now
+recognize a narrow class of exact, self-contained English universal inequalities
+in unmarked UTF-8 text. For up to three independent bounded real variables and
+an affine expression, it reuses the exact checker to prove the formal box bound
+or verify a strict counterexample. It **never** concludes that an article's
+author asserted the sentence or that the publication contains an error.
+All other prose remains uninterpreted; zero candidates is not a clean-paper result.
+
+Run only on source bytes you are permitted to inspect, with an independently
+retained SHA-256 of those bytes:
+
+```text
+python -m researchwitness.prose_math scan --source examples/prose-math-v1/illustrative-source.txt --expected-source-sha256 SOURCE_SHA256
+```
+
+Reports contain original byte anchors and derived mathematics, not raw
+quotations. See the documented private-report replay and refusal limits.
+This is an engineering development aid, **not** general paper interpretation.
+
 ## Current MVP loop
 
 ```text

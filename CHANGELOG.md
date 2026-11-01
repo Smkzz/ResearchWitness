@@ -2,6 +2,24 @@
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
+### RW-MATH-03: unmarked literal sentence screening — 2026-11-01
+
+- Add an optional offline screen for exact, self-contained universal inequalities
+  over one to three bounded real variables in ordinary UTF-8 lines; retain exact
+  source-byte spans and separately supplied SHA-256 commitments without
+  normalizing whitespace, Unicode or line endings.
+- Reuse the installed exact rational upper-certificate verifier and feasible-point
+  checker. Prove or refute **only** the extracted formal model's claim, returning
+  exact maximum, a checked attaining point and any strict rational violation.
+- Expose audit counts for unrecognized and unsupported candidate-like text;
+  preserve permanent ambiguity about surrounding quotations, author intent,
+  source legitimacy and complete paper coverage. No paper error verdict.
+- Add deterministic private-report replay, exclusive output, bounded parsing,
+  adversarial syntax/pin tests and synthetic examples. No new dependency,
+  source download, protected research data or external contact.
+- Keep original RW-MATH-02 marked claims and all scientific evidence gates intact.
+
+
 ### RW-MATH-02: bounded source claim compilation and replay — 2026-11-01
 
 - Merged as [PR #62](https://github.com/Smkzz/ResearchWitness/pull/62)
