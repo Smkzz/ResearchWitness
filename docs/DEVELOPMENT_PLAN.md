@@ -559,10 +559,12 @@ proof and scientific truth/report authority separate.
 
 ## RW-MATH-02 - Controlled source claim compilation and replay
 
-**Status:** in review as a bounded *parallel* engineering slice, allowed to
-progress despite RW-01/RW-02 empirical evidence blockers. It does **not**
-promote general RW-06 to ready or waive its dependencies. No original paper
-or sealed corpus is accessed. [Contract](SOURCE_CLAIM_COMPILER.md).
+**Status:** **done as a bounded parallel engineering slice**, merged as
+[PR #62](https://github.com/Smkzz/ResearchWitness/pull/62) at
+`ac3272fba5eaa4f99918452e7022fb4e6ebba4bd`. Exact-head 13/13 and
+postmerge 11/11 GitHub checks passed. This does **not** promote RW-06 to
+ready or waive RW-01/RW-02 scientific evidence dependencies. No original
+private paper or sealed corpus was accessed. [Contract](SOURCE_CLAIM_COMPILER.md).
 
 Start with complete explicit `RW-MATH-BEGIN v1` mathematical blocks in a
 byte-pinned UTF-8 text document. Require the domain, bounded real variables,

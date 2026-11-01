@@ -4,6 +4,10 @@
 
 ### RW-MATH-02: bounded source claim compilation and replay — 2026-11-01
 
+- Merged as [PR #62](https://github.com/Smkzz/ResearchWitness/pull/62)
+  at `ac3272fba5eaa4f99918452e7022fb4e6ebba4bd`; exact PR checks
+  13/13 and independent postmerge main checks 11/11 succeeded.
+
 - Add the installed, source-byte-anchored controlled-markup claim compiler for
   explicit bounded-real affine objectives, linear constraints and bilinear
   product relations; preserve exact UTF-8 spans and candidate identity.
