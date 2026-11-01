@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "ceca3c3453071a1606a7c46caf6e870402e78d1f",
+    "observed_main_sha": "e9fb168f5a6fa6fa3dc0367758b9895b984f3bcf",
     "observed_on": "2026-11-01",
     "version": "0.3.0.dev0",
     "release": "UNRELEASED",
-    "note": "RW-MATH-03 PR #64 and RW-MATH-04 PR #70 merged. RW-MATH-04 had exact-head 13/13 hosted checks and independent postmerge main 11/11. Main Ubuntu 3.12 1384 tests + 366 subtests, installed core coverage 93%. Feature distinguishes only source-declared roles, not genuine author intent, publisher origin or scientific paper error. Historic Europe PMC original XML 0/13; protected custody and independent scientific performance remain unqualified."
+    "note": "RW-MATH-01 through RW-MATH-04 and optional RW-04I exact formal-refutation receipt replay merged. RW-04I PR #72 exact-head CI 13/13 passed; postmerge main CI and CodeQL succeeded 11/11. Mathematical replay is not independently reviewed scientific source correspondence. Original Europe PMC XML 0/13, actual source rights/labels and protected custody unqualified. Version 0.3.0.dev0 remains UNRELEASED."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -359,9 +359,24 @@
           "scope": "merged exact bounded hypothetical Fréchet joint endpoint ranges and independent-within-stratum attrition quota sensitivity; no real source-based power or accuracy proof",
           "implementation": "tools/study_sensitivity.py",
           "tests": "tests/test_study_sensitivity.py"
+        },
+        {
+          "id": "RW-04I",
+          "scope": "checkout-only exact source-block/model/point replay of declared accepted formal-refutation development receipts; no independent source truth, paper-error finding or sealed scientific validation",
+          "implementation": "tools/development_artifact_replay.py",
+          "tests": "tests/test_development_artifact_replay.py",
+          "contract": "docs/DEVELOPMENT_ARTIFACT_REPLAY.md",
+          "evidence": [
+            "https://github.com/Smkzz/ResearchWitness/pull/72",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/41336653134",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/41336653019",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/41336652985",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/41336847318",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/41336847339"
+          ]
         }
       ],
-      "next_action": "Prefer real permitted RW-01O #35 original PMC acquisition, article-specific rights/version review and genuinely independent source-context adjudication before source-based effect, paired harm or missingness-rate estimation. RW-01Q #50 also remains blocked at 0/13 historical original Europe PMC XML. Do not multiply hypothetical quota completion by endpoint power or turn RW-04H into a scientific result; avoid further source-free simulation layers without new grounded inputs."
+      "next_action": "No additional source-free hypothetical power layers. The next material scientific prerequisite remains authentic original-source bytes and rights plus genuinely separate source-context interpretation under RW-01O #35 / RW-01Q #50; the checkout-only mathematical replay supports exposed development and must not promote declared labels to scientific truth."
     },
     {
       "id": "RW-05",
