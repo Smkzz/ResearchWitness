@@ -2,6 +2,22 @@
 
 ## 0.3.0 — engineering preview candidate — UNRELEASED
 
+### RW-01O3 original PMC OAI → JATS checkout adapter (candidate) — 2026-11-04
+
+- Add a narrow offline utility that consumes an externally retained full PMC
+  OAI-PMH `GetRecord` response, derives the JATS article, runs installed JATS
+  arithmetic review, independently replays the saved JATS result and writes a
+  final completion receipt only after both checks pass.
+- Pin and check source bytes, requested identifier, transfer declaration,
+  derived JATS and replay identities. Reject malformed/mismatched input and
+  existing output directories; distinguish a partial directory from success.
+- Add fabricated OAI-positive and negative-control tests, including simulated
+  interruptions, changed result identities, symlinks and hardlinks.
+- No actual original PMC11845954 HTTP entity, source authenticity, independent
+  article rights review, scientific error discovery or evaluation has been
+  verified; this is **candidate work pending new exact-head checks**.
+
+
 - Prepare a Python 3.11+ offline package based on the accepted exact-rational
   proof core, installed source-bound audit aids, and registered developer-only
   evidence accounting. Preserve historical scientific-evaluation gates.
@@ -10,9 +26,10 @@
   explicit non-scientific, non-contact flags and never overwrites a directory.
 - Add install/first-run/replay guidance and clean-wheel regression coverage;
   ensure old immutable development records retain their original versions.
-- No tagged GitHub Release, PyPI publication, independent scientific accuracy,
-  protected-source run, author contact or research-error finding is asserted by
-  this release-candidate preparation.
+- [PR #75](https://github.com/Smkzz/ResearchWitness/pull/75) passed
+  exact-head and postmerge checks; commit `8df6c0b47ecfeb6575efac9edf1c3e6eb33e0d84`.
+  No tagged GitHub Release, PyPI publication, independent scientific accuracy,
+  protected-source run, author contact or research-error finding is asserted.
 
 ## 0.3.0.dev0 — on main — UNRELEASED
 
