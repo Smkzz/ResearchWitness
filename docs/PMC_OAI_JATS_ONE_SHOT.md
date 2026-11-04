@@ -3,7 +3,7 @@
 **Scope:** Engineering-only, development-exposed offline replay. The script is a
 checkout tool, **not** part of the installed wheel. No network access, article
 download, licence authentication, researcher contact or scientific evaluation
-is performed by this script. ResearchWitness 0.3.0 remains a bounded engineering
+is performed by this script. ResearchWitness 0.3.1 remains a bounded engineering
 preview; its scientific discovery performance is not established.
 
 ## Before running
@@ -33,7 +33,7 @@ OAI/Cloud are supported automated retrieval services.
   unclear rights must remain unsupported/excluded until separately reviewed.
 
 The source archive contains the checkout-only `tools` package. Execute the tool
-from a **clean ResearchWitness 0.3.0 source checkout**, not from a bare wheel:
+from a **clean ResearchWitness 0.3.1 source checkout**, not from a bare wheel:
 
 ```text
 python -m tools.pmc_oai_jats_pilot \
