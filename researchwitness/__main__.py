@@ -65,6 +65,11 @@ def main(argv: list[str] | None = None) -> int:
     command.add_argument('kind', choices=sorted(KINDS))
     command.add_argument('--output', type=Path, required=True, help='New directory for the synthetic intake scaffold')
 
+    command = sub.add_parser('demo', help='Create and verify a synthetic offline example in a NEW directory.')
+    command.add_argument('--output', type=Path, required=True, help='Fresh output directory; never overwrites existing files.')
+    command.add_argument('--kind', choices=sorted(KINDS), default='finite_pmf_bound')
+    command.add_argument('--as-of', type=date.fromisoformat, default=date(2026, 10, 4))
+
     command = sub.add_parser('schema')
     command.add_argument('name', choices=('case', 'intake'))
 
@@ -138,6 +143,34 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({'scaffold': str(root), 'kind': args.kind,
                               'source_capture_status': 'synthetic',
                               'correction_status': 'unchecked'}, indent=2))
+            return 0
+        if args.command == 'demo':
+            # The only inputs are reviewed, packaged synthetic examples. Do not
+            # interpret an arithmetic counterexample as a finding in a paper.
+            root = args.output.absolute()
+            root.mkdir(parents=True, exist_ok=False)
+            intake = scaffold_intake(args.kind, root / 'intake') / 'audit.json'
+            bundle = prepare(intake, root / 'bundle')
+            _case, _artifacts, result = _evaluate(bundle, args.as_of)
+            readiness = contact_readiness(result)
+            demonstration = {
+                'status': 'synthetic_demo_complete',
+                'version': VERSION,
+                'kind': args.kind,
+                'intake': str(intake),
+                'bundle': str(bundle),
+                'decision': result['decision'],
+                'subject_sha256': result['subject_sha256'],
+                'bundle_sha256': result['bundle_sha256'],
+                'contact_readiness': readiness['status'],
+                'author_contact_authorized': False,
+                'paper_error_established': False,
+                'source_type': 'SYNTHETIC_FIXTURE_NOT_PUBLICATION',
+                'scientific_accuracy_established': False,
+                'external_actions': 'OUT_OF_SCOPE',
+            }
+            (root / 'demo-result.json').write_bytes(canonical(demonstration) + b'\n')
+            print(json.dumps(demonstration, indent=2, ensure_ascii=True))
             return 0
         if args.command == 'schema':
             schema = package_files('researchwitness').joinpath('schemas', f'{args.name}.schema.json')

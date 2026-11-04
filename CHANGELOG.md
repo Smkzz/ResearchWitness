@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0 — engineering preview candidate — UNRELEASED
+
+- Prepare a Python 3.11+ offline package based on the accepted exact-rational
+  proof core, installed source-bound audit aids, and registered developer-only
+  evidence accounting. Preserve historical scientific-evaluation gates.
+- Add `researchwitness demo --output FRESH_DIR`: end-to-end packaged synthetic
+  scaffold, audit, proof replay and machine-readable evidence bundle. It returns
+  explicit non-scientific, non-contact flags and never overwrites a directory.
+- Add install/first-run/replay guidance and clean-wheel regression coverage;
+  ensure old immutable development records retain their original versions.
+- No tagged GitHub Release, PyPI publication, independent scientific accuracy,
+  protected-source run, author contact or research-error finding is asserted by
+  this release-candidate preparation.
+
 ## 0.3.0.dev0 — on main — UNRELEASED
 
 ### RW-04I: replay accepted development proof receipts — 2026-11-01

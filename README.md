@@ -11,7 +11,7 @@ and records arithmetic candidates or explicit abstentions. Separate checkout
 tools retain guarded metadata discovery and scientific-development comparisons. It does **not** autonomously fact-check any
 paper, authenticate publisher origin, establish misconduct or certify conclusions.
 
-**On main:** `0.3.0.dev0` · **UNRELEASED** · Python 3.11+ · CI tests Python
+**Candidate:** `0.3.0` · **engineering preview, not a scientific release or tagged GitHub Release** · Python 3.11+ · CI tests Python
 3.11–3.13 on Ubuntu, Windows and macOS · no installed runtime dependencies · Apache-2.0.
 
 ## Agent start and development plan
@@ -32,10 +32,11 @@ is not replaced by an opinion. Default incremental spending authorization is EUR
 ## Status
 
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed
-by documentation #17 and intake/export consistency #18. The observed pre-plan main
-is `242abaa2b5fe1f064ac10f14ae88e9bdfc825c1a` (2026-10-17), with passing main CI/CodeQL.
-See [project status](docs/PROJECT_STATUS.md) for exact receipts; this is not a claim
-that an untested later head passed. No tagged release or PyPI publication is claimed.
+by documentation #17 and intake/export consistency #18. The latest independently checked engineering baseline is
+`e204d7b238933fffddf847c8873cfec0099a50c1` (2026-11-04), with successful CI and CodeQL.
+See [project status](docs/PROJECT_STATUS.md) for exact receipts. The `0.3.0`
+preview must pass its own candidate-head tests before it is qualified. There is
+no tagged GitHub Release or PyPI publication.
 
 The internal 10-category engineering assessment used owner-accepted AI review,
 not an independent human audit, security certification or scientific evaluation.
@@ -53,7 +54,7 @@ optimization checker, replay a complete source→model→upper-certificate proof
 or verify a source-bound *formal-model counterexample*. It does **not** infer
 unsupported paper prose, authenticate sources or certify publication errors.
 Synthetic [examples](examples/source-claim-v1/README.md) and explicit refusal
-cases are provided. Version remains `0.3.0.dev0` UNRELEASED.
+cases are provided. The `0.3.0` candidate remains restricted to formal models.
 
 ## Conservative unmarked mathematical candidate screening (RW-MATH-03)
 
@@ -91,6 +92,30 @@ Candidate discovery, source interpretation and mathematical verification are
 different jobs. `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` proves something about the
 supplied formalization/witness; `paper_error_established` remains `false`.
 Unsupported inputs are rejected or abstained on, not guessed into a positive.
+
+## First run: one command, no research data required
+
+The candidate wheel installs without third-party runtime dependencies. In a clean
+Python 3.11+ environment, run the following using a **fresh** output directory:
+
+```text
+python -m researchwitness demo --output work/first-run
+```
+
+This creates a synthetic intake, a source-anchored evidence bundle and a small
+`demo-result.json` reporting `FORMALIZATION_COUNTEREXAMPLE_VERIFIED` with
+`paper_error_established: false` and `contact_readiness: NOT_READY`. The demo
+performs no network access, research-paper download or author contact. It never
+overwrites an existing output directory. The results are **not** research evidence.
+
+Afterwards, verify the generated bundle with the independently retained digest:
+
+```text
+python -m researchwitness verify work/first-run/bundle --as-of 2026-10-04 --expected-bundle-sha256 SHA256_FROM_DEMO_RESULT
+```
+
+See [engineering preview installation and boundaries](docs/ENGINEERING_PREVIEW.md)
+for clean-wheel installation, the supported CLI surfaces, and data-handling limits.
 
 ## Quick start
 

@@ -1,16 +1,31 @@
 # Project status
 
-**As of:** 2026-11-01
-**Version:** `0.3.0.dev0`  
-**Release:** UNRELEASED  
-**Branch:** `main`  
-**Verified engineering baseline main:** `e9fb168f5a6fa6fa3dc0367758b9895b984f3bcf`
+**As of:** 2026-11-04
+**Version:** `0.3.0` (engineering preview candidate)
+**Release:** UNRELEASED / no GitHub tag or PyPI upload
+**Branch:** candidate (based on protected `main`)
+**Verified engineering baseline main:** `e204d7b238933fffddf847c8873cfec0099a50c1`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-11-04: engineering preview packaging (candidate)
+
+The latest accepted protected main `e204d7b238933fffddf847c8873cfec0099a50c1`
+includes an exact-head coordinated dependency update, nine Python/OS jobs, release
+gate and CodeQL all green; the source version before this candidate was
+`0.3.0.dev0`, **UNRELEASED**. The new **0.3.0 candidate** adds an installed
+one-command synthetic demonstration, a clean-wheel smoke, explicit first-run
+instructions and version-aware historical-documentation checks. Its own exact-head
+qualification must succeed before it can be called technically accepted.
+
+This release lane does **not** complete the RW-01/O/Q original-paper evidence
+or the RW-03/RW-05/11 protected scientific evaluation gates. Old frozen studies
+and their original software-version identities remain unchanged. The candidate
+contains no source-data acquisition, article accusation or external contact.
 
 ## 2026-11-01: RW-04I replays accepted development proof receipts
 

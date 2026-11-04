@@ -147,6 +147,27 @@ def main() -> int:
                                '--as-of', '2026-10-04', cwd=temp).stdout)
         if smoke['decision'] != 'FORMALIZATION_COUNTEREXAMPLE_VERIFIED':
             raise RuntimeError('installed-wheel smoke check failed')
+        # An actual clean installed wheel must also complete first-run demo
+        # without checkout imports or network, and preserve scientific abstention.
+        demo_dir = temp / 'first-run-demo'
+        demo = json.loads(run(str(cli), 'demo', '--output', str(demo_dir),
+                              cwd=temp).stdout)
+        if (demo['status'] != 'synthetic_demo_complete' or
+                demo['decision'] != 'FORMALIZATION_COUNTEREXAMPLE_VERIFIED' or
+                demo['paper_error_established'] is not False or
+                demo['author_contact_authorized'] is not False or
+                demo['contact_readiness'] != 'NOT_READY' or
+                demo['external_actions'] != 'OUT_OF_SCOPE'):
+            raise RuntimeError('installed demo improperly claims scientific approval')
+        if not (demo_dir / 'bundle' / 'case.json').is_file():
+            raise RuntimeError('installed demo did not create its replay bundle')
+        demonstrated = json.loads(run(str(cli), 'verify', str(demo_dir / 'bundle'),
+                                       '--as-of', '2026-10-04',
+                                       '--expected-bundle-sha256', demo['bundle_sha256'],
+                                       cwd=temp).stdout)
+        if (demonstrated['decision'] != demo['decision'] or
+                demonstrated['paper_error_established'] is not False):
+            raise RuntimeError('installed demo evidence failed pinned replay')
         # RW-MATH-02: exercise source -> typed model -> exact certificate from
         # the installed wheel OUTSIDE the checkout. All sources are synthetic.
         from researchwitness.exact_optimization import canonical_bytes
