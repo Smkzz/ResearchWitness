@@ -34,7 +34,7 @@ Documentation = "https://github.com/Smkzz/ResearchWitness#readme"
 researchwitness = "researchwitness.__main__:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "jsonschema>=4,<5", "coverage>=7.6,<8", "ruff>=0.14,<0.15"]
+dev = ["pytest>=8,<10", "jsonschema>=4,<5", "coverage>=7.6,<8", "ruff>=0.14,<0.18"]
 
 [tool.setuptools.packages.find]
 include = ["researchwitness*"]
