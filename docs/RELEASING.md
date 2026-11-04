@@ -1,8 +1,8 @@
 # Release process
 
 A merge, an engineering preview and a scientific-performance claim are separate.
-The observed version `0.3.0.dev0` remains UNRELEASED. A version bump is not
-qualification. Follow [AGENTS.md](../AGENTS.md) and the
+The `0.3.0` engineering preview candidate remains **UNRELEASED until actually
+published**. A version bump is not qualification. Follow [AGENTS.md](../AGENTS.md) and the
 [release gate](ROADMAP.md#release-gate).
 
 ## Authority and release scope

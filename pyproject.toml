@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "researchwitness"
-version = "0.3.0.dev0"
+version = "0.3.0"
 description = "Agent-oriented deterministic evidence capsules for scientific claim verification"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -24,7 +24,7 @@ MAINTAINED = (
     'README.md', 'CHANGELOG.md', 'docs/PROJECT_STATUS.md',
     'docs/OSS_QUALITY_FINAL.md', 'docs/OSS_MAINTAINER_REVIEW.md',
     'docs/ARCHITECTURE.md', 'docs/ROADMAP.md', 'docs/RELEASING.md',
-    'docs/OFFLINE_RESEARCH_AUDIT.md', 'validation/README.md',
+    'docs/OFFLINE_RESEARCH_AUDIT.md', 'docs/ENGINEERING_PREVIEW.md', 'validation/README.md',
 )
 COMMANDS = {
     'core': ('python', '-m', 'researchwitness', 'verify',
@@ -86,13 +86,13 @@ class DocumentationTests(unittest.TestCase):
         project = tomllib.loads(read('pyproject.toml'))['project']
         cp = json.loads(read('validation/OSS_QUALITY_CHECKPOINT.json'))
         self.assertEqual(project['version'], VERSION)
-        self.assertEqual(cp['version'], VERSION)
+        self.assertEqual(cp['version'], '0.3.0.dev0')  # immutable historical record
         self.assertEqual(cp['release_state'], 'UNRELEASED')
         self.assertEqual(cp['branch'], 'main')
-        self.assertIn(f'**On main:** `{VERSION}`', read('README.md'))
+        self.assertIn(f'**Candidate:** `{VERSION}`', read('README.md'))
         self.assertIn(f'**Version:** `{VERSION}`', read('docs/PROJECT_STATUS.md'))
-        self.assertIn(f'## {VERSION} — on main — UNRELEASED', read('CHANGELOG.md'))
-        self.assertIn(f'## Main — {VERSION} (UNRELEASED)', read('docs/ROADMAP.md'))
+        self.assertIn(f'## {VERSION} — engineering preview candidate — UNRELEASED', read('CHANGELOG.md'))
+        self.assertIn(f'## Main — {VERSION} (ENGINEERING PREVIEW CANDIDATE)', read('docs/ROADMAP.md'))
         pr = cp['pull_request']
         self.assertEqual((pr['number'], pr['state'], pr['draft'], pr['merged']),
                          (13, 'closed', False, True))

@@ -2,15 +2,15 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 3,
-  "updated_on": "2026-11-01",
+  "updated_on": "2026-11-04",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "e9fb168f5a6fa6fa3dc0367758b9895b984f3bcf",
-    "observed_on": "2026-11-01",
-    "version": "0.3.0.dev0",
+    "observed_main_sha": "e204d7b238933fffddf847c8873cfec0099a50c1",
+    "observed_on": "2026-11-04",
+    "version": "0.3.0",
     "release": "UNRELEASED",
-    "note": "RW-MATH-01 through RW-MATH-04 and optional RW-04I exact formal-refutation receipt replay merged. RW-04I PR #72 exact-head CI 13/13 passed; postmerge main CI and CodeQL succeeded 11/11. Mathematical replay is not independently reviewed scientific source correspondence. Original Europe PMC XML 0/13, actual source rights/labels and protected custody unqualified. Version 0.3.0.dev0 remains UNRELEASED."
+    "note": "0.3.0 engineering-preview candidate packaging, NOT an actual GitHub Release or PyPI publication. Baseline 0.3.0.dev0 main e204d7b passed 10/10 main CI and CodeQL. RW-01O/Q original-source, source rights, scientific labels and protected custody remain blocked. RW-09/research release not marked done."
   },
   "authority": {
     "routine_human_approval_required": false,

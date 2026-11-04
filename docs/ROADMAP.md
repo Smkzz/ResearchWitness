@@ -5,16 +5,20 @@ identifier `RW-PLAN-2026-10-24`. Agents start at [AGENTS.md](../AGENTS.md), then
 [EXECUTION_STATE.json](EXECUTION_STATE.json). This page is the navigation summary,
 not a second independently maintained task list.
 
-## Main — 0.3.0.dev0 (UNRELEASED)
+## Main — 0.3.0 (ENGINEERING PREVIEW CANDIDATE)
 
-The **verified main** is `6131bccef55e1fe3c2d789e50821c7f51aafb2aa`
-(2026-10-28), which includes the selective RW-01A–N and RW-01O1 source/JATS integrations
-and RW-04A–G benchmark/scoring and purely hypothetical power calculations.
+The last fully qualified main before this candidate is
+`e204d7b238933fffddf847c8873cfec0099a50c1` (2026-11-04). The candidate adds
+a one-command **synthetic first-run demo**, a versioned offline wheel and explicit
+limitations. It must obtain its own exact-head checks before acceptance.
+
+The present product includes selective RW-01 source/JATS integrations and
+RW-04 development accounting, plus exact bounded mathematical checks.
 The verifier still has ten bounded deterministic families, installed offline
 JATS review aids and replayable evidence; no general paper truth or independent
 scientific accuracy is implied. See [PROJECT_STATUS.md](PROJECT_STATUS.md)
-for exact commit/check receipts and exposed limitations. The library remains
-`0.3.0.dev0` UNRELEASED, not an externally published product.
+for exact commit/check receipts and exposed limitations. The candidate is `0.3.0`, **not yet tagged or published on PyPI**.
+It is an engineering preview, not a claim of independent scientific accuracy.
 
 **RW-01O1 private pilot accounting (merged, technically qualified):** the
 [offline intake ledger](PMC_PILOT_LEDGER.md) retains all attempted
