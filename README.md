@@ -179,6 +179,32 @@ parent directories must exist. The deterministic ZIP needs a new output filename
 Packing includes only manifested artifacts and reserved generated metadata, not
 an entire directory. Intake/verification/export share bounded validation.
 
+## Offline original PMC OAI-PMH → JATS pilot (checkout-only)
+
+For a previously authorized, lawfully retained **original, complete PMC OAI-PMH
+`GetRecord` HTTP response entity**, the opt-in checkout utility
+[`tools.pmc_oai_jats_pilot`](docs/PMC_OAI_JATS_ONE_SHOT.md) re-derives exact JATS
+article bytes, runs the current installed JATS arithmetic review and independently
+replays its source-bound results. The input must include a separately retained
+SHA-256 pin, strict transfer declaration and matching article ID. No provider
+request, source download, publisher authentication or scientific adjudication is
+performed by this script. It is **not part of the installed Python wheel**.
+
+```text
+python -m tools.pmc_oai_jats_pilot \
+  --raw-envelope PRIVATE_RESPONSE.xml \
+  --transfer PRIVATE_TRANSFER.json \
+  --expected-raw-sha256 PIN_FROM_SEPARATE_TRUSTED_RECORD \
+  --document-id PMC11845954 \
+  --output-dir FRESH_PRIVATE_OUTPUT --include-structure --include-denominator-trace
+```
+
+Only supported JATS relationships are checked; arithmetic discrepancies remain
+**unreviewed candidates**. The old 13 Europe PMC originals and new PMC GetRecord
+original response entities have **not been recovered** by developing this tool.
+Tests use fabricated XML; the historical source / licence / independent-label
+/ protected-custody gates remain open.
+
 ## Installed JATS review (development scope)
 
 The distribution now includes the existing bounded JATS percentage detector without

@@ -1,10 +1,10 @@
 # Project status
 
 **As of:** 2026-11-04
-**Version:** `0.3.0` (engineering preview candidate)
-**Release:** UNRELEASED / no GitHub tag or PyPI upload
-**Branch:** candidate (based on protected `main`)
-**Verified engineering baseline main:** `e204d7b238933fffddf847c8873cfec0099a50c1`
+**Version:** `0.3.0` (technically accepted engineering preview)
+**Release:** NO tagged GitHub Release / no PyPI upload
+**Branch:** `main` plus a separately qualified RW-01O3 candidate
+**Verified engineering baseline main:** `8df6c0b47ecfeb6575efac9edf1c3e6eb33e0d84`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,15 +12,27 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## 2026-11-04: engineering preview packaging (candidate)
+## 2026-11-04: optional original PMC OAI → JATS adapter (candidate only)
 
-The latest accepted protected main `e204d7b238933fffddf847c8873cfec0099a50c1`
-includes an exact-head coordinated dependency update, nine Python/OS jobs, release
-gate and CodeQL all green; the source version before this candidate was
-`0.3.0.dev0`, **UNRELEASED**. The new **0.3.0 candidate** adds an installed
-one-command synthetic demonstration, a clean-wheel smoke, explicit first-run
-instructions and version-aware historical-documentation checks. Its own exact-head
-qualification must succeed before it can be called technically accepted.
+The checkout-only [RW-01O3 tool](PMC_OAI_JATS_ONE_SHOT.md) composes the existing
+exact PMC OAI-PMH envelope derivation with installed JATS arithmetic review and
+byte-pinned output replay. The selected article/transfer bytes and rights must
+be obtained separately in a previously authorized environment. Only invented
+XML fixtures have qualified its code locally, and **no original PMC11845954
+OAI response** has been captured in this implementation turn. This is a
+pre-merge code candidate, not a completed real-paper pilot or independent
+scientific review. RW-01O #35 / RW-01Q #50 stay open.
+
+## 2026-11-04: engineering preview packaging (accepted on main)
+
+[PR #75](https://github.com/Smkzz/ResearchWitness/pull/75) was accepted
+on protected main as `8df6c0b47ecfeb6575efac9edf1c3e6eb33e0d84` after
+exact-head 13/13 checks and separate successful postmerge main CI/CodeQL
+([CI 41832672114](https://github.com/Smkzz/ResearchWitness/actions/runs/41832672114),
+[CodeQL 41832672140](https://github.com/Smkzz/ResearchWitness/actions/runs/41832672140)).
+The 0.3.0 engineering preview has an installed offline demo, a clean-wheel smoke,
+explicit first-run guidance and reproducible wheel/source artifacts. The package
+was **not published as a tagged GitHub Release or PyPI distribution**.
 
 This release lane does **not** complete the RW-01/O/Q original-paper evidence
 or the RW-03/RW-05/11 protected scientific evaluation gates. Old frozen studies
