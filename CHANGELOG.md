@@ -1,8 +1,23 @@
 # Changelog
 
+## 0.3.1 — engineering preview candidate — UNRELEASED
+
+- Package the independently checked 0.3.0 offline verifier and newly merged
+  [RW-01O3 PR #76](https://github.com/Smkzz/ResearchWitness/pull/76)
+  checkout-only PMC original-response/JATS pilot under a new pinned version.
+  The OAI helper is in the **source ZIP**, not the installed wheel.
+- Reconcile technical acceptance of PR #76 (13/13 exact-head checks, 11/11
+  postmerge main CI/CodeQL) while retaining the RW-01/O/Q scientific evidence
+  blockers, original-response custody and unmet independent rights/review gates.
+- Update first-run, source-utility, version and citation instructions.
+  No new runtime dependency, source download, paper-error allegation, author
+  contact, protected study evaluation or paid service is added.
+- This candidate has **not** been tagged/published on GitHub Releases or PyPI.
+  It needs its own exact-head and postmerge checks before acceptance.
+
 ## 0.3.0 — engineering preview candidate — UNRELEASED
 
-### RW-01O3 original PMC OAI → JATS checkout adapter (candidate) — 2026-11-04
+### RW-01O3 original PMC OAI → JATS checkout adapter (merged) — 2026-11-04
 
 - Add a narrow offline utility that consumes an externally retained full PMC
   OAI-PMH `GetRecord` response, derives the JATS article, runs installed JATS
@@ -15,7 +30,8 @@
   interruptions, changed result identities, symlinks and hardlinks.
 - No actual original PMC11845954 HTTP entity, source authenticity, independent
   article rights review, scientific error discovery or evaluation has been
-  verified; this is **candidate work pending new exact-head checks**.
+  verified; [PR #76](https://github.com/Smkzz/ResearchWitness/pull/76)
+  passed 13/13 exact-head checks and 11/11 postmerge main checks.
 
 
 - Prepare a Python 3.11+ offline package based on the accepted exact-rational

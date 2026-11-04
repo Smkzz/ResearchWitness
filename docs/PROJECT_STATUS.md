@@ -1,10 +1,10 @@
 # Project status
 
 **As of:** 2026-11-04
-**Version:** `0.3.0` (technically accepted engineering preview)
+**Version:** `0.3.1` (engineering preview candidate; 0.3.0 accepted)
 **Release:** NO tagged GitHub Release / no PyPI upload
-**Branch:** `main` plus a separately qualified RW-01O3 candidate
-**Verified engineering baseline main:** `8df6c0b47ecfeb6575efac9edf1c3e6eb33e0d84`
+**Branch:** 0.3.1 candidate based on protected `main`
+**Verified engineering baseline main:** `35639595a9adabea11ed259c3a6652c17c358175`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -12,16 +12,27 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## 2026-11-04: optional original PMC OAI → JATS adapter (candidate only)
+## 2026-11-04: RW-01O3 offline original PMC OAI → JATS adapter accepted
 
+[PR #76](https://github.com/Smkzz/ResearchWitness/pull/76) merged as
+`35639595a9adabea11ed259c3a6652c17c358175`, passing 13/13 exact-head
+checks and 11/11 separate postmerge CI/CodeQL checks
+([CI 41916157194](https://github.com/Smkzz/ResearchWitness/actions/runs/41916157194),
+[CodeQL 41916157124](https://github.com/Smkzz/ResearchWitness/actions/runs/41916157124)).
 The checkout-only [RW-01O3 tool](PMC_OAI_JATS_ONE_SHOT.md) composes the existing
-exact PMC OAI-PMH envelope derivation with installed JATS arithmetic review and
-byte-pinned output replay. The selected article/transfer bytes and rights must
-be obtained separately in a previously authorized environment. Only invented
-XML fixtures have qualified its code locally, and **no original PMC11845954
-OAI response** has been captured in this implementation turn. This is a
-pre-merge code candidate, not a completed real-paper pilot or independent
-scientific review. RW-01O #35 / RW-01Q #50 stay open.
+strict PMC OAI-PMH envelope derivation with installed JATS arithmetic review
+and replay. The selected original article/transfer bytes and rights must be
+obtained separately in an already-authorized environment. Hosted and local
+tests used fabricated XML; **zero original PMC11845954 OAI response entities**
+were captured. No actual source-publisher authentication or independent source
+review took place. RW-01O #35 and RW-01Q #50 remain open.
+
+## 2026-11-04: 0.3.1 versioned preview (candidate)
+
+The proposed 0.3.1 release keeps the installed core offline and dependency-free,
+and distributes RW-01O3 via the source ZIP only. Neither a version bump nor CI
+changes the scientific source/custody gates; no tag or PyPI upload exists.
+This candidate must receive new exact-head, release and postmerge checks.
 
 ## 2026-11-04: engineering preview packaging (accepted on main)
 

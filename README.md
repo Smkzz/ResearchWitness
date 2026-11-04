@@ -11,7 +11,7 @@ and records arithmetic candidates or explicit abstentions. Separate checkout
 tools retain guarded metadata discovery and scientific-development comparisons. It does **not** autonomously fact-check any
 paper, authenticate publisher origin, establish misconduct or certify conclusions.
 
-**Candidate:** `0.3.0` · **engineering preview, not a scientific release or tagged GitHub Release** · Python 3.11+ · CI tests Python
+**Candidate:** `0.3.1` · **engineering preview, not a scientific release or tagged GitHub Release** · Python 3.11+ · CI tests Python
 3.11–3.13 on Ubuntu, Windows and macOS · no installed runtime dependencies · Apache-2.0.
 
 ## Agent start and development plan
@@ -34,7 +34,7 @@ is not replaced by an opinion. Default incremental spending authorization is EUR
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed
 by documentation #17 and intake/export consistency #18. The latest independently checked engineering baseline is
 `e204d7b238933fffddf847c8873cfec0099a50c1` (2026-11-04), with successful CI and CodeQL.
-See [project status](docs/PROJECT_STATUS.md) for exact receipts. The `0.3.0`
+See [project status](docs/PROJECT_STATUS.md) for exact receipts. The `0.3.1`
 preview must pass its own candidate-head tests before it is qualified. There is
 no tagged GitHub Release or PyPI publication.
 

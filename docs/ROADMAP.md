@@ -5,19 +5,23 @@ identifier `RW-PLAN-2026-10-24`. Agents start at [AGENTS.md](../AGENTS.md), then
 [EXECUTION_STATE.json](EXECUTION_STATE.json). This page is the navigation summary,
 not a second independently maintained task list.
 
-## Main — 0.3.0 (ENGINEERING PREVIEW CANDIDATE)
+## Main — 0.3.1 (ENGINEERING PREVIEW CANDIDATE)
 
-The last fully qualified main before this candidate is
-`e204d7b238933fffddf847c8873cfec0099a50c1` (2026-11-04). The candidate adds
-a one-command **synthetic first-run demo**, a versioned offline wheel and explicit
-limitations. It must obtain its own exact-head checks before acceptance.
+The last verified main before this candidate is
+`35639595a9adabea11ed259c3a6652c17c358175` (2026-11-04), after
+[RW-01O3 PR #76](https://github.com/Smkzz/ResearchWitness/pull/76) passed
+13/13 exact-head and 11/11 postmerge CI/CodeQL checks. Version 0.3.1 packages
+the existing installed offline verifier plus a **separate checkout-only**
+original-PMC-envelope/JATS replay helper in its source ZIP. Its own exact-head
+checks must pass before the new candidate is called accepted. No real PMC
+source acquisition or new discovery is inferred.
 
 The present product includes selective RW-01 source/JATS integrations and
 RW-04 development accounting, plus exact bounded mathematical checks.
 The verifier still has ten bounded deterministic families, installed offline
 JATS review aids and replayable evidence; no general paper truth or independent
 scientific accuracy is implied. See [PROJECT_STATUS.md](PROJECT_STATUS.md)
-for exact commit/check receipts and exposed limitations. The candidate is `0.3.0`, **not yet tagged or published on PyPI**.
+for exact commit/check receipts and exposed limitations. The candidate is `0.3.1`, **not yet tagged or published on PyPI**.
 It is an engineering preview, not a claim of independent scientific accuracy.
 
 **RW-01O1 private pilot accounting (merged, technically qualified):** the

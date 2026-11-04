@@ -129,6 +129,19 @@ outcomes. Authentic independent timestamping, real PMC acquisition,
 article-specific licence checks and actually separate substantive
 source reviews are still essential for RW-01O and later RW-03/RW-05.
 
+### RW-01O3 — offline original GetRecord-to-JATS execution and replay (merged)
+
+[PR #76](https://github.com/Smkzz/ResearchWitness/pull/76) introduced an
+optional checkout-only integrator: independently supplied original PMC OAI-PMH
+response and transfer declaration → exact derived JATS → installed JATS
+percentage arithmetic and optional table/denominator trace → independently
+replayed source-bound evidence receipt. The reported raw-byte hash is a
+continuity check, not proof of publisher authenticity or licensing. Synthetic
+OAI fixtures were accepted; no original PMC11845954 source was obtained, no
+scientific performance measured and no rights/custody privilege was granted.
+RW-01O remains blocked pending real permission-cleared original response bytes
+and independent source-context adjudication.
+
 ### RW-01P — installed source-mapped PRISMA record-flow check (merged)
 
 Archived 2026-10-06 development data from the *separate unmerged*

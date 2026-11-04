@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "e204d7b238933fffddf847c8873cfec0099a50c1",
+    "observed_main_sha": "35639595a9adabea11ed259c3a6652c17c358175",
     "observed_on": "2026-11-04",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "release": "UNRELEASED",
-    "note": "0.3.0 engineering-preview candidate packaging, NOT an actual GitHub Release or PyPI publication. Baseline 0.3.0.dev0 main e204d7b passed 10/10 main CI and CodeQL. RW-01O/Q original-source, source rights, scientific labels and protected custody remain blocked. RW-09/research release not marked done."
+    "note": "Technically accepted RW-01O3 checkout-only OAI\u2192JATS replay merged via PR #76 with 13/13 exact-head checks and 11/11 postmerge main checks. 0.3.1 patch-level engineering preview candidate, not a GitHub Release/PyPI upload. Zero real original PMC11845954 OAI entities; Europe PMC historical 0/13 originals; publisher rights/independent labels and protected custody remain unqualified. RW-01 remains blocked_evidence."
   },
   "authority": {
     "routine_human_approval_required": false,
@@ -96,7 +96,8 @@
         "docs/REAL_SOURCE_ACQUISITION_2026-10-28.md",
         "validation/current-source-comparison-20261028/pre-method-commitment.json",
         "validation/current-source-comparison-20261028/results.json",
-        "https://github.com/Smkzz/ResearchWitness/commit/b4f2ebf390ad3e4c0817badb2144339011516338"
+        "https://github.com/Smkzz/ResearchWitness/commit/b4f2ebf390ad3e4c0817badb2144339011516338",
+        "https://github.com/Smkzz/ResearchWitness/pull/76"
       ],
       "blocker": {
         "category": "evidence",
@@ -200,7 +201,7 @@
         },
         {
           "id": "RW-01O1",
-          "scope": "merged, exact-head CI-qualified checkout-only 2–5-family private PMC pilot denominator ledger; validates supplied raw-to-review source chains, duplicate family/version registry, parser refusals, negative source failures and legal exclusions; no actual source acquisition or independent adjudication",
+          "scope": "merged, exact-head CI-qualified checkout-only 2\u20135-family private PMC pilot denominator ledger; validates supplied raw-to-review source chains, duplicate family/version registry, parser refusals, negative source failures and legal exclusions; no actual source acquisition or independent adjudication",
           "implementation": "tools/pmc_pilot_ledger.py",
           "tests": "tests/test_pmc_pilot_ledger.py"
         },
@@ -234,9 +235,16 @@
           "record": "docs/REAL_SOURCE_ACQUISITION_2026-10-28.md",
           "results": "validation/current-source-comparison-20261028/results.json",
           "pre_method_commit": "b4f2ebf390ad3e4c0817badb2144339011516338"
+        },
+        {
+          "id": "RW-01O3",
+          "scope": "Merged exact-head CI-qualified checkout-only original PMC GetRecord response-to-derived-JATS-to-installed JATS audit and independent replay helper; only synthetic OAI inputs, no actual provider response, rights validation or independent scientific labels",
+          "implementation": "tools/pmc_oai_jats_pilot.py",
+          "tests": "tests/test_pmc_oai_jats_pilot.py",
+          "receipt": "https://github.com/Smkzz/ResearchWitness/pull/76"
         }
       ],
-      "next_action": "Preserve the completed negative added-feature comparison. Obtain actual original responses and independently adjudicated source context before scientific scoring. The observed development gaps are prose percentage coverage, explicit percentage context and local table-section denominator scope; do not reinterpret a tuned follow-up as this frozen experiment. Issues #50 and #35 remain open.",
+      "next_action": "Original PMC11845954 full GetRecord response, permissible rights/transport evidence and genuinely separate source-context adjudication are still missing. Prepare a private original response via an already-authorized provider route; do not substitute an XML display, hand transcription, a posthoc hash or a synthetic OAI fixture. RW-01Q original historical Europe PMC recovery remains 0/13.",
       "write_scope": [
         "docs/REAL_SOURCE_ACQUISITION_2026-10-28.md",
         "docs/EXECUTION_STATE.json",
@@ -356,7 +364,7 @@
         },
         {
           "id": "RW-04H",
-          "scope": "merged exact bounded hypothetical Fréchet joint endpoint ranges and independent-within-stratum attrition quota sensitivity; no real source-based power or accuracy proof",
+          "scope": "merged exact bounded hypothetical Fr\u00e9chet joint endpoint ranges and independent-within-stratum attrition quota sensitivity; no real source-based power or accuracy proof",
           "implementation": "tools/study_sensitivity.py",
           "tests": "tests/test_study_sensitivity.py"
         },

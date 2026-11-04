@@ -1,4 +1,4 @@
-# ResearchWitness 0.3.0 engineering preview
+# ResearchWitness 0.3.1 engineering preview
 
 **Scope:** installable, offline, zero-runtime-dependency engineering preview.
 **Publication state:** this checked-out version is a **release candidate** until
@@ -19,7 +19,7 @@ On macOS / Linux:
 ```text
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --no-index --no-deps researchwitness-0.3.0-py3-none-any.whl
+python -m pip install --no-index --no-deps researchwitness-0.3.1-py3-none-any.whl
 python -m researchwitness --version
 ```
 
@@ -28,7 +28,7 @@ On Windows PowerShell:
 ```text
 py -3 -m venv .venv
 .venv\Scripts\Activate.ps1
-python -m pip install --no-index --no-deps researchwitness-0.3.0-py3-none-any.whl
+python -m pip install --no-index --no-deps researchwitness-0.3.1-py3-none-any.whl
 python -m researchwitness --version
 ```
 
@@ -74,6 +74,16 @@ Use the source's actual copyright/redistribution terms; do not treat a file
 hash as independent provenance authentication. Raw sources, local reports and
 witnesses can contain confidential research. Store bundles privately and share
 only after an explicit content/licence review.
+
+## Source-only optional PMC original-envelope pilot
+
+The 0.3.1 **source ZIP** includes `tools/pmc_oai_jats_pilot.py` and
+its tests. This is intentionally **not installed into the Python wheel**:
+it imports checkout-only `tools` modules and must run from an extracted
+0.3.1 source checkout on genuine, permission-cleared, separately retained
+original PMC OAI-PMH bytes. The script makes no network request. See
+[the exact OAI/JATS protocol](PMC_OAI_JATS_ONE_SHOT.md). No real original
+PMC11845954 response has been acquired or scientifically adjudicated.
 
 ## Unsupported / unqualified
 
