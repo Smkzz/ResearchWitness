@@ -11,7 +11,7 @@ and records arithmetic candidates or explicit abstentions. Separate checkout
 tools retain guarded metadata discovery and scientific-development comparisons. It does **not** autonomously fact-check any
 paper, authenticate publisher origin, establish misconduct or certify conclusions.
 
-**On protected main:** `0.3.1` · **engineering preview, not a scientific-performance result or tagged GitHub Release** · Python 3.11+ · CI tests Python
+**Candidate:** `0.3.1` · **engineering preview, not a scientific-performance result or tagged GitHub Release** · Python 3.11+ · CI tests Python
 3.11–3.13 on Ubuntu, Windows and macOS · no installed runtime dependencies · Apache-2.0.
 
 ## Agent start and development plan
