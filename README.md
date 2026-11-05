@@ -11,7 +11,7 @@ and records arithmetic candidates or explicit abstentions. Separate checkout
 tools retain guarded metadata discovery and scientific-development comparisons. It does **not** autonomously fact-check any
 paper, authenticate publisher origin, establish misconduct or certify conclusions.
 
-**Candidate:** `0.3.1` · **engineering preview, not a scientific release or tagged GitHub Release** · Python 3.11+ · CI tests Python
+**Candidate:** `0.3.1` · **engineering preview, not a scientific-performance result or tagged GitHub Release** · Python 3.11+ · CI tests Python
 3.11–3.13 on Ubuntu, Windows and macOS · no installed runtime dependencies · Apache-2.0.
 
 ## Agent start and development plan
@@ -32,11 +32,13 @@ is not replaced by an opinion. Default incremental spending authorization is EUR
 ## Status
 
 PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed
-by documentation #17 and intake/export consistency #18. The latest independently checked engineering baseline is
-`e204d7b238933fffddf847c8873cfec0099a50c1` (2026-11-04), with successful CI and CodeQL.
-See [project status](docs/PROJECT_STATUS.md) for exact receipts. The `0.3.1`
-preview must pass its own candidate-head tests before it is qualified. There is
-no tagged GitHub Release or PyPI publication.
+by documentation #17 and intake/export consistency #18. The independently checked 0.3.1 engineering-preview baseline is
+`e92c93cb904cafe4c093fcd78c903492e33b45d1` (2026-11-04), with successful
+main [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316046)
+and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316227).
+See [project status](docs/PROJECT_STATUS.md) for exact receipts. There is no
+tagged GitHub Release or PyPI publication; scientific source/rights/reviewer
+and protected-custody qualification remain incomplete.
 
 The internal 10-category engineering assessment used owner-accepted AI review,
 not an independent human audit, security certification or scientific evaluation.

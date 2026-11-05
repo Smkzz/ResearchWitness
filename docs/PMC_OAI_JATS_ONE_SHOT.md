@@ -46,9 +46,17 @@ python -m tools.pmc_oai_jats_pilot \
 ```
 
 Do not place `PRIVATE_NEW_RUN_DIRECTORY` inside the public checkout or an
-unapproved synchronization/CI directory. The output parent must exist and the
-output directory must be new. If a parent, permission or transport boundary is
-unavailable, do not change the sandbox or run over another service.
+unapproved synchronization/CI directory. The tool **now refuses** an output
+located inside its own extracted source checkout, a Git working tree (including
+linked worktrees with a `.git` *file*), or a Mercurial/SVN working tree. It checks
+resolved ancestors, including directory aliases, before creating any output.
+The output parent must exist and the output directory must be new.
+
+**This is an accidental-commit guard, not a privacy guarantee:** it cannot
+detect every cloud-synchronized, shared, backed-up or publicly mounted directory,
+or prove article-specific rights. Use a separately approved private destination.
+If a parent, permission or transport boundary is unavailable, do not change
+sandbox policy or run over another service.
 
 ## What a completed invocation actually does
 

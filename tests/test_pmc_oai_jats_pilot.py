@@ -258,3 +258,63 @@ def test_hardlinked_input_rejected_before_creating_output(tmp_path):
         pilot.run(rawfile, transfer, tmp_path / "no-hardlink",
                   expected_raw_sha256=sha256(raw).hexdigest(), document_id="PMC12345")
     assert not (tmp_path / "no-hardlink").exists()
+
+
+def test_no_original_oai_response_written_inside_source_checkout():
+    """Guard an extracted checkout even when it lacks its .git directory."""
+    from tools import pmc_oai_jats_pilot as pilot
+    with pytest.raises(vb.BenchmarkError, match="OUTPUT_IN_SOURCE_CHECKOUT"):
+        pilot._private_destination(ROOT / "private-oai-original-DO-NOT-CREATE")
+    with pytest.raises(vb.BenchmarkError, match="OUTPUT_IN_SOURCE_CHECKOUT"):
+        pilot._private_destination(ROOT / "examples" / "private-oai-original-DO-NOT-CREATE")
+
+
+@pytest.mark.parametrize("marker,is_directory", [
+    (".git", False), (".git", True), (".hg", True), (".svn", True),
+])
+def test_version_control_ancestor_refused_before_any_source_write(tmp_path, marker, is_directory):
+    raw_file, transfer, raw, _ = fixture(tmp_path)
+    repository = tmp_path / "public-workspace"
+    repository.mkdir()
+    if is_directory:
+        (repository / marker).mkdir()
+    else:
+        (repository / marker).write_text("gitdir: /somewhere/else\n", encoding="utf-8")
+    project_subdir = repository / "subdirectory"
+    project_subdir.mkdir()
+    output = project_subdir / "original-response"
+    with pytest.raises(vb.BenchmarkError, match="OUTPUT_IN_VERSION_CONTROL_TREE"):
+        pilot.run(raw_file, transfer, output,
+                  expected_raw_sha256=sha256(raw).hexdigest(), document_id="PMC12345")
+    assert not output.exists()
+
+
+def test_version_control_alias_does_not_evade_private_output_guard(tmp_path):
+    raw_file, transfer, raw, _ = fixture(tmp_path)
+    repository = tmp_path / "public-workspace"
+    repository.mkdir()
+    (repository / ".git").mkdir()
+    link = tmp_path / "alias"
+    try:
+        link.symlink_to(repository, target_is_directory=True)
+    except (NotImplementedError, OSError):
+        pytest.skip("symlink creation unavailable")
+    output = link / "original-response"
+    # The existing immediate-parent symlink refusal may fire before the new
+    # resolved-ancestry guard; either decision safely prevents output.
+    with pytest.raises(vb.BenchmarkError, match="UNSAFE_PARENT|OUTPUT_IN_VERSION_CONTROL_TREE"):
+        pilot.run(raw_file, transfer, output,
+                  expected_raw_sha256=sha256(raw).hexdigest(), document_id="PMC12345")
+    assert not (repository / "original-response").exists()
+
+
+def test_clean_private_directory_still_replays_source(tmp_path):
+    raw_file, transfer, raw, _ = fixture(tmp_path)
+    private = tmp_path / "private"
+    private.mkdir()
+    output = private / "pilot"
+    report = pilot.run(raw_file, transfer, output,
+                       expected_raw_sha256=sha256(raw).hexdigest(), document_id="PMC12345")
+    assert report["status"] == "OFFLINE_SOURCE_DERIVED_AND_JATS_REPLAYED"
+    assert (output / "original-oai-response.xml").read_bytes() == raw
+    assert (output / "result.json").is_file()

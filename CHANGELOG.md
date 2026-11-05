@@ -12,8 +12,24 @@
 - Update first-run, source-utility, version and citation instructions.
   No new runtime dependency, source download, paper-error allegation, author
   contact, protected study evaluation or paid service is added.
-- This candidate has **not** been tagged/published on GitHub Releases or PyPI.
-  It needs its own exact-head and postmerge checks before acceptance.
+- [PR #77](https://github.com/Smkzz/ResearchWitness/pull/77) merged
+  to protected main as `e92c93cb904cafe4c093fcd78c903492e33b45d1`.
+  Exact-head PR checks and separate postmerge main
+  [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316046) and
+  [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316227)
+  were successful. This version has **not** been tagged/published on GitHub
+  Releases or PyPI. No independently validated scientific accuracy is claimed.
+
+### Original-response private-output containment — 2026-11-05
+
+- Harden the checkout-only PMC OAI/JATS pilot so a caller cannot accidentally
+  write original research XML into the source checkout (including an extracted
+  ZIP without `.git`) or any Git/Mercurial/SVN working tree. Examine resolved
+  parent aliases before creating output; fail with a fixed diagnostic code.
+- Preserve the original input pins, the separately private successful output
+  workflow and scientific-uncertainty flags. This limits accidental VCS leaks;
+  it **cannot** prove that an arbitrary filesystem location is private or that
+  article rights are verified. Add cross-platform adversarial tests.
 
 ## 0.3.0 — engineering preview candidate — UNRELEASED
 
