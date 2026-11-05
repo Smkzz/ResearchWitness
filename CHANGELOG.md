@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.1 — technically accepted engineering preview on main — NOT TAGGED
+## 0.3.1 — engineering preview candidate — UNRELEASED
 
 - Package the independently checked 0.3.0 offline verifier and newly merged
   [RW-01O3 PR #76](https://github.com/Smkzz/ResearchWitness/pull/76)
