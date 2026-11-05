@@ -4,7 +4,7 @@
 **Version:** `0.3.1` (technically accepted engineering preview on main)
 **Release:** NO tagged GitHub Release / no PyPI upload
 **Branch:** protected `main`
-**Verified engineering baseline main:** `e92c93cb904cafe4c093fcd78c903492e33b45d1`
+**Verified engineering baseline main:** `090e230223e00c14722de3cb33d5494d8fa77d96`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
@@ -29,8 +29,15 @@ symbolically aliased parents and Git linked-worktree markers. This prevents one
 avoidable route for accidental inclusion of raw article XML in a public commit.
 It does **not** guarantee that arbitrary destinations are private or backed by
 lawful reuse rights. The local synthetic regression suite tests the guard,
-not a publisher-original source retrieval. Verify the new exact-head checks
-before treating this improvement as accepted on main.
+not a publisher-original source retrieval.
+
+[PR #78](https://github.com/Smkzz/ResearchWitness/pull/78) merged as `090e230223e00c14722de3cb33d5494d8fa77d96` on 2026-11-05. Its final head `65c9ae6e41e0672ab3cad8df53596c6f59299446` passed 13/13 exact-head checks (nine Python/OS jobs, Release gate, CodeQL and dependency evidence). Independent merged-main [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41949465883) and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41949466016) passed 11/11 jobs at that merge commit.
+
+The local focused 173 Python tests and 24 optimized-mode pilot tests passed; the
+local comprehensive quality gate did not finish before its execution deadline,
+so that incomplete run is **not** counted as a pass. The hosted exact-head
+Release gate passed. No new full-text response or independent source evidence
+was acquired.
 
 **Scientific gate unchanged:** Zero actual PMC11845954 full `GetRecord` raw
 response entities were obtained; historical Europe PMC exact-XML recovery is

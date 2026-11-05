@@ -30,6 +30,12 @@
   workflow and scientific-uncertainty flags. This limits accidental VCS leaks;
   it **cannot** prove that an arbitrary filesystem location is private or that
   article rights are verified. Add cross-platform adversarial tests.
+- [PR #78](https://github.com/Smkzz/ResearchWitness/pull/78) merged as
+  `090e230223e00c14722de3cb33d5494d8fa77d96` after 13/13 exact-head checks. Independent
+  [main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41949465883)
+  and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41949466016)
+  passed 11/11 postmerge jobs. This is engineering acceptance, not a
+  tagged publication, provider-original acquisition, or scientific accuracy result.
 
 ## 0.3.0 — engineering preview candidate — UNRELEASED
 
