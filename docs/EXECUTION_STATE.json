@@ -6,11 +6,11 @@
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "e92c93cb904cafe4c093fcd78c903492e33b45d1",
+    "observed_main_sha": "090e230223e00c14722de3cb33d5494d8fa77d96",
     "observed_on": "2026-11-05",
     "version": "0.3.1",
     "release": "UNRELEASED",
-    "note": "RW-01O3 offline PMC OAI to JATS pilot PR #76 and 0.3.1 engineering preview PR #77 merged. 0.3.1 main e92c93cb904cafe4c093fcd78c903492e33b45d1 passed 12/12 main CI/CodeQL checks. Source checkout still only qualified for offline development; no original PMC11845954 HTTP response was captured, Europe PMC historical exact source recovery 0/13, rights and independent labels unresolved, protected custody unqualified. No GitHub Release tag or PyPI publication. A separate hardening candidate prevents accidental VCS output of raw XML but needs its own PR acceptance."
+    "note": "RW-01O3 offline PMC OAI to JATS pilot PR #76 and 0.3.1 engineering preview PR #77 merged. 0.3.1 engineering-preview main 090e230223e00c14722de3cb33d5494d8fa77d96 passed 11/11 independent postmerge CI/CodeQL checks after PR #78. Source checkout still only qualified for offline development; no original PMC11845954 HTTP response was captured, Europe PMC historical exact source recovery 0/13, rights and independent labels unresolved, protected custody unqualified. No GitHub Release tag or PyPI publication. PR #78's original-XML accidental-VCS-output guard was merged as 090e230223e00c14722de3cb33d5494d8fa77d96 after 13/13 exact-head checks and 11/11 independent postmerge main checks. This is an accidental-commit guard, not general privacy assurance."
   },
   "authority": {
     "routine_human_approval_required": false,

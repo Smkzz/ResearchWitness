@@ -31,11 +31,11 @@ is not replaced by an opinion. Default incremental spending authorization is EUR
 
 ## Status
 
-PR [#13](https://github.com/Smkzz/ResearchWitness/pull/13) merged on 2026-10-16, followed
-by documentation #17 and intake/export consistency #18. The independently checked 0.3.1 engineering-preview baseline is
-`e92c93cb904cafe4c093fcd78c903492e33b45d1` (2026-11-04), with successful
-main [CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316046)
-and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316227).
+The latest independently qualified 0.3.1 engineering-preview baseline on main is
+`090e230223e00c14722de3cb33d5494d8fa77d96` (2026-11-05). [PR #78](https://github.com/Smkzz/ResearchWitness/pull/78)
+passed 13/13 exact-head checks, followed by 11/11 independent postmerge
+[CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41949465883) and
+[CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41949466016) jobs.
 See [project status](docs/PROJECT_STATUS.md) for exact receipts. There is no
 tagged GitHub Release or PyPI publication; scientific source/rights/reviewer
 and protected-custody qualification remain incomplete.
