@@ -2,15 +2,15 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 3,
-  "updated_on": "2026-11-04",
+  "updated_on": "2026-11-05",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
-    "observed_main_sha": "35639595a9adabea11ed259c3a6652c17c358175",
-    "observed_on": "2026-11-04",
+    "observed_main_sha": "e92c93cb904cafe4c093fcd78c903492e33b45d1",
+    "observed_on": "2026-11-05",
     "version": "0.3.1",
     "release": "UNRELEASED",
-    "note": "Technically accepted RW-01O3 checkout-only OAI\u2192JATS replay merged via PR #76 with 13/13 exact-head checks and 11/11 postmerge main checks. 0.3.1 patch-level engineering preview candidate, not a GitHub Release/PyPI upload. Zero real original PMC11845954 OAI entities; Europe PMC historical 0/13 originals; publisher rights/independent labels and protected custody remain unqualified. RW-01 remains blocked_evidence."
+    "note": "RW-01O3 offline PMC OAI to JATS pilot PR #76 and 0.3.1 engineering preview PR #77 merged. 0.3.1 main e92c93cb904cafe4c093fcd78c903492e33b45d1 passed 12/12 main CI/CodeQL checks. Source checkout still only qualified for offline development; no original PMC11845954 HTTP response was captured, Europe PMC historical exact source recovery 0/13, rights and independent labels unresolved, protected custody unqualified. No GitHub Release tag or PyPI publication. A separate hardening candidate prevents accidental VCS output of raw XML but needs its own PR acceptance."
   },
   "authority": {
     "routine_human_approval_required": false,

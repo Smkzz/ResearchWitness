@@ -41,6 +41,23 @@ def _plain_dir(path: Path) -> None:
     require(stat.S_ISDIR(mode) and not path.is_symlink(), "UNSAFE_PARENT")
 
 
+def _private_destination(output_dir: Path) -> None:
+    """Refuse original-response output inside source and version-control trees.
+
+    This guards against an accidental public commit of original article bytes.
+    It is not a proof of destination privacy, safe synchronization or rights.
+    The source is still expected to be kept outside the public checkout.
+    """
+    parent = output_dir.parent.resolve(strict=True)
+    checkout = Path(__file__).resolve().parents[1]
+    require(parent != checkout and checkout not in parent.parents,
+            "OUTPUT_IN_SOURCE_CHECKOUT")
+    for ancestor in (parent, *parent.parents):
+        if any((ancestor / marker).exists() or (ancestor / marker).is_symlink()
+               for marker in (".git", ".hg", ".svn")):
+            raise vb.BenchmarkError("OUTPUT_IN_VERSION_CONTROL_TREE")
+
+
 def run(raw_file: Path, transfer_file: Path, output_dir: Path, *,
         expected_raw_sha256: str, document_id: str,
         include_denominator_trace: bool = False,
@@ -82,6 +99,7 @@ def run(raw_file: Path, transfer_file: Path, output_dir: Path, *,
             "REPORT_SIZE_LIMIT")
     output_dir = Path(output_dir)
     _plain_dir(output_dir.parent)
+    _private_destination(output_dir)
     require(not output_dir.exists() and not output_dir.is_symlink(),
             "OUTPUT_MUST_BE_FRESH")
     # This directory is private, caller-chosen, and assumed quiescent. Source is

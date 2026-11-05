@@ -1,16 +1,41 @@
 # Project status
 
-**As of:** 2026-11-04
-**Version:** `0.3.1` (engineering preview candidate; 0.3.0 accepted)
+**As of:** 2026-11-05
+**Version:** `0.3.1` (technically accepted engineering preview on main)
 **Release:** NO tagged GitHub Release / no PyPI upload
-**Branch:** 0.3.1 candidate based on protected `main`
-**Verified engineering baseline main:** `35639595a9adabea11ed259c3a6652c17c358175`
+**Branch:** protected `main`
+**Verified engineering baseline main:** `e92c93cb904cafe4c093fcd78c903492e33b45d1`
 
 The current development instructions are [AGENTS.md](../AGENTS.md),
 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) and [EXECUTION_STATE.json](EXECUTION_STATE.json).
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## 2026-11-05: 0.3.1 preview receipt and private-source output guard
+
+The 0.3.1 engineering preview [PR #77](https://github.com/Smkzz/ResearchWitness/pull/77)
+merged to main at `e92c93cb904cafe4c093fcd78c903492e33b45d1` after
+exact-head PR qualification. Independent main
+[CI](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316046)
+and [CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/41918316227)
+passed at that commit (12/12 completed main checks). No GitHub Release tag or
+PyPI publication exists. The installed verifier is a bounded offline tool,
+not an autonomously validated paper-error detector.
+
+The optional checkout-only PMC OAI pilot now additionally refuses output paths
+inside the source checkout or a version-controlled working tree, including
+symbolically aliased parents and Git linked-worktree markers. This prevents one
+avoidable route for accidental inclusion of raw article XML in a public commit.
+It does **not** guarantee that arbitrary destinations are private or backed by
+lawful reuse rights. The local synthetic regression suite tests the guard,
+not a publisher-original source retrieval. Verify the new exact-head checks
+before treating this improvement as accepted on main.
+
+**Scientific gate unchanged:** Zero actual PMC11845954 full `GetRecord` raw
+response entities were obtained; historical Europe PMC exact-XML recovery is
+0/13. Independent publisher identity, rights, separate source interpretation,
+source sampling and protected custody still require outside evidence.
 
 ## 2026-11-04: RW-01O3 offline original PMC OAI → JATS adapter accepted
 
@@ -27,12 +52,12 @@ tests used fabricated XML; **zero original PMC11845954 OAI response entities**
 were captured. No actual source-publisher authentication or independent source
 review took place. RW-01O #35 and RW-01Q #50 remain open.
 
-## 2026-11-04: 0.3.1 versioned preview (candidate)
+## 2026-11-04: 0.3.1 versioned engineering preview (accepted)
 
-The proposed 0.3.1 release keeps the installed core offline and dependency-free,
-and distributes RW-01O3 via the source ZIP only. Neither a version bump nor CI
-changes the scientific source/custody gates; no tag or PyPI upload exists.
-This candidate must receive new exact-head, release and postmerge checks.
+The qualified 0.3.1 engineering preview keeps the installed core offline and
+dependency-free, and distributes RW-01O3 via the source ZIP only. Neither the
+version bump nor passing CI changes scientific source/custody gates; no tag or
+PyPI upload exists. See the exact-head and main receipts above.
 
 ## 2026-11-04: engineering preview packaging (accepted on main)
 
