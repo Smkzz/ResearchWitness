@@ -1,6 +1,6 @@
 # Project status
 
-**As of:** 2026-11-05
+**As of:** 2026-11-21
 **Version:** `0.3.1` (technically accepted engineering preview on main)
 **Release:** NO tagged GitHub Release / no PyPI upload
 **Branch:** protected `main`
@@ -11,6 +11,70 @@ The current development instructions are [AGENTS.md](../AGENTS.md),
 New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
+
+## RW-04K accepted engineering receipt
+
+[PR #82](https://github.com/Smkzz/ResearchWitness/pull/82), final head
+`5922eda4a839f3bb8691669197031b42e167cc91` (`5922eda`, the implementation
+plus a merge of main after [PR #81](https://github.com/Smkzz/ResearchWitness/pull/81)),
+squash-merged to main as `733916a6f11d3bac8911ba887fdea394c7da7727`
+(tree `3abb9ce01d3569375b3b6c3a1456ae00d30a7af7`).
+Exact-head checks passed **14/14**: the 11 required by the active
+[main-quality-gates ruleset](https://github.com/Smkzz/ResearchWitness/rules/25233301)
+(Python 3.11–3.13 across Ubuntu, Windows and macOS, Release gate and Analyze
+Python), plus CodeQL, Dependency evidence and Devin Review. Evidence:
+[CI](https://github.com/Smkzz/ResearchWitness/actions/runs/44874498270),
+[CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/44874498218),
+[Dependency evidence](https://github.com/Smkzz/ResearchWitness/actions/runs/44874498272).
+The separate [Devin Review](https://app.devin.ai/review/smkzz/researchwitness/pull/82)
+is an automated AI engineering review, not a human or scientific review. On the
+first head `a35cd5a` it reported one bug: the exact analysis flagged
+refutations as replayed even when none replayed. Commit `26989a0` fixed it by
+reporting per-arm replayed counts (`null` in declaration-only mode), with a
+regression test. Its reviews of `26989a0` and `5922eda` reported **0 findings**.
+
+Separate postmerge checks at the exact squash merge passed **11/11**:
+all nine Python 3.11–3.13/Ubuntu-Windows-macOS jobs and Release gate in
+[main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/44875098150),
+and Analyze Python in
+[main CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/44875098117).
+No postmerge check failed, remained pending or was skipped.
+
+The paired development comparison and exact family analysis accept optional
+per-arm evidence roots and run pins (all or none). With them
+(`rw-development-paired-comparison.replay-bound.v1`,
+`aggregation_evidence: replay_verified_only`), a family outcome counts only
+through a replayed accepted formal refutation; every other eligible family,
+including forged or missing bundles, non-refuting points and relabelled
+abstentions, stays in the denominator as unknown. Declared summaries are
+reported beside the counted ones as `declared_*_not_counted`. Declaration-only
+exact analysis can no longer pass: meeting thresholds on it is
+`declared_thresholds_met_not_replay_verified` with reason
+`DECLARATION_ONLY_RECEIPTS_NOT_REPLAYED`. Adversarial synthetic tests are in
+`tests/test_replay_bound_aggregation.py`.
+
+Implementation-head local qualification (Python 3.12.16) ran ruff, the full
+coverage suite (**1449 passed, 380 subtests**; trusted-core 90% gate passed),
+synthetic conformance, historical MVP replay, checksum regeneration and
+`python tools/quality_gate.py` (exit 0). These results do not qualify later
+receipt changes.
+
+**Limits:** replay proves a formal refutation of the declared source block,
+not source authenticity, interpretation fidelity or a paper error. The current
+replay profile verifies only accepted formal refutations, so baseline misses
+and clean negatives stay unknown and the replay-bound numerical pass
+`met_on_replay_verified_development_data` is not reachable yet. Synthetic
+tests are engineering evidence, not scientific measurements. RW-04 remains
+incomplete and `ready`; no scientific accuracy, qualified custody, new source
+acquisition or release publication is established.
+
+**Next eligible engineering task:** a separately reviewed replay profile for
+non-alarm outcomes (baseline misses and clean negatives), so replay-bound
+exact analysis can become complete without a looser counting rule. Authentic
+original source bytes and rights plus genuinely separate source-context
+interpretation remain scientific blockers under
+[RW-01O #35](https://github.com/Smkzz/ResearchWitness/issues/35) and
+[RW-01Q #50](https://github.com/Smkzz/ResearchWitness/issues/50).
 
 ## RW-04J accepted engineering receipt
 

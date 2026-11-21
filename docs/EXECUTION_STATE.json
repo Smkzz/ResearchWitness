@@ -2,7 +2,7 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 3,
-  "updated_on": "2026-11-05",
+  "updated_on": "2026-11-21",
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {
@@ -398,9 +398,25 @@
             "https://github.com/Smkzz/ResearchWitness/actions/runs/44873054327",
             "https://github.com/Smkzz/ResearchWitness/actions/runs/44873054419"
           ]
+        },
+        {
+          "id": "RW-04K",
+          "scope": "merged and qualified replay-bound comparative aggregation: paired comparison and exact family analysis count only replayed accepted formal refutations, keep all other eligible outcomes in the denominator as unknown, and refuse declaration-only passes; PR #82 head 5922eda passed 14/14 checks; separate automated AI engineering review found 1 bug, fixed in 26989a0, then 0 findings; squash merge 733916a6f11d3bac8911ba887fdea394c7da7727 passed 11/11 postmerge checks; non-alarm outcomes not yet replayable, so no replay-bound numerical pass; not source authenticity, labels or scientific validation",
+          "implementation": "tools/paired_development_comparison.py; tools/exact_family_analysis.py; tools/development_artifact_replay.py",
+          "tests": "tests/test_replay_bound_aggregation.py",
+          "contract": "docs/PAIRED_DEVELOPMENT_COMPARISON.md; docs/EXACT_FAMILY_ANALYSIS.md",
+          "evidence": [
+            "https://github.com/Smkzz/ResearchWitness/pull/82",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44874498270",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44874498218",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44874498272",
+            "https://app.devin.ai/review/smkzz/researchwitness/pull/82",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44875098150",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44875098117"
+          ]
         }
       ],
-      "next_action": "Implement strict evidence-bound comparative aggregation binding both complete runs to execution/replay evidence before paired/exact analysis, without declaration-only fallback. No additional source-free hypothetical power layers. The next material scientific prerequisite remains authentic original-source bytes and rights plus genuinely separate source-context interpretation under RW-01O #35 / RW-01Q #50; the checkout-only mathematical replay supports exposed development and must not promote declared labels to scientific truth."
+      "next_action": "Implement a separately reviewed replay profile for non-alarm outcomes (baseline misses and clean negatives) so replay-bound paired/exact analysis can become complete without a looser counting rule or declaration-only fallback. No additional source-free hypothetical power layers. The next material scientific prerequisite remains authentic original-source bytes and rights plus genuinely separate source-context interpretation under RW-01O #35 / RW-01Q #50; the checkout-only mathematical replay supports exposed development and must not promote declared labels to scientific truth."
     },
     {
       "id": "RW-05",
