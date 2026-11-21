@@ -88,14 +88,39 @@ The explicit uniquely named Python-server pipe test records **1 passed /
 SID/image before asserting rejection, with a 15-second child timeout and handle
 cleanup. This narrows identity risk; it does not resolve it or qualify execution.
 
+The mandatory-rejection follow-up [PR #92](https://github.com/Smkzz/ResearchWitness/pull/92)
+merged as [`03963c0370f3cdc7ceda2994435d93b807ff8a73`](https://github.com/Smkzz/ResearchWitness/commit/03963c0370f3cdc7ceda2994435d93b807ff8a73).
+The known-folder/signature follow-up [PR #93](https://github.com/Smkzz/ResearchWitness/pull/93)
+merged as [`ba7dc5db97556b88eead5f20f0aaf808a46a5074`](https://github.com/Smkzz/ResearchWitness/commit/ba7dc5db97556b88eead5f20f0aaf808a46a5074).
+Each merge passed **11/11** post-merge checks: the nine Python/platform jobs,
+Release gate and Analyze Python, as observed in the linked run session.
+Dependency evidence did not run on either merge commit (the workflow trigger
+restriction noted above). The
+[native signature log](../evidence/rw03-npipe-signature-2026-11-22/native-signature.log)
+records unchanged runner/test source hashes at #93's merge. With
+`RW_NATIVE_DOCKER_DESKTOP=1` and with it unset, each run records **17 passed /
+1 skipped**, exit **0**; the explicit fake-pipe rejection records **1 passed /
+17 deselected**, exit **0**. The log's actual capture time is **2026-11-21 UTC**;
+the directory date is the requested receipt label. Certificate Subject, Issuer
+and Thumbprint are read offline with `X509Certificate.CreateFromSignedFile`,
+which does not validate the signature (metadata status `NOT_CHECKED`). A separate
+offline name-based `WinVerifyTrust` check records **PASS**, exit **0**. Neither
+result establishes current revocation status, installation integrity or qualification.
+
 **Real PDF isolation: BLOCKED / NOT RUN.** No reviewed SHA-256-pinned Poppler
 image is provisioned; Docker Hub and snapshot.debian.org build downloads await
 Sami's egress decision. Pipe-server identity is narrowed, not resolved: the check
 requires a current-user or SYSTEM token owner and a resolved image location under
-`Program Files\Docker`. A standalone Docker Engine there would also pass; it does
-not distinguish Docker Desktop. Residual risks remain: the check-then-use race
-before the CLI's separate connection, same-user/admin attackers, no binary-integrity
-check, and `ProgramFiles` read from the environment. Another local process can
+`Program Files\Docker`, obtained via `SHGetKnownFolderPath`, not the environment.
+The executable must pass an offline, name-based Authenticode signature check;
+the leaf signer's simple display name must equal `Docker Inc`. There is no issuer
+restriction, chain-root pin or certificate-fingerprint check: any otherwise valid
+signature chaining to a trusted root with that subject name passes the signer
+check. A standalone Docker-signed Engine there could also pass; it does not
+distinguish Docker Desktop. Residual risks remain: the check-then-use race before
+the CLI's separate connection, same-user/admin attackers, offline-only revocation
+(revoked certificates are not detected), name-only signer matching and the rest
+of the installation's integrity. Another local process can
 create `\\.\pipe\docker_engine` when the daemon is absent. These residual risks
 require separate assurance before any Windows PDF
 qualification claim. `pdf_execution` stays `unqualified`. Protected custody

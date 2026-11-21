@@ -80,9 +80,13 @@ runner opens the pipe and uses `GetNamedPipeServerProcessId` to inspect its serv
 The server's token user SID must match the current process user or LocalSystem
 (`S-1-5-18`), and its resolved image path must be under the known Program Files
 folder's `Docker\` subtree (case-insensitive). `SHGetKnownFolderPath` supplies
-that folder, not the environment. The executable must pass offline Authenticode
-verification with `WinVerifyTrust` and have leaf signer subject simple-display
-name exactly `Docker Inc`. UI and revocation checks are disabled; cache-only URL
+that folder, not the environment. The executable must pass an offline,
+**name-based** Authenticode signature check with `WinVerifyTrust`: the leaf
+signer's simple display name must equal `Docker Inc`. There is no issuer
+restriction, chain-root pin or certificate-fingerprint check. Any otherwise valid
+signature whose certificate chains to a trusted root with that subject name would
+pass this signer check; name-only matching remains a residual risk.
+UI and revocation checks are disabled; cache-only URL
 retrieval prevents network access. Trust state and known-folder memory are cleaned
 up; API or cleanup failures block execution. Offline-only verification does not
 detect revoked certificates and does not verify the entire installation's integrity.

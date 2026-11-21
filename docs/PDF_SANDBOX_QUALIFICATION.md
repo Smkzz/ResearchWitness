@@ -23,9 +23,12 @@ pipe, queries `GetNamedPipeServerProcessId`, and inspects the server process tok
 and image path. It requires the current process user SID or LocalSystem
 (`S-1-5-18`) and a resolved image path under the known Program Files folder's
 `Docker\` subtree, compared case-insensitively. `SHGetKnownFolderPath` supplies
-the folder instead of the environment. The executable must pass offline
-`WinVerifyTrust` Authenticode verification and its leaf signer certificate's
-subject simple-display name must be exactly `Docker Inc`. Verification disables
+the folder instead of the environment. The executable must pass an offline,
+**name-based** Authenticode signature check with `WinVerifyTrust`: its leaf signer
+certificate's simple display name must equal `Docker Inc`. No issuer restriction,
+chain-root pin or certificate-fingerprint check is applied. Any otherwise valid
+signature whose certificate chains to a trusted root with that subject name would
+pass this signer check; name-only matching remains a residual risk. Verification disables
 UI and revocation checks and uses cache-only URL retrieval: no network access.
 Trust state is always closed and known-folder memory freed; API and cleanup
 failures block execution. Offline-only revocation means a revoked certificate
