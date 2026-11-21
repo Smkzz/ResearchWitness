@@ -3,9 +3,9 @@
 This tool compares two *declared* development result ledgers under the same
 externally pinned registry, scheduled works and identical declared per-work
 resource limits. It uses the existing strict receipt scorer for each arm.
-It **does not execute a model or checker**, revalidate source evidence,
-authenticate scientific labels, guarantee work-family independence or measure
-general research precision/recall.
+The default mode does not execute a checker or revalidate source evidence.
+Neither mode authenticates scientific labels, guarantees work-family independence
+or measures general research precision/recall.
 
 ## Inputs and usage
 
@@ -64,11 +64,8 @@ arm's own, distinct evidence root and externally pinned run hash.
 - The legacy declaration-only summaries are kept beside the counted ones as
   `declared_*_not_counted`, so the effect of excluding unreplayed declarations
   is visible but cannot improve any counted diagnostic.
-- Only accepted refutations have a replay profile. A completed non-detection
-  or clean negative cannot yet be verified, so replay-bound reports are
-  normally `incomplete`; unlocking that needs a separately reviewed replay
-  profile for non-alarm outcomes (for example deterministic re-execution of a
-  frozen arm), not a looser counting rule.
+- This accepted-only profile cannot verify a completed non-detection or clean
+  negative, so its replay-bound reports typically remain `incomplete`.
 - Pin, evidence-root, case-collision and byte-budget failures still fail closed.
   Labels, targets and source-correspondence fields remain declarations that
   can only demote a replayed refutation.
@@ -76,6 +73,50 @@ arm's own, distinct evidence root and externally pinned run hash.
 Without the evidence arguments the report is the unchanged declaration-only
 `rw-development-paired-comparison.v1` with `aggregation_evidence:
 declaration_only`.
+
+## Frozen-arm replay (RW-04L)
+
+Add `--replay-frozen-arms` **and** all four replay arguments to the paired or
+exact analysis CLI. This selects the separate
+`rw-development-paired-comparison.frozen-arm-replay.v1` profile; it never falls
+back to declaration-only or accepted-only replay.
+
+Before seeing outcomes, pin the two distinct local implementations, the registry
+and each arm protocol separately. Obtain the implementation commitments with
+`python -c "from tools.development_artifact_replay import frozen_implementation_pins; print(frozen_implementation_pins())"`.
+Use the chosen commitments in the protocols and study draft. Each binds its named
+arm, the checkout replay/compiler/checker and input helper bytes, and Python
+version/implementation/platform metadata. A changed pin or unknown arm is
+refused; replay needs a trusted matching checkout/runtime, not supplied code.
+
+- `box-midpoint` evaluates the exact midpoint of the independent closed
+  intervals. `box-objective-corner` uses the upper endpoint where the objective
+  coefficient is positive and the lower endpoint elsewhere. Both run exactly
+  one verified point on the same registered source and under the same declared
+  budget. The midpoint can miss a true formal violation.
+- Supply the exact registered bytes as `WORK_ID/source.txt` in each arm's
+  distinct root, using portable work IDs. The one explicit RW-MATH-02 block
+  must compile with default hints to a supported affine box with no additional
+  constraints. Its block hash must match the registered interpretation pin.
+  Use `marked-claim` as the target ID for positive works; the probe reads
+  neither the label nor target. The run pin covers the completed receipt.
+- Replay regenerates the result, not just the arithmetic behind a submitted
+  alarm. A strict exceedance requires an accepted receipt and hashes of the
+  canonical exact compiler candidate and exact point array. Existing
+  source-correspondence and target checks still apply to positive detections.
+  A no-alarm counts only if **every** member of that family shows a verified,
+  completed no-alarm. Missing, rejected, mismatched, unsupported and
+  budget-exceeded outcomes do not become known non-alarms.
+- The per-arm replay cap is 128 receipts and 32 MiB of source bytes, with
+  existing per-file and parser limits and zero provider calls. Re-execution
+  exceeding the declared per-work elapsed limit does not count as completed.
+  This is bounded local computation, not an OS sandbox or historical timing
+  attestation.
+
+The report separates accepted refutations from replayed/unverified non-alarms.
+Replay demonstrates what the pinned computation returned, not whether the
+historical run took place, whether the registered labels are true, or whether
+the narrow marked block faithfully represents a scientific claim.
 
 ## Limitations and next steps
 

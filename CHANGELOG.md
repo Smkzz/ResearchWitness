@@ -2,6 +2,11 @@
 
 ## 0.3.1 — engineering preview candidate — UNRELEASED
 
+- RW-04L: optional frozen-arm replay of exact alarm and no-alarm outcomes on
+  explicitly marked affine box models. Baseline misses and clean negatives
+  count only when every family member has a replayed completed non-alarm.
+  A synthetic fixture reaches the existing numeric gate; scientific evidence
+  and protected evaluation status are unchanged.
 - RW-04K: optional replay-bound aggregation in the paired development
   comparison and exact family analysis. With per-arm evidence roots and run
   pins, only outcomes backed by RW-04I replay of accepted formal refutations

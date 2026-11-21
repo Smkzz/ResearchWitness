@@ -108,10 +108,12 @@ receipt or historical result is rewritten by this correction.
   the endpoints use only replay-verified outcomes; unverified families stay in
   the denominator, make the endpoints incomplete and add
   `UNVERIFIED_DECLARED_OUTCOMES`. The only possible pass is
-  `met_on_replay_verified_development_data`, which the current accepted-only
-  replay profile cannot reach (a baseline miss or clean negative is never
-  verified). Any pass is development-exposed, **never an approval of scientific
-  superiority**, and not a real data sample or protected holdout.
+  `met_on_replay_verified_development_data`. The accepted-only profile cannot
+  reach it. RW-04L adds [`--replay-frozen-arms`](PAIRED_DEVELOPMENT_COMPARISON.md#frozen-arm-replay-rw-04l)
+  to verify completed non-alarms for two pinned deterministic local box probes.
+  This makes the outcome reachable on synthetic data without changing the
+  evidence, denominator, sample-size or statistical thresholds. Any pass
+  remains development-exposed, **never an approval of scientific superiority**.
 - Results include the exact input/report commitments, counts, omissions,
   zero-spend scope, display rounding method, and explicit FALSE flags for
   source authenticity, family independence, protected custody and scientific

@@ -17,17 +17,22 @@ from hashlib import sha256
 from pathlib import Path
 import stat
 import sys
+import time
 from typing import Any
 
 from researchwitness import exact_optimization as exact
 from researchwitness import source_claims as source
+from researchwitness import strict
 from tools import verification_benchmark as vb
+from tools import offline_files
 from tools.offline_files import read_regular
 
 VERSION = "rw-development-artifact-replay.v1"
 MAX_ACCEPTED = 128
 MAX_TOTAL_ARTIFACT_BYTES = 32 * 1024 * 1024
 MAX_REPORT_BYTES = 8 * 1024 * 1024
+FROZEN_ARMS = ("box-midpoint", "box-objective-corner")
+FROZEN_TARGET_ID = "marked-claim"
 
 
 def _digest(raw: bytes) -> str:
@@ -128,16 +133,83 @@ def _bound_inputs(registry: dict[str, Any], protocol: dict[str, Any],
     return original, works, {r["work_id"]: r for r in run["results"]}
 
 
+def frozen_implementation_pins() -> dict[str, str]:
+    """Commit to the fixed algorithm, its local implementation and Python runtime."""
+    files = {name: _digest(_load(Path(path), exact.MAX_MODEL_BYTES))
+             for name, path in (("replay", __file__), ("compiler", source.__file__),
+                                ("checker", exact.__file__), ("scorer", vb.__file__),
+                                ("files", offline_files.__file__), ("paths", strict.__file__))}
+    runtime = {"python": sys.version, "platform": sys.platform,
+               "implementation": sys.implementation.name}
+    return {arm: vb.commitment({"profile": "rw-marked-box-probe.v1",
+                                "arm": arm, "files": files, "runtime": runtime})
+            for arm in FROZEN_ARMS}
+
+
+def _probe(raw: bytes, source_sha256: str, arm: str) -> tuple[dict, list[str], bool]:
+    """Run the full single-point search, without labels, on one affine box."""
+    candidate, model = source.compile_candidate(
+        raw, block_index=0, expected_source_sha256=source_sha256)
+    vb.require(candidate["explicit_block_count"] == 1, "MULTIPLE_SOURCE_BLOCKS")
+    compiled = exact.compile_model(model)
+    vb.require(not (compiled.inequalities or compiled.equalities or compiled.products),
+               "FROZEN_ARM_REQUIRES_AFFINE_BOX")
+    if arm == "box-midpoint":
+        point = [str((lo + hi) / 2) for lo, hi in compiled.bounds]
+    else:
+        vb.require(arm == "box-objective-corner", "UNKNOWN_FROZEN_ARM")
+        coefficients = dict(compiled.objective)
+        point = [str(hi if coefficients.get(i, 0) > 0 else lo)
+                 for i, (lo, hi) in enumerate(compiled.bounds)]
+    return candidate, point, exact.verify_point(compiled, point) > exact.rational(
+        candidate["claimed_upper"])
+
+
+def _replay_frozen(work: dict[str, Any], record: dict[str, Any], evidence_root: Path,
+                   budget: list[int], arm: str, max_elapsed_ms: int) -> dict[str, Any]:
+    """Verify a completion against regenerated semantics, never a retained report."""
+    start = time.monotonic_ns()
+    vb.require(record["status"] == "completed", "FROZEN_ARM_RECEIPT_NOT_COMPLETED")
+    folder = evidence_root / work["work_id"]
+    _directory(folder)
+    raw = _load(folder / "source.txt", min(source.MAX_SOURCE_BYTES,
+                                          MAX_TOTAL_ARTIFACT_BYTES - budget[0] + 1))
+    budget[0] += len(raw)
+    vb.require(budget[0] <= MAX_TOTAL_ARTIFACT_BYTES, "CUMULATIVE_ARTIFACT_BUDGET")
+    candidate, point, alarm = _probe(raw, work["source_sha256"], arm)
+    vb.require(candidate["source_block_sha256"] == work["interpretation_sha256"],
+               "INTERPRETATION_SOURCE_BLOCK_MISMATCH")
+    vb.require(work["label"] != "positive" or work["target_id"] == FROZEN_TARGET_ID,
+               "FROZEN_ARM_TARGET_ID_MISMATCH")
+    vb.require(alarm == record["alarm_emitted"], "FROZEN_ARM_ALARM_MISMATCH")
+    result = {"work_id": work["work_id"], "source_sha256": work["source_sha256"],
+              "source_block_sha256": candidate["source_block_sha256"],
+              "model_sha256": candidate["model_sha256"], "arm": arm,
+              "paper_error_established": False}
+    if alarm:
+        candidate_sha = _digest(exact.canonical_bytes(candidate))
+        point_sha = _digest(exact.canonical_bytes(point))
+        vb.require(record["certificate_status"] == "accepted", "FROZEN_ARM_ALARM_NOT_ACCEPTED")
+        vb.require(record["candidate_sha256"] == candidate_sha and
+                   record["certificate_sha256"] == point_sha, "FROZEN_ARM_ALARM_DIGEST_MISMATCH")
+        result.update(candidate_sha256=candidate_sha, point_sha256=point_sha,
+                      mathematical_replay="exact_formal_refutation_replayed")
+    vb.require(time.monotonic_ns() - start <= max_elapsed_ms * 1_000_000,
+               "FROZEN_ARM_REPLAY_TIME_LIMIT")
+    return result
+
+
 def verify_receipts(registry: dict[str, Any], protocol: dict[str, Any],
                     run: dict[str, Any], evidence_root: Path, *,
                     expected_registry_sha256: str, expected_protocol_sha256: str,
-                    expected_run_sha256: str) -> dict[str, Any]:
+                    expected_run_sha256: str, frozen_arm: bool = False) -> dict[str, Any]:
     """Per-work replay status for aggregation; nothing is dropped or upgraded.
 
     Unlike `replay`, a receipt whose evidence is missing, substituted or does
     not refute is reported UNVERIFIED with a stable code instead of aborting.
     Pins, the evidence root, case collisions and budgets still fail closed.
-    Only accepted receipts have a replay profile; no other outcome is verified.
+    By default only accepted refutations are replayed. The opt-in frozen arm
+    re-executes completed alarm and non-alarm outcomes with no legacy fallback.
     """
     original, works, records = _bound_inputs(
         registry, protocol, run,
@@ -149,24 +221,53 @@ def verify_receipts(registry: dict[str, Any], protocol: dict[str, Any],
                 if w in records and records[w]["certificate_status"] == "accepted"]
     vb.require(len(expected) <= MAX_ACCEPTED, "ACCEPTED_REPLAY_BUDGET")
     _directory(evidence_root)
+    arm = None
+    non_alarms: list[str] = []
+    if frozen_arm:
+        try:
+            for work_id in works:
+                strict.relative_path(work_id)
+        except strict.Invalid as exc:
+            raise vb.BenchmarkError("FROZEN_ARM_WORK_PATH_NOT_PORTABLE") from exc
+        matching = {pin: name for name, pin in frozen_implementation_pins().items()}
+        arm = matching.get(protocol["implementation_sha256"])
+        vb.require(arm is not None, "FROZEN_ARM_IMPLEMENTATION_MISMATCH")
+        vb.require(protocol["max_calls"] == 0, "FROZEN_ARM_PROVIDER_CALLS_NOT_SUPPORTED")
+        non_alarms = [w for w in protocol["schedule"]
+                      if w in records and works[w]["eligible"]
+                      and records[w]["status"] == "completed" and not records[w]["alarm_emitted"]]
+        vb.require(len(non_alarms) + len(expected) <= MAX_ACCEPTED, "FROZEN_ARM_REPLAY_BUDGET")
     budget = [0]
     verified: dict[str, dict[str, Any]] = {}
     unverified: dict[str, str] = {}
-    for work_id in expected:
+    verified_non_alarms: dict[str, dict[str, Any]] = {}
+    unverified_non_alarms: dict[str, str] = {}
+    for work_id in [*expected, *non_alarms]:
+        non_alarm = arm is not None and not records[work_id]["alarm_emitted"]
+        successes = verified_non_alarms if non_alarm else verified
+        failures = unverified_non_alarms if non_alarm else unverified
         try:
-            verified[work_id] = _replay_work(
-                work_id, works[work_id], records[work_id], evidence_root, budget)
+            if arm is None:
+                successes[work_id] = _replay_work(
+                    work_id, works[work_id], records[work_id], evidence_root, budget)
+            else:
+                successes[work_id] = _replay_frozen(
+                    works[work_id], records[work_id], evidence_root, budget,
+                    arm, protocol["max_elapsed_ms"])
         except (vb.BenchmarkError, source.UnsupportedClaim, exact.CertificateError) as exc:
             if str(exc) == "CUMULATIVE_ARTIFACT_BUDGET":
                 raise
-            unverified[work_id] = str(exc)
-        except (OSError, ValueError, TypeError, RecursionError):
-            unverified[work_id] = "ARTIFACT_UNAVAILABLE_OR_INVALID"
+            failures[work_id] = str(exc)
+        except (OSError, ValueError, TypeError, OverflowError, RecursionError):
+            failures[work_id] = "ARTIFACT_UNAVAILABLE_OR_INVALID"
     return {
         "original_development_score": original,
         "accepted_receipts_declared": len(expected),
         "verified": verified,
         "unverified": unverified,
+        **({"frozen_arm": arm,
+            "verified_non_alarms": verified_non_alarms,
+            "unverified_non_alarms": unverified_non_alarms} if frozen_arm else {}),
     }
 
 
