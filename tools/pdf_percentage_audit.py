@@ -106,12 +106,14 @@ def _extract_layout_text(data: bytes) -> str:
 
     # Do not load credentials, proxy settings, contexts, or proxy configuration
     # from the calling user's Docker client configuration.  The only host API
-    # endpoint accepted by this runner is the local Unix socket.
+    # endpoint is the local Docker Desktop named pipe on Windows or Unix socket
+    # elsewhere. The resolved executable needs no inherited client environment.
     docker_env = {"PATH": os.defpath, "LANG": "C", "LC_ALL": "C"}
+    docker_host = "npipe:////./pipe/docker_engine" if sys.platform == "win32" else "unix:///var/run/docker.sock"
     with tempfile.TemporaryDirectory(prefix="researchwitness-docker-config-") as config_dir:
         docker_prefix = [
             docker,
-            "--host", "unix:///var/run/docker.sock",
+            "--host", docker_host,
             "--config", config_dir,
         ]
         try:

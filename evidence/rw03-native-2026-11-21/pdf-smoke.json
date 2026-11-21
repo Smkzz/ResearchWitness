@@ -1,0 +1,20 @@
+{
+  "remaining_qualification": [
+    "Independent image rootfs/package/provenance review and pinned image ID",
+    "Effective runtime isolation, environment and mount inspection on the authorized daemon",
+    "Real resource-limit/timeout/output-overflow and success/failure cleanup evidence",
+    "Separate hermetic failure-injection tests do not establish real runtime enforcement"
+  ],
+  "results": [
+    {
+      "expected": "two_relationships",
+      "fixture": "normal",
+      "passed": false,
+      "reason": "The configured Poppler sandbox image is unavailable or unverified",
+      "source_sha256": "41118ac02e09559aa6b5cefcc7f1d688978eac4fca604bb8ec7bd60402a8c033"
+    }
+  ],
+  "sandbox_qualified": false,
+  "schema_version": 1,
+  "status": "blocked_or_failed"
+}

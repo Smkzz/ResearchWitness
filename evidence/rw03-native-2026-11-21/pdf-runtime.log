@@ -1,0 +1,116 @@
+UTC: 2026-11-21T20:36:57.489952+00:00
+
+COMMAND: git rev-parse HEAD
+f7e17793abe151f5b7bcd68a3d5bfa11419528b6
+EXIT CODE: 0
+
+COMMAND: powershell -NoProfile -Command "Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber | Format-List"
+
+
+Caption     : Microsoft Windows Server 2022 Standard
+Version     : 10.0.20348
+BuildNumber : 20348
+
+
+
+EXIT CODE: 0
+
+COMMAND: cmd /c ver
+
+Microsoft Windows [Version 10.0.20348.5622]
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine version
+Client:
+ Version:           29.9.2
+ API version:       1.56
+ Go version:        go1.26.10
+ Git commit:        a82e528
+ Built:             Tue Oct 20 19:44:07 2026
+ OS/Arch:           windows/amd64
+ Context:           default
+
+Server: Docker Desktop 4.98.0 (245422)
+ Engine:
+  Version:          29.9.2
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.10
+  Git commit:       0367cbe
+  Built:            Tue Oct 20 18:45:02 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine info --format "{{json .SecurityOptions}}"
+["name=seccomp,profile=builtin","name=cgroupns"]
+EXIT CODE: 0
+
+EVIDENCE COMMANDS
+
+COMMAND: "C:\Program Files\Python313\python.exe" -c "import os, shutil, subprocess, tempfile
+docker = shutil.which('docker')
+with tempfile.TemporaryDirectory(prefix='rw03-evidence-empty-config-') as config:
+    env = {'PATH': os.defpath, 'LANG': 'C', 'LC_ALL': 'C'}
+    command = [docker, '--host', 'npipe:////./pipe/docker_engine', '--config', config, 'info', '--format', '{{json .SecurityOptions}}']
+    print('Empty config contents:', os.listdir(config), flush=True)
+    print('Child environment:', env, flush=True)
+    print('Child command:', command, flush=True)
+    result = subprocess.run(command, env=env, check=False)
+    print('Child exit code:', result.returncode, flush=True)
+    raise SystemExit(result.returncode)
+"
+Empty config contents: []
+Child environment: {'PATH': '.;C:\\bin', 'LANG': 'C', 'LC_ALL': 'C'}
+Child command: ['C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.EXE', '--host', 'npipe:////./pipe/docker_engine', '--config', 'C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\rw03-evidence-empty-config-36i4v0o1', 'info', '--format', '{{json .SecurityOptions}}']
+["name=seccomp,profile=builtin","name=cgroupns"]
+Child exit code: 0
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m tools.pdf_sandbox_smoke --output C:\Users\Administrator\rw03-evidence\pdf-smoke.json
+EXIT CODE: 2
+
+COMMAND: "C:\Program Files\Python313\python.exe" -c "from pathlib import Path; print(Path(r'C:\Users\Administrator\rw03-evidence\pdf-smoke.json').read_text())"
+{
+  "remaining_qualification": [
+    "Independent image rootfs/package/provenance review and pinned image ID",
+    "Effective runtime isolation, environment and mount inspection on the authorized daemon",
+    "Real resource-limit/timeout/output-overflow and success/failure cleanup evidence",
+    "Separate hermetic failure-injection tests do not establish real runtime enforcement"
+  ],
+  "results": [
+    {
+      "expected": "two_relationships",
+      "fixture": "normal",
+      "passed": false,
+      "reason": "The configured Poppler sandbox image is unavailable or unverified",
+      "source_sha256": "41118ac02e09559aa6b5cefcc7f1d688978eac4fca604bb8ec7bd60402a8c033"
+    }
+  ],
+  "sandbox_qualified": false,
+  "schema_version": 1,
+  "status": "blocked_or_failed"
+}
+
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine images
+IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA
+hello-world:latest   c567b231f656       25.9kB         9.49kB        
+EXIT CODE: 0

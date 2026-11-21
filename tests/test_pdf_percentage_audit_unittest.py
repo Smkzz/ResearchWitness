@@ -58,6 +58,45 @@ class PDFPercentageAuditTests(unittest.TestCase):
                             _extract_layout_text(b"%PDF-1.7\n")
         popen.assert_not_called()
 
+    def test_local_endpoint_and_minimal_environment_per_platform(self):
+        configured = "sha256:" + "a" * 64
+        for platform, endpoint in (
+            ("win32", "npipe:////./pipe/docker_engine"),
+            ("linux", "unix:///var/run/docker.sock"),
+            ("darwin", "unix:///var/run/docker.sock"),
+        ):
+            with self.subTest(platform=platform):
+                calls = []
+
+                def docker_run(command, **kwargs):
+                    calls.append(command)
+                    self.assertEqual(command[:3], ["/absolute/docker", "--host", endpoint])
+                    self.assertEqual(command[3], "--config")
+                    self.assertEqual(list(Path(command[4]).iterdir()), [])
+                    self.assertEqual(kwargs["env"], {"PATH": os.defpath, "LANG": "C", "LC_ALL": "C"})
+                    self.assertFalse(kwargs["shell"])
+                    if command[5] == "info":
+                        return self.seccomp_info_result()
+                    return mock.Mock(returncode=1, stdout="")
+
+                with (
+                    mock.patch.dict(os.environ, {
+                        SANDBOX_IMAGE_ENV: configured, "DOCKER_HOST": "tcp://untrusted:2375",
+                        "DOCKER_CONFIG": "/untrusted", "HTTPS_PROXY": "http://untrusted",
+                        "SYSTEMROOT": "untrusted", "DOCKER_AUTH_CONFIG": "untrusted",
+                    }, clear=True),
+                    mock.patch("tools.pdf_percentage_audit.sys.platform", platform),
+                    mock.patch("tools.pdf_percentage_audit.shutil.which", return_value="/absolute/docker"),
+                    mock.patch("tools.pdf_percentage_audit.subprocess.run", side_effect=docker_run),
+                    mock.patch("tools.pdf_percentage_audit.subprocess.Popen") as popen,
+                ):
+                    with self.assertRaisesRegex(PDFSourceError, "unavailable or unverified"):
+                        _extract_layout_text(b"%PDF-1.7\n")
+                self.assertEqual(len(calls), 2)
+                self.assertEqual(calls[0][:5], calls[1][:5])
+                self.assertFalse(Path(calls[0][4]).exists())
+                popen.assert_not_called()
+
     def test_extraction_fails_closed_without_the_docker_builtin_seccomp_profile(self):
         configured = "sha256:" + "a" * 64
         with mock.patch.dict(os.environ, {SANDBOX_IMAGE_ENV: configured}, clear=True):
