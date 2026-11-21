@@ -67,6 +67,28 @@ families, specified before confirmatory exposure.
 
 ## Fail-closed restrictions
 
+### RW-04J: distinct declared negative relationships
+
+The `minimum_negative_relationships` gate counts distinct
+`(source_sha256, interpretation_sha256)` pairs among eligible negative works.
+Repeated work/version records with the same pair count once; distinct
+interpretations of the same source can count separately. Family counts are
+not substituted for relationship counts, and family-level statistical
+denominators are unchanged.
+
+The output `distinct_negative_relationships_declared` is the count used by
+this gate. `eligible_negative_work_records_declared` reports the raw eligible
+negative row count. For compatibility, `negative_relationships_declared`
+retains its historical raw-row meaning. When raw rows exceed distinct pairs,
+`reasons` includes `DUPLICATE_NEGATIVE_RELATIONSHIP_REPRESENTATIONS`; this is
+informational, not an automatic failure if the distinct minimum is still met.
+An unmet distinct minimum retains `DECLARED_MINIMUM_SAMPLE_NOT_MET`.
+
+This is identity deduplication, **not a verified relationship census**.
+Different hashes do not prove scientifically distinct relationships, source
+authenticity, valid labels or independent families. No frozen registry,
+receipt or historical result is rewritten by this correction.
+
 - Missing/incomplete or eligible unresolved families make **both** statistical
   endpoints inconclusive. The scorer does not analyze only favorable complete
   cases or silently promote unresolved cases to negatives.

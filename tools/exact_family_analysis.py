@@ -165,10 +165,15 @@ def analyze(
         row["eligible"] and row["label"] == "negative"
         for row in registry["works"]
     )
+    distinct_negative_relationships = len({
+        (row["source_sha256"], row["interpretation_sha256"])
+        for row in registry["works"]
+        if row["eligible"] and row["label"] == "negative"
+    })
     count_adequate = (
         npos >= study["sampling"]["minimum_positive_families"]
         and nneg >= study["sampling"]["minimum_negative_families"]
-        and nneg_relationships >= study["sampling"]["minimum_negative_relationships"]
+        and distinct_negative_relationships >= study["sampling"]["minimum_negative_relationships"]
     )
     complete = (
         report["status"] == "complete"
@@ -240,6 +245,8 @@ def analyze(
         }
 
     reasons = []
+    if nneg_relationships > distinct_negative_relationships:
+        reasons.append("DUPLICATE_NEGATIVE_RELATIONSHIP_REPRESENTATIONS")
     if not complete:
         reasons.append("MISSING_OR_UNRESOLVED_ELIGIBLE_FAMILIES")
     if not computable:
@@ -262,6 +269,8 @@ def analyze(
         "positive_families_declared": npos,
         "negative_families_declared": nneg,
         "negative_relationships_declared": nneg_relationships,
+        "eligible_negative_work_records_declared": nneg_relationships,
+        "distinct_negative_relationships_declared": distinct_negative_relationships,
         "excluded_families_declared": report["excluded_family_count"],
         "unresolved_families_declared": report["unresolved_family_count"],
         "incomplete_paired_positive_families": pos["paired_unknown"],
@@ -279,6 +288,7 @@ def analyze(
         "scientific_superiority_established": False,
         "limitations": [
             "Registry labels, identities, eligibility, family partitions and run receipts are unverified declarations.",
+            "Distinct negative source/interpretation hash pairs deduplicate identities, not a verified relationship census.",
             "Hash equality cannot demonstrate pre-outcome registration, ownership or actual acquisition.",
             "An exact statistical calculation on incorrect labels does not establish source or scientific truth.",
             "At least one unresolved or incomplete eligible family makes the statistical gates inconclusive.",
