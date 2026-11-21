@@ -17,6 +17,7 @@ import re
 import socket
 import ssl
 import stat
+import sys
 import tempfile
 import time
 from typing import Any, Callable, Mapping
@@ -31,6 +32,10 @@ from urllib.request import (
     getproxies,
     proxy_bypass,
 )
+
+if sys.platform == "win32":
+    import ctypes
+    from ctypes import wintypes
 
 try:
     import fcntl
@@ -196,18 +201,123 @@ class _ApprovedRedirectHandler(HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+class _WindowsRateSecurity:
+    def __init__(self):
+        self.advapi = ctypes.WinDLL("advapi32", use_last_error=True)
+        self.kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        pointer = ctypes.c_void_p
+        signatures = (
+            (self.kernel, "GetCurrentProcess", [], wintypes.HANDLE),
+            (self.kernel, "CloseHandle", [wintypes.HANDLE], wintypes.BOOL),
+            (self.kernel, "LocalFree", [pointer], pointer),
+            (self.kernel, "CreateDirectoryW", [wintypes.LPCWSTR, pointer], wintypes.BOOL),
+            (self.advapi, "OpenProcessToken", [wintypes.HANDLE, wintypes.DWORD, pointer], wintypes.BOOL),
+            (self.advapi, "GetTokenInformation", [wintypes.HANDLE, ctypes.c_int, pointer, wintypes.DWORD, pointer], wintypes.BOOL),
+            (self.advapi, "ConvertSidToStringSidW", [pointer, pointer], wintypes.BOOL),
+            (self.advapi, "ConvertStringSecurityDescriptorToSecurityDescriptorW", [wintypes.LPCWSTR, wintypes.DWORD, pointer, pointer], wintypes.BOOL),
+            (self.advapi, "GetNamedSecurityInfoW", [wintypes.LPWSTR, ctypes.c_int, wintypes.DWORD, pointer, pointer, pointer, pointer, pointer], wintypes.DWORD),
+            (self.advapi, "GetSecurityDescriptorControl", [pointer, pointer, pointer], wintypes.BOOL),
+            (self.advapi, "GetSecurityDescriptorDacl", [pointer, pointer, pointer, pointer], wintypes.BOOL),
+            (self.advapi, "GetAce", [pointer, wintypes.DWORD, pointer], wintypes.BOOL),
+        )
+        for library, name, args, result in signatures:
+            function = getattr(library, name)
+            function.argtypes = args
+            function.restype = result
+
+    @staticmethod
+    def require(success):
+        if not success:
+            raise OSError("Windows rate-state security check failed")
+
+    def sid_string(self, sid):
+        value = ctypes.c_wchar_p()
+        self.require(self.advapi.ConvertSidToStringSidW(sid, ctypes.byref(value)))
+        try:
+            return value.value
+        finally:
+            self.require(not self.kernel.LocalFree(value))
+
+    def user_sid(self):
+        token = wintypes.HANDLE()
+        self.require(self.advapi.OpenProcessToken(self.kernel.GetCurrentProcess(), 0x0008, ctypes.byref(token)))
+        try:
+            size = wintypes.DWORD()
+            result = self.advapi.GetTokenInformation(token, 1, None, 0, ctypes.byref(size))
+            self.require(not result and ctypes.get_last_error() == 122 and size.value > 0)
+            buffer = ctypes.create_string_buffer(size.value)
+            self.require(self.advapi.GetTokenInformation(token, 1, buffer, size, ctypes.byref(size)))
+            return self.sid_string(ctypes.c_void_p.from_buffer(buffer).value)
+        finally:
+            self.require(self.kernel.CloseHandle(token))
+
+    def create(self, directory, sid):
+        class SecurityAttributes(ctypes.Structure):
+            _fields_ = [("length", wintypes.DWORD), ("descriptor", ctypes.c_void_p), ("inherit", wintypes.BOOL)]
+
+        descriptor = ctypes.c_void_p()
+        self.require(self.advapi.ConvertStringSecurityDescriptorToSecurityDescriptorW(
+            f"O:{sid}D:P(A;OICI;FA;;;{sid})", 1, ctypes.byref(descriptor), None,
+        ))
+        try:
+            attributes = SecurityAttributes(ctypes.sizeof(SecurityAttributes), descriptor, False)
+            if not self.kernel.CreateDirectoryW(str(directory), ctypes.byref(attributes)):
+                self.require(ctypes.get_last_error() == 183)
+        finally:
+            self.require(not self.kernel.LocalFree(descriptor))
+
+    def verify(self, directory, sid):
+        descriptor = ctypes.c_void_p()
+        owner = ctypes.c_void_p()
+        dacl = ctypes.c_void_p()
+        self.require(self.advapi.GetNamedSecurityInfoW(
+            str(directory), 1, 0x00000005, ctypes.byref(owner), None,
+            ctypes.byref(dacl), None, ctypes.byref(descriptor),
+        ) == 0)
+        try:
+            self.require(self.sid_string(owner) == sid)
+            control = wintypes.WORD()
+            revision = wintypes.DWORD()
+            self.require(self.advapi.GetSecurityDescriptorControl(descriptor, ctypes.byref(control), ctypes.byref(revision)))
+            self.require(control.value & 0x1000)
+            present, defaulted = wintypes.BOOL(), wintypes.BOOL()
+            self.require(self.advapi.GetSecurityDescriptorDacl(
+                descriptor, ctypes.byref(present), ctypes.byref(dacl), ctypes.byref(defaulted),
+            ))
+            self.require(present.value and dacl.value)
+            ace_count = ctypes.c_ushort.from_address(dacl.value + 4).value
+            for index in range(ace_count):
+                ace = ctypes.c_void_p()
+                self.require(self.advapi.GetAce(dacl, index, ctypes.byref(ace)))
+                self.require(ctypes.c_ubyte.from_address(ace.value).value == 0)
+                self.require(self.sid_string(ace.value + 8) == sid)
+        finally:
+            self.require(not self.kernel.LocalFree(descriptor))
+
+
 def _private_rate_state_directory(
     temp_root: Path | None = None, *, host: str = "rate-limit-state"
 ) -> Path:
     """Return a verified per-user directory for persistent rate-limit state."""
     getuid = getattr(os, "getuid", None)
-    if not callable(getuid):
+    windows = None
+    if sys.platform == "win32":
+        try:
+            windows = _WindowsRateSecurity()
+            user_scope = windows.user_sid()
+        except (OSError, AttributeError, ValueError):
+            raise SourceAccessError(host, "private rate-limit state ownership cannot be verified on this platform") from None
+    elif not callable(getuid):
         raise SourceAccessError(host, "private rate-limit state ownership cannot be verified on this platform")
-    user_scope = str(getuid())
+    else:
+        user_scope = str(getuid())
     token = sha256(user_scope.encode("utf-8")).hexdigest()[:24]
     directory = (temp_root or Path(tempfile.gettempdir())) / f"researchwitness-public-rate-{token}"
     try:
-        directory.mkdir(mode=0o700)
+        if windows is not None:
+            windows.create(directory, user_scope)
+        else:
+            directory.mkdir(mode=0o700)
     except FileExistsError:
         pass
     except OSError:
@@ -219,6 +329,13 @@ def _private_rate_state_directory(
         raise SourceAccessError(host, "could not inspect the rate-limit state directory") from None
     if not stat.S_ISDIR(info.st_mode) or stat.S_ISLNK(info.st_mode):
         raise SourceAccessError(host, "rate-limit state path is not a directory")
+    if windows is not None:
+        try:
+            if info.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT:
+                raise OSError("reparse point")
+            windows.verify(directory, user_scope)
+        except (OSError, AttributeError, ValueError):
+            raise SourceAccessError(host, "rate-limit state directory is not private to the current user") from None
     if hasattr(os, "getuid") and (
         info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) & 0o077
     ):
@@ -1336,4 +1453,3 @@ def summarize_registry(registry: Mapping[str, Any]) -> dict[str, Any]:
             "qualification acceptance is maintained by the independent custodian, not this registry",
         ],
     }
-
