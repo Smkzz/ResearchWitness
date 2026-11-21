@@ -12,6 +12,24 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-04J candidate receipt — pending review/CI
+
+On base `ad80c4103ae64ec82f0207ee373c5a7cbbb0f032`, the exact development
+analysis now uses distinct eligible negative `(source_sha256,
+interpretation_sha256)` pairs for the relationship minimum. It exposes both
+the distinct count and raw work-record count, preserves the legacy raw-count
+field, and reports duplicate representations. Synthetic regressions cover a
+duplicate version failing the minimum, a distinct interpretation meeting it,
+and an empty eligible-negative set. Family statistical counts, registry
+validation and frozen historical records are unchanged.
+
+This receipt describes a candidate implementation, not a merged acceptance:
+separate AI review and exact-head CI are pending. Local qualification is
+reported with the branch handoff. The correction is identity deduplication,
+not a verified relationship census, source-label adjudication, paper-error
+finding or protected scientific evaluation. RW-04's wider evidence gates
+remain unchanged.
+
 ## 2026-11-05: 0.3.1 preview receipt and private-source output guard
 
 The 0.3.1 engineering preview [PR #77](https://github.com/Smkzz/ResearchWitness/pull/77)

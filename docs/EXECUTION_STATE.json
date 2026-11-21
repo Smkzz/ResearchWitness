@@ -382,6 +382,13 @@
             "https://github.com/Smkzz/ResearchWitness/actions/runs/41336847318",
             "https://github.com/Smkzz/ResearchWitness/actions/runs/41336847339"
           ]
+        },
+        {
+          "id": "RW-04J",
+          "scope": "candidate exact-analysis negative-relationship minimum deduplicated by eligible source/interpretation hash pairs, with raw counts and duplicate reasons; identity deduplication only, not a verified census, labels or scientific validation; review and exact-head CI pending",
+          "implementation": "tools/exact_family_analysis.py",
+          "tests": "tests/test_exact_family_analysis.py",
+          "contract": "docs/EXACT_FAMILY_ANALYSIS.md"
         }
       ],
       "next_action": "No additional source-free hypothetical power layers. The next material scientific prerequisite remains authentic original-source bytes and rights plus genuinely separate source-context interpretation under RW-01O #35 / RW-01Q #50; the checkout-only mathematical replay supports exposed development and must not promote declared labels to scientific truth."

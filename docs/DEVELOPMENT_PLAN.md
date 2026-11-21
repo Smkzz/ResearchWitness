@@ -417,6 +417,19 @@ and non-accepted receipts remain explicitly **declarations only** in this
 v1 adapter. It does not establish source authenticity, paper error, independent
 labels, scientific accuracy or the protected evaluation infrastructure.
 
+### RW-04J — deduplicate declared negative relationship identities (candidate)
+
+The exact development analysis counts distinct eligible negative
+`(source_sha256, interpretation_sha256)` pairs for its registered relationship
+minimum. Raw work-row counts remain visible, duplicate representations receive
+an explicit reason code, and family-level statistical denominators are unchanged.
+Regression coverage includes a repeated source/interpretation that cannot fill
+the minimum and a distinct interpretation in the same family that can.
+This is identity deduplication, not a verified relationship census or scientific
+validation. Frozen registry commitments and historical records are unchanged.
+See [the analysis contract](EXACT_FAMILY_ANALYSIS.md). Review and exact-head CI
+are pending; RW-04 as a whole remains incomplete.
+
 ## RW-05 - Independent evidence curation and sealed custody
 
 **Owner role:** isolated custodian plus source-review agent. **Depends on:** RW-02,

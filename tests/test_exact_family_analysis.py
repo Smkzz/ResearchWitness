@@ -130,6 +130,77 @@ def test_six_one_sided_wins_and_eighty_six_zero_alarm_negatives_meet_numeric_gat
     assert vb.canonical_bytes(out) == vb.canonical_bytes(evaluate(deepcopy(docs)))
 
 
+@pytest.mark.parametrize("distinct_interpretation", [False, True])
+def test_negative_relationship_minimum_deduplicates_source_interpretation(distinct_interpretation):
+    d = synthetic_data()
+    d[0]["sampling"]["minimum_negative_relationships"] = 87
+    d[6]["expected_registration_sha256"] = vb.commitment(d[0])
+    before = evaluate(d)
+    assert before["declared_minimum_sample_met"] is False
+    assert before["numeric_thresholds"] == "not_met_or_sample_inadequate"
+
+    work = deepcopy(d[1]["works"][6])
+    work["work_id"] = "another-negative-representation"
+    if distinct_interpretation:
+        work["interpretation_sha256"] = "f" * 64
+    d[1]["works"].append(work)
+    registry_sha = vb.commitment(d[1])
+    d[6]["expected_registry_sha256"] = registry_sha
+    for protocol, run, pin in (
+        (d[2], d[3], "expected_baseline_protocol_sha256"),
+        (d[4], d[5], "expected_candidate_protocol_sha256"),
+    ):
+        protocol["registry_sha256"] = registry_sha
+        protocol["schedule"].append(work["work_id"])
+        row = deepcopy(run["results"][6])
+        row["work_id"] = work["work_id"]
+        row["interpretation_sha256"] = work["interpretation_sha256"]
+        run["results"].append(row)
+        protocol_sha = vb.commitment(protocol)
+        run["registry_sha256"] = registry_sha
+        run["protocol_sha256"] = protocol_sha
+        d[6][pin] = protocol_sha
+
+    out = evaluate(d)
+    assert out["negative_families_declared"] == 86
+    assert out["negative_relationships_declared"] == 87
+    assert out["eligible_negative_work_records_declared"] == 87
+    assert out["distinct_negative_relationships_declared"] == (87 if distinct_interpretation else 86)
+    assert out["declared_minimum_sample_met"] is distinct_interpretation
+    duplicate_reason = "DUPLICATE_NEGATIVE_RELATIONSHIP_REPRESENTATIONS"
+    if distinct_interpretation:
+        assert out["numeric_thresholds"] == "met_on_unverified_development_data"
+        assert "DECLARED_MINIMUM_SAMPLE_NOT_MET" not in out["reasons"]
+        assert duplicate_reason not in out["reasons"]
+    else:
+        assert out["numeric_thresholds"] == "not_met_or_sample_inadequate"
+        assert "DECLARED_MINIMUM_SAMPLE_NOT_MET" in out["reasons"]
+        assert duplicate_reason in out["reasons"]
+
+
+def test_no_eligible_negative_relationships_reports_zero_counts():
+    d = synthetic_data(negatives=1)
+    work = d[1]["works"][-1]
+    work.update(eligible=False, exclusion_reason="synthetic-exclusion")
+    registry_sha = vb.commitment(d[1])
+    d[6]["expected_registry_sha256"] = registry_sha
+    for protocol, run, pin in (
+        (d[2], d[3], "expected_baseline_protocol_sha256"),
+        (d[4], d[5], "expected_candidate_protocol_sha256"),
+    ):
+        protocol["registry_sha256"] = registry_sha
+        run["registry_sha256"] = registry_sha
+        run["protocol_sha256"] = vb.commitment(protocol)
+        d[6][pin] = vb.commitment(protocol)
+    out = evaluate(d)
+    assert out["negative_relationships_declared"] == 0
+    assert out["eligible_negative_work_records_declared"] == 0
+    assert out["distinct_negative_relationships_declared"] == 0
+    assert out["declared_minimum_sample_met"] is False
+    assert "DUPLICATE_NEGATIVE_RELATIONSHIP_REPRESENTATIONS" not in out["reasons"]
+    assert "DECLARED_MINIMUM_SAMPLE_NOT_MET" in out["reasons"]
+
+
 def test_eighty_five_zero_alarm_negatives_cannot_meet_five_point_safety_margin():
     out = evaluate(synthetic_data(negatives=85))
     assert out["declared_minimum_sample_met"] is True

@@ -2,6 +2,12 @@
 
 ## 0.3.1 — engineering preview candidate — UNRELEASED
 
+- RW-04J: gate the exact development analysis's negative-relationship minimum
+  on distinct eligible `(source_sha256, interpretation_sha256)` pairs, not
+  repeated work/version rows. Report distinct and raw counts and flag duplicate
+  representations while preserving legacy output counts and family statistics.
+  This deduplicates declared identities; it does not verify a relationship
+  census, scientific labels or paper errors. Review and exact-head CI pending.
 - Package the independently checked 0.3.0 offline verifier and newly merged
   [RW-01O3 PR #76](https://github.com/Smkzz/ResearchWitness/pull/76)
   checkout-only PMC original-response/JATS pilot under a new pinned version.
