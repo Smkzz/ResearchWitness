@@ -19,7 +19,7 @@ from tools import research_preregistration as registration
 from tools import verification_benchmark as vb
 from tools.offline_files import read_regular
 
-VERSION = "rw-development-exact-family-analysis.v1"
+VERSION = "rw-development-exact-family-analysis.v2"
 MAX_FAMILIES_PER_ENDPOINT = 2048
 DYADIC_BITS = 40
 DENOMINATOR = 1 << DYADIC_BITS
@@ -131,8 +131,16 @@ def analyze(
     expected_registry_sha256: str,
     expected_baseline_protocol_sha256: str,
     expected_candidate_protocol_sha256: str,
+    baseline_evidence_root: Path | None = None,
+    candidate_evidence_root: Path | None = None,
+    expected_baseline_run_sha256: str | None = None,
+    expected_candidate_run_sha256: str | None = None,
 ) -> dict[str, Any]:
-    """Replay the exact paired ledger; report ONLY development-stage diagnostics."""
+    """Replay the exact paired ledger; report ONLY development-stage diagnostics.
+
+    A numerical pass requires replay-bound aggregation (both evidence roots and
+    run pins). Declaration-only inputs are still computed, but can never pass.
+    """
     registration.validate(
         study, expected_registration_sha256=expected_registration_sha256,
     )
@@ -142,7 +150,12 @@ def analyze(
         expected_registry_sha256=expected_registry_sha256,
         expected_baseline_protocol_sha256=expected_baseline_protocol_sha256,
         expected_candidate_protocol_sha256=expected_candidate_protocol_sha256,
+        baseline_evidence_root=baseline_evidence_root,
+        candidate_evidence_root=candidate_evidence_root,
+        expected_baseline_run_sha256=expected_baseline_run_sha256,
+        expected_candidate_run_sha256=expected_candidate_run_sha256,
     )
+    replay_bound = report["aggregation_evidence"] == "replay_verified_only"
     arms = study["arms"]
     resources = study["resources"]
     vb.require(
@@ -206,10 +219,12 @@ def analyze(
         practical = Fraction(delta, npos) >= minimum_gain
         safety = Fraction(upper - lower, DENOMINATOR) <= harm_margin
         thresholds_met = significance and practical and safety
-        numeric_gates = (
-            "met_on_unverified_development_data" if thresholds_met and count_adequate
-            else "not_met_or_sample_inadequate"
-        )
+        if not (thresholds_met and count_adequate):
+            numeric_gates = "not_met_or_sample_inadequate"
+        elif replay_bound:
+            numeric_gates = "met_on_replay_verified_development_data"
+        else:
+            numeric_gates = "declared_thresholds_met_not_replay_verified"
         metrics = {
             "positive_families": npos,
             "positive_paired_discordant": wins + losses,
@@ -245,6 +260,11 @@ def analyze(
         }
 
     reasons = []
+    if not replay_bound:
+        reasons.append("DECLARATION_ONLY_RECEIPTS_NOT_REPLAYED")
+    elif any(count for arms_ in report["replay"]["declared_known_family_outcomes_left_unverified"].values()
+             for count in arms_.values()):
+        reasons.append("UNVERIFIED_DECLARED_OUTCOMES")
     if nneg_relationships > distinct_negative_relationships:
         reasons.append("DUPLICATE_NEGATIVE_RELATIONSHIP_REPRESENTATIONS")
     if not complete:
@@ -253,7 +273,7 @@ def analyze(
         reasons.append("NO_ENDPOINT_DATA_OR_SIZE_LIMIT")
     if not count_adequate:
         reasons.append("DECLARED_MINIMUM_SAMPLE_NOT_MET")
-    if metrics is not None and numeric_gates != "met_on_unverified_development_data":
+    if numeric_gates == "not_met_or_sample_inadequate":
         reasons.append("STATISTICAL_OR_PRACTICAL_THRESHOLD_NOT_MET")
     return {
         "schema_version": VERSION,
@@ -283,11 +303,16 @@ def analyze(
         "registration_frozen_by_independent_custodian": False,
         "independent_source_labels_verified": False,
         "family_independence_verified": False,
+        "aggregation_evidence": report["aggregation_evidence"],
         "source_and_certificate_replayed_by_this_analysis": False,
+        "accepted_formal_refutations_replayed_by_this_analysis": (
+            {arm: report["replay"][arm]["accepted_formal_refutations_replayed"]
+             for arm in ("baseline", "candidate")} if replay_bound else None),
         "protected_holdout_evaluated": False,
         "scientific_superiority_established": False,
         "limitations": [
             "Registry labels, identities, eligibility, family partitions and run receipts are unverified declarations.",
+            "Only replay-verified accepted formal refutations count; every other outcome is unknown, so declarations alone cannot pass.",
             "Distinct negative source/interpretation hash pairs deduplicate identities, not a verified relationship census.",
             "Hash equality cannot demonstrate pre-outcome registration, ownership or actual acquisition.",
             "An exact statistical calculation on incorrect labels does not establish source or scientific truth.",
@@ -306,6 +331,7 @@ def main(argv: list[str] | None = None) -> int:
     for name in ("registration", "registry", "baseline-protocol",
                  "candidate-protocol"):
         parser.add_argument("--expected-" + name + "-sha256", required=True)
+    paired.add_replay_arguments(parser)
     args = parser.parse_args(argv)
     try:
         inputs = {
@@ -323,6 +349,7 @@ def main(argv: list[str] | None = None) -> int:
             expected_registry_sha256=args.expected_registry_sha256,
             expected_baseline_protocol_sha256=args.expected_baseline_protocol_sha256,
             expected_candidate_protocol_sha256=args.expected_candidate_protocol_sha256,
+            **paired.replay_arguments(args),
         )
         sys.stdout.buffer.write(vb.canonical_bytes(result))
         return 0

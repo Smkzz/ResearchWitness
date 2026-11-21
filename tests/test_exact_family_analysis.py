@@ -110,7 +110,7 @@ def test_six_one_sided_wins_and_eighty_six_zero_alarm_negatives_meet_numeric_gat
     docs = synthetic_data()
     out = evaluate(docs)
     metrics = out["metrics"]
-    assert out["numeric_thresholds"] == "met_on_unverified_development_data"
+    assert out["numeric_thresholds"] == "declared_thresholds_met_not_replay_verified"
     assert out["complete_declared_endpoints"] is True
     assert out["declared_minimum_sample_met"] is True
     assert metrics["exact_one_sided_discordance_p_value_upper_decimal"] == "0.015625000000"
@@ -169,7 +169,7 @@ def test_negative_relationship_minimum_deduplicates_source_interpretation(distin
     assert out["declared_minimum_sample_met"] is distinct_interpretation
     duplicate_reason = "DUPLICATE_NEGATIVE_RELATIONSHIP_REPRESENTATIONS"
     if distinct_interpretation:
-        assert out["numeric_thresholds"] == "met_on_unverified_development_data"
+        assert out["numeric_thresholds"] == "declared_thresholds_met_not_replay_verified"
         assert "DECLARED_MINIMUM_SAMPLE_NOT_MET" not in out["reasons"]
         assert duplicate_reason not in out["reasons"]
     else:
