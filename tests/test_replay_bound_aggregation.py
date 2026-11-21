@@ -231,6 +231,7 @@ def test_declaration_only_exact_analysis_never_passes(tmp_path):
     docs, pins, _ = exact_fixture(tmp_path)
     out = exact.analyze(*docs, **pins)
     assert out["aggregation_evidence"] == "declaration_only"
+    assert out["accepted_formal_refutations_replayed_by_this_analysis"] is None
     assert out["numeric_thresholds"] == "declared_thresholds_met_not_replay_verified"
     assert "DECLARATION_ONLY_RECEIPTS_NOT_REPLAYED" in out["reasons"]
 
@@ -240,7 +241,8 @@ def test_replay_bound_exact_analysis_counts_no_unverified_wins(tmp_path, forge):
     docs, pins, evidence = exact_fixture(tmp_path, forge)
     out = exact.analyze(*docs, **pins, **evidence)
     assert out["aggregation_evidence"] == "replay_verified_only"
-    assert out["accepted_formal_refutations_replayed_by_this_analysis"] is True
+    assert out["accepted_formal_refutations_replayed_by_this_analysis"] == {
+        "baseline": 0, "candidate": 0 if forge else 6}
     assert out["numeric_thresholds"] == "not_evaluated"
     assert out["complete_declared_endpoints"] is False
     assert "UNVERIFIED_DECLARED_OUTCOMES" in out["reasons"]

@@ -305,7 +305,9 @@ def analyze(
         "family_independence_verified": False,
         "aggregation_evidence": report["aggregation_evidence"],
         "source_and_certificate_replayed_by_this_analysis": False,
-        "accepted_formal_refutations_replayed_by_this_analysis": replay_bound,
+        "accepted_formal_refutations_replayed_by_this_analysis": (
+            {arm: report["replay"][arm]["accepted_formal_refutations_replayed"]
+             for arm in ("baseline", "candidate")} if replay_bound else None),
         "protected_holdout_evaluated": False,
         "scientific_superiority_established": False,
         "limitations": [
