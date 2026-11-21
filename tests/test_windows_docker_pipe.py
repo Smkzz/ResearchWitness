@@ -129,6 +129,7 @@ class WindowsDockerPipeTests(unittest.TestCase):
 
 @unittest.skipUnless(sys.platform == "win32", "native Windows Docker pipe")
 class NativeWindowsDockerPipeTests(unittest.TestCase):
+    @unittest.skipUnless(os.environ.get("RW_NATIVE_DOCKER_DESKTOP") == "1", "set RW_NATIVE_DOCKER_DESKTOP=1 for Docker Desktop acceptance")
     def test_real_daemon_identity(self):
         try:
             audit._verify_windows_docker_pipe()
@@ -136,3 +137,11 @@ class NativeWindowsDockerPipeTests(unittest.TestCase):
             if isinstance(exc.__cause__, OSError) and getattr(exc.__cause__, "winerror", None) in (2, 3):
                 self.skipTest("Docker Desktop pipe is absent")
             raise
+
+    @unittest.skipIf(os.environ.get("RW_NATIVE_DOCKER_DESKTOP") == "1", "Docker Desktop acceptance is opted in")
+    def test_available_server_returns_or_fails_closed(self):
+        try:
+            audit._verify_windows_docker_pipe()
+        except audit.PDFSourceError as exc:
+            if isinstance(exc.__cause__, OSError) and getattr(exc.__cause__, "winerror", None) in (2, 3):
+                self.skipTest("Docker pipe is absent")
