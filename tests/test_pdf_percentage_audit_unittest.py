@@ -9,6 +9,7 @@ import subprocess
 import unittest
 from unittest import mock
 
+from tools import pdf_percentage_audit as pdf_audit
 from tools.pdf_percentage_audit import (
     MAX_PDF_BYTES,
     PDFSourceError,
@@ -25,6 +26,9 @@ def layout(body: str) -> str:
 
 
 class PDFPercentageAuditTests(unittest.TestCase):
+    def setUp(self):
+        self.pipe_check = self.enterContext(mock.patch.object(pdf_audit, "_verify_windows_docker_pipe"))
+
     @staticmethod
     def seccomp_info_result(options='["name=seccomp,profile=builtin"]'):
         return mock.Mock(returncode=0, stdout=options)
@@ -66,6 +70,7 @@ class PDFPercentageAuditTests(unittest.TestCase):
             ("darwin", "unix:///var/run/docker.sock"),
         ):
             with self.subTest(platform=platform):
+                self.pipe_check.reset_mock()
                 calls = []
 
                 def docker_run(command, **kwargs):
@@ -93,6 +98,7 @@ class PDFPercentageAuditTests(unittest.TestCase):
                     with self.assertRaisesRegex(PDFSourceError, "unavailable or unverified"):
                         _extract_layout_text(b"%PDF-1.7\n")
                 self.assertEqual(len(calls), 2)
+                self.assertEqual(self.pipe_check.call_count, int(platform == "win32"))
                 self.assertEqual(calls[0][:5], calls[1][:5])
                 self.assertFalse(Path(calls[0][4]).exists())
                 popen.assert_not_called()

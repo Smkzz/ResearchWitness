@@ -75,11 +75,16 @@ baked environment variables, entrypoints or volumes are rejected.
 The runner uses the local Unix socket on POSIX and Docker Desktop's
 `npipe:////./pipe/docker_engine` on Windows. Unlike the root-owned
 `/var/run/docker.sock`, any local process can create `\\.\pipe\docker_engine`
-when Docker Desktop is not listening. The runner does not authenticate the pipe
-server (for example, with `GetNamedPipeServerProcessId` plus a process-owner
-check). This residual endpoint-spoofing risk is accepted only while the PDF runner
-stays unqualified and must be resolved before any Windows PDF qualification
-claim. Sami authorized native RW-03 qualification on the org Windows Devin
+when Docker Desktop is not listening. Before invoking Docker on Windows, the
+runner opens the pipe and uses `GetNamedPipeServerProcessId` to inspect its server.
+The server's token user SID must match the current process user or LocalSystem
+(`S-1-5-18`), and its resolved image path must be under `%ProgramFiles%\Docker\`
+(case-insensitive). API or cleanup failures block execution. This is not binary
+signature or installation-integrity verification. A check-then-use race remains:
+the Docker CLI opens its own connection after this check. An administrator or
+same-user attacker is not defended against. These residual risks remain explicit
+qualification limitations; `pdf_execution` stays unqualified, including because
+no reviewed Poppler image is provisioned. Sami authorized native RW-03 qualification on the org Windows Devin
 machine in his answer to the "Use a Windows machine" card on **2026-11-21
 19:59 UTC**; this authority does not establish server identity or waive the gate.
 
