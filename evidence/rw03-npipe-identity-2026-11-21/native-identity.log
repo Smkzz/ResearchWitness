@@ -1,0 +1,167 @@
+UTC: 2026-11-21T22:10:56.722581+00:00
+
+COMMAND: git rev-parse HEAD
+83fec7e65eb54ed9dcedd14388323e1e476b5cac
+
+EXIT CODE: 0
+
+COMMAND: powershell -NoProfile -Command "Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber | Format-List"
+
+
+Caption     : Microsoft Windows Server 2022 Standard
+Version     : 10.0.20348
+BuildNumber : 20348
+
+
+
+
+EXIT CODE: 0
+
+COMMAND: cmd /c ver
+
+Microsoft Windows [Version 10.0.20348.5622]
+
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine version
+Client:
+ Version:           29.9.2
+ API version:       1.56
+ Go version:        go1.26.10
+ Git commit:        a82e528
+ Built:             Tue Oct 20 19:44:07 2026
+ OS/Arch:           windows/amd64
+ Context:           default
+
+Server: Docker Desktop 4.98.0 (245422)
+ Engine:
+  Version:          29.9.2
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.10
+  Git commit:       0367cbe
+  Built:            Tue Oct 20 18:45:02 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+
+EXIT CODE: 0
+
+WORKTREE: native tests include uncommitted follow-up changes relative to HEAD.
+SOURCE SHA256 (LF): 5d8ce94bef439a1411c1d8f7875455d65151d484c899b34822ceb31d40788e0c  tools/pdf_percentage_audit.py
+SOURCE SHA256 (LF): f835609ff590889be242d7aa0c897acefa5fb1f88a9138e92cf7eec25d7ae9e5  tests/test_windows_docker_pipe.py
+
+RW_NATIVE_DOCKER_DESKTOP: 1
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m pytest tests/test_windows_docker_pipe.py -v -rs -s
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.2.0, pluggy-1.7.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Administrator\repos\rw03-npipe-followup
+configfile: pyproject.toml
+collecting ... collected 11 items
+
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.CreateFileW' id='1912136033216'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.GetNamedPipeServerProcessId' id='1912136034224'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.OpenProcess' id='1912136033552'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.OpenProcessToken' id='1912136034896'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.GetTokenInformation' id='1912136035232'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.QueryFullProcessImageNameW' id='1912136034560'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.CloseHandle' id='1912136033888'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_cleanup_does_not_mask_api_error PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_current_user_and_system_servers_accepted SUBPASSED(sid='S-1-5-21-123')
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_current_user_and_system_servers_accepted SUBPASSED(sid='S-1-5-18')
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_current_user_and_system_servers_accepted PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_custom_pipe_name_is_used PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_failure_prevents_any_docker_invocation PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_missing_program_files_rejected PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_outside_or_missing_image_rejected SUBPASSED(image=WindowsPath('C:/Users/ADMINI~1/AppData/Local/Temp/tmpb01zd5vm/Docker-other/backend.exe'))
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_outside_or_missing_image_rejected SUBPASSED(image=WindowsPath('C:/Users/ADMINI~1/AppData/Local/Temp/tmpb01zd5vm/Docker/missing.exe'))
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_outside_or_missing_image_rejected PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_wrong_user_rejected PASSED
+tests/test_windows_docker_pipe.py::NativeWindowsDockerPipeTests::test_available_server_returns_or_fails_closed SKIPPED
+tests/test_windows_docker_pipe.py::NativeWindowsDockerPipeTests::test_python_pipe_server_rejected Native Python pipe server SID: S-1-5-21-1275553374-3417329209-2171274556-500
+Native Python pipe server image: C:\Program Files\Python313\python.exe
+Expected rejection: Docker named-pipe server is unavailable or unverified
+PASSED
+tests/test_windows_docker_pipe.py::NativeWindowsDockerPipeTests::test_real_daemon_identity PASSED
+
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_windows_docker_pipe.py:193: Docker Desktop acceptance is opted in
+============== 10 passed, 1 skipped, 11 subtests passed in 0.19s ==============
+
+EXIT CODE: 0
+
+RW_NATIVE_DOCKER_DESKTOP: unset
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m pytest tests/test_windows_docker_pipe.py -v -rs -s
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.2.0, pluggy-1.7.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Administrator\repos\rw03-npipe-followup
+configfile: pyproject.toml
+collecting ... collected 11 items
+
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.CreateFileW' id='1992919311296'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.GetNamedPipeServerProcessId' id='1992919312304'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.OpenProcess' id='1992919311632'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.OpenProcessToken' id='1992919312976'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.GetTokenInformation' id='1992919313312'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.QueryFullProcessImageNameW' id='1992919312640'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed SUBPASSED(api=<Mock name='mock.CloseHandle' id='1992919311968'>)
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_api_failures_and_absent_pipe_fail_closed PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_cleanup_does_not_mask_api_error PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_current_user_and_system_servers_accepted SUBPASSED(sid='S-1-5-21-123')
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_current_user_and_system_servers_accepted SUBPASSED(sid='S-1-5-18')
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_current_user_and_system_servers_accepted PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_custom_pipe_name_is_used PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_failure_prevents_any_docker_invocation PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_missing_program_files_rejected PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_outside_or_missing_image_rejected SUBPASSED(image=WindowsPath('C:/Users/ADMINI~1/AppData/Local/Temp/tmp3om2nn9y/Docker-other/backend.exe'))
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_outside_or_missing_image_rejected SUBPASSED(image=WindowsPath('C:/Users/ADMINI~1/AppData/Local/Temp/tmp3om2nn9y/Docker/missing.exe'))
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_outside_or_missing_image_rejected PASSED
+tests/test_windows_docker_pipe.py::WindowsDockerPipeTests::test_wrong_user_rejected PASSED
+tests/test_windows_docker_pipe.py::NativeWindowsDockerPipeTests::test_available_server_returns_or_fails_closed PASSED
+tests/test_windows_docker_pipe.py::NativeWindowsDockerPipeTests::test_python_pipe_server_rejected Native Python pipe server SID: S-1-5-21-1275553374-3417329209-2171274556-500
+Native Python pipe server image: C:\Program Files\Python313\python.exe
+Expected rejection: Docker named-pipe server is unavailable or unverified
+PASSED
+tests/test_windows_docker_pipe.py::NativeWindowsDockerPipeTests::test_real_daemon_identity SKIPPED
+
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_windows_docker_pipe.py:184: set RW_NATIVE_DOCKER_DESKTOP=1 for Docker Desktop acceptance
+============== 10 passed, 1 skipped, 11 subtests passed in 0.19s ==============
+
+EXIT CODE: 0
+
+EXPLICIT NATIVE IMPOSTOR REJECTION (no Docker required)
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m pytest tests/test_windows_docker_pipe.py -k python_pipe_server_rejected -v -rs -s
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.2.0, pluggy-1.7.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Administrator\repos\rw03-npipe-followup
+configfile: pyproject.toml
+collecting ... collected 11 items / 10 deselected / 1 selected
+
+tests/test_windows_docker_pipe.py::NativeWindowsDockerPipeTests::test_python_pipe_server_rejected Native Python pipe server SID: S-1-5-21-1275553374-3417329209-2171274556-500
+Native Python pipe server image: C:\Program Files\Python313\python.exe
+Expected rejection: Docker named-pipe server is unavailable or unverified
+PASSED
+
+====================== 1 passed, 10 deselected in 0.17s =======================
+
+EXIT CODE: 0
