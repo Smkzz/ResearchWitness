@@ -3,10 +3,12 @@ import ctypes
 from ctypes import wintypes
 import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
+from uuid import uuid4
 
 from tools import pdf_percentage_audit as audit
 
@@ -56,6 +58,10 @@ class WindowsDockerPipeTests(unittest.TestCase):
         self.enterContext(patch.object(ctypes, "WinError", return_value=OSError("pipe unavailable"), create=True))
         self.enterContext(patch.object(audit, "_WindowsDockerPipeSecurity", return_value=self.security))
         self.enterContext(patch.dict(os.environ, {"ProgramFiles": str(self.root)}))
+
+    def test_custom_pipe_name_is_used(self):
+        audit._verify_windows_docker_pipe(r"\\.\pipe\custom-identity-test")
+        self.assertEqual(self.security.kernel.CreateFileW.call_args.args[0], r"\\.\pipe\custom-identity-test")
 
     def test_current_user_and_system_servers_accepted(self):
         for sid in ("S-1-5-21-123", "S-1-5-18"):
@@ -129,6 +135,52 @@ class WindowsDockerPipeTests(unittest.TestCase):
 
 @unittest.skipUnless(sys.platform == "win32", "native Windows Docker pipe")
 class NativeWindowsDockerPipeTests(unittest.TestCase):
+    def test_python_pipe_server_rejected(self):
+        security = audit._WindowsDockerPipeSecurity()
+        create = security.kernel.CreateNamedPipeW
+        create.argtypes = [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, wintypes.DWORD,
+                           wintypes.DWORD, wintypes.DWORD, wintypes.DWORD, ctypes.c_void_p]
+        create.restype = wintypes.HANDLE
+        name = rf"\\.\pipe\rw03-identity-{uuid4().hex}"
+        pipe = create(name, 3 | 0x00080000, 0, 1, 4096, 4096, 1000, None)
+        security.require(pipe not in (None, wintypes.HANDLE(-1).value))
+        try:
+            result = subprocess.run(
+                [sys.executable, "-c", """
+from pathlib import Path
+import sys
+from unittest.mock import patch
+from tools import pdf_percentage_audit as audit
+
+security = audit._WindowsDockerPipeSecurity()
+identity = security.server_identity
+observed = []
+def identify(name):
+    value = identity(name)
+    observed.append(value)
+    return value
+security.server_identity = identify
+with patch.object(audit, '_WindowsDockerPipeSecurity', return_value=security):
+    try:
+        audit._verify_windows_docker_pipe(sys.argv[1])
+    except audit.PDFSourceError as exc:
+        assert len(observed) == 1, 'server identity was not read'
+        sid, image = observed[0]
+        assert sid == security.user_sid(), 'unexpected server owner'
+        assert Path(image).samefile(sys.executable), 'server is not this Python process'
+        print('Native Python pipe server SID:', sid)
+        print('Native Python pipe server image:', image)
+        print('Expected rejection:', exc)
+    else:
+        raise AssertionError('Python pipe server was accepted')
+""", name],
+                capture_output=True, text=True, timeout=15, check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            print(result.stdout, end="")
+        finally:
+            security.require(security.kernel.CloseHandle(pipe))
+
     @unittest.skipUnless(os.environ.get("RW_NATIVE_DOCKER_DESKTOP") == "1", "set RW_NATIVE_DOCKER_DESKTOP=1 for Docker Desktop acceptance")
     def test_real_daemon_identity(self):
         try:

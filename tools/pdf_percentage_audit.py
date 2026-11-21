@@ -85,8 +85,8 @@ class _WindowsDockerPipeSecurity(_WindowsRateSecurity):
             function.argtypes = args
             function.restype = result
 
-    def server_identity(self):
-        pipe = self.kernel.CreateFileW(r"\\.\pipe\docker_engine", 0xC0000000, 0, None, 3, 0, None)
+    def server_identity(self, pipe_name=r"\\.\pipe\docker_engine"):
+        pipe = self.kernel.CreateFileW(pipe_name, 0xC0000000, 0, None, 3, 0, None)
         if pipe in (None, wintypes.HANDLE(-1).value):
             raise ctypes.WinError(ctypes.get_last_error())
         with self.checked_cleanup(lambda: self.kernel.CloseHandle(pipe)):
@@ -110,10 +110,10 @@ class _WindowsDockerPipeSecurity(_WindowsRateSecurity):
                 return sid, image.value
 
 
-def _verify_windows_docker_pipe() -> None:
+def _verify_windows_docker_pipe(pipe_name=r"\\.\pipe\docker_engine") -> None:
     try:
         security = _WindowsDockerPipeSecurity()
-        sid, image = security.server_identity()
+        sid, image = security.server_identity(pipe_name)
         security.require(sid in (security.user_sid(), "S-1-5-18"))
         program_files = Path(os.environ["ProgramFiles"])
         security.require(program_files.is_absolute() and Path(image).is_absolute())

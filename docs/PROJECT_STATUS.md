@@ -45,6 +45,10 @@ merged as [`0ad921cfc22e5c09973e09b6b9d2f686f1f0d6ff`](https://github.com/Smkzz/
 Its post-merge checks passed **11/11**: the nine Python/platform jobs,
 Release gate and Analyze Python. These CI observations are recorded in the
 linked run session; they do not change the historical native-log counts above.
+The message-assertion follow-up [PR #90](https://github.com/Smkzz/ResearchWitness/pull/90)
+merged as [`a776a165bf5be9b96aaf8287a2aa36dca2cfffef`](https://github.com/Smkzz/ResearchWitness/commit/a776a165bf5be9b96aaf8287a2aa36dca2cfffef).
+Its post-merge checks also passed **11/11** (the same nine Python/platform jobs,
+Release gate and Analyze Python), as observed in the linked run session.
 
 **PDF transport:** [PR #87](https://github.com/Smkzz/ResearchWitness/pull/87)
 merged as [`09286c1b88a2e31ddfcc97565d2f5d80c0e8788f`](https://github.com/Smkzz/ResearchWitness/commit/09286c1b88a2e31ddfcc97565d2f5d80c0e8788f).
@@ -69,17 +73,37 @@ every release command exit 0, trusted-core 93%, synthetic 500/500, MVP 3/3,
 reproducible wheel/install/CLI smoke PASS). These logs back transport and
 fail-closed observations, not real PDF isolation.
 
+**Pipe identity narrowing:** [PR #91](https://github.com/Smkzz/ResearchWitness/pull/91)
+merged as [`83fec7e65eb54ed9dcedd14388323e1e476b5cac`](https://github.com/Smkzz/ResearchWitness/commit/83fec7e65eb54ed9dcedd14388323e1e476b5cac).
+Post-merge checks passed **11/11** (the same nine Python/platform jobs,
+Release gate and Analyze Python), as observed in the linked run session.
+Dependency evidence did not run on #90/#91 merge commits (the workflow trigger
+restriction noted above). The
+[native identity log](../evidence/rw03-npipe-identity-2026-11-21/native-identity.log)
+records this follow-up's working-tree tests over that base, with LF-normalized
+source hashes: with `RW_NATIVE_DOCKER_DESKTOP=1` and with it unset, each run
+records **10 passed / 1 skipped** (the mutually exclusive native mode), exit **0**.
+The explicit uniquely named Python-server pipe test records **1 passed /
+10 deselected**, exit **0**, without needing Docker. It verifies the real server
+SID/image before asserting rejection, with a 15-second child timeout and handle
+cleanup. This narrows identity risk; it does not resolve it or qualify execution.
+
 **Real PDF isolation: BLOCKED / NOT RUN.** No reviewed SHA-256-pinned Poppler
 image is provisioned; Docker Hub and snapshot.debian.org build downloads await
-Sami's egress decision. The named-pipe server identity is also unverified:
-another local process can create `\\.\pipe\docker_engine` when Docker Desktop
-is absent. This residual risk must be resolved before any Windows PDF
+Sami's egress decision. Pipe-server identity is narrowed, not resolved: the check
+requires a current-user or SYSTEM token owner and a resolved image location under
+`Program Files\Docker`. A standalone Docker Engine there would also pass; it does
+not distinguish Docker Desktop. Residual risks remain: the check-then-use race
+before the CLI's separate connection, same-user/admin attackers, no binary-integrity
+check, and `ProgramFiles` read from the environment. Another local process can
+create `\\.\pipe\docker_engine` when the daemon is absent. These residual risks
+require separate assurance before any Windows PDF
 qualification claim. `pdf_execution` stays `unqualified`. Protected custody
 was **NOT RUN** (no authorized isolated custodian); it stays `unqualified`.
 `scientific_wave_3` remains `not_run`. No human certification is claimed.
 
 **RW-03 remains `blocked_external`.** Remaining conditions are
-pipe-server identity assurance, the image egress decision
+assurance for the remaining pipe-server identity risks, the image egress decision
 and reviewed-image isolation evidence, and separately authorized isolated custody.
 `next_unblocked_task` was deliberately set to `null`: the old RW-01 pointer was
 stale, and no next eligible package is identified after RW-04L. Original-source
