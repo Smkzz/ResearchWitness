@@ -47,6 +47,129 @@ def _load(path: Path, maximum: int) -> bytes:
     return raw
 
 
+def _replay_work(work_id: str, work: dict[str, Any], record: dict[str, Any],
+                 evidence_root: Path, budget: list[int]) -> dict[str, Any]:
+    """Replay one accepted receipt or raise; `budget` holds cumulative bytes."""
+    vb.require(record["status"] == "completed" and record["alarm_emitted"] is True,
+               "ACCEPTANCE_ON_NONCOMPLETED_OR_NONALARM")
+    folder = evidence_root / work_id
+    _directory(folder)
+    paths = (
+        ("source", source.MAX_SOURCE_BYTES, "source.txt"),
+        ("candidate", 32 * 1024, "candidate.json"),
+        ("model", exact.MAX_MODEL_BYTES, "model.json"),
+        ("point", 64 * 1024, "point.json"),
+    )
+    artifacts = {}
+    for name, maximum, filename in paths:
+        raw = _load(folder / filename, maximum)
+        budget[0] += len(raw)
+        vb.require(budget[0] <= MAX_TOTAL_ARTIFACT_BYTES,
+                   "CUMULATIVE_ARTIFACT_BUDGET")
+        artifacts[name] = raw
+    candidate_raw = artifacts["candidate"]
+    model_raw = artifacts["model"]
+    point_raw = artifacts["point"]
+    # The registry and run are separately pinned by the caller. A self-
+    # consistent bundle cannot replace the expected source/point/candidate.
+    vb.require(_digest(artifacts["source"]) == work["source_sha256"],
+               "SOURCE_ARTIFACT_PIN_MISMATCH")
+    vb.require(_digest(candidate_raw) == record["candidate_sha256"],
+               "CANDIDATE_ARTIFACT_PIN_MISMATCH")
+    vb.require(_digest(point_raw) == record["certificate_sha256"],
+               "POINT_ARTIFACT_PIN_MISMATCH")
+    model_sha = _digest(model_raw)
+    candidate, model = source.recheck_candidate(
+        artifacts["source"], block_index=0,
+        expected_source_sha256=work["source_sha256"],
+        candidate_bytes=candidate_raw, model_bytes=model_raw,
+        expected_candidate_sha256=record["candidate_sha256"],
+        expected_model_sha256=model_sha,
+    )
+    vb.require(candidate["explicit_block_count"] == 1 and
+               candidate["selected_block_index"] == 0,
+               "MULTIPLE_OR_UNSELECTED_SOURCE_BLOCKS")
+    vb.require(candidate["source_block_sha256"] == work["interpretation_sha256"],
+               "INTERPRETATION_SOURCE_BLOCK_MISMATCH")
+    point = exact.parse_json(point_raw, 64 * 1024)
+    vb.require(type(point) is list and point_raw == exact.canonical_bytes(point),
+               "POINT_NOT_CANONICAL_ARRAY")
+    objective = exact.verify_point(exact.compile_model(model), point)
+    claimed = exact.rational(candidate["claimed_upper"])
+    vb.require(objective > claimed, "POINT_DOES_NOT_REFUTE_FORMAL_CLAIM")
+    return {
+        "work_id": work_id,
+        "candidate_sha256": record["candidate_sha256"],
+        "point_sha256": record["certificate_sha256"],
+        "model_sha256": model_sha,
+        "source_sha256": work["source_sha256"],
+        "source_block_sha256": candidate["source_block_sha256"],
+        "formal_refutation_margin": str(objective - claimed),
+        "mathematical_replay": "exact_formal_refutation_replayed",
+        "publisher_or_paper_error_verified": False,
+    }
+
+
+def _bound_inputs(registry: dict[str, Any], protocol: dict[str, Any],
+                  run: dict[str, Any], *, expected_registry_sha256: str,
+                  expected_protocol_sha256: str, expected_run_sha256: str
+                  ) -> tuple[dict[str, Any], dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    exact._sha(expected_run_sha256)
+    original = vb.score(
+        registry, protocol, run,
+        expected_registry_sha256=expected_registry_sha256,
+        expected_protocol_sha256=expected_protocol_sha256,
+    )
+    vb.require(vb.commitment(run) == expected_run_sha256, "RUN_EXTERNAL_PIN_MISMATCH")
+    works = vb._registry(registry)
+    # No alias of two identities into one Windows case-insensitive folder.
+    vb.require(len({w.casefold() for w in works}) == len(works),
+               "WORK_PATH_CASE_COLLISION")
+    return original, works, {r["work_id"]: r for r in run["results"]}
+
+
+def verify_receipts(registry: dict[str, Any], protocol: dict[str, Any],
+                    run: dict[str, Any], evidence_root: Path, *,
+                    expected_registry_sha256: str, expected_protocol_sha256: str,
+                    expected_run_sha256: str) -> dict[str, Any]:
+    """Per-work replay status for aggregation; nothing is dropped or upgraded.
+
+    Unlike `replay`, a receipt whose evidence is missing, substituted or does
+    not refute is reported UNVERIFIED with a stable code instead of aborting.
+    Pins, the evidence root, case collisions and budgets still fail closed.
+    Only accepted receipts have a replay profile; no other outcome is verified.
+    """
+    original, works, records = _bound_inputs(
+        registry, protocol, run,
+        expected_registry_sha256=expected_registry_sha256,
+        expected_protocol_sha256=expected_protocol_sha256,
+        expected_run_sha256=expected_run_sha256,
+    )
+    expected = [w for w in protocol["schedule"]
+                if w in records and records[w]["certificate_status"] == "accepted"]
+    vb.require(len(expected) <= MAX_ACCEPTED, "ACCEPTED_REPLAY_BUDGET")
+    _directory(evidence_root)
+    budget = [0]
+    verified: dict[str, dict[str, Any]] = {}
+    unverified: dict[str, str] = {}
+    for work_id in expected:
+        try:
+            verified[work_id] = _replay_work(
+                work_id, works[work_id], records[work_id], evidence_root, budget)
+        except (vb.BenchmarkError, source.UnsupportedClaim, exact.CertificateError) as exc:
+            if str(exc) == "CUMULATIVE_ARTIFACT_BUDGET":
+                raise
+            unverified[work_id] = str(exc)
+        except (OSError, ValueError, TypeError, RecursionError):
+            unverified[work_id] = "ARTIFACT_UNAVAILABLE_OR_INVALID"
+    return {
+        "original_development_score": original,
+        "accepted_receipts_declared": len(expected),
+        "verified": verified,
+        "unverified": unverified,
+    }
+
+
 def replay(registry: dict[str, Any], protocol: dict[str, Any], run: dict[str, Any],
            evidence_root: Path, *, expected_registry_sha256: str,
            expected_protocol_sha256: str, expected_run_sha256: str) -> dict[str, Any]:
@@ -59,87 +182,21 @@ def replay(registry: dict[str, Any], protocol: dict[str, Any], run: dict[str, An
     not a solver-reported upper certificate. Only a strict formal refutation
     receives this adapter's `mathematical_replay_verified` status.
     """
-    exact._sha(expected_run_sha256)
     # Establish all schedule, source, family, receipt and zero-cost invariants
     # without changing the legacy denominator or supplied scientific labels.
-    original = vb.score(
+    original, works, records = _bound_inputs(
         registry, protocol, run,
         expected_registry_sha256=expected_registry_sha256,
         expected_protocol_sha256=expected_protocol_sha256,
+        expected_run_sha256=expected_run_sha256,
     )
-    vb.require(vb.commitment(run) == expected_run_sha256, "RUN_EXTERNAL_PIN_MISMATCH")
-    works = vb._registry(registry)
-    records = {r["work_id"]: r for r in run["results"]}
-    # No alias of two identities into one Windows case-insensitive folder.
-    vb.require(len({w.casefold() for w in works}) == len(works),
-               "WORK_PATH_CASE_COLLISION")
     expected = [w for w in protocol["schedule"]
                 if w in records and records[w]["certificate_status"] == "accepted"]
     vb.require(len(expected) <= MAX_ACCEPTED, "ACCEPTED_REPLAY_BUDGET")
     _directory(evidence_root)
-    total_bytes = 0
-    checked: list[dict[str, Any]] = []
-    for work_id in expected:
-        record = records[work_id]
-        work = works[work_id]
-        vb.require(record["status"] == "completed" and record["alarm_emitted"] is True,
-                   "ACCEPTANCE_ON_NONCOMPLETED_OR_NONALARM")
-        folder = evidence_root / work_id
-        _directory(folder)
-        paths = (
-            ("source", source.MAX_SOURCE_BYTES, "source.txt"),
-            ("candidate", 32 * 1024, "candidate.json"),
-            ("model", exact.MAX_MODEL_BYTES, "model.json"),
-            ("point", 64 * 1024, "point.json"),
-        )
-        artifacts = {}
-        for name, maximum, filename in paths:
-            raw = _load(folder / filename, maximum)
-            total_bytes += len(raw)
-            vb.require(total_bytes <= MAX_TOTAL_ARTIFACT_BYTES,
-                       "CUMULATIVE_ARTIFACT_BUDGET")
-            artifacts[name] = raw
-        candidate_raw = artifacts["candidate"]
-        model_raw = artifacts["model"]
-        point_raw = artifacts["point"]
-        # The registry and run are separately pinned by the caller. A self-
-        # consistent bundle cannot replace the expected source/point/candidate.
-        vb.require(_digest(artifacts["source"]) == work["source_sha256"],
-                   "SOURCE_ARTIFACT_PIN_MISMATCH")
-        vb.require(_digest(candidate_raw) == record["candidate_sha256"],
-                   "CANDIDATE_ARTIFACT_PIN_MISMATCH")
-        vb.require(_digest(point_raw) == record["certificate_sha256"],
-                   "POINT_ARTIFACT_PIN_MISMATCH")
-        model_sha = _digest(model_raw)
-        candidate, model = source.recheck_candidate(
-            artifacts["source"], block_index=0,
-            expected_source_sha256=work["source_sha256"],
-            candidate_bytes=candidate_raw, model_bytes=model_raw,
-            expected_candidate_sha256=record["candidate_sha256"],
-            expected_model_sha256=model_sha,
-        )
-        vb.require(candidate["explicit_block_count"] == 1 and
-                   candidate["selected_block_index"] == 0,
-                   "MULTIPLE_OR_UNSELECTED_SOURCE_BLOCKS")
-        vb.require(candidate["source_block_sha256"] == work["interpretation_sha256"],
-                   "INTERPRETATION_SOURCE_BLOCK_MISMATCH")
-        point = exact.parse_json(point_raw, 64 * 1024)
-        vb.require(type(point) is list and point_raw == exact.canonical_bytes(point),
-                   "POINT_NOT_CANONICAL_ARRAY")
-        objective = exact.verify_point(exact.compile_model(model), point)
-        claimed = exact.rational(candidate["claimed_upper"])
-        vb.require(objective > claimed, "POINT_DOES_NOT_REFUTE_FORMAL_CLAIM")
-        checked.append({
-            "work_id": work_id,
-            "candidate_sha256": record["candidate_sha256"],
-            "point_sha256": record["certificate_sha256"],
-            "model_sha256": model_sha,
-            "source_sha256": work["source_sha256"],
-            "source_block_sha256": candidate["source_block_sha256"],
-            "formal_refutation_margin": str(objective - claimed),
-            "mathematical_replay": "exact_formal_refutation_replayed",
-            "publisher_or_paper_error_verified": False,
-        })
+    budget = [0]
+    checked = [_replay_work(work_id, works[work_id], records[work_id],
+                            evidence_root, budget) for work_id in expected]
     report: dict[str, Any] = {
         "schema_version": VERSION,
         "status": "accepted_formal_refutations_replayed" if checked else "no_accepted_records_to_replay",

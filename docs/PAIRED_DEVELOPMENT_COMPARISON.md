@@ -41,6 +41,42 @@ produces no superiority p-value, trusted scientific accuracy, sealed-holdout
 qualification or empirical discovery claim. A completed matrix of declared
 results is not a completed independent research study.
 
+## Replay-bound aggregation (RW-04K)
+
+Supplying `--baseline-evidence-root`, `--candidate-evidence-root`,
+`--expected-baseline-run-sha256` and `--expected-candidate-run-sha256`
+(all four or none) switches the report to
+`rw-development-paired-comparison.replay-bound.v1` with
+`aggregation_evidence: replay_verified_only`. Each arm's accepted receipts are
+replayed with the [RW-04I adapter](DEVELOPMENT_ARTIFACT_REPLAY.md) against that
+arm's own, distinct evidence root and externally pinned run hash.
+
+- A family outcome counts only when replay evidence supports it: a positive
+  family is detected only by a replayed accepted formal refutation whose
+  declared target and source correspondence also match; a negative family has
+  an alarm only through a replayed accepted refutation (a verified false alarm).
+- Every other eligible family stays in the denominator as **unverified**
+  (unknown in the logical bounds): declared non-detections, clean negatives,
+  abstentions relabelled as completions, rejected alarms and accepted receipts
+  whose bundle is missing, substituted, forged or non-refuting. Per-arm
+  replay counts, stable unverified codes and the number of declared-known
+  outcomes left unverified are reported.
+- The legacy declaration-only summaries are kept beside the counted ones as
+  `declared_*_not_counted`, so the effect of excluding unreplayed declarations
+  is visible but cannot improve any counted diagnostic.
+- Only accepted refutations have a replay profile. A completed non-detection
+  or clean negative cannot yet be verified, so replay-bound reports are
+  normally `incomplete`; unlocking that needs a separately reviewed replay
+  profile for non-alarm outcomes (for example deterministic re-execution of a
+  frozen arm), not a looser counting rule.
+- Pin, evidence-root, case-collision and byte-budget failures still fail closed.
+  Labels, targets and source-correspondence fields remain declarations that
+  can only demote a replayed refutation.
+
+Without the evidence arguments the report is the unchanged declaration-only
+`rw-development-paired-comparison.v1` with `aggregation_evidence:
+declaration_only`.
+
 ## Limitations and next steps
 
 Resources are compared from supplied declarations, not attested measurements.

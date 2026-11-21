@@ -2,6 +2,14 @@
 
 ## 0.3.1 — engineering preview candidate — UNRELEASED
 
+- RW-04K: optional replay-bound aggregation in the paired development
+  comparison and exact family analysis. With per-arm evidence roots and run
+  pins, only outcomes backed by RW-04I replay of accepted formal refutations
+  count; every other eligible family stays in the denominator as unverified.
+  Declaration-only exact analysis can no longer report a numerical pass
+  (`declared_thresholds_met_not_replay_verified`; schema v2). Adversarial tests
+  cover forged certificate/candidate hashes, missing or non-refuting bundles
+  and relabelled abstentions. No scientific validation is claimed.
 - RW-04J: gate the exact development analysis's negative-relationship minimum
   on distinct eligible `(source_sha256, interpretation_sha256)` pairs, not
   repeated work/version rows. Report distinct and raw counts and flag duplicate

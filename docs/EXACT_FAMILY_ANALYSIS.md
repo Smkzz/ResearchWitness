@@ -99,10 +99,19 @@ receipt or historical result is rewritten by this correction.
   the validated registration. Every source/run/protocol must match its external
   pin and the same registered work schedule.
 - Entire input registry, source interpretation, certificate acceptance, family
-  grouping and reviewer labels remain *supplied declarations*. A synthetic
-  numerical pass is explicitly
-  `met_on_unverified_development_data`, **never an approval of scientific
-  superiority**. It is not a real data sample or protected holdout.
+  grouping and reviewer labels remain *supplied declarations*.
+- RW-04K (`rw-development-exact-family-analysis.v2`): declaration-only inputs
+  are still computed but can no longer pass; meeting the thresholds on them is
+  reported as `declared_thresholds_met_not_replay_verified` with reason
+  `DECLARATION_ONLY_RECEIPTS_NOT_REPLAYED`. With the four replay arguments of
+  the [paired comparison](PAIRED_DEVELOPMENT_COMPARISON.md#replay-bound-aggregation-rw-04k)
+  the endpoints use only replay-verified outcomes; unverified families stay in
+  the denominator, make the endpoints incomplete and add
+  `UNVERIFIED_DECLARED_OUTCOMES`. The only possible pass is
+  `met_on_replay_verified_development_data`, which the current accepted-only
+  replay profile cannot reach (a baseline miss or clean negative is never
+  verified). Any pass is development-exposed, **never an approval of scientific
+  superiority**, and not a real data sample or protected holdout.
 - Results include the exact input/report commitments, counts, omissions,
   zero-spend scope, display rounding method, and explicit FALSE flags for
   source authenticity, family independence, protected custody and scientific

@@ -11,10 +11,12 @@ from pathlib import Path
 import sys
 from typing import Any
 
+from tools import development_artifact_replay as replay
 from tools import verification_benchmark as vb
 from tools.offline_files import read_regular
 
 VERSION = "rw-development-paired-comparison.v1"
+REPLAY_VERSION = "rw-development-paired-comparison.replay-bound.v1"
 
 
 def _fraction(numerator: int, denominator: int) -> dict[str, int] | None:
@@ -92,12 +94,60 @@ def _paired_summary(pairs: list[tuple[bool | None, bool | None]],
     }
 
 
+def _replayed_state(work_ids: list[str], works: dict[str, dict[str, Any]],
+                    receipts: dict[str, dict[str, Any]], verified: set[str],
+                    label: str) -> bool | None:
+    """Known only when replay evidence supports it; otherwise unverified (None).
+
+    The only replay profile is an accepted exact formal refutation. A declared
+    non-detection, clean negative, abstention or rejected alarm therefore stays
+    in the denominator as unknown: relabelling it cannot move any count.
+    """
+    for identifier in work_ids:
+        record = receipts.get(identifier)
+        if record is None or identifier not in verified:
+            continue
+        if label == "negative":
+            return True
+        if (record["source_correspondence"] == "supported"
+                and record["target_id"] == works[identifier]["target_id"]):
+            return True
+    return None
+
+
+def _replay_summary(result: dict[str, Any]) -> dict[str, Any]:
+    codes: dict[str, int] = defaultdict(int)
+    for code in result["unverified"].values():
+        codes[code] += 1
+    return {
+        "accepted_receipts_declared": result["accepted_receipts_declared"],
+        "accepted_formal_refutations_replayed": len(result["verified"]),
+        "accepted_receipts_unverified": len(result["unverified"]),
+        "unverified_codes": dict(sorted(codes.items())),
+    }
+
+
 def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
             baseline_run: dict[str, Any], candidate_protocol: dict[str, Any],
             candidate_run: dict[str, Any], *, expected_registry_sha256: str,
             expected_baseline_protocol_sha256: str,
-            expected_candidate_protocol_sha256: str) -> dict[str, Any]:
-    """Compare declarations on the exact same registered works and cost envelope."""
+            expected_candidate_protocol_sha256: str,
+            baseline_evidence_root: Path | None = None,
+            candidate_evidence_root: Path | None = None,
+            expected_baseline_run_sha256: str | None = None,
+            expected_candidate_run_sha256: str | None = None) -> dict[str, Any]:
+    """Compare both arms on the exact same registered works and cost envelope.
+
+    With both evidence roots and externally pinned run hashes, aggregation is
+    replay-bound: only replay-verified outcomes count and every other eligible
+    family stays in the denominator as unverified. Without them the report is
+    the legacy declaration-only accounting and says so.
+    """
+    evidence = (baseline_evidence_root, candidate_evidence_root,
+                expected_baseline_run_sha256, expected_candidate_run_sha256)
+    replay_bound = all(item is not None for item in evidence)
+    vb.require(replay_bound or all(item is None for item in evidence),
+               "REPLAY_EVIDENCE_ARGUMENTS_INCOMPLETE")
     baseline = vb.score(
         registry, baseline_protocol, baseline_run,
         expected_registry_sha256=expected_registry_sha256,
@@ -114,12 +164,31 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
     vb.require(baseline_protocol["schedule"] == candidate_protocol["schedule"],
                "SCHEDULE_ORDER_MISMATCH")
     works = vb._registry(registry)
+    replays: dict[str, dict[str, Any]] = {}
+    if replay_bound:
+        for arm, protocol, run, root, pin in (
+            ("baseline", baseline_protocol, baseline_run, baseline_evidence_root,
+             expected_baseline_run_sha256),
+            ("candidate", candidate_protocol, candidate_run, candidate_evidence_root,
+             expected_candidate_run_sha256),
+        ):
+            replays[arm] = replay.verify_receipts(
+                registry, protocol, run, root,
+                expected_registry_sha256=expected_registry_sha256,
+                expected_protocol_sha256=vb.commitment(protocol),
+                expected_run_sha256=pin,
+            )
+        vb.require(baseline_evidence_root.resolve() != candidate_evidence_root.resolve(),
+                   "ARM_EVIDENCE_ROOTS_NOT_DISTINCT")
     families: dict[str, list[str]] = defaultdict(list)
     for work_id, work in works.items():
         families[work["family_id"]].append(work_id)
     baseline_receipts = {row["work_id"]: row for row in baseline_run["results"]}
     candidate_receipts = {row["work_id"]: row for row in candidate_run["results"]}
     categories: dict[str, list[tuple[bool | None, bool | None]]] = {
+        "positive": [], "negative": [],
+    }
+    declared: dict[str, list[tuple[bool | None, bool | None]]] = {
         "positive": [], "negative": [],
     }
     unresolved = excluded = 0
@@ -133,21 +202,33 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
             unresolved += 1
             continue
         label = anchor["label"]
-        categories[label].append((
+        declared[label].append((
             _state(members, works, baseline_receipts, label),
             _state(members, works, candidate_receipts, label),
         ))
+        if replay_bound:
+            categories[label].append((
+                _replayed_state(members, works, baseline_receipts,
+                                set(replays["baseline"]["verified"]), label),
+                _replayed_state(members, works, candidate_receipts,
+                                set(replays["candidate"]["verified"]), label),
+            ))
+        else:
+            categories[label].append(declared[label][-1])
     positives = _paired_summary(categories["positive"], desirable="increase")
     negatives = _paired_summary(categories["negative"], desirable="decrease")
     complete = (baseline["status"] == candidate["status"] == "complete"
                 and positives["paired_unknown"] == negatives["paired_unknown"] == 0)
-    return {
-        "schema_version": VERSION,
+    report: dict[str, Any] = {
+        "schema_version": REPLAY_VERSION if replay_bound else VERSION,
         "classification": "PAIRED_DEVELOPMENT_DECLARATIONS_NOT_SCIENTIFIC_VALIDATION",
         "status": "complete" if complete else "incomplete",
+        "aggregation_evidence": "replay_verified_only" if replay_bound else "declaration_only",
         "scientific_performance_established": False,
         "protected_evaluation_performed": False,
-        "source_and_certificate_validation": "SUPPLIED_DECLARATIONS_NOT_REPLAYED",
+        "source_and_certificate_validation": (
+            "ACCEPTED_FORMAL_REFUTATIONS_REPLAYED_OTHER_OUTCOMES_UNVERIFIED"
+            if replay_bound else "SUPPLIED_DECLARATIONS_NOT_REPLAYED"),
         "family_independence": "DECLARED_FAMILIES_NOT_AUTHENTICATED",
         "commitments": {
             "registry": vb.commitment(registry),
@@ -179,6 +260,49 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
             "No superiority p-value, sealed evaluation, baseline runtime execution or new discovery is claimed.",
         ],
     }
+    if replay_bound:
+        unverified = {
+            label: {
+                arm: sum(1 for pair, strict in zip(declared[label], categories[label], strict=True)
+                         if pair[index] is not None and strict[index] is None)
+                for index, arm in enumerate(("baseline", "candidate"))
+            }
+            for label in ("positive", "negative")
+        }
+        report["replay"] = {
+            "baseline": _replay_summary(replays["baseline"]),
+            "candidate": _replay_summary(replays["candidate"]),
+            "declared_known_family_outcomes_left_unverified": unverified,
+        }
+        report["declared_positive_detection_not_counted"] = _paired_summary(
+            declared["positive"], desirable="increase")
+        report["declared_negative_false_alarm_not_counted"] = _paired_summary(
+            declared["negative"], desirable="decrease")
+        report["limitations"] = [
+            "Only accepted exact formal refutations have a replay profile; every other declared outcome is unverified and counted as unknown.",
+            "Replay proves a formal refutation of the declared source block, not source authenticity, interpretation fidelity or a paper error.",
+            "Labels, target identities and source-correspondence fields remain supplied declarations that can only demote a replayed refutation.",
+            "Equal declared work budgets and a shared schedule do not authenticate resource usage.",
+            "Work-family independence remains unverified.",
+            "Logical missing-outcome bounds are not statistical confidence intervals.",
+            "No superiority p-value, sealed evaluation, baseline runtime execution or new discovery is claimed.",
+        ]
+    return report
+
+
+def add_replay_arguments(parser: argparse.ArgumentParser) -> None:
+    for arm in ("baseline", "candidate"):
+        parser.add_argument(f"--{arm}-evidence-root", type=Path)
+        parser.add_argument(f"--expected-{arm}-run-sha256")
+
+
+def replay_arguments(args: argparse.Namespace) -> dict[str, Any]:
+    return {
+        "baseline_evidence_root": args.baseline_evidence_root,
+        "candidate_evidence_root": args.candidate_evidence_root,
+        "expected_baseline_run_sha256": args.expected_baseline_run_sha256,
+        "expected_candidate_run_sha256": args.expected_candidate_run_sha256,
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -188,6 +312,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("registry", "baseline-protocol", "candidate-protocol"):
         parser.add_argument("--expected-" + name + "-sha256", required=True)
+    add_replay_arguments(parser)
     args = parser.parse_args(argv)
     try:
         docs = {
@@ -202,6 +327,7 @@ def main(argv: list[str] | None = None) -> int:
             expected_registry_sha256=args.expected_registry_sha256,
             expected_baseline_protocol_sha256=args.expected_baseline_protocol_sha256,
             expected_candidate_protocol_sha256=args.expected_candidate_protocol_sha256,
+            **replay_arguments(args),
         )
         sys.stdout.buffer.write(vb.canonical_bytes(report))
         return 0
