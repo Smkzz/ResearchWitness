@@ -37,7 +37,7 @@ class OfflineBoundaryTests(unittest.TestCase):
 
     def test_unverifiable_rate_state_fails_before_filesystem_or_network(self):
         discovery = load_tool('public_discovery')
-        with patch.object(discovery.os, 'getuid', None, create=True), patch.object(discovery.Path, 'mkdir') as mkdir:
+        with patch.object(discovery.sys, 'platform', 'unsupported'), patch.object(discovery.os, 'getuid', None, create=True), patch.object(discovery.Path, 'mkdir') as mkdir:
             with self.assertRaisesRegex(discovery.SourceAccessError, 'ownership cannot be verified'):
                 discovery._private_rate_state_directory()
             mkdir.assert_not_called()
