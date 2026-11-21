@@ -321,11 +321,16 @@
       "blocker": {
         "category": "evidence",
         "reason": "The replay-bound development harness is qualified on synthetic inputs, but cannot ground a study registration or empirically calibrate assumptions without an admissible original-source development pilot.",
+        "failed_operation": "Qualify real-source calibration and a grounded study registration using currently available evidence. No new source acquisition was attempted in RW-04L.",
         "evidence": [
           "https://github.com/Smkzz/ResearchWitness/pull/84",
           "https://github.com/Smkzz/ResearchWitness/issues/35",
           "https://github.com/Smkzz/ResearchWitness/issues/50",
           "docs/INDEPENDENT_PILOT_HANDOFF.md"
+        ],
+        "safe_alternatives_attempted": [
+          "Replayed pinned synthetic families with both frozen arms to demonstrate engineering gate reachability only.",
+          "Checked the existing pilot handoff and RW-01O/RW-01Q issue records; they did not supply admissible original bodies, rights/transport evidence or independent source reviews."
         ],
         "unlock_condition": "Obtain permission-cleared original response bytes and transport/rights evidence, plus genuinely separate source-context and lineage adjudication for the exposed RW-01O/RW-01Q pilot. Do not substitute synthetic replay or source-free power calculations.",
         "next_unblocked_package": null
