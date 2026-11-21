@@ -17,6 +17,7 @@ from tools.offline_files import read_regular
 
 VERSION = "rw-development-paired-comparison.v1"
 REPLAY_VERSION = "rw-development-paired-comparison.replay-bound.v1"
+FROZEN_REPLAY_VERSION = "rw-development-paired-comparison.frozen-arm-replay.v1"
 
 
 def _fraction(numerator: int, denominator: int) -> dict[str, int] | None:
@@ -96,12 +97,11 @@ def _paired_summary(pairs: list[tuple[bool | None, bool | None]],
 
 def _replayed_state(work_ids: list[str], works: dict[str, dict[str, Any]],
                     receipts: dict[str, dict[str, Any]], verified: set[str],
-                    label: str) -> bool | None:
+                    non_alarms: set[str], label: str) -> bool | None:
     """Known only when replay evidence supports it; otherwise unverified (None).
 
-    The only replay profile is an accepted exact formal refutation. A declared
-    non-detection, clean negative, abstention or rejected alarm therefore stays
-    in the denominator as unknown: relabelling it cannot move any count.
+    A miss or clean negative needs a replayed non-alarm for every family member.
+    Missing work, abstentions and rejected alarms cannot supply that evidence.
     """
     for identifier in work_ids:
         record = receipts.get(identifier)
@@ -112,6 +112,8 @@ def _replayed_state(work_ids: list[str], works: dict[str, dict[str, Any]],
         if (record["source_correspondence"] == "supported"
                 and record["target_id"] == works[identifier]["target_id"]):
             return True
+    if all(identifier in non_alarms for identifier in work_ids):
+        return False
     return None
 
 
@@ -119,12 +121,23 @@ def _replay_summary(result: dict[str, Any]) -> dict[str, Any]:
     codes: dict[str, int] = defaultdict(int)
     for code in result["unverified"].values():
         codes[code] += 1
-    return {
+    summary = {
         "accepted_receipts_declared": result["accepted_receipts_declared"],
         "accepted_formal_refutations_replayed": len(result["verified"]),
         "accepted_receipts_unverified": len(result["unverified"]),
         "unverified_codes": dict(sorted(codes.items())),
     }
+    if "frozen_arm" in result:
+        non_alarm_codes: dict[str, int] = defaultdict(int)
+        for code in result["unverified_non_alarms"].values():
+            non_alarm_codes[code] += 1
+        summary.update(
+            frozen_arm=result["frozen_arm"],
+            non_alarm_receipts_replayed=len(result["verified_non_alarms"]),
+            non_alarm_receipts_unverified=len(result["unverified_non_alarms"]),
+            non_alarm_unverified_codes=dict(sorted(non_alarm_codes.items())),
+        )
+    return summary
 
 
 def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
@@ -135,7 +148,8 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
             baseline_evidence_root: Path | None = None,
             candidate_evidence_root: Path | None = None,
             expected_baseline_run_sha256: str | None = None,
-            expected_candidate_run_sha256: str | None = None) -> dict[str, Any]:
+            expected_candidate_run_sha256: str | None = None,
+            replay_frozen_arms: bool = False) -> dict[str, Any]:
     """Compare both arms on the exact same registered works and cost envelope.
 
     With both evidence roots and externally pinned run hashes, aggregation is
@@ -148,6 +162,7 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
     replay_bound = all(item is not None for item in evidence)
     vb.require(replay_bound or all(item is None for item in evidence),
                "REPLAY_EVIDENCE_ARGUMENTS_INCOMPLETE")
+    vb.require(not replay_frozen_arms or replay_bound, "FROZEN_ARM_REPLAY_REQUIRES_EVIDENCE")
     baseline = vb.score(
         registry, baseline_protocol, baseline_run,
         expected_registry_sha256=expected_registry_sha256,
@@ -166,6 +181,11 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
     works = vb._registry(registry)
     replays: dict[str, dict[str, Any]] = {}
     if replay_bound:
+        vb.require(baseline_evidence_root.resolve() != candidate_evidence_root.resolve(),
+                   "ARM_EVIDENCE_ROOTS_NOT_DISTINCT")
+        if replay_frozen_arms:
+            vb.require(baseline_protocol["implementation_sha256"] !=
+                       candidate_protocol["implementation_sha256"], "FROZEN_ARMS_NOT_DISTINCT")
         for arm, protocol, run, root, pin in (
             ("baseline", baseline_protocol, baseline_run, baseline_evidence_root,
              expected_baseline_run_sha256),
@@ -177,9 +197,10 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
                 expected_registry_sha256=expected_registry_sha256,
                 expected_protocol_sha256=vb.commitment(protocol),
                 expected_run_sha256=pin,
+                frozen_arm=replay_frozen_arms,
             )
-        vb.require(baseline_evidence_root.resolve() != candidate_evidence_root.resolve(),
-                   "ARM_EVIDENCE_ROOTS_NOT_DISTINCT")
+    verified = {arm: set(result["verified"]) for arm, result in replays.items()}
+    non_alarms = {arm: set(result.get("verified_non_alarms", ())) for arm, result in replays.items()}
     families: dict[str, list[str]] = defaultdict(list)
     for work_id, work in works.items():
         families[work["family_id"]].append(work_id)
@@ -209,9 +230,9 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
         if replay_bound:
             categories[label].append((
                 _replayed_state(members, works, baseline_receipts,
-                                set(replays["baseline"]["verified"]), label),
+                                verified["baseline"], non_alarms["baseline"], label),
                 _replayed_state(members, works, candidate_receipts,
-                                set(replays["candidate"]["verified"]), label),
+                                verified["candidate"], non_alarms["candidate"], label),
             ))
         else:
             categories[label].append(declared[label][-1])
@@ -220,13 +241,15 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
     complete = (baseline["status"] == candidate["status"] == "complete"
                 and positives["paired_unknown"] == negatives["paired_unknown"] == 0)
     report: dict[str, Any] = {
-        "schema_version": REPLAY_VERSION if replay_bound else VERSION,
+        "schema_version": (FROZEN_REPLAY_VERSION if replay_frozen_arms else
+                           REPLAY_VERSION if replay_bound else VERSION),
         "classification": "PAIRED_DEVELOPMENT_DECLARATIONS_NOT_SCIENTIFIC_VALIDATION",
         "status": "complete" if complete else "incomplete",
         "aggregation_evidence": "replay_verified_only" if replay_bound else "declaration_only",
         "scientific_performance_established": False,
         "protected_evaluation_performed": False,
         "source_and_certificate_validation": (
+            "FROZEN_ARM_COMPLETIONS_REPLAYED" if replay_frozen_arms else
             "ACCEPTED_FORMAL_REFUTATIONS_REPLAYED_OTHER_OUTCOMES_UNVERIFIED"
             if replay_bound else "SUPPLIED_DECLARATIONS_NOT_REPLAYED"),
         "family_independence": "DECLARED_FAMILIES_NOT_AUTHENTICATED",
@@ -279,18 +302,23 @@ def compare(registry: dict[str, Any], baseline_protocol: dict[str, Any],
         report["declared_negative_false_alarm_not_counted"] = _paired_summary(
             declared["negative"], desirable="decrease")
         report["limitations"] = [
-            "Only accepted exact formal refutations have a replay profile; every other declared outcome is unverified and counted as unknown.",
+            ("A no-alarm receipt proves only what the named fixed probe returned on the marked affine box."
+             if replay_frozen_arms else
+             "Only accepted exact formal refutations have a replay profile; every other declared outcome is unverified and counted as unknown."),
             "Replay proves a formal refutation of the declared source block, not source authenticity, interpretation fidelity or a paper error.",
             "Labels, target identities and source-correspondence fields remain supplied declarations that can only demote a replayed refutation.",
             "Equal declared work budgets and a shared schedule do not authenticate resource usage.",
             "Work-family independence remains unverified.",
             "Logical missing-outcome bounds are not statistical confidence intervals.",
-            "No superiority p-value, sealed evaluation, baseline runtime execution or new discovery is claimed.",
+            ("No superiority p-value, authenticated historical execution, sealed evaluation or new discovery is claimed."
+             if replay_frozen_arms else
+             "No superiority p-value, sealed evaluation, baseline runtime execution or new discovery is claimed."),
         ]
     return report
 
 
 def add_replay_arguments(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--replay-frozen-arms", action="store_true")
     for arm in ("baseline", "candidate"):
         parser.add_argument(f"--{arm}-evidence-root", type=Path)
         parser.add_argument(f"--expected-{arm}-run-sha256")
@@ -298,6 +326,7 @@ def add_replay_arguments(parser: argparse.ArgumentParser) -> None:
 
 def replay_arguments(args: argparse.Namespace) -> dict[str, Any]:
     return {
+        "replay_frozen_arms": args.replay_frozen_arms,
         "baseline_evidence_root": args.baseline_evidence_root,
         "candidate_evidence_root": args.candidate_evidence_root,
         "expected_baseline_run_sha256": args.expected_baseline_run_sha256,

@@ -135,6 +135,7 @@ def analyze(
     candidate_evidence_root: Path | None = None,
     expected_baseline_run_sha256: str | None = None,
     expected_candidate_run_sha256: str | None = None,
+    replay_frozen_arms: bool = False,
 ) -> dict[str, Any]:
     """Replay the exact paired ledger; report ONLY development-stage diagnostics.
 
@@ -154,9 +155,13 @@ def analyze(
         candidate_evidence_root=candidate_evidence_root,
         expected_baseline_run_sha256=expected_baseline_run_sha256,
         expected_candidate_run_sha256=expected_candidate_run_sha256,
+        replay_frozen_arms=replay_frozen_arms,
     )
     replay_bound = report["aggregation_evidence"] == "replay_verified_only"
     arms = study["arms"]
+    if replay_frozen_arms:
+        vb.require(all(arm["proposal_kind"] == "deterministic_local" for arm in arms),
+                   "FROZEN_STUDY_ARMS_NOT_DETERMINISTIC_LOCAL")
     resources = study["resources"]
     vb.require(
         baseline_protocol["implementation_sha256"] == arms[0]["implementation_sha256"]
@@ -308,11 +313,17 @@ def analyze(
         "accepted_formal_refutations_replayed_by_this_analysis": (
             {arm: report["replay"][arm]["accepted_formal_refutations_replayed"]
              for arm in ("baseline", "candidate")} if replay_bound else None),
+        **({"frozen_arm_non_alarm_receipts_replayed_by_this_analysis": {
+            arm: report["replay"][arm]["non_alarm_receipts_replayed"]
+            for arm in ("baseline", "candidate")
+        }} if replay_frozen_arms else {}),
         "protected_holdout_evaluated": False,
         "scientific_superiority_established": False,
         "limitations": [
             "Registry labels, identities, eligibility, family partitions and run receipts are unverified declarations.",
-            "Only replay-verified accepted formal refutations count; every other outcome is unknown, so declarations alone cannot pass.",
+            ("Only replay-verified formal refutations and fixed-arm non-alarms count; a family non-alarm requires all members."
+             if replay_frozen_arms else
+             "Only replay-verified accepted formal refutations count; every other outcome is unknown, so declarations alone cannot pass."),
             "Distinct negative source/interpretation hash pairs deduplicate identities, not a verified relationship census.",
             "Hash equality cannot demonstrate pre-outcome registration, ownership or actual acquisition.",
             "An exact statistical calculation on incorrect labels does not establish source or scientific truth.",
