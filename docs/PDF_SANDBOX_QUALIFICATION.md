@@ -8,12 +8,41 @@ may exploit defects, consume resources or emit adversarial instructions. Arithme
 checks and pinned image IDs do not remove these risks. The Docker daemon and host
 kernel remain trusted; this is process isolation, not a cryptographic/VM boundary.
 
-The existing runner uses only the local Unix socket, a fresh Docker configuration,
+The existing runner uses the local Unix socket on POSIX or the Docker Desktop
+named pipe `npipe:////./pipe/docker_engine` on Windows, a fresh Docker configuration,
 no network/source-directory mount, read-only root, UID/GID 65534, dropped capabilities,
 verified default seccomp, no-new-privileges, and CPU/memory/PID/file/output/time bounds.
 It sends input over stdin and fails closed if cleanup is not confirmed. It cannot
 authenticate a builder or inspect hidden image files. Review the rootfs, not only
 its empty environment settings. No host Poppler fallback is permitted.
+
+Unlike the root-owned `/var/run/docker.sock`, the Windows pipe name
+`\\.\pipe\docker_engine` can be created by any local process when Docker Desktop
+is not listening. The runner does not verify the pipe server's identity (for
+example, using `GetNamedPipeServerProcessId` plus a process-owner check). This
+endpoint-spoofing risk is accepted only while the PDF runner remains unqualified;
+it must be resolved before any Windows PDF qualification claim. The authority
+for native RW-03 qualification runs on the org Windows Devin machine is Sami's
+answer to the "Use a Windows machine" card, **2026-11-21 19:59 UTC**. That
+authorization is not pipe-server authentication or a waiver of qualification.
+
+## Native transport evidence - not isolation qualification
+
+Raw evidence captured on 2026-11-21 at PR #87 head
+`f7e17793abe151f5b7bcd68a3d5bfa11419528b6` is archived under
+[`evidence/rw03-native-2026-11-21/`](../evidence/rw03-native-2026-11-21/):
+[focused tests](../evidence/rw03-native-2026-11-21/pdf-focused.log),
+[runtime commands](../evidence/rw03-native-2026-11-21/pdf-runtime.log),
+[release sequence](../evidence/rw03-native-2026-11-21/pdf-release.log),
+[smoke result](../evidence/rw03-native-2026-11-21/pdf-smoke.json), and the
+[capture script](../evidence/rw03-native-2026-11-21/capture.py).
+The script records the original machine paths and also includes the separate
+Windows metadata capture procedure; it is an execution record, not a portable
+qualification harness. Logs retain their output text and branch-head IDs, with
+line endings normalized to LF for the repository's checksum convention.
+The smoke used a nonexistent image digest and failed closed at image verification;
+it did not run Poppler or qualify PDF isolation. No containers remained; the image
+inventory contained only a pre-existing `hello-world` image. No image was pulled.
 
 ## Minimal image construction recipe - not built or qualified by this document
 

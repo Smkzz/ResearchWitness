@@ -7,6 +7,7 @@ whether a candidate is eligible for blinded evaluation.
 from __future__ import annotations
 
 import errno
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
@@ -230,26 +231,38 @@ class _WindowsRateSecurity:
         if not success:
             raise OSError("Windows rate-state security check failed")
 
+    @classmethod
+    @contextmanager
+    def checked_cleanup(cls, cleanup):
+        failed = False
+        try:
+            yield
+        except BaseException:
+            failed = True
+            raise
+        finally:
+            try:
+                cls.require(cleanup())
+            except BaseException:
+                if not failed:
+                    raise
+
     def sid_string(self, sid):
         value = ctypes.c_wchar_p()
         self.require(self.advapi.ConvertSidToStringSidW(sid, ctypes.byref(value)))
-        try:
+        with self.checked_cleanup(lambda: not self.kernel.LocalFree(value)):
             return value.value
-        finally:
-            self.require(not self.kernel.LocalFree(value))
 
     def user_sid(self):
         token = wintypes.HANDLE()
         self.require(self.advapi.OpenProcessToken(self.kernel.GetCurrentProcess(), 0x0008, ctypes.byref(token)))
-        try:
+        with self.checked_cleanup(lambda: self.kernel.CloseHandle(token)):
             size = wintypes.DWORD()
             result = self.advapi.GetTokenInformation(token, 1, None, 0, ctypes.byref(size))
             self.require(not result and ctypes.get_last_error() == 122 and size.value > 0)
             buffer = ctypes.create_string_buffer(size.value)
             self.require(self.advapi.GetTokenInformation(token, 1, buffer, size, ctypes.byref(size)))
             return self.sid_string(ctypes.c_void_p.from_buffer(buffer).value)
-        finally:
-            self.require(self.kernel.CloseHandle(token))
 
     def create(self, directory, sid):
         class SecurityAttributes(ctypes.Structure):
@@ -259,12 +272,10 @@ class _WindowsRateSecurity:
         self.require(self.advapi.ConvertStringSecurityDescriptorToSecurityDescriptorW(
             f"O:{sid}D:P(A;OICI;FA;;;{sid})", 1, ctypes.byref(descriptor), None,
         ))
-        try:
+        with self.checked_cleanup(lambda: not self.kernel.LocalFree(descriptor)):
             attributes = SecurityAttributes(ctypes.sizeof(SecurityAttributes), descriptor, False)
             if not self.kernel.CreateDirectoryW(str(directory), ctypes.byref(attributes)):
                 self.require(ctypes.get_last_error() == 183)
-        finally:
-            self.require(not self.kernel.LocalFree(descriptor))
 
     def verify(self, directory, sid):
         descriptor = ctypes.c_void_p()
@@ -274,7 +285,7 @@ class _WindowsRateSecurity:
             str(directory), 1, 0x00000005, ctypes.byref(owner), None,
             ctypes.byref(dacl), None, ctypes.byref(descriptor),
         ) == 0)
-        try:
+        with self.checked_cleanup(lambda: not self.kernel.LocalFree(descriptor)):
             self.require(self.sid_string(owner) == sid)
             control = wintypes.WORD()
             revision = wintypes.DWORD()
@@ -286,13 +297,17 @@ class _WindowsRateSecurity:
             ))
             self.require(present.value and dacl.value)
             ace_count = ctypes.c_ushort.from_address(dacl.value + 4).value
+            user_has_full_access = False
             for index in range(ace_count):
                 ace = ctypes.c_void_p()
                 self.require(self.advapi.GetAce(dacl, index, ctypes.byref(ace)))
                 self.require(ctypes.c_ubyte.from_address(ace.value).value == 0)
                 self.require(self.sid_string(ace.value + 8) == sid)
-        finally:
-            self.require(not self.kernel.LocalFree(descriptor))
+                flags = ctypes.c_ubyte.from_address(ace.value + 1).value
+                mask = wintypes.DWORD.from_address(ace.value + 4).value
+                if not flags & 0x08 and mask & 0x1F01FF == 0x1F01FF:
+                    user_has_full_access = True
+            self.require(user_has_full_access)
 
 
 def _private_rate_state_directory(

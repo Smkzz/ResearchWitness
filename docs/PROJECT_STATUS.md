@@ -40,9 +40,20 @@ observed in the linked run session. Dependency evidence was **not run on the
 merge commit**: its workflow triggers only on `pull_request`/`workflow_dispatch`,
 not pushes to main. `windows_managed_metadata` remains `unqualified`.
 
+The ACL/cleanup follow-up [PR #89](https://github.com/Smkzz/ResearchWitness/pull/89)
+merged as [`0ad921cfc22e5c09973e09b6b9d2f686f1f0d6ff`](https://github.com/Smkzz/ResearchWitness/commit/0ad921cfc22e5c09973e09b6b9d2f686f1f0d6ff).
+Its post-merge checks passed **11/11**: the nine Python/platform jobs,
+Release gate and Analyze Python. These CI observations are recorded in the
+linked run session; they do not change the historical native-log counts above.
+
 **PDF transport:** [PR #87](https://github.com/Smkzz/ResearchWitness/pull/87)
-is still under review. Its evidence paths below land with #87 and are not
-duplicated by this receipt. At head
+merged as [`09286c1b88a2e31ddfcc97565d2f5d80c0e8788f`](https://github.com/Smkzz/ResearchWitness/commit/09286c1b88a2e31ddfcc97565d2f5d80c0e8788f).
+Its post-merge checks passed **11/11**: the nine Python/platform jobs,
+Release gate and Analyze Python, as observed in the linked run session.
+Dependency evidence did not run on either #87's or #89's merge commit
+(the same workflow trigger restriction noted above).
+The PDF evidence below landed with #87 and is not duplicated by this receipt.
+At the earlier head
 `f7e17793abe151f5b7bcd68a3d5bfa11419528b6`, the native test run is recorded in
 [`evidence/rw03-native-2026-11-21/pdf-focused.log`](https://github.com/Smkzz/ResearchWitness/blob/509e4de1f46b9458a859542bc118e23205caebe7/evidence/rw03-native-2026-11-21/pdf-focused.log)
 (**25 passed**, exit 0),
@@ -67,8 +78,8 @@ qualification claim. `pdf_execution` stays `unqualified`. Protected custody
 was **NOT RUN** (no authorized isolated custodian); it stays `unqualified`.
 `scientific_wave_3` remains `not_run`. No human certification is claimed.
 
-**RW-03 remains `blocked_external`.** Remaining conditions are #87 review/merge
-and main verification, pipe-server identity assurance, the image egress decision
+**RW-03 remains `blocked_external`.** Remaining conditions are
+pipe-server identity assurance, the image egress decision
 and reviewed-image isolation evidence, and separately authorized isolated custody.
 `next_unblocked_task` was deliberately set to `null`: the old RW-01 pointer was
 stale, and no next eligible package is identified after RW-04L. Original-source
