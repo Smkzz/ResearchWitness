@@ -385,13 +385,22 @@
         },
         {
           "id": "RW-04J",
-          "scope": "candidate exact-analysis negative-relationship minimum deduplicated by eligible source/interpretation hash pairs, with raw counts and duplicate reasons; identity deduplication only, not a verified census, labels or scientific validation; review and exact-head CI pending",
+          "scope": "merged and qualified exact-analysis negative-relationship minimum deduplicated by eligible source/interpretation hash pairs, with raw counts and duplicate reasons; PR #80 head 9ebd1be passed 14/14 checks and separate automated AI engineering review with 0 findings; squash merge 6759c5bfc5c9310a3206947dea73286152c88eb6 passed 11/11 postmerge checks; identity deduplication only, not a verified census, labels or scientific validation",
           "implementation": "tools/exact_family_analysis.py",
           "tests": "tests/test_exact_family_analysis.py",
-          "contract": "docs/EXACT_FAMILY_ANALYSIS.md"
+          "contract": "docs/EXACT_FAMILY_ANALYSIS.md",
+          "evidence": [
+            "https://github.com/Smkzz/ResearchWitness/pull/80",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44872842447",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44872842428",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44872842355",
+            "https://app.devin.ai/review/smkzz/researchwitness/pull/80",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44873054327",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44873054419"
+          ]
         }
       ],
-      "next_action": "No additional source-free hypothetical power layers. The next material scientific prerequisite remains authentic original-source bytes and rights plus genuinely separate source-context interpretation under RW-01O #35 / RW-01Q #50; the checkout-only mathematical replay supports exposed development and must not promote declared labels to scientific truth."
+      "next_action": "Implement strict evidence-bound comparative aggregation binding both complete runs to execution/replay evidence before paired/exact analysis, without declaration-only fallback. No additional source-free hypothetical power layers. The next material scientific prerequisite remains authentic original-source bytes and rights plus genuinely separate source-context interpretation under RW-01O #35 / RW-01Q #50; the checkout-only mathematical replay supports exposed development and must not promote declared labels to scientific truth."
     },
     {
       "id": "RW-05",
