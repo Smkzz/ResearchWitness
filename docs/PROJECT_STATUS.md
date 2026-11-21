@@ -12,7 +12,28 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## RW-04J candidate receipt — pending review/CI
+## RW-04J accepted engineering receipt
+
+[PR #80](https://github.com/Smkzz/ResearchWitness/pull/80), head
+`9ebd1be917bebad6b453da47047cbd1b622095e6` (`9ebd1be`), squash-merged
+to main as `6759c5bfc5c9310a3206947dea73286152c88eb6`.
+Exact-head checks passed **14/14**: the 11 required by the active
+[main-quality-gates ruleset](https://github.com/Smkzz/ResearchWitness/rules/25233301)
+(Python 3.11–3.13 across Ubuntu, Windows and macOS, Release gate and Analyze
+Python), plus CodeQL, Dependency evidence and Devin Review. Evidence:
+[CI](https://github.com/Smkzz/ResearchWitness/actions/runs/44872842447),
+[CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/44872842428),
+[Dependency evidence](https://github.com/Smkzz/ResearchWitness/actions/runs/44872842355).
+The separate [Devin Review](https://app.devin.ai/review/smkzz/researchwitness/pull/80)
+was an automated AI engineering review with **0 findings**, not a human or
+scientific review.
+
+Separate postmerge checks at the exact squash merge passed **11/11**:
+all nine Python 3.11–3.13/Ubuntu-Windows-macOS jobs and Release gate in
+[main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/44873054327),
+and Analyze Python in
+[main CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/44873054419).
+No postmerge check failed, remained pending or was skipped.
 
 On base `ad80c4103ae64ec82f0207ee373c5a7cbbb0f032`, the exact development
 analysis now uses distinct eligible negative `(source_sha256,
@@ -23,12 +44,45 @@ duplicate version failing the minimum, a distinct interpretation meeting it,
 and an empty eligible-negative set. Family statistical counts, registry
 validation and frozen historical records are unchanged.
 
-This receipt describes a candidate implementation, not a merged acceptance:
-separate AI review and exact-head CI are pending. Local qualification is
-reported with the branch handoff. The correction is identity deduplication,
-not a verified relationship census, source-label adjudication, paper-error
-finding or protected scientific evaluation. RW-04's wider evidence gates
-remain unchanged.
+Implementation-head local qualification used Python 3.12.16 in an isolated
+environment and ran:
+
+```text
+python -m pytest -q tests/test_exact_family_analysis.py
+python -m ruff check .
+python -m coverage run -m pytest -q
+python -m coverage report
+python -m coverage report --include='researchwitness/*.py' --fail-under=90
+python benchmarks/run_synthetic.py
+python validation/mvp_real/run_validation.py
+python -c "from tools.make_release import write_checksums; write_checksums()"
+python tools/quality_gate.py
+```
+
+Results: focused tests **17 passed**; ruff passed; full suite **1436 passed,
+380 subtests passed**; total coverage **84%**, trusted-core coverage **93%**
+(90% gate passed); synthetic conformance **500/500**; historical MVP replay
+**3/3**; quality gate passed source checksums, schema/static checks,
+reproducible wheel builds, offline installation and CLI smoke checks.
+Checksums were regenerated before the full suite and quality gate so those
+checks validated the updated manifest. No local qualification command was
+skipped. These implementation results do not qualify future receipt changes.
+
+**Limits unchanged:** The correction is identity deduplication, not a verified
+relationship census, source-label adjudication, paper-error finding or protected
+scientific evaluation. RW-04 remains incomplete and `ready`; no scientific
+accuracy, qualified custody, new source acquisition or release publication is
+established.
+
+**Next eligible engineering task:** the strict evidence-bound comparative
+aggregation gap: bind both complete runs to their execution/replay evidence
+before paired/exact aggregation, without falling back to declaration-only
+validation. No more source-free hypothetical power tools. Authentic original
+source bytes and rights plus genuinely separate source-context interpretation
+remain scientific blockers under [RW-01O #35](https://github.com/Smkzz/ResearchWitness/issues/35)
+and [RW-01Q #50](https://github.com/Smkzz/ResearchWitness/issues/50). Mathematical
+replay supports exposed development and must not promote declared labels to
+scientific truth.
 
 ## 2026-11-05: 0.3.1 preview receipt and private-source output guard
 
