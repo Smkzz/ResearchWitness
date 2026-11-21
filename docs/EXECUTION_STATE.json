@@ -21,7 +21,7 @@
     "authorized_incremental_spend_eur": 0,
     "scientific_or_security_gates_waived": false
   },
-  "next_task": "RW-04",
+  "next_task": null,
   "allowed_states": [
     "todo",
     "ready",
@@ -112,7 +112,7 @@
           "Separately frozen provider-display derivative experiment: four captures, one failed control transfer, two articles executed, zero added optional-check coverage."
         ],
         "unlock_condition": "Permission-cleared original files matching the historical source pins, or separately identified current original responses, plus actually independent source-context adjudication. RW-01O additionally requires original PMC OAI-PMH GetRecord envelopes. A display derivative or more synthetic tests does not satisfy these requirements.",
-        "next_unblocked_package": "RW-04 remains available for study planning only; it cannot supply the missing originals or independent labels."
+        "next_unblocked_package": "None identified after RW-04L. Offline benchmark tooling cannot supply the missing originals or independent labels."
       },
       "completed_slices": [
         {
@@ -303,7 +303,7 @@
       "depends_on": [],
       "required_capability_gates": [],
       "role": "benchmark-methods",
-      "status": "ready",
+      "status": "blocked_evidence",
       "owner": null,
       "branch": null,
       "base_sha": null,
@@ -318,7 +318,18 @@
         "https://github.com/Smkzz/ResearchWitness/pull/41",
         "https://github.com/Smkzz/ResearchWitness/pull/42"
       ],
-      "blocker": null,
+      "blocker": {
+        "category": "evidence",
+        "reason": "The replay-bound development harness is qualified on synthetic inputs, but cannot ground a study registration or empirically calibrate assumptions without an admissible original-source development pilot.",
+        "evidence": [
+          "https://github.com/Smkzz/ResearchWitness/pull/84",
+          "https://github.com/Smkzz/ResearchWitness/issues/35",
+          "https://github.com/Smkzz/ResearchWitness/issues/50",
+          "docs/INDEPENDENT_PILOT_HANDOFF.md"
+        ],
+        "unlock_condition": "Obtain permission-cleared original response bytes and transport/rights evidence, plus genuinely separate source-context and lineage adjudication for the exposed RW-01O/RW-01Q pilot. Do not substitute synthetic replay or source-free power calculations.",
+        "next_unblocked_package": null
+      },
       "completed_slices": [
         {
           "id": "RW-04A",
@@ -414,9 +425,29 @@
             "https://github.com/Smkzz/ResearchWitness/actions/runs/44875098150",
             "https://github.com/Smkzz/ResearchWitness/actions/runs/44875098117"
           ]
+        },
+        {
+          "id": "RW-04L",
+          "scope": "merged opt-in frozen midpoint/objective-corner arm replay over pinned marked affine box claims; all family members must replay completed without alarms for a known miss or clean negative. Preserves denominators, numerical thresholds, unknowns and the default accepted-refutation profile. Synthetic gate reachability only; no authenticity, verified labels, protected evaluation or scientific result.",
+          "implementation": "tools/development_artifact_replay.py; tools/paired_development_comparison.py; tools/exact_family_analysis.py",
+          "tests": "tests/test_frozen_arm_replay.py",
+          "contract": "docs/PAIRED_DEVELOPMENT_COMPARISON.md; docs/EXACT_FAMILY_ANALYSIS.md",
+          "pr_head": "fe11f11be3e9974364df53b7fabc49748fb8ca18",
+          "merge_sha": "7b67c1b2f59fd623395bb519f9f7207c703ac53c",
+          "merge_tree": "fe150a19b22d23fc0a50e61fc7da0f47c9780384",
+          "qualification": "14/14 exact-head checks; separate automated AI engineering review with 0 findings; 11/11 postmerge checks on main, including CodeQL, with no skipped jobs. Exact-head local quality gate: 1474 tests and 380 subtests passed. No scientific pilot or protected evaluation.",
+          "evidence": [
+            "https://github.com/Smkzz/ResearchWitness/pull/84",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44875720393",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44875720326",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44875720295",
+            "https://app.devin.ai/review/smkzz/researchwitness/pull/84",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44893240343",
+            "https://github.com/Smkzz/ResearchWitness/actions/runs/44893240358"
+          ]
         }
       ],
-      "next_action": "Implement a separately reviewed replay profile for non-alarm outcomes (baseline misses and clean negatives) so replay-bound paired/exact analysis can become complete without a looser counting rule or declaration-only fallback. No additional source-free hypothetical power layers. The next material scientific prerequisite remains authentic original-source bytes and rights plus genuinely separate source-context interpretation under RW-01O #35 / RW-01Q #50; the checkout-only mathematical replay supports exposed development and must not promote declared labels to scientific truth."
+      "next_action": "Resume real-source calibration and ground the study registration after the exposed RW-01O #35 / RW-01Q #50 pilot has admissible evidence. No additional source-free hypothetical power layers or promotion of declared labels to scientific truth."
     },
     {
       "id": "RW-05",

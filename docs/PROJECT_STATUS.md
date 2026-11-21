@@ -12,7 +12,59 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-04L accepted engineering receipt
+
+[PR #84](https://github.com/Smkzz/ResearchWitness/pull/84), exact head
+`fe11f11be3e9974364df53b7fabc49748fb8ca18`, merged to protected main as
+`7b67c1b2f59fd623395bb519f9f7207c703ac53c` with the identical tree
+`fe150a19b22d23fc0a50e61fc7da0f47c9780384`.
+Exact-head checks passed **14/14**:
+[CI](https://github.com/Smkzz/ResearchWitness/actions/runs/44875720393),
+[CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/44875720326),
+[Dependency evidence](https://github.com/Smkzz/ResearchWitness/actions/runs/44875720295),
+and separate [Devin Review](https://app.devin.ai/review/smkzz/researchwitness/pull/84).
+The automated AI engineering review reported **0 findings**, not a human or
+scientific review. The 2026-11-21 dependency capture reported zero advisories
+and `REQUIRES_REVIEW_OF_CAPTURED_TEXTS`; it is not a license clearance.
+
+Separate postmerge checks at the merge commit passed **11/11**: nine Python
+3.11–3.13 jobs across Ubuntu, Windows and macOS and Release gate in
+[main CI](https://github.com/Smkzz/ResearchWitness/actions/runs/44893240343),
+plus Analyze Python in
+[main CodeQL](https://github.com/Smkzz/ResearchWitness/actions/runs/44893240358).
+No postmerge check failed, remained pending or was skipped.
+
+The opt-in [frozen-arm replay profile](PAIRED_DEVELOPMENT_COMPARISON.md#frozen-arm-replay-rw-04l)
+re-executes two pinned searches (exact midpoint and objective corner) over
+the same registered, explicitly marked affine box claim. A family counts as
+a baseline miss or clean negative only if every member replays as completed
+without an alarm. Missing, mismatched, unsupported, rejected or incomplete
+outcomes do not become known non-alarms. Denominators, statistical thresholds
+and the default accepted-refutation replay profile are unchanged.
+
+The exact-head local quality gate (Python 3.12.16) passed with **1474 tests
+and 380 subtests**, 500/500 synthetic conformance cases, 3/3 historical MVP
+replays, checksum/schema checks and reproducible offline wheel smoke checks.
+Adversarial tests in `tests/test_frozen_arm_replay.py` exercise forged or
+missing evidence and hidden alarms. A synthetic 6-positive/86-negative-family
+fixture reaches `met_on_replay_verified_development_data` without relaxing
+the gate. No original-source pilot, independent scientific review or protected
+evaluation was run. Neither synthetic thresholds nor formal replay establish
+authenticity, interpretive fidelity, historical execution or scientific accuracy.
+
+**Next:** No further slice is presently identified as eligible under existing
+authority. The next material package is the exposed original-source pilot
+([RW-01O #35](https://github.com/Smkzz/ResearchWitness/issues/35) /
+[RW-01Q #50](https://github.com/Smkzz/ResearchWitness/issues/50)), still blocked
+on permission-cleared original response bytes, transport/rights evidence and
+genuinely separate source-context review. RW-04 remains incomplete and
+`blocked_evidence` for real-source calibration and a grounded study registration;
+another source-free power layer would not unblock it.
+
 ## RW-04K accepted engineering receipt
+
+Historical receipt: the opt-in RW-04L profile above addresses the non-alarm
+limitation of the accepted-refutation profile described here.
 
 [PR #82](https://github.com/Smkzz/ResearchWitness/pull/82), final head
 `5922eda4a839f3bb8691669197031b42e167cc91` (`5922eda`, the implementation
