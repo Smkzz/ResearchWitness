@@ -12,6 +12,55 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-03 native runtime receipt - pending merge and main verification
+
+Observed on **2026-11-21 UTC**: Windows Server 2022, Python 3.13.12,
+Docker Desktop 29.9.2 Linux engine via WSL2 kernel
+`6.18.58.1-microsoft-standard-WSL2`, cgroup v2 and built-in seccomp.
+These are branch-head engineering receipts, not qualification of current main.
+
+**Windows managed metadata:** [PR #86](https://github.com/Smkzz/ResearchWitness/pull/86),
+head `9b925669f82d47128503a18fe552bb820f7fde58`, implements native process-user
+SID ownership, protected private ACL verification, reparse-point rejection and
+msvcrt rate-state locking. Native focused tests passed **37 passed / 2 skipped**;
+the full suite passed **1472 passed / 7 skipped**. The native release gate
+(ruff, coverage and trusted-core floor, synthetic benchmark, historical MVP
+replay, and quality_gate including reproducible wheel builds) passed.
+Exact-head CI passed **14/14**, including Python 3.11-3.13 on Ubuntu, Windows
+and macOS, Release gate, CodeQL/Analyze Python, dependency evidence and
+[Devin Review](https://app.devin.ai/review/smkzz/researchwitness/pull/86).
+The AI engineering review reported **0 findings**; it is not human review or
+security/scientific certification. `windows_managed_metadata` stays
+`unqualified` on main until #86 merges and main is verified.
+
+**PDF transport:** [PR #87](https://github.com/Smkzz/ResearchWitness/pull/87),
+head `f7e17793abe151f5b7bcd68a3d5bfa11419528b6`, adds the local Docker Desktop
+named-pipe endpoint. The real daemon seccomp check passed via
+`npipe:////./pipe/docker_engine` with a fresh empty client config and only
+PATH/LANG/LC_ALL in the child environment; no SYSTEMROOT addition was needed.
+The smoke with a nonexistent SHA-256 digest failed closed at image verification,
+reported `sandbox_qualified: false`, and left no containers (`docker ps -a`
+was empty). The full suite passed **1468 passed / 7 skipped**; the native
+release gate passed. Exact-head CI passed **14/14** with the same check matrix;
+[Devin Review](https://app.devin.ai/review/smkzz/researchwitness/pull/87)
+reported **0 findings** (AI engineering review, not human certification).
+This verifies transport and fail-closed behavior, not PDF isolation.
+
+**Real PDF isolation qualification: BLOCKED / NOT RUN.** No reviewed,
+SHA-256-pinned Poppler image is provisioned. Building it requires Docker Hub
+and snapshot.debian.org downloads awaiting Sami's egress decision; no download
+or image pull was performed for these receipts. `pdf_execution` stays
+`unqualified`, including after a transport-only merge. Protected custody was
+**NOT RUN**: there is no authorized isolated custodian, and its gate stays
+`unqualified`. `scientific_wave_3` remains `not_run`.
+
+**RW-03 remains `blocked_external`.** Docker CLI/native Windows execution are
+now available; remaining unlock conditions are merge and verified main for
+#86/#87, the image egress decision followed by reviewed-image isolation evidence,
+and separately authorized isolated custody with its own receipt. No next
+unblocked package is identified in the ledger after RW-04L; original-source
+RW-01O/RW-01Q evidence remains missing. No gate is waived by this receipt.
+
 ## RW-04L accepted engineering receipt
 
 [PR #84](https://github.com/Smkzz/ResearchWitness/pull/84), exact head
