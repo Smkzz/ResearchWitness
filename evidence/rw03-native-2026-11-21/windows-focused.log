@@ -1,0 +1,46 @@
+UTC: 2026-11-21T20:36:54.705362+00:00
+
+COMMAND: git rev-parse HEAD
+7a5f550f4f815adc37fccb1409d6203d1db68bcf
+EXIT CODE: 0
+
+COMMAND: powershell -NoProfile -Command "Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber | Format-List"
+
+
+Caption     : Microsoft Windows Server 2022 Standard
+Version     : 10.0.20348
+BuildNumber : 20348
+
+
+
+EXIT CODE: 0
+
+COMMAND: cmd /c ver
+
+Microsoft Windows [Version 10.0.20348.5622]
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+EXIT CODE: 0
+
+EVIDENCE COMMANDS
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m pytest tests/test_windows_rate_security.py tests/test_offline_file_boundary_unittest.py -k "WindowsRateSecurityTests or rate_state" -v -rs
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.2.0, pluggy-1.7.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Administrator\repos\rw03-main-evidence
+configfile: pyproject.toml
+collecting ... collected 7 items / 1 deselected / 6 selected
+
+tests/test_windows_rate_security.py::WindowsRateSecurityTests::test_extra_everyone_ace_rejected PASSED [ 16%]
+tests/test_windows_rate_security.py::WindowsRateSecurityTests::test_inherited_default_acl_rejected PASSED [ 33%]
+tests/test_windows_rate_security.py::WindowsRateSecurityTests::test_junction_rejected PASSED [ 50%]
+tests/test_windows_rate_security.py::WindowsRateSecurityTests::test_native_api_errors_fail_closed 
+tests/test_windows_rate_security.py::WindowsRateSecurityTests::test_native_api_errors_fail_closed PASSED [ 66%]
+tests/test_windows_rate_security.py::WindowsRateSecurityTests::test_private_creation_existing_acl_and_native_lock PASSED [ 83%]
+tests/test_offline_file_boundary_unittest.py::OfflineBoundaryTests::test_unverifiable_rate_state_fails_before_filesystem_or_network PASSED [100%]
+
+============= 6 passed, 1 deselected, 3 subtests passed in 0.12s ==============
+EXIT CODE: 0

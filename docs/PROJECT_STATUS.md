@@ -12,6 +12,79 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## RW-03 native test run receipt
+
+This is a **native test run (logs linked)**, not a qualification claim.
+Run session: [354eb40b35be48a49fa03c200a4e25ca](https://app.devin.ai/sessions/354eb40b35be48a49fa03c200a4e25ca).
+Authority: Sami's answer to the "Use a Windows machine" card on
+**2026-11-21 19:59 UTC** authorized RW-03 native runs on the org Windows Devin
+machine; it does not waive any gate. The
+[Windows log header](../evidence/rw03-native-2026-11-21/windows-focused.log)
+records Windows Server 2022 Standard, build **10.0.20348.5622** and Python
+3.13.12. The PDF runtime log linked below records Docker Desktop **4.98.0**
+with Linux engine **29.9.2**. Logs are LF-normalized without changing output text.
+
+**Windows managed metadata:** [PR #86](https://github.com/Smkzz/ResearchWitness/pull/86)
+merged as [`7a5f550f4f815adc37fccb1409d6203d1db68bcf`](https://github.com/Smkzz/ResearchWitness/commit/7a5f550f4f815adc37fccb1409d6203d1db68bcf).
+At that main commit, the [focused native test log](../evidence/rw03-native-2026-11-21/windows-focused.log)
+records **6 passed / 1 deselected**, including owner/ACL/reparse/msvcrt-lock
+tests and the rate-state fail-closed test. The
+[release sequence log](../evidence/rw03-native-2026-11-21/windows-release.log)
+records **1472 passed / 7 skipped**, with every release command exiting **0**:
+ruff, coverage suite/report and trusted-core 90% floor (93%), synthetic benchmark
+(500/500), historical MVP replay (3/3), and quality_gate including reproducible
+wheel/install/CLI smoke checks. These are test results, not security certification.
+Post-merge checks at that SHA passed **11/11**: Python 3.11-3.13 on
+Ubuntu/Windows/macOS, Release gate and Analyze Python (CodeQL workflow), as
+observed in the linked run session. Dependency evidence was **not run on the
+merge commit**: its workflow triggers only on `pull_request`/`workflow_dispatch`,
+not pushes to main. `windows_managed_metadata` remains `unqualified`.
+
+The ACL/cleanup follow-up [PR #89](https://github.com/Smkzz/ResearchWitness/pull/89)
+merged as [`0ad921cfc22e5c09973e09b6b9d2f686f1f0d6ff`](https://github.com/Smkzz/ResearchWitness/commit/0ad921cfc22e5c09973e09b6b9d2f686f1f0d6ff).
+Its post-merge checks passed **11/11**: the nine Python/platform jobs,
+Release gate and Analyze Python. These CI observations are recorded in the
+linked run session; they do not change the historical native-log counts above.
+
+**PDF transport:** [PR #87](https://github.com/Smkzz/ResearchWitness/pull/87)
+merged as [`09286c1b88a2e31ddfcc97565d2f5d80c0e8788f`](https://github.com/Smkzz/ResearchWitness/commit/09286c1b88a2e31ddfcc97565d2f5d80c0e8788f).
+Its post-merge checks passed **11/11**: the nine Python/platform jobs,
+Release gate and Analyze Python, as observed in the linked run session.
+Dependency evidence did not run on either #87's or #89's merge commit
+(the same workflow trigger restriction noted above).
+The PDF evidence below landed with #87 and is not duplicated by this receipt.
+At the earlier head
+`f7e17793abe151f5b7bcd68a3d5bfa11419528b6`, the native test run is recorded in
+[`evidence/rw03-native-2026-11-21/pdf-focused.log`](https://github.com/Smkzz/ResearchWitness/blob/509e4de1f46b9458a859542bc118e23205caebe7/evidence/rw03-native-2026-11-21/pdf-focused.log)
+(**25 passed**, exit 0),
+[`pdf-runtime.log`](https://github.com/Smkzz/ResearchWitness/blob/509e4de1f46b9458a859542bc118e23205caebe7/evidence/rw03-native-2026-11-21/pdf-runtime.log)
+and [`pdf-smoke.json`](https://github.com/Smkzz/ResearchWitness/blob/509e4de1f46b9458a859542bc118e23205caebe7/evidence/rw03-native-2026-11-21/pdf-smoke.json)
+in the same directory (real named-pipe
+seccomp check exit 0 with empty config and PATH/LANG/LC_ALL only; missing-image
+smoke exit 2, `sandbox_qualified: false`; empty container inventory, pre-existing
+hello-world image only), and
+[`pdf-release.log`](https://github.com/Smkzz/ResearchWitness/blob/509e4de1f46b9458a859542bc118e23205caebe7/evidence/rw03-native-2026-11-21/pdf-release.log)
+(**1468 passed / 7 skipped**,
+every release command exit 0, trusted-core 93%, synthetic 500/500, MVP 3/3,
+reproducible wheel/install/CLI smoke PASS). These logs back transport and
+fail-closed observations, not real PDF isolation.
+
+**Real PDF isolation: BLOCKED / NOT RUN.** No reviewed SHA-256-pinned Poppler
+image is provisioned; Docker Hub and snapshot.debian.org build downloads await
+Sami's egress decision. The named-pipe server identity is also unverified:
+another local process can create `\\.\pipe\docker_engine` when Docker Desktop
+is absent. This residual risk must be resolved before any Windows PDF
+qualification claim. `pdf_execution` stays `unqualified`. Protected custody
+was **NOT RUN** (no authorized isolated custodian); it stays `unqualified`.
+`scientific_wave_3` remains `not_run`. No human certification is claimed.
+
+**RW-03 remains `blocked_external`.** Remaining conditions are
+pipe-server identity assurance, the image egress decision
+and reviewed-image isolation evidence, and separately authorized isolated custody.
+`next_unblocked_task` was deliberately set to `null`: the old RW-01 pointer was
+stale, and no next eligible package is identified after RW-04L. Original-source
+RW-01O/RW-01Q evidence remains missing. No gate is waived by this receipt.
+
 ## RW-04L accepted engineering receipt
 
 [PR #84](https://github.com/Smkzz/ResearchWitness/pull/84), exact head

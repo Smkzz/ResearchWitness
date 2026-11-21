@@ -1,0 +1,335 @@
+UTC: 2026-11-21T20:36:57.253086+00:00
+
+COMMAND: git rev-parse HEAD
+7a5f550f4f815adc37fccb1409d6203d1db68bcf
+EXIT CODE: 0
+
+COMMAND: powershell -NoProfile -Command "Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber | Format-List"
+
+
+Caption     : Microsoft Windows Server 2022 Standard
+Version     : 10.0.20348
+BuildNumber : 20348
+
+
+
+EXIT CODE: 0
+
+COMMAND: cmd /c ver
+
+Microsoft Windows [Version 10.0.20348.5622]
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+EXIT CODE: 0
+
+EVIDENCE COMMANDS
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m ruff check .
+All checks passed!
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m coverage run -m pytest -q
+........................................................................ [  4%]
+............................................................ [  8%]
+..........................................s............................. [ 13%]
+................................................................... [ 18%]
+.............................. [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+........................................................................ [ 34%]
+.................................................... [ 38%]
+........................................................................ [ 43%]
+........................................................................ [ 48%]
+........................................................................ [ 53%]
+............................................... [ 56%]
+............................................................... [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+........................ss.................... [ 73%]
+...................................................s...s.............. [ 78%]
+.............................s.................. [ 81%]
+........................................................................ [ 86%]
+........................................................................ [ 91%]
+........................................................................ [ 95%]
+.....................................................s......          [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_core.py:235: POSIX-only FIFO attack test
+SKIPPED [1] tests\test_public_discovery_unittest.py:199: POSIX ownership and permission checks
+SKIPPED [1] tests\test_public_discovery_unittest.py:207: POSIX ownership and permission checks
+SKIPPED [1] tests\test_registry_input_bounds_unittest.py:72: FIFO inputs are POSIX-specific
+SKIPPED [1] tests\test_release_files_unittest.py:129: probe relies on POSIX backslash filename semantics
+SKIPPED [1] tests\test_research_audit.py:546: requires POSIX FIFOs
+SKIPPED [1] tests\test_verification_benchmark.py:280: POSIX FIFO
+1472 passed, 7 skipped, 384 subtests passed in 39.91s
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m coverage report
+Name                                         Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------------------------------
+researchwitness\__main__.py                    173     10     40      3    94%   119-134, 188->191, 225-226, 242
+researchwitness\_jats_files.py                  23      3      8      3    81%   25, 27, 31
+researchwitness\_jats_math.py                   21      6      8      4    66%   14, 16, 19, 22-23, 26
+researchwitness\_jats_parser.py                744     56    356     37    92%   150, 155, 157, 162-163, 178, 195, 204->exit, 218, 262-263, 296-297, 300, 325, 331, 461, 470->481, 536, 542, 636, 712, 714, 759->764, 760->762, 767, 777->787, 785-786, 814-815, 884-885, 900-903, 920, 939, 957, 1017, 1027, 1031, 1033, 1064, 1066->1056, 1104, 1107->1094, 1113, 1128, 1173, 1194-1205
+researchwitness\checkers.py                    489      2    114      2    99%   429, 799
+researchwitness\exact_optimization.py          366      5     76      2    98%   439-441, 471, 505
+researchwitness\intake.py                       90      4      8      1    95%   61-64
+researchwitness\jats_product.py                232     17     98     17    90%   54, 79, 191, 271, 303, 419, 471, 474, 487, 501, 520, 523, 525, 536, 544, 549, 553
+researchwitness\jats_section_proposals.py      131     17     52     12    84%   55, 66, 81, 88, 98, 104-105, 111, 118, 146-147, 151, 159-161, 197, 241
+researchwitness\jats_table_projection.py       256     12    106     11    94%   102-103, 149-150, 178, 185->192, 223, 315, 356, 393, 403, 410, 421
+researchwitness\paper_count_totals.py           73      8     28      5    87%   44, 88-89, 99-100, 117-118, 140
+researchwitness\paper_document.py              148      1      8      2    98%   189->191, 193
+researchwitness\paper_flow.py                   82     11     30      8    79%   19, 63, 67, 71, 74, 83-86, 101, 111-112
+researchwitness\paper_flow_source.py           333     21     90     20    90%   231, 234, 280->277, 310, 313, 402-404, 412, 417, 421, 427, 429, 440, 447, 473, 484, 488, 502, 536, 632, 636
+researchwitness\paper_prisma_flow.py            82     10     28      7    83%   99, 107-121, 145, 169, 171, 175, 180
+researchwitness\paper_statistics.py             52      2     26      0    97%   83-84
+researchwitness\paper_statistics_source.py     210     24     88     16    87%   82, 134, 143, 146-147, 149, 157, 183, 186, 190, 193, 195, 199, 205, 231-232, 306-308, 337, 363-364, 369-370
+researchwitness\paper_two_by_two_source.py     177     26     66     11    85%   55, 80, 96->98, 144-146, 170-172, 181-183, 219-221, 228-230, 235-237, 247-249, 265-267
+researchwitness\product.py                      36      2      8      2    91%   26, 79
+researchwitness\prose_attribution.py           125      2     22      2    97%   216, 248
+researchwitness\prose_math.py                  170      4     26      2    97%   93-94, 301, 321
+researchwitness\resolution.py                   87      0     16      1    99%   109->114
+researchwitness\scaffold.py                     19      1      2      1    90%   14
+researchwitness\source_claim_workflow.py       105      9     14      1    90%   69-73, 202-208, 214
+researchwitness\source_claims.py               244      7     60      5    96%   63-64, 147, 149, 151, 181, 184
+tools\audit_contracts.py                        47      6      6      1    83%   176-177, 187-189, 193
+tools\denominator_scope_review.py              145     31     24      1    80%   274-314, 318
+tools\dependency_review.py                     121     33     48     11    70%   32, 36, 50, 59, 61, 69, 74, 84, 120, 131, 140-177, 181
+tools\development_artifact_replay.py           167      2     22      2    98%   259, 358
+tools\discover_public_candidates.py             85     17     10      4    76%   50, 56, 77-83, 105->108, 134-144, 148
+tools\exact_family_analysis.py                 152     20     50      4    86%   47, 49, 52, 338-370, 374
+tools\jats_demo.py                              46     46      6      0     0%   7-77
+tools\jats_percentage_audit.py                   6      1      2      1    75%   7
+tools\jats_source_adapter.py                   170     21     48      7    84%   160-165, 172, 180-182, 184-186, 188-190, 208, 234-241
+tools\jats_worker.py                            17     17      4      0     0%   2-26
+tools\joint_power_feasibility.py               117     16     16      1    87%   230-251, 255
+tools\make_examples.py                         104     78     24      1    23%   78-97, 101-134, 138-140, 144-262, 266
+tools\make_release.py                          179     60     76     13    67%   43, 45, 51, 103, 107, 134-135, 138, 140, 142, 147, 149, 160, 164, 171, 174-175, 177, 183-187, 211-225, 229-231, 235-275, 279
+tools\make_timeline_example.py                  27     27      4      0     0%   2-53
+tools\offline_files.py                          23      2      8      2    87%   25, 31
+tools\optimization_examples.py                  64      1      8      1    97%   126
+tools\paired_development_comparison.py         153     22     68      1    87%   321-324, 328, 338-366, 370
+tools\pdf_percentage_audit.py                  309     49    112     20    84%   77, 88-89, 132-133, 150-151, 165-166, 229-230, 234, 241-243, 267-269, 282-283, 284->286, 287, 295, 331, 356-357, 367, 372, 376->378, 379, 391, 406, 449, 452, 454, 505-506, 519, 590, 594-605
+tools\pdf_sandbox_smoke.py                      80     13     32      6    83%   20, 53, 63, 72, 99, 110-116, 120
+tools\percentage_benchmark.py                  576    115    346     89    76%   46->43, 58-59, 68, 106, 109, 119, 121, 139, 150, 152, 156, 159, 161, 167, 175, 176->184, 185, 187->200, 193-194, 211, 214, 253, 260, 264-268, 274, 278, 281, 284-285, 291, 310, 317, 323, 335, 338-339, 342, 345, 352, 354, 357, 361, 363, 367, 369, 371-374, 378, 382, 385, 394, 396, 398, 400, 414, 420, 428, 433, 439, 441, 443-444, 446-447, 453, 463, 465, 469, 470->480, 477, 480->288, 485, 494, 496, 498, 500, 502, 509, 511, 517, 521, 535, 538, 545, 567, 569, 571, 580, 586, 589, 597, 600->609, 608, 612-613, 617, 636-637, 654, 664, 669, 688, 727-743
+tools\percentage_math.py                        86     10     24      5    86%   27, 36-37, 104, 111-113, 115-116, 127
+tools\pmc_oai_envelope.py                      279     44     36      6    83%   86-87, 98, 135->exit, 191, 197, 205, 209, 237-238, 366-372, 376-410, 414
+tools\pmc_oai_jats_pilot.py                     89      1      6      1    98%   202
+tools\pmc_pilot_ledger.py                      161     16     26      1    91%   186, 306-322, 326
+tools\pmc_pilot_selection_frame.py              90     19     16      1    81%   109-134, 138
+tools\pmc_source_review_chain.py                62     33      2      1    47%   97-141, 145
+tools\power_feasibility.py                     152     16     38      2    91%   75->81, 280-301, 305
+tools\propose_exact_optimization.py            140     25     42      2    81%   30-56, 109, 117->126, 133-134, 194
+tools\public_discovery.py                      876    131    420    103    81%   36->40, 113, 115-116, 118-119, 121-122, 133-134, 158, 179-180, 188, 313, 320, 322, 328-329, 331, 332->339, 342, 353-354, 364-365, 370-371, 395, 403, 405, 429->423, 459, 462, 480, 483-484, 489, 493, 501-502, 504, 506->508, 510, 516-517, 520->523, 533, 556, 560, 592, 594, 610->612, 613-617, 658, 678, 704-705, 707, 753, 816, 830, 833, 853, 859, 869->875, 871-874, 876->883, 878-879, 940, 948, 970, 978, 1040->1042, 1067, 1071-1072, 1077-1078, 1102, 1104, 1113, 1119->1114, 1144, 1161, 1165, 1175, 1181, 1184-1185, 1187, 1193, 1197, 1199, 1204, 1207, 1212, 1216, 1246, 1248, 1252, 1259, 1266, 1271, 1276, 1278, 1282, 1284, 1291, 1310, 1316, 1318, 1329, 1332, 1334, 1339, 1341, 1343, 1348, 1350, 1354->1358, 1359->1335, 1361, 1363-1366, 1374, 1378, 1381, 1391, 1395, 1419, 1423, 1427
+tools\quality_gate.py                          255    255    122      0     0%   5-459
+tools\recover_legacy_europepmc_sources.py      172     27     36      4    85%   199, 220-221, 223, 236, 246-247, 285, 326-353, 357
+tools\registered_jats_run.py                   380     48     94     15    85%   108-109, 116-117, 121-122, 138-139, 150-151, 155, 158, 164, 166, 332->331, 372-373, 375-376, 390, 404-405, 417, 487->490, 494, 497->496, 520-547, 551
+tools\research_audit.py                        139     17     50     10    85%   51, 53, 55, 57, 59, 62->64, 140, 151->158, 208-218, 222
+tools\research_preregistration.py              129     16     12      1    88%   94, 230-244, 248
+tools\review_frozen_screen.py                   34     34      6      0     0%   2-148
+tools\source_capture_manifest.py               209     32     32      1    85%   72-73, 318-363, 367
+tools\source_claim_workflow.py                   4      1      2      1    67%   19
+tools\source_review_binding.py                  63     30      4      2    52%   77-84, 89-121, 125
+tools\study_sensitivity.py                      89     19     36      4    82%   33, 66, 68, 170-189, 193
+tools\verification_benchmark.py                237      1     58      1    99%   359
+tools\write_schema.py                           71      8      4      1    85%   377-387
+----------------------------------------------------------------------------------------
+TOTAL                                        11442   1620   3498    502    84%
+
+8 files skipped due to complete coverage.
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m coverage report --include=researchwitness/*.py --fail-under=90
+Name                                         Stmts   Miss Branch BrPart  Cover   Missing
+----------------------------------------------------------------------------------------
+researchwitness\__main__.py                    173     10     40      3    94%   119-134, 188->191, 225-226, 242
+researchwitness\_jats_files.py                  23      3      8      3    81%   25, 27, 31
+researchwitness\_jats_math.py                   21      6      8      4    66%   14, 16, 19, 22-23, 26
+researchwitness\_jats_parser.py                744     56    356     37    92%   150, 155, 157, 162-163, 178, 195, 204->exit, 218, 262-263, 296-297, 300, 325, 331, 461, 470->481, 536, 542, 636, 712, 714, 759->764, 760->762, 767, 777->787, 785-786, 814-815, 884-885, 900-903, 920, 939, 957, 1017, 1027, 1031, 1033, 1064, 1066->1056, 1104, 1107->1094, 1113, 1128, 1173, 1194-1205
+researchwitness\checkers.py                    489      2    114      2    99%   429, 799
+researchwitness\exact_optimization.py          366      5     76      2    98%   439-441, 471, 505
+researchwitness\intake.py                       90      4      8      1    95%   61-64
+researchwitness\jats_product.py                232     17     98     17    90%   54, 79, 191, 271, 303, 419, 471, 474, 487, 501, 520, 523, 525, 536, 544, 549, 553
+researchwitness\jats_section_proposals.py      131     17     52     12    84%   55, 66, 81, 88, 98, 104-105, 111, 118, 146-147, 151, 159-161, 197, 241
+researchwitness\jats_table_projection.py       256     12    106     11    94%   102-103, 149-150, 178, 185->192, 223, 315, 356, 393, 403, 410, 421
+researchwitness\paper_count_totals.py           73      8     28      5    87%   44, 88-89, 99-100, 117-118, 140
+researchwitness\paper_document.py              148      1      8      2    98%   189->191, 193
+researchwitness\paper_flow.py                   82     11     30      8    79%   19, 63, 67, 71, 74, 83-86, 101, 111-112
+researchwitness\paper_flow_source.py           333     21     90     20    90%   231, 234, 280->277, 310, 313, 402-404, 412, 417, 421, 427, 429, 440, 447, 473, 484, 488, 502, 536, 632, 636
+researchwitness\paper_prisma_flow.py            82     10     28      7    83%   99, 107-121, 145, 169, 171, 175, 180
+researchwitness\paper_statistics.py             52      2     26      0    97%   83-84
+researchwitness\paper_statistics_source.py     210     24     88     16    87%   82, 134, 143, 146-147, 149, 157, 183, 186, 190, 193, 195, 199, 205, 231-232, 306-308, 337, 363-364, 369-370
+researchwitness\paper_two_by_two_source.py     177     26     66     11    85%   55, 80, 96->98, 144-146, 170-172, 181-183, 219-221, 228-230, 235-237, 247-249, 265-267
+researchwitness\product.py                      36      2      8      2    91%   26, 79
+researchwitness\prose_attribution.py           125      2     22      2    97%   216, 248
+researchwitness\prose_math.py                  170      4     26      2    97%   93-94, 301, 321
+researchwitness\resolution.py                   87      0     16      1    99%   109->114
+researchwitness\scaffold.py                     19      1      2      1    90%   14
+researchwitness\source_claim_workflow.py       105      9     14      1    90%   69-73, 202-208, 214
+researchwitness\source_claims.py               244      7     60      5    96%   63-64, 147, 149, 151, 181, 184
+----------------------------------------------------------------------------------------
+TOTAL                                         4867    260   1448    175    93%
+
+6 files skipped due to complete coverage.
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" benchmarks/run_synthetic.py
+{
+  "classification": "SYNTHETIC ENGINEERING CONFORMANCE, NOT SCIENTIFIC DISCOVERY EVALUATION",
+  "seed": 20261004,
+  "case_count": 500,
+  "matched": 500,
+  "mismatches": [],
+  "group_counts": {
+    "polynomial-positive": 100,
+    "polynomial-nonrefuting": 100,
+    "infeasible-witness": 100,
+    "radical-signed": 100,
+    "context-baseline": 10,
+    "context-source-unverified": 10,
+    "context-correction-present": 10,
+    "context-future-correction-check": 10,
+    "context-stale-correction-check": 10,
+    "context-objection": 10,
+    "context-unchecked-correction": 10,
+    "context-legacy-field": 10,
+    "context-hash-tamper": 10,
+    "context-quote-tamper": 10
+  },
+  "outcome_counts": {
+    "REFUTED_FOR_FORMALIZATION": 150,
+    "NO_REFUTATION_AT_WITNESS": 150,
+    "INVALID": 130,
+    "FORMALIZATION_COUNTEREXAMPLE_VERIFIED": 10,
+    "FLAG:SOURCE_CAPTURE_UNVERIFIED": 10,
+    "FLAG:CORRECTION_PRESENT": 10,
+    "FLAG:FUTURE_CORRECTION_CHECK": 10,
+    "FLAG:STALE_CORRECTION_CHECK": 10,
+    "FLAG:OPEN_OBJECTION": 10,
+    "FLAG:CORRECTION_STATUS_UNCHECKED": 10
+  },
+  "core_sha256": "4a92107426620c94d06e478659eef028d3bd7f6e78436dedd0eabb26ba427946",
+  "python": "3.13.12",
+  "wall_seconds": 1.269116,
+  "paper_discovery_precision": "NOT_MEASURED",
+  "paper_discovery_recall": "NOT_MEASURED",
+  "false_contact_rate": "NOT_ESTIMATED",
+  "independence": "Cases share generators; not independent clinical/scientific trials."
+}
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" validation/mvp_real/run_validation.py
+{
+  "cases": 3,
+  "matched": 3,
+  "results": {
+    "elliptic-c4": {
+      "decision": "FORMALIZATION_COUNTEREXAMPLE_VERIFIED",
+      "contact_readiness": "NOT_READY",
+      "detail": {
+        "prime": 29,
+        "enumerated_variables": [
+          "x",
+          "y"
+        ],
+        "parameters_mod_p": {
+          "c": 4
+        },
+        "classification_parameter": "c",
+        "power_class": "quadratic_nonquartic",
+        "point_count_adjustment": 1,
+        "total_solution_count": 40,
+        "modulus": 8,
+        "observed_residue": 0,
+        "expected_residues_for_class": [
+          4
+        ],
+        "enumeration_size": 841
+      },
+      "context_flags": [
+        "BUNDLE_NOT_EXTERNALLY_PINNED",
+        "SOURCE_CAPTURE_UNVERIFIED",
+        "CORRECTION_PRESENT",
+        "OPEN_OBJECTION"
+      ]
+    },
+    "elliptic-c7": {
+      "decision": "FORMALIZATION_COUNTEREXAMPLE_VERIFIED",
+      "contact_readiness": "NOT_READY",
+      "detail": {
+        "prime": 29,
+        "enumerated_variables": [
+          "x",
+          "y"
+        ],
+        "parameters_mod_p": {
+          "c": 7
+        },
+        "classification_parameter": "c",
+        "power_class": "quartic_residue",
+        "point_count_adjustment": 1,
+        "total_solution_count": 20,
+        "modulus": 8,
+        "observed_residue": 4,
+        "expected_residues_for_class": [
+          0
+        ],
+        "enumeration_size": 841
+      },
+      "context_flags": [
+        "BUNDLE_NOT_EXTERNALLY_PINNED",
+        "SOURCE_CAPTURE_UNVERIFIED",
+        "CORRECTION_PRESENT",
+        "OPEN_OBJECTION"
+      ]
+    },
+    "fixed-point": {
+      "decision": "FORMALIZATION_COUNTEREXAMPLE_VERIFIED",
+      "contact_readiness": "NOT_READY",
+      "detail": {
+        "universe_size": 2,
+        "mapping": {
+          "0": "1",
+          "1": "0"
+        },
+        "fixed_points": [],
+        "theorem_premises": "NOT_ESTABLISHED_BY_THIS_CHECKER"
+      },
+      "context_flags": [
+        "BUNDLE_NOT_EXTERNALLY_PINNED",
+        "SOURCE_CAPTURE_UNVERIFIED",
+        "CORRECTION_PRESENT",
+        "OPEN_OBJECTION"
+      ]
+    }
+  }
+}
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" tools/quality_gate.py
+Actual environment location may have moved due to redirects, links or junctions.
+  Requested location: "C:\Users\ADMINI~1\AppData\Local\Temp\researchwitness-quality-xy3342ei\venv\Scripts\python.exe"
+  Actual location:    "C:\Users\Administrator\AppData\Local\Temp\researchwitness-quality-xy3342ei\venv\Scripts\python.exe"
+{
+  "version": "0.3.1",
+  "python": "3.13.12",
+  "tests": "1472 passed, 7 skipped, 384 subtests passed in 29.76s",
+  "synthetic_cases": 500,
+  "synthetic_matched": 500,
+  "mvp_real_cases": 3,
+  "mvp_real_matched": 3,
+  "trusted_core_static_scan": "PASS",
+  "source_checksums": "PASS",
+  "schema_drift": "PASS",
+  "intake_schema_drift": "PASS",
+  "capability_examples_drift": "PASS",
+  "frozen_screen_review": "PASS",
+  "compileall": "PASS",
+  "wheel_sha256": "c98544676dac3eba672bc31b5bda02546a57cae51f48d66cc88fec228d4e238c",
+  "wheel_reproducible": "PASS",
+  "wheel_install_smoke": "PASS",
+  "agent_cli_smoke": "PASS",
+  "runtime_dependencies": []
+}
+EXIT CODE: 0
