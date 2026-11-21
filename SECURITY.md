@@ -78,9 +78,15 @@ The runner uses the local Unix socket on POSIX and Docker Desktop's
 when Docker Desktop is not listening. Before invoking Docker on Windows, the
 runner opens the pipe and uses `GetNamedPipeServerProcessId` to inspect its server.
 The server's token user SID must match the current process user or LocalSystem
-(`S-1-5-18`), and its resolved image path must be under `%ProgramFiles%\Docker\`
-(case-insensitive). API or cleanup failures block execution. This is not binary
-signature or installation-integrity verification. A check-then-use race remains:
+(`S-1-5-18`), and its resolved image path must be under the known Program Files
+folder's `Docker\` subtree (case-insensitive). `SHGetKnownFolderPath` supplies
+that folder, not the environment. The executable must pass offline Authenticode
+verification with `WinVerifyTrust` and have leaf signer subject simple-display
+name exactly `Docker Inc`. UI and revocation checks are disabled; cache-only URL
+retrieval prevents network access. Trust state and known-folder memory are cleaned
+up; API or cleanup failures block execution. Offline-only verification does not
+detect revoked certificates and does not verify the entire installation's integrity.
+A check-then-use race remains:
 the Docker CLI opens its own connection after this check. An administrator or
 same-user attacker is not defended against. These residual risks remain explicit
 qualification limitations; `pdf_execution` stays unqualified, including because
