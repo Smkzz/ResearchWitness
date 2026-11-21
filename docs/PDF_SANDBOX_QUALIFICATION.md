@@ -21,9 +21,16 @@ Unlike the root-owned `/var/run/docker.sock`, the Windows pipe name
 is not listening. Before any Docker invocation on Windows, the runner opens this
 pipe, queries `GetNamedPipeServerProcessId`, and inspects the server process token
 and image path. It requires the current process user SID or LocalSystem
-(`S-1-5-18`) and a resolved image path under `%ProgramFiles%\Docker\`, compared
-case-insensitively. API and cleanup failures block execution. It does not verify
-binary signatures or installation integrity. A check-then-use race remains because
+(`S-1-5-18`) and a resolved image path under the known Program Files folder's
+`Docker\` subtree, compared case-insensitively. `SHGetKnownFolderPath` supplies
+the folder instead of the environment. The executable must pass offline
+`WinVerifyTrust` Authenticode verification and its leaf signer certificate's
+subject simple-display name must be exactly `Docker Inc`. Verification disables
+UI and revocation checks and uses cache-only URL retrieval: no network access.
+Trust state is always closed and known-folder memory freed; API and cleanup
+failures block execution. Offline-only revocation means a revoked certificate
+is not detected; the entire installation's integrity is not verified.
+A check-then-use race remains because
 the Docker CLI opens a separate connection after the check; an administrator or
 same-user attacker is not defended against. These remain qualification limitations,
 and `pdf_execution` stays unqualified: the reviewed image is still blocked.

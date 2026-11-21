@@ -18,6 +18,7 @@ import sys
 import tempfile
 from threading import Event, Thread
 from typing import Any
+from uuid import UUID
 
 from tools.public_discovery import _WindowsRateSecurity, percentage_recalculation
 from tools.offline_files import read_regular
@@ -84,6 +85,83 @@ class _WindowsDockerPipeSecurity(_WindowsRateSecurity):
             function = getattr(self.kernel, name)
             function.argtypes = args
             function.restype = result
+        self.shell = ctypes.WinDLL("shell32", use_last_error=True)
+        self.ole = ctypes.WinDLL("ole32", use_last_error=True)
+        self.trust = ctypes.WinDLL("wintrust", use_last_error=True)
+        self.cert = ctypes.WinDLL("crypt32", use_last_error=True)
+        for library, name, args, result in (
+            (self.shell, "SHGetKnownFolderPath", [pointer, wintypes.DWORD, wintypes.HANDLE, pointer], wintypes.LONG),
+            (self.ole, "CoTaskMemFree", [pointer], None),
+            (self.trust, "WinVerifyTrust", [wintypes.HWND, pointer, pointer], wintypes.LONG),
+            (self.trust, "WTHelperProvDataFromStateData", [wintypes.HANDLE], pointer),
+            (self.trust, "WTHelperGetProvSignerFromChain", [pointer, wintypes.DWORD, wintypes.BOOL, wintypes.DWORD], pointer),
+            (self.cert, "CertGetNameStringW", [pointer, wintypes.DWORD, wintypes.DWORD, pointer, wintypes.LPWSTR, wintypes.DWORD], wintypes.DWORD),
+        ):
+            function = getattr(library, name)
+            function.argtypes = args
+            function.restype = result
+
+    def program_files(self):
+        folder = ctypes.create_string_buffer(UUID("905e63b6-c1bf-494e-b29c-65b732d3d21a").bytes_le)
+        value = ctypes.c_void_p()
+        with self.checked_cleanup(lambda: not self.ole.CoTaskMemFree(value)):
+            self.require(self.shell.SHGetKnownFolderPath(folder, 0, None, ctypes.byref(value)) == 0)
+            self.require(value.value)
+            return Path(ctypes.wstring_at(value))
+
+    def verify_signature(self, image):
+        pointer = ctypes.c_void_p
+
+        class FileInfo(ctypes.Structure):
+            _fields_ = [("cbStruct", wintypes.DWORD), ("path", wintypes.LPCWSTR),
+                        ("file", wintypes.HANDLE), ("subject", pointer)]
+
+        class TrustData(ctypes.Structure):
+            _fields_ = [("cbStruct", wintypes.DWORD), ("policy", pointer), ("sip", pointer),
+                        ("ui", wintypes.DWORD), ("revocation", wintypes.DWORD),
+                        ("choice", wintypes.DWORD), ("info", ctypes.POINTER(FileInfo)),
+                        ("action", wintypes.DWORD), ("state", wintypes.HANDLE),
+                        ("url", wintypes.LPWSTR), ("flags", wintypes.DWORD),
+                        ("context", wintypes.DWORD), ("settings", pointer)]
+
+        class ProviderCert(ctypes.Structure):
+            _fields_ = [("cbStruct", wintypes.DWORD), ("cert", pointer)]
+
+        class ProviderSigner(ctypes.Structure):
+            _fields_ = [("cbStruct", wintypes.DWORD), ("time", wintypes.FILETIME),
+                        ("count", wintypes.DWORD), ("certs", ctypes.POINTER(ProviderCert))]
+
+        action = ctypes.create_string_buffer(UUID("00aac56b-cd44-11d0-8cc2-00c04fc295ee").bytes_le)
+        info = FileInfo(ctypes.sizeof(FileInfo), str(image), None, None)
+        data = TrustData()
+        data.cbStruct = ctypes.sizeof(TrustData)
+        data.ui = 2  # WTD_UI_NONE
+        data.revocation = 0  # WTD_REVOKE_NONE
+        data.choice = 1  # WTD_CHOICE_FILE
+        data.info = ctypes.pointer(info)
+        data.action = 1  # WTD_STATEACTION_VERIFY
+        data.flags = 0x1000 | 0x10  # CACHE_ONLY_URL_RETRIEVAL | REVOCATION_CHECK_NONE
+
+        def close():
+            data.action = 2  # WTD_STATEACTION_CLOSE
+            return self.trust.WinVerifyTrust(None, action, ctypes.byref(data)) == 0
+
+        with self.checked_cleanup(close):
+            self.require(self.trust.WinVerifyTrust(None, action, ctypes.byref(data)) == 0)
+            self.require(data.state)
+            provider = self.trust.WTHelperProvDataFromStateData(data.state)
+            self.require(provider)
+            signer = self.trust.WTHelperGetProvSignerFromChain(provider, 0, False, 0)
+            self.require(signer)
+            signer = ctypes.cast(signer, ctypes.POINTER(ProviderSigner)).contents
+            self.require(signer.cbStruct >= ctypes.sizeof(ProviderSigner) and signer.count and signer.certs)
+            certificate = signer.certs[0]
+            self.require(certificate.cbStruct >= ctypes.sizeof(ProviderCert) and certificate.cert)
+            size = self.cert.CertGetNameStringW(certificate.cert, 4, 0, None, None, 0)
+            self.require(1 < size <= 32768)
+            name = ctypes.create_unicode_buffer(size)
+            self.require(self.cert.CertGetNameStringW(certificate.cert, 4, 0, None, name, size) == size)
+            self.require(name.value == "Docker Inc")
 
     def server_identity(self, pipe_name=r"\\.\pipe\docker_engine"):
         pipe = self.kernel.CreateFileW(pipe_name, 0xC0000000, 0, None, 3, 0, None)
@@ -115,7 +193,7 @@ def _verify_windows_docker_pipe(pipe_name=r"\\.\pipe\docker_engine") -> None:
         security = _WindowsDockerPipeSecurity()
         sid, image = security.server_identity(pipe_name)
         security.require(sid in (security.user_sid(), "S-1-5-18"))
-        program_files = Path(os.environ["ProgramFiles"])
+        program_files = security.program_files()
         security.require(program_files.is_absolute() and Path(image).is_absolute())
         docker_root = (program_files / "Docker").resolve(strict=True)
         executable = Path(image).resolve(strict=True)
@@ -123,6 +201,7 @@ def _verify_windows_docker_pipe(pipe_name=r"\\.\pipe\docker_engine") -> None:
             executable.is_file()
             and Path(str(executable).casefold()).is_relative_to(Path(str(docker_root).casefold()))
         )
+        security.verify_signature(executable)
     except (OSError, AttributeError, ValueError, KeyError) as exc:
         raise PDFSourceError("Docker named-pipe server is unavailable or unverified") from exc
 

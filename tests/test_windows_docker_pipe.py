@@ -8,9 +8,18 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from tools import pdf_percentage_audit as audit
+
+
+class ProviderCertificate(ctypes.Structure):
+    _fields_ = [("cbStruct", wintypes.DWORD), ("cert", ctypes.c_void_p)]
+
+
+class ProviderSigner(ctypes.Structure):
+    _fields_ = [("cbStruct", wintypes.DWORD), ("time", wintypes.FILETIME),
+                ("count", wintypes.DWORD), ("certs", ctypes.POINTER(ProviderCertificate))]
 
 
 class WindowsDockerPipeTests(unittest.TestCase):
@@ -23,6 +32,49 @@ class WindowsDockerPipeTests(unittest.TestCase):
         self.security = object.__new__(audit._WindowsDockerPipeSecurity)
         self.security.kernel = Mock()
         self.security.advapi = Mock()
+        self.security.shell = Mock()
+        self.security.ole = Mock()
+        self.security.trust = Mock()
+        self.security.cert = Mock()
+        self.security.ole.CoTaskMemFree.return_value = None
+        self.folder = ctypes.create_unicode_buffer(str(self.root))
+
+        def folder(folder_id, flags, token, output):
+            self.assertEqual(folder_id.raw[:16], UUID("905e63b6-c1bf-494e-b29c-65b732d3d21a").bytes_le)
+            self.assertEqual((flags, token), (0, None))
+            output._obj.value = ctypes.addressof(self.folder)
+            return 0
+
+        self.security.shell.SHGetKnownFolderPath.side_effect = folder
+        self.certificate = ProviderCertificate(ctypes.sizeof(ProviderCertificate), 100)
+        self.signer = ProviderSigner(ctypes.sizeof(ProviderSigner), wintypes.FILETIME(),
+                                     1, ctypes.pointer(self.certificate))
+        self.security.trust.WTHelperProvDataFromStateData.return_value = 200
+        self.security.trust.WTHelperGetProvSignerFromChain.return_value = ctypes.addressof(self.signer)
+        self.trust_actions = []
+
+        def trust(window, action, data):
+            self.assertIsNone(window)
+            self.assertEqual(action.raw[:16], UUID("00aac56b-cd44-11d0-8cc2-00c04fc295ee").bytes_le)
+            value = data._obj
+            self.assertEqual((value.ui, value.revocation, value.choice, value.flags), (2, 0, 1, 0x1010))
+            self.assertEqual(value.info.contents.path, str(self.image.resolve()))
+            self.trust_actions.append(value.action)
+            if value.action == 1:
+                value.state = 300
+            return 0
+
+        self.security.trust.WinVerifyTrust.side_effect = trust
+        self.signer_name = "Docker Inc"
+
+        def name(certificate, kind, flags, parameters, output, size):
+            self.assertEqual((certificate, kind, flags, parameters), (100, 4, 0, None))
+            if output is not None:
+                self.assertEqual(size, len(self.signer_name) + 1)
+                output.value = self.signer_name
+            return len(self.signer_name) + 1
+
+        self.security.cert.CertGetNameStringW.side_effect = name
         self.security.user_sid = Mock(return_value="S-1-5-21-123")
         self.security.sid_string = Mock(return_value="S-1-5-21-123")
         self.security.kernel.CreateFileW.return_value = 10
@@ -78,10 +130,81 @@ class WindowsDockerPipeTests(unittest.TestCase):
         with self.assertRaisesRegex(audit.PDFSourceError, "server is unavailable or unverified"):
             audit._verify_windows_docker_pipe()
 
-    def test_missing_program_files_rejected(self):
-        with patch.dict(os.environ, {}, clear=True):
-            with self.assertRaisesRegex(audit.PDFSourceError, "server is unavailable or unverified"):
-                audit._verify_windows_docker_pipe()
+    def test_program_files_environment_is_ignored(self):
+        with patch.dict(os.environ, {"ProgramFiles": "not-a-trusted-folder"}):
+            audit._verify_windows_docker_pipe()
+
+    def test_known_folder_failures_and_cleanup(self):
+        for failure in (-1, 0):
+            with self.subTest(failure=failure):
+                self.security.ole.CoTaskMemFree.reset_mock()
+                with patch.object(self.security.shell, "SHGetKnownFolderPath", return_value=failure):
+                    with self.assertRaises(audit.PDFSourceError):
+                        audit._verify_windows_docker_pipe()
+                self.security.ole.CoTaskMemFree.assert_called_once()
+
+    def test_known_folder_cleanup_error_is_fail_closed(self):
+        self.security.ole.CoTaskMemFree.side_effect = OSError("free failed")
+        with self.assertRaises(audit.PDFSourceError) as caught:
+            audit._verify_windows_docker_pipe()
+        self.assertEqual(str(caught.exception.__cause__), "free failed")
+        original = OSError("folder failed")
+        self.security.shell.SHGetKnownFolderPath.side_effect = original
+        with self.assertRaises(audit.PDFSourceError) as caught:
+            audit._verify_windows_docker_pipe()
+        self.assertIs(caught.exception.__cause__, original)
+
+    def test_signature_verified_offline_and_state_closed(self):
+        audit._verify_windows_docker_pipe()
+        self.assertEqual(self.trust_actions, [1, 2])
+        self.security.trust.WTHelperGetProvSignerFromChain.assert_called_once_with(200, 0, False, 0)
+
+    def test_unsigned_and_failed_trust_are_rejected_and_closed(self):
+        for result in (0x800B0100, -1):
+            with self.subTest(result=result):
+                actions = []
+
+                def trust(_window, _action, data):
+                    actions.append(data._obj.action)
+                    return result if data._obj.action == 1 else 0
+
+                self.security.trust.WinVerifyTrust.side_effect = trust
+                with self.assertRaises(audit.PDFSourceError):
+                    audit._verify_windows_docker_pipe()
+                self.assertEqual(actions, [1, 2])
+
+    def test_wrong_or_empty_signer_rejected(self):
+        for name in ("Python Software Foundation", ""):
+            with self.subTest(name=name):
+                self.signer_name = name
+                with self.assertRaises(audit.PDFSourceError):
+                    audit._verify_windows_docker_pipe()
+        self.assertEqual(self.trust_actions, [1, 2, 1, 2])
+
+    def test_signer_api_failures_rejected(self):
+        for api in (self.security.trust.WTHelperProvDataFromStateData,
+                    self.security.trust.WTHelperGetProvSignerFromChain,
+                    self.security.cert.CertGetNameStringW):
+            with self.subTest(api=api), patch.object(api, "side_effect", None), patch.object(api, "return_value", 0):
+                with self.assertRaises(audit.PDFSourceError):
+                    audit._verify_windows_docker_pipe()
+                self.assertEqual(self.trust_actions[-1], 2)
+
+    def test_trust_cleanup_failure_and_error_preservation(self):
+        original = OSError("signer failed")
+        self.security.trust.WTHelperProvDataFromStateData.side_effect = original
+
+        def trust(_window, _action, data):
+            data._obj.state = 300
+            return int(data._obj.action == 2)
+
+        self.security.trust.WinVerifyTrust.side_effect = trust
+        with self.assertRaises(audit.PDFSourceError) as caught:
+            audit._verify_windows_docker_pipe()
+        self.assertIs(caught.exception.__cause__, original)
+        self.security.trust.WTHelperProvDataFromStateData.side_effect = None
+        with self.assertRaises(audit.PDFSourceError):
+            audit._verify_windows_docker_pipe()
 
     def test_cleanup_does_not_mask_api_error(self):
         original = OSError("image query failed")
