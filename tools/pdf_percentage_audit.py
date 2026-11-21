@@ -19,8 +19,12 @@ import tempfile
 from threading import Event, Thread
 from typing import Any
 
-from tools.public_discovery import percentage_recalculation
+from tools.public_discovery import _WindowsRateSecurity, percentage_recalculation
 from tools.offline_files import read_regular
+
+if sys.platform == "win32":
+    import ctypes
+    from ctypes import wintypes
 
 MAX_PDF_BYTES = 8 * 1024 * 1024
 MAX_LAYOUT_TEXT_BYTES = 2 * 1024 * 1024
@@ -66,6 +70,63 @@ class PDFSourceError(ValueError):
     """The PDF is unsupported, malformed for extraction, or outside limits."""
 
 
+class _WindowsDockerPipeSecurity(_WindowsRateSecurity):
+    def __init__(self):
+        super().__init__()
+        pointer = ctypes.c_void_p
+        signatures = (
+            ("CreateFileW", [wintypes.LPCWSTR, wintypes.DWORD, wintypes.DWORD, pointer, wintypes.DWORD, wintypes.DWORD, wintypes.HANDLE], wintypes.HANDLE),
+            ("GetNamedPipeServerProcessId", [wintypes.HANDLE, pointer], wintypes.BOOL),
+            ("OpenProcess", [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD], wintypes.HANDLE),
+            ("QueryFullProcessImageNameW", [wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, pointer], wintypes.BOOL),
+        )
+        for name, args, result in signatures:
+            function = getattr(self.kernel, name)
+            function.argtypes = args
+            function.restype = result
+
+    def server_identity(self):
+        pipe = self.kernel.CreateFileW(r"\\.\pipe\docker_engine", 0xC0000000, 0, None, 3, 0, None)
+        if pipe in (None, wintypes.HANDLE(-1).value):
+            raise ctypes.WinError(ctypes.get_last_error())
+        with self.checked_cleanup(lambda: self.kernel.CloseHandle(pipe)):
+            pid = wintypes.DWORD()
+            self.require(self.kernel.GetNamedPipeServerProcessId(pipe, ctypes.byref(pid)))
+            process = self.kernel.OpenProcess(0x1000, False, pid.value)
+            self.require(process)
+            with self.checked_cleanup(lambda: self.kernel.CloseHandle(process)):
+                token = wintypes.HANDLE()
+                self.require(self.advapi.OpenProcessToken(process, 0x0008, ctypes.byref(token)))
+                with self.checked_cleanup(lambda: self.kernel.CloseHandle(token)):
+                    size = wintypes.DWORD()
+                    result = self.advapi.GetTokenInformation(token, 1, None, 0, ctypes.byref(size))
+                    self.require(not result and ctypes.get_last_error() == 122 and size.value > 0)
+                    buffer = ctypes.create_string_buffer(size.value)
+                    self.require(self.advapi.GetTokenInformation(token, 1, buffer, size, ctypes.byref(size)))
+                    sid = self.sid_string(ctypes.c_void_p.from_buffer(buffer).value)
+                size = wintypes.DWORD(32768)
+                image = ctypes.create_unicode_buffer(size.value)
+                self.require(self.kernel.QueryFullProcessImageNameW(process, 0, image, ctypes.byref(size)))
+                return sid, image.value
+
+
+def _verify_windows_docker_pipe() -> None:
+    try:
+        security = _WindowsDockerPipeSecurity()
+        sid, image = security.server_identity()
+        security.require(sid in (security.user_sid(), "S-1-5-18"))
+        program_files = Path(os.environ["ProgramFiles"])
+        security.require(program_files.is_absolute() and Path(image).is_absolute())
+        docker_root = (program_files / "Docker").resolve(strict=True)
+        executable = Path(image).resolve(strict=True)
+        security.require(
+            executable.is_file()
+            and Path(str(executable).casefold()).is_relative_to(Path(str(docker_root).casefold()))
+        )
+    except (OSError, AttributeError, ValueError, KeyError) as exc:
+        raise PDFSourceError("Docker named-pipe server is unavailable or unverified") from exc
+
+
 def _remove_sandbox_container(
     docker_prefix: list[str], docker_env: dict[str, str], container_id_file: Path
 ) -> None:
@@ -103,6 +164,9 @@ def _extract_layout_text(data: bytes) -> str:
     docker = shutil.which("docker")
     if docker is None:
         raise PDFSourceError("Docker is required for isolated PDF extraction")
+
+    if sys.platform == "win32":
+        _verify_windows_docker_pipe()
 
     # Do not load credentials, proxy settings, contexts, or proxy configuration
     # from the calling user's Docker client configuration.  The only host API

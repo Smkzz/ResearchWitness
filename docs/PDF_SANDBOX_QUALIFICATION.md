@@ -18,10 +18,16 @@ its empty environment settings. No host Poppler fallback is permitted.
 
 Unlike the root-owned `/var/run/docker.sock`, the Windows pipe name
 `\\.\pipe\docker_engine` can be created by any local process when Docker Desktop
-is not listening. The runner does not verify the pipe server's identity (for
-example, using `GetNamedPipeServerProcessId` plus a process-owner check). This
-endpoint-spoofing risk is accepted only while the PDF runner remains unqualified;
-it must be resolved before any Windows PDF qualification claim. The authority
+is not listening. Before any Docker invocation on Windows, the runner opens this
+pipe, queries `GetNamedPipeServerProcessId`, and inspects the server process token
+and image path. It requires the current process user SID or LocalSystem
+(`S-1-5-18`) and a resolved image path under `%ProgramFiles%\Docker\`, compared
+case-insensitively. API and cleanup failures block execution. It does not verify
+binary signatures or installation integrity. A check-then-use race remains because
+the Docker CLI opens a separate connection after the check; an administrator or
+same-user attacker is not defended against. These remain qualification limitations,
+and `pdf_execution` stays unqualified: the reviewed image is still blocked.
+The authority
 for native RW-03 qualification runs on the org Windows Devin machine is Sami's
 answer to the "Use a Windows machine" card, **2026-11-21 19:59 UTC**. That
 authorization is not pipe-server authentication or a waiver of qualification.
