@@ -57,7 +57,7 @@ class WindowsRateSecurityTests(unittest.TestCase):
                 try:
                     with patch.object(security.advapi, "ConvertStringSecurityDescriptorToSecurityDescriptorW", side_effect=convert_acl):
                         with patch.object(discovery, "_WindowsRateSecurity", return_value=security):
-                            with self.assertRaises(discovery.SourceAccessError):
+                            with self.assertRaisesRegex(discovery.SourceAccessError, "not private to the current user"):
                                 discovery._private_rate_state_directory(Path(root))
                 finally:
                     for directory in Path(root).iterdir():
@@ -86,14 +86,14 @@ class WindowsRateSecurityTests(unittest.TestCase):
             directory = discovery._private_rate_state_directory(Path(root))
             directory.rmdir()
             directory.mkdir()
-            with self.assertRaises(discovery.SourceAccessError):
+            with self.assertRaisesRegex(discovery.SourceAccessError, "not private to the current user"):
                 discovery._private_rate_state_directory(Path(root))
 
     def test_extra_everyone_ace_rejected(self):
         with tempfile.TemporaryDirectory() as root:
             directory = discovery._private_rate_state_directory(Path(root))
             subprocess.run(["icacls", str(directory), "/grant", "*S-1-1-0:(OI)(CI)R"], check=True, capture_output=True)
-            with self.assertRaises(discovery.SourceAccessError):
+            with self.assertRaisesRegex(discovery.SourceAccessError, "not private to the current user"):
                 discovery._private_rate_state_directory(Path(root))
 
     def test_junction_rejected(self):
@@ -104,7 +104,7 @@ class WindowsRateSecurityTests(unittest.TestCase):
             target.mkdir()
             subprocess.run(["cmd", "/c", "mklink", "/J", str(directory), str(target)], check=True, capture_output=True)
             try:
-                with self.assertRaises(discovery.SourceAccessError):
+                with self.assertRaisesRegex(discovery.SourceAccessError, "not private to the current user"):
                     discovery._private_rate_state_directory(Path(root))
             finally:
                 directory.rmdir()
