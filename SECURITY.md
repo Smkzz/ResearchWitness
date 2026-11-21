@@ -72,6 +72,17 @@ unavailable. `docker info` must report built-in default seccomp; the runner lets
 the daemon apply it rather than using non-portable `seccomp=builtin`. Images with
 baked environment variables, entrypoints or volumes are rejected.
 
+The runner uses the local Unix socket on POSIX and Docker Desktop's
+`npipe:////./pipe/docker_engine` on Windows. Unlike the root-owned
+`/var/run/docker.sock`, any local process can create `\\.\pipe\docker_engine`
+when Docker Desktop is not listening. The runner does not authenticate the pipe
+server (for example, with `GetNamedPipeServerProcessId` plus a process-owner
+check). This residual endpoint-spoofing risk is accepted only while the PDF runner
+stays unqualified and must be resolved before any Windows PDF qualification
+claim. Sami authorized native RW-03 qualification on the org Windows Devin
+machine in his answer to the "Use a Windows machine" card on **2026-11-21
+19:59 UTC**; this authority does not establish server identity or waive the gate.
+
 PDF bytes pass through stdin, with no host-file mount. A per-run CID file identifies
 the only container cleanup may remove. A finally path removes that verified ID
 after success/client termination; missing ID or failed cleanup prevents extracted

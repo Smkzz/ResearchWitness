@@ -1,0 +1,104 @@
+UTC: 2026-11-21T20:36:54.705894+00:00
+
+COMMAND: git rev-parse HEAD
+f7e17793abe151f5b7bcd68a3d5bfa11419528b6
+EXIT CODE: 0
+
+COMMAND: powershell -NoProfile -Command "Get-CimInstance Win32_OperatingSystem | Select-Object Caption,Version,BuildNumber | Format-List"
+
+
+Caption     : Microsoft Windows Server 2022 Standard
+Version     : 10.0.20348
+BuildNumber : 20348
+
+
+
+EXIT CODE: 0
+
+COMMAND: cmd /c ver
+
+Microsoft Windows [Version 10.0.20348.5622]
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine version
+Client:
+ Version:           29.9.2
+ API version:       1.56
+ Go version:        go1.26.10
+ Git commit:        a82e528
+ Built:             Tue Oct 20 19:44:07 2026
+ OS/Arch:           windows/amd64
+ Context:           default
+
+Server: Docker Desktop 4.98.0 (245422)
+ Engine:
+  Version:          29.9.2
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.10
+  Git commit:       0367cbe
+  Built:            Tue Oct 20 18:45:02 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+EXIT CODE: 0
+
+COMMAND: "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine info --format "{{json .SecurityOptions}}"
+["name=seccomp,profile=builtin","name=cgroupns"]
+EXIT CODE: 0
+
+EVIDENCE COMMANDS
+
+COMMAND: "C:\Program Files\Python313\python.exe" -m pytest tests/test_pdf_percentage_audit_unittest.py -v -rs
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-9.2.0, pluggy-1.7.0 -- C:\Program Files\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Administrator\repos\ResearchWitness
+configfile: pyproject.toml
+collecting ... collected 25 items
+
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_abstains_on_conflicting_header_denominators PASSED [  4%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_abstains_when_header_indicates_row_specific_denominators PASSED [  8%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_abstains_when_source_rounding_convention_is_stated PASSED [ 12%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_abstains_when_table_footnote_marks_percentages_as_weighted PASSED [ 16%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_abstains_when_unmarked_parenthetical_values_are_not_corroborated PASSED [ 20%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_cleanup_failure_fails_closed_after_pdf_extraction PASSED [ 24%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_does_not_truncate_non_integer_header_denominators 
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_does_not_truncate_non_integer_header_denominators PASSED [ 28%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_explicit_percentage_header_can_surface_a_single_mismatch PASSED [ 32%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_extraction_fails_closed_when_docker_is_unavailable PASSED [ 36%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_extraction_fails_closed_without_a_pinned_sandbox_image PASSED [ 40%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_extraction_fails_closed_without_the_docker_builtin_seccomp_profile PASSED [ 44%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_extraction_rejects_a_sandbox_image_id_mismatch PASSED [ 48%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_extraction_rejects_image_baked_environment_entrypoint_or_volumes 
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_extraction_rejects_image_baked_environment_entrypoint_or_volumes PASSED [ 52%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_extraction_uses_network_disabled_credential_free_container PASSED [ 56%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_infers_percent_context_from_repeated_count_denominator_matches PASSED [ 60%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_layout_parser_requires_a_sha256_for_original_pdf PASSED [ 64%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_local_endpoint_and_minimal_environment_per_platform 
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_local_endpoint_and_minimal_environment_per_platform PASSED [ 68%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_output_overflow_invalid_encoding_extractor_failure_and_missing_cleanup_id_fail_closed 
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_output_overflow_invalid_encoding_extractor_failure_and_missing_cleanup_id_fail_closed PASSED [ 72%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_pdf_byte_audit_rejects_non_pdf_and_oversized_input PASSED [ 76%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_pdf_smoke_checks_operands_hashes_counts_and_extracted_anchors 
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_pdf_smoke_checks_operands_hashes_counts_and_extracted_anchors PASSED [ 80%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_pdf_smoke_does_not_count_infrastructure_failures_as_expected_rejections 
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_pdf_smoke_does_not_count_infrastructure_failures_as_expected_rejections PASSED [ 84%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_pdf_smoke_fixture_is_deterministic_and_unavailable_runtime_stops_once PASSED [ 88%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_repeating_percentage_preserves_an_exact_fraction PASSED [ 92%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_skips_mean_and_standard_deviation_table PASSED [ 96%]
+tests/test_pdf_percentage_audit_unittest.py::PDFPercentageAuditTests::test_timeout_removes_verified_container_id_after_killing_docker_client PASSED [100%]
+
+=================== 25 passed, 28 subtests passed in 0.14s ====================
+EXIT CODE: 0
