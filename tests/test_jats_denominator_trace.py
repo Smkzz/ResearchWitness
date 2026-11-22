@@ -145,6 +145,18 @@ def test_grouped_ratio_token_is_not_normalized_before_resolution():
                for item in provenance["rejected_competing_denominators"])
 
 
+def test_invalid_local_base_explains_why_broader_competitor_is_blocked():
+    row = traced.trace_denominators(synthetic(label="Event (n=1,000)"))["relations"][0]
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    rejected = provenance["rejected_competing_denominators"]
+    broader = next(item for item in rejected if item["value_exact"] == "100")
+    assert broader["rejection_reasons"] == ["BLOCKED_BY_INVALID_MORE_SPECIFIC_OR_EQUAL_SCOPE"]
+    assert any(item["raw_value"] == "1,000"
+               and "GROUPED_INTEGER_FORMAT_UNSUPPORTED" in item["rejection_reasons"]
+               for item in rejected)
+
+
 def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)

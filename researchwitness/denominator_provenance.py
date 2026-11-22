@@ -971,6 +971,9 @@ def resolve_denominator(
                 'OPERANDS_OUTSIDE_PROPORTION_DOMAIN', 'DENOMINATOR_SCOPE_UNRESOLVED',
             ) if reason in reasons), 'DENOMINATOR_SCOPE_UNRESOLVED')
             selected = None
+            for item in valid:
+                item['rejection_reasons'] = ['BLOCKED_BY_INVALID_MORE_SPECIFIC_OR_EQUAL_SCOPE']
+                rejected.append(item)
         elif len(top) > 1:
             skip_reasons.append('DENOMINATOR_AMBIGUOUS')
             resolution_status = 'AMBIGUOUS'
@@ -1001,13 +1004,12 @@ def resolve_denominator(
                     else 'BROADER_SCOPE_THAN_SELECTED'
                 ]
                 rejected.append(item)
-            for item in invalid:
-                if item not in rejected:
-                    rejected.append(item)
 
     # Preserve the selected source separately; all other structurally
     # applicable candidates retain explicit rejection reasons.
-    rejected.extend(item for item in candidates if item is not selected and item not in rejected)
+    rejected.extend(item for item in invalid if item not in rejected)
+    if selected is not None:
+        rejected.extend(item for item in candidates if item is not selected and item not in rejected)
     rejected = list({item['candidate_id']: item for item in rejected}.values())
     return {
         'denominator_scope_resolved': selected is not None,
