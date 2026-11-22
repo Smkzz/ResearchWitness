@@ -328,7 +328,8 @@ class LocalAuditStore:
 
 class LocalUIHTTPServer(http.server.ThreadingHTTPServer):
     daemon_threads = True
-    allow_reuse_address = False
+    # POSIX reuse permits quick restarts; Windows reuse can allow port hijacking.
+    allow_reuse_address = os.name != "nt"
 
     def __init__(self, address: tuple[str, int], store: LocalAuditStore, token: str):
         if address[0] != "127.0.0.1":

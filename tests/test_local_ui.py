@@ -330,6 +330,28 @@ class LocalUITests(unittest.TestCase):
 
 
 class LocalUIContractTests(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "Windows address reuse permits port hijacking")
+    def test_posix_server_rebinds_same_port_after_serving_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            port = 0
+            for _ in range(2):
+                server = ui.create_server(root, port=port)
+                port = server.server_port
+                thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": .01})
+                thread.start()
+                connection = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+                try:
+                    connection.request("GET", "/", headers={"Host": f"127.0.0.1:{port}"})
+                    response = connection.getresponse()
+                    self.assertEqual(response.status, 200)
+                    response.read()
+                finally:
+                    server.shutdown()
+                    thread.join(timeout=5)
+                    server.server_close()
+                    connection.close()
+
     def test_cli_port_and_lazy_dispatch(self):
         with mock.patch.object(ui, "serve_ui", return_value=0) as serve:
             self.assertEqual(main(["ui", "--port", "0", "--no-browser", "--state-dir", "private"]), 0)
