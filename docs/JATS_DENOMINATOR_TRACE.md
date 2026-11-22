@@ -61,11 +61,16 @@ alter detector decisions. Old v1 bundles are not migrated; exact replay may
 reject them after this implementation change.
 
 Tables are projected once and indexed by original cell byte spans. The adapter
-normalizes projection row-group names (for example `tbody:unlabeled` to
-`tbody`) for the unchanged resolver, preserving cells and anchors. Subgroup
-boundaries and parent-count groups are computed once per table. A missing
+binds row-group identity to the original enclosing XML element's byte offset,
+including separate unnamed body groups, preserving cells and anchors. Subgroup
+boundaries and parent-count groups stop at group boundaries and are computed
+once per table. Printed cell-ratio denominators are passed as explicit local
+source facts, not inferred from arithmetic agreement. Ambiguous header/body
+layouts and spanning-cell roles produce `UNRESOLVED / TABLE_STRUCTURE_UNSUPPORTED`.
+Invalid candidates retain their printed value, source anchor and rejection
+reasons even when no denominator resolves. A missing
 projected relation cell produces `UNRESOLVED / RELATION_CELL_NOT_PROJECTED`.
-Neither arithmetic fit nor the detector's selected base is fed to the resolver.
+Neither arithmetic fit nor a detector-inferred base is fed to the resolver.
 Review packets continue to expose source facts, not these advisory preferences.
 
 A contradictory header and table caption may refer to different analysis

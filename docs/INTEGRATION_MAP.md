@@ -159,7 +159,7 @@ numeric value, provider role, scope label, status and unresolved reason.
 
 The standalone `denominator_provenance.py` from PR #11 is ported without
 `paper_ratio.py`, paper-audit, table-arithmetic, telemetry or validation replays.
-It consumes projected Tables with row-group names normalized by the adapter;
+It consumes projected Tables with row groups bound to original XML group spans;
 original cell byte spans bind relations. It reports advisory selections,
 rejected competitors, scope and detector/base disagreement in trace v2. In particular,
 arithmetic fit is **never used** to choose a denominator, and a conflict

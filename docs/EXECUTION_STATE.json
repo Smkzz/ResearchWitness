@@ -29,6 +29,12 @@
     "base_sha": "438921727693caf6931bd40fec43ad780dd7908a",
     "lease_expires_at_utc": "2026-11-23T01:20:41Z",
     "source_head": "6843593",
+    "review_followup": {
+      "reviewed_head": "7a54b14ed52d3932cd6a8f9504d5b45ef19262fd",
+      "review": "PR #106 Devin Review: all five findings reproduced with synthetic regressions; not a completed approval.",
+      "fix_commits": ["c98d457", "76dcfa0", "e857593", "845846f", "45bd664"],
+      "scope": "Printed ratio evidence, original XML body-group boundaries, ambiguous-layout abstention, retained invalid competitors and boundary-owned scope anchors; detector decisions/arithmetic unchanged."
+    },
     "write_scope": ["researchwitness/denominator_provenance.py", "researchwitness/jats_denominator_trace.py", "researchwitness/jats_product.py", "tests/test_denominator_provenance.py", "tests/test_jats_denominator_trace.py", "docs/JATS_DENOMINATOR_TRACE.md", "docs/INTEGRATION_MAP.md", "docs/PROJECT_STATUS.md", "docs/EXECUTION_STATE.json", "CHECKSUMS.sha256"],
     "receipt": "Pre-merge advisory scope-first trace v2; synthetic tests only. Required local acceptance: Ruff, full coverage/core >=90%, quality gate. No separate review, exact-head CI, merge or postmerge result claimed. No scientific adjudication; detector decisions unchanged.",
     "next_action": "Record local command outcomes in handoff; obtain exact-head CI and separate review before routine merge."

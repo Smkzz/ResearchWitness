@@ -26,6 +26,14 @@ Results belong to the implementation commit receipt; no exact-head CI, separate
 review, merge or postmerge success is claimed here. No reviewer is invented.
 PDF qualification and protected custody gates are unchanged.
 
+PR #106's Devin Review raised five reproducible synthetic failures at
+`7a54b14`: ignored printed ratios, cross-body subgroup leakage, unsupported
+header layouts resolving, lost invalid-candidate evidence and stale subgroup
+scope-cell anchors. Focused fixes are in `c98d457`, `76dcfa0`, `e857593`,
+`845846f` and `45bd664` respectively, with regression tests. Review findings
+are not a completed approval; final local checks and exact-head CI remain
+separate receipts. No detector decisions or arithmetic were changed.
+
 ## RW-03 native test run receipt
 
 This is a **native test run (logs linked)**, not a qualification claim.
