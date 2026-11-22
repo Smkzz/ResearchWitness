@@ -64,6 +64,10 @@ inventory contained only a pre-existing `hello-world` image. No image was pulled
 
 ## Minimal rootfs construction requirements
 
+The [next authorized real rebuild](../tools/pdf_sandbox_image/README.md#next-authorized-rebuild-mandatory-new-check-receipt)
+must commit a receipt proving #96's build.py pre-import tar SHA256 and exact sqv
+signer-set checks both ran and passed end to end; no rebuild has exercised them yet.
+
 Use an already authorized build machine and managed daemon. Record OS/architecture,
 package-repository snapshot and signed metadata, exact packages/hashes, builder
 image digest, build script and source materials. Do not rely on floating `latest`.

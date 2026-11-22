@@ -192,6 +192,26 @@ verified exact signer set. No new build, package download or egress was used.
 PDF execution remains unqualified, RW-03 blocked_external, custody NOT RUN and
 scientific gates unchanged.
 
+### PR #96 merge and pending rebuild receipt
+
+[PR #96](https://github.com/Smkzz/ResearchWitness/pull/96) at exact head
+`87bd4f43759dcf198f176f3914488ea94777d4ca` merged as main
+`a304c71b32cf07edece7817fd59fa856ebcfa5f6`.
+[Reviewer approval and note](https://github.com/Smkzz/ResearchWitness/pull/96#pullrequestreview-6009671867):
+the new build.py hash and signer-set guards were not exercised end to end because
+there was no rebuild. The [next authorized rebuild must commit a receipt](../tools/pdf_sandbox_image/README.md#next-authorized-rebuild-mandatory-new-check-receipt)
+showing the rootfs.tar SHA256 matched the pin before import and sqv returned
+exactly the locked fingerprint set, with both checks executed and passed.
+Mocked tests and standalone offline verification are not a rebuild receipt.
+
+Post-merge main CI: **11/11 PASS**, confirmed by the coordinator on 2026-11-22
+(nine Python/platform matrix jobs, Release gate, Analyze Python/CodeQL).
+
+This engineering approval and documentation follow-up do not qualify PDF
+execution or change any state: pdf_execution unqualified, RW-03 blocked_external,
+custody NOT RUN and scientific gates unchanged. No rebuild or Docker run was
+performed for this documentation-only change.
+
 ## RW-04L accepted engineering receipt
 
 [PR #84](https://github.com/Smkzz/ResearchWitness/pull/84), exact head
