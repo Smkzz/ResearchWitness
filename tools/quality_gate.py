@@ -66,6 +66,37 @@ def check_source_checksums() -> None:
             raise RuntimeError(f'source checksum mismatch: {relative}')
 
 
+def scan_ui() -> None:
+    for path in sorted((ROOT / 'researchwitness_ui').glob('*.py')):
+        tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+        for node in ast.walk(tree):
+            names = []
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                names = [node.module]
+                if node.module in {'http', 'urllib'}:
+                    names = [f'{node.module}.{alias.name}' for alias in node.names]
+            for name in names:
+                allowed = (name in {'http', 'http.server', 'urllib.parse'}
+                           and path.name == 'server.py')
+                if name.split('.')[0] in BANNED_IMPORT_ROOTS and not allowed:
+                    raise RuntimeError(f'banned import in UI adapter: {path.name}: {name}')
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                    and node.func.id in BANNED_CALLS):
+                raise RuntimeError(f'banned dynamic call in UI adapter: {path.name}: {node.func.id}')
+        if path.name == 'server.py':
+            binds = [node for node in ast.walk(tree)
+                     if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                     and node.func.id == 'LocalUIHTTPServer']
+            if (len(binds) != 1 or not binds[0].args
+                    or not isinstance(binds[0].args[0], ast.Tuple)
+                    or not binds[0].args[0].elts
+                    or not isinstance(binds[0].args[0].elts[0], ast.Constant)
+                    or binds[0].args[0].elts[0].value != '127.0.0.1'):
+                raise RuntimeError('local UI must bind only to 127.0.0.1')
+
+
 def main() -> int:
     pyproject = tomllib.loads((ROOT / 'pyproject.toml').read_text(encoding='utf-8'))
     version = pyproject['project']['version']
@@ -97,6 +128,7 @@ def main() -> int:
     if not compileall.compile_dir(CORE, quiet=1):
         raise RuntimeError('compileall failed')
     scan_core()
+    scan_ui()
 
     tests = run(sys.executable, '-m', 'pytest', '-q')
 
@@ -134,12 +166,20 @@ def main() -> int:
                 raise RuntimeError('wheel missing capability example data')
             if 'researchwitness/schemas/intake.schema.json' not in names:
                 raise RuntimeError('wheel missing agent-intake JSON Schema')
+            for name in ('__init__.py', 'server.py', 'webui/index.html', 'webui/app.js', 'webui/style.css'):
+                if f'researchwitness_ui/{name}' not in names:
+                    raise RuntimeError(f'wheel missing local UI resource: {name}')
 
         env = temp / 'venv'
         venv.EnvBuilder(with_pip=True, clear=True).create(env)
         python = env / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
         cli = env / ('Scripts/researchwitness.exe' if sys.platform == 'win32' else 'bin/researchwitness')
         run(str(python), '-m', 'pip', 'install', '--no-index', '--no-deps', str(wheel), cwd=temp)
+        run(str(cli), 'ui', '--help', cwd=temp)
+        run(str(python), '-c',
+            'from pathlib import Path; from researchwitness_ui.server import create_server; '
+            's = create_server(Path("ui-state")); '
+            'assert s.server_address[0] == "127.0.0.1"; s.server_close()', cwd=temp)
         version_out = run(str(cli), '--version', cwd=temp).stdout.strip()
         if version_out != f'researchwitness {version}':
             raise RuntimeError('installed CLI version mismatch')
@@ -439,6 +479,7 @@ def main() -> int:
             'mvp_real_cases': real['cases'],
             'mvp_real_matched': real['matched'],
             'trusted_core_static_scan': 'PASS',
+            'ui_adapter_static_scan': 'PASS',
             'source_checksums': 'PASS',
             'schema_drift': 'PASS',
             'intake_schema_drift': 'PASS',

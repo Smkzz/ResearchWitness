@@ -207,6 +207,23 @@ original response entities have **not been recovered** by developing this tool.
 Tests use fabricated XML; the historical source / licence / independent-label
 / protected-custody gates remain open.
 
+## Local JATS preview UI
+
+```sh
+researchwitness ui --no-browser --port 8765 --state-dir /path/to/private/jats-preview
+```
+
+Open the printed loopback URL to upload JATS XML, select existing audit slices,
+review summaries and the sandboxed HTML report, and export a deterministic,
+manifest-pinned replay bundle. JATS XML only on this version: no text, Markdown,
+PDF, network retrieval or model calls. Only queued jobs can be cancelled.
+
+**Local preview, not a custody boundary; any local process that can reach the
+port with the right Host can obtain the token.** `paper_error_established`
+remains false. Human visual/assistive-technology review is pending. Sources and
+reports persist locally with bounded retention; deletion is not secure erasure.
+See [LOCAL_UI.md](docs/LOCAL_UI.md) for replay, storage and attack-surface limits.
+
 ## Installed JATS review (development scope)
 
 The distribution now includes the existing bounded JATS percentage detector without

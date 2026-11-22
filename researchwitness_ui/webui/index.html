@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="rw-session-token" content="__RW_SESSION_TOKEN__">
+  <title>ResearchWitness · Local JATS preview</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><strong>ResearchWitness</strong><span>Local JATS preview</span></header>
+  <main class="layout">
+    <section class="intro">
+      <p class="eyebrow">Offline · source-bound · replayable</p>
+      <h1>Review the arithmetic.<br>Keep the evidence.</h1>
+      <p>Upload a local JATS XML article to run the installed, bounded JATS checks.
+        A mismatch is a candidate for review, not an established paper error.</p>
+    </section>
+    <p class="notice">Local preview, not a custody boundary; any local process that can reach the port
+      with the right Host can obtain the token. No network retrieval or model calls.</p>
+    <p id="error" class="error-note" role="alert" hidden></p>
+    <section class="panel" aria-labelledby="upload-title">
+      <div class="section-heading"><span class="step">01</span><h2 id="upload-title">Choose your source</h2></div>
+      <form id="upload-form">
+        <label class="drop-zone" for="paper-file"><span class="drop-title">Select a JATS XML article</span>
+          <span class="drop-subtitle">.xml or .nxml only</span>
+          <input id="paper-file" type="file" accept=".xml,.nxml" required>
+        </label>
+        <div class="field"><label for="document-id">Document ID</label>
+          <input id="document-id" maxlength="120" pattern="[A-Za-z0-9][A-Za-z0-9._:\-]{0,119}" required>
+          <small>A local identifier, not an authentication claim. Start with a letter or digit; use ASCII letters, digits, dot, underscore, colon or hyphen.</small>
+        </div>
+        <fieldset><legend>Optional JATS slices</legend>
+          <label><input type="checkbox" name="include_structure"> Source-mapped table structure</label>
+          <label><input type="checkbox" name="include_odds_ratio"> Unadjusted 2×2 odds ratios</label>
+          <label><input type="checkbox" name="include_prose_flows"> Explicit prose sample flows</label>
+          <label><input type="checkbox" name="include_prisma_flows"> Explicit PRISMA record flows</label>
+          <label><input type="checkbox" name="include_count_totals"> Explicit count totals</label>
+          <label><input type="checkbox" name="include_sd_se_n"> SD / SE / n checks</label>
+          <label><input type="checkbox" name="include_denominator_trace"> Denominator evidence trace</label>
+        </fieldset>
+        <button id="submit" class="button primary" type="submit">Run local audit</button>
+        <p class="format-note">JATS XML only on this version. Text, Markdown and PDF are not supported.
+          Running audits cannot be interrupted; only queued jobs can be cancelled.</p>
+      </form>
+    </section>
+    <section id="results" class="panel" aria-labelledby="results-title" hidden>
+      <div class="section-heading"><span class="step">02</span><h2 id="results-title">Audit result</h2></div>
+      <div id="job-status" role="status" aria-live="polite"></div>
+      <div id="summary" class="summary-grid"></div>
+      <p id="manifest" class="hash"></p>
+      <p>paper_error_established: false. Inspect the full report for coverage, abstentions, assumptions and source evidence.</p>
+      <div class="action-row">
+        <button id="cancel" class="button secondary" type="button" hidden>Cancel queued job</button>
+        <button id="export" class="button primary" type="button" hidden>Export replayable bundle</button>
+      </div>
+      <p>Export contains a bundle/ directory and top-level REPLAY.txt. Extract the ZIP,
+        open a terminal in the extracted directory and follow REPLAY.txt to replay bundle/.</p>
+      <iframe id="report" title="Sandboxed JATS audit report" sandbox hidden></iframe>
+    </section>
+    <section class="panel" aria-labelledby="history-title">
+      <div class="section-heading"><span class="step">03</span><h2 id="history-title">Local history</h2></div>
+      <button id="refresh" class="button secondary" type="button">Refresh history</button>
+      <ul id="history" class="history-list"></ul>
+      <p class="privacy-note">The private state directory retains at most 10 jobs and 512 MiB; oldest finished jobs
+        are removed when needed. Deletion is local file removal, not secure erasure. Export anything you need to keep.</p>
+    </section>
+    <footer class="page-footer">Human visual and assistive-technology review pending. Engineering preview only.</footer>
+  </main>
+</body>
+</html>
