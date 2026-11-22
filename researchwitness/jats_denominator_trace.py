@@ -13,10 +13,10 @@ from typing import Any
 
 from . import _jats_parser as jats
 from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
-from .jats_table_projection import _paths, project_jats_tables
-from .paper_document import TableRow
+from .jats_table_projection import _paths, _project_jats_tables_from_report
+from .paper_document import PaperDocument, TableRow
 
-VERSION = "rw-jats-denominator-evidence.v2"
+VERSION = "rw-jats-denominator-evidence.v3"
 MAX_FACTS_PER_RELATION = 64
 MAX_TOTAL_FACTS = 32768
 _DETECTOR_STATES = frozenset({
@@ -97,15 +97,23 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
     trusted because their hash happens to match. Contradictory or unresolved
     source facts remain visible and are never overridden by arithmetic fit.
     """
-    root = jats._parse_jats(source)
-    source_hash = sha256(source).hexdigest()
     original = jats.audit_jats_percentage_tables(source)
     if detector_report is not None:
         _require(type(detector_report) is dict and detector_report == original,
                  "SUPPLIED_DETECTOR_RESULTS_NOT_REPLAYED_FROM_SOURCE")
+    return _trace_denominators_from_report(source, original)
+
+
+def _trace_denominators_from_report(
+    source: bytes, original: dict[str, Any], document: PaperDocument | None = None,
+) -> dict[str, Any]:
+    """Internal path: report and optional projection must derive from these bytes."""
+    root = jats._parse_jats(source)
+    source_hash = sha256(source).hexdigest()
     _require(original["source_sha256"] == source_hash, "SOURCE_DIGEST_CHANGED")
     positions, paths = _source_index(root), _paths(root)
-    document = project_jats_tables(source, original)
+    if document is None:
+        document = _project_jats_tables_from_report(source, original)
     cells = {}
     table_scopes = {}
     for table in document.tables:
@@ -119,6 +127,7 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                 cells[(anchor.start_byte, anchor.end_byte)] = (table, row, row_index, cell)
     resolution_states: Counter[str] = Counter()
     disagreements = 0
+    resolver_only_bases = 0
     relations: list[dict[str, Any]] = []
     states: Counter[str] = Counter()
     fact_roles: Counter[str] = Counter()
@@ -186,6 +195,7 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                      "ACCEPTED_BASE_HAS_NO_SOURCE_ELEMENT")
         projected = cells.get((evidence["byte_start"], evidence["byte_end"]))
         if projected is None:
+            # Defense in depth: projection normally raises on unbound findings.
             resolution = {
                 "resolution_status": "UNRESOLVED",
                 "resolution_reason": "RELATION_CELL_NOT_PROJECTED",
@@ -225,9 +235,10 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                 )
         selected = resolution["selected_denominator"]
         agrees = (int(selected["value_exact"]) == reported_denominator
-                  if selected is not None else None)
+                  if selected is not None and reported_denominator is not None else None)
         resolution_states[resolution["resolution_status"]] += 1
         disagreements += agrees is False
+        resolver_only_bases += selected is not None and reported_denominator is None
         relations.append({
             "denominator_provenance": resolution,
             "resolved_value_equals_detector_base": agrees,
@@ -261,6 +272,7 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
         "detector_status_counts": dict(sorted(states.items())),
         "resolution_status_counts": dict(sorted(resolution_states.items())),
         "detector_resolver_disagreement_count": disagreements,
+        "resolver_selected_without_detector_base_count": resolver_only_bases,
         "denominator_fact_roles": dict(sorted(fact_roles.items())),
         "relations": relations,
         "detector_method_scope_overflow": bool(original["method_scope_overflow"]),

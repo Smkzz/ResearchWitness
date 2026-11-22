@@ -50,17 +50,31 @@ All optional sections are deterministically recomputed on bundle replay.
 
 ## Scientific, security and licensing limits
 
-The report schema is now `rw-jats-denominator-evidence.v2` (the version is
+The report schema is now `rw-jats-denominator-evidence.v3` (the version is
 recorded in bundles). Each relation adds `denominator_provenance`: resolution
 status/reason, relationship scope, selected value/source anchor and rejected
-competitors/reasons. `resolved_value_equals_detector_base` is null when
-unresolved; otherwise it compares the selected integer to the detector base
-(including a missing base). Top-level `resolution_status_counts` and
-`detector_resolver_disagreement_count` summarize those results. This does not
-alter detector decisions. Old v1 bundles are not migrated; exact replay may
-reject them after this implementation change.
+competitors/reasons. `resolved_value_equals_detector_base` is null when the
+resolver selects no base or the detector base is missing; otherwise it compares
+the two integers. Top-level `resolution_status_counts` summarizes resolver
+statuses. `detector_resolver_disagreement_count` counts only relations where both
+bases exist and differ. `resolver_selected_without_detector_base_count` separately
+counts relations where the resolver selected a base but the detector had none.
+These v3 semantics replace v2's comparison against a missing base. This does not
+alter detector decisions. Implementation fingerprints are included in every
+product report, plain or trace. Any bundle made before an implementation
+change that alters those fingerprints will not replay exactly under the new
+implementation. Replay it with the implementation commit that created it.
+Old bundles are not migrated; exact replay stays strict, with no compatibility
+shim. See [the release process](RELEASING.md#exact-bundle-replay).
 
-Tables are projected once and indexed by original cell byte spans. The adapter
+Product reports run the detector once and build at most one table projection,
+shared between trace and all structure-backed modes. Public `trace_denominators`
+and `project_jats_tables` still recompute and compare any supplied detector report
+in full; only private product paths reuse reports computed from the same bytes.
+Tables are indexed by original cell byte spans. The adapter
+retains `RELATION_CELL_NOT_PROJECTED` as defense in depth: projection normally
+raises on an unbound detector finding, so this branch requires bypassing that
+contract (as the existing monkeypatch test does). The adapter
 binds row-group identity to the original enclosing XML element's byte offset,
 including separate unnamed body groups, preserving cells and anchors. Subgroup
 boundaries and parent-count groups stop at group boundaries and are computed

@@ -7,16 +7,19 @@ from __future__ import annotations
 
 from dataclasses import replace
 from hashlib import sha256
+from itertools import product
 import json
 from pathlib import Path
 import subprocess
 import sys
+from unittest.mock import Mock
 
 import pytest
 
 from researchwitness import _jats_parser as jats
 from researchwitness import jats_denominator_trace as traced
 from researchwitness import jats_product
+from researchwitness import jats_table_projection as projection
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "examples/synthetic-jats/denominator-trace.xml"
@@ -53,8 +56,9 @@ def test_advisory_resolver_preserves_detector(header, label, status):
     if status == "RESOLVED":
         assert resolution["selected_denominator"]["value_exact"] == "20"
         assert resolution["selected_denominator"]["source_anchor"]["start_byte"] >= 0
-        assert row["resolved_value_equals_detector_base"] is (row["detector_denominator"] == 20)
-        assert report["detector_resolver_disagreement_count"] == int(row["detector_denominator"] != 20)
+        assert row["resolved_value_equals_detector_base"] is None
+        assert report["detector_resolver_disagreement_count"] == 0
+        assert report["resolver_selected_without_detector_base_count"] == 1
         assert any(item["value_exact"] == "100" and item["rejection_reasons"]
                    for item in resolution["rejected_competing_denominators"])
     else:
@@ -64,8 +68,8 @@ def test_advisory_resolver_preserves_detector(header, label, status):
 
 
 def test_missing_projected_cell_fails_closed(monkeypatch):
-    project = traced.project_jats_tables
-    monkeypatch.setattr(traced, "project_jats_tables",
+    project = traced._project_jats_tables_from_report
+    monkeypatch.setattr(traced, "_project_jats_tables_from_report",
                         lambda *args: replace(project(*args), tables=()))
     report = traced.trace_denominators(synthetic())
     row = report["relations"][0]
@@ -78,6 +82,42 @@ def test_empty_trace_has_empty_resolution_counts():
     report = traced.trace_denominators(b"<article><body/></article>")
     assert report["resolution_status_counts"] == {}
     assert report["detector_resolver_disagreement_count"] == 0
+    assert report["resolver_selected_without_detector_base_count"] == 0
+
+
+@pytest.mark.parametrize(("label", "equal", "disagreements", "resolver_only"), [
+    ("Event", True, 0, 0),
+    ("Event (n=20)", None, 0, 1),
+])
+def test_comparison_requires_both_bases(label, equal, disagreements, resolver_only):
+    report = traced.trace_denominators(synthetic(label=label))
+    assert report["relations"][0]["resolved_value_equals_detector_base"] is equal
+    assert report["detector_resolver_disagreement_count"] == disagreements
+    assert report["resolver_selected_without_detector_base_count"] == resolver_only
+
+
+def test_comparison_with_neither_base():
+    report = traced.trace_denominators(synthetic(header="Participants", label="Event"))
+    assert report["relations"][0]["resolved_value_equals_detector_base"] is None
+    assert report["detector_resolver_disagreement_count"] == 0
+    assert report["resolver_selected_without_detector_base_count"] == 0
+
+
+def test_comparison_counts_two_different_bases(monkeypatch):
+    resolve = traced.resolve_denominator
+
+    def select_different_base(*args, **kwargs):
+        result = resolve(*args, **kwargs)
+        result["denominator_provenance"]["selected_denominator"]["value_exact"] = "20"
+        return result
+
+    monkeypatch.setattr(traced, "resolve_denominator", select_different_base)
+    report = traced.trace_denominators(synthetic(label="Event"))
+    row = report["relations"][0]
+    assert row["detector_denominator"] == 100
+    assert row["resolved_value_equals_detector_base"] is False
+    assert report["detector_resolver_disagreement_count"] == 1
+    assert report["resolver_selected_without_detector_base_count"] == 0
 
 
 def test_printed_ratio_base_is_passed_to_resolver():
@@ -161,7 +201,7 @@ def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)
     trace = traced.trace_denominators(data, detector)
-    assert trace["schema_version"] == "rw-jats-denominator-evidence.v2"
+    assert trace["schema_version"] == "rw-jats-denominator-evidence.v3"
     assert trace["relation_count"] == detector["percentage_cells_reviewed"] == 3
     assert trace["fact_count"] >= 2
     assert trace["unresolved_relation_count"] == 1
@@ -215,6 +255,57 @@ def test_arithmetic_is_not_changed_by_a_provenance_trace():
     assert opt_in["findings"] == plain["findings"]
     assert opt_in["summary"] == plain["summary"]
     assert opt_in["denominator_evidence_trace"]["relation_count"] == len(plain["findings"])
+
+
+_PRODUCT_MODES = (
+    "include_structure", "include_odds_ratio", "include_prose_flows",
+    "include_prisma_flows", "include_count_totals", "include_sd_se_n",
+    "include_denominator_trace",
+)
+
+
+@pytest.mark.parametrize("enabled", list(product((False, True), repeat=len(_PRODUCT_MODES))))
+@pytest.mark.parametrize("data", [synthetic(), b"<article><body/></article>"])
+def test_product_reuses_detector_and_projection(monkeypatch, enabled, data):
+    expected_detector = jats.audit_jats_percentage_tables(data)
+    expected_trace = traced.trace_denominators(data) if enabled[-1] else None
+    detector = Mock(wraps=jats.audit_jats_percentage_tables)
+    project = Mock(wraps=projection._project_jats_tables_from_report)
+    monkeypatch.setattr(jats, "audit_jats_percentage_tables", detector)
+    monkeypatch.setattr(jats_product, "audit_jats_percentage_tables", detector)
+    monkeypatch.setattr(projection, "_project_jats_tables_from_report", project)
+    monkeypatch.setattr(traced, "_project_jats_tables_from_report", project)
+    report = jats_product.make_report(data, "synthetic", False, **dict(zip(_PRODUCT_MODES, enabled)))
+    detector.assert_called_once_with(data)
+    assert project.call_count == int(any(enabled))
+    assert [finding["relationship"] for finding in report["findings"]] == expected_detector["results"]
+    if expected_trace is not None:
+        assert report["denominator_evidence_trace"] == expected_trace
+    if enabled[0]:
+        assert report["table_projection"]["source_sha256"] == sha256(data).hexdigest()
+
+
+def test_invalid_product_source_stops_before_projection(monkeypatch):
+    detector = Mock(wraps=jats.audit_jats_percentage_tables)
+    project = Mock(wraps=projection._project_jats_tables_from_report)
+    monkeypatch.setattr(jats_product, "audit_jats_percentage_tables", detector)
+    monkeypatch.setattr(projection, "_project_jats_tables_from_report", project)
+    with pytest.raises(jats.JATSSourceError):
+        jats_product.make_report(b"not XML", "synthetic", False,
+                                 **dict.fromkeys(_PRODUCT_MODES, True))
+    detector.assert_called_once()
+    project.assert_not_called()
+
+
+@pytest.mark.parametrize("public", [traced.trace_denominators, projection.project_jats_tables])
+@pytest.mark.parametrize("supplied", [False, True])
+def test_public_adapters_validate_once(monkeypatch, public, supplied):
+    data = synthetic()
+    report = jats.audit_jats_percentage_tables(data)
+    detector = Mock(wraps=jats.audit_jats_percentage_tables)
+    monkeypatch.setattr(jats, "audit_jats_percentage_tables", detector)
+    public(data, report if supplied else None)
+    detector.assert_called_once_with(data)
 
 
 def test_conflicting_denominator_sources_visible_but_not_resolved():
