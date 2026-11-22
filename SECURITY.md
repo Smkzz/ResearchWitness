@@ -95,7 +95,16 @@ the Docker CLI opens its own connection after this check. An administrator or
 same-user attacker is not defended against. These residual risks remain explicit
 qualification limitations; `pdf_execution` stays unqualified. A pinned candidate
 image and native synthetic evidence are now recorded, but no separate image/
-evidence security review or residual-risk acceptance has happened. Sami authorized
+evidence security review has happened; no reviewer has been named. On
+**2026-11-23**, Sami (project owner) accepted the check-then-use race,
+same-user/admin attackers, offline-only revocation, name-only signer matching
+and installation-integrity risks: **"Accept these risks"**, relayed by the
+ResearchWitness coordinator. These risks are **accepted, not resolved or
+mitigated**. This is an owner decision, not a review. The only remaining
+PDF-execution unlock is separate security review of the inventory and evidence
+bound to the exact candidate image ID below. The next-real-rebuild receipt
+requirement in the recipe remains; custody stays NOT RUN and scientific gates
+are unchanged. Sami authorized
 native RW-03 qualification on the org Windows Devin
 machine in his answer to the "Use a Windows machine" card on **2026-11-21
 19:59 UTC**; this authority does not establish server identity or waive the gate.

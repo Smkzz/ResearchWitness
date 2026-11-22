@@ -1,7 +1,9 @@
 # PDF execution boundary and outstanding qualification
 
 **Observed state:** UNQUALIFIED; synthetic candidate-image evidence is recorded,
-but real-document use remains disabled pending separate review and risk acceptance.
+but real-document use remains disabled pending separate image security review.
+Pipe residual risks were accepted by Sami's owner decision below, not resolved
+or mitigated; no security reviewer has been named.
 **Plan owner:** RW-03 in [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md).
 
 Poppler is a native parser for attacker-controlled complex input. Malformed PDFs
@@ -38,7 +40,11 @@ A check-then-use race remains because
 the Docker CLI opens a separate connection after the check; an administrator or
 same-user attacker is not defended against. These remain qualification limitations,
 and `pdf_execution` stays unqualified: candidate-image evidence is not a separate
-security review or acceptance of these residual risks.
+security review. On **2026-11-23**, Sami (project owner) accepted the
+check-then-use race, same-user/admin attackers, offline-only revocation,
+name-only signer matching and installation-integrity risks: **"Accept these risks"**,
+relayed by the ResearchWitness coordinator. This is an owner decision,
+not a review; risks are **accepted, not resolved or mitigated**.
 The authority
 for native RW-03 qualification runs on the org Windows Devin machine is Sami's
 answer to the "Use a Windows machine" card, **2026-11-21 19:59 UTC**. That
@@ -207,8 +213,10 @@ or runs host Poppler. A first-fixture runtime failure stops the sequence. Its
 
 Before real documents, a separately reviewing security agent/operator must review
 the image inventory/provenance and recorded evidence bound to the exact image ID,
-and accept or resolve the open Windows pipe residual risks. No such separate
-review has happened for this candidate. The required evidence includes
+which is the only remaining PDF-execution unlock. No reviewer has been named
+and no such separate review has happened for this candidate. Sami's dated owner
+decision accepted the remaining pipe risks; it did not resolve or mitigate them.
+The required evidence includes
 effective image/container inspection, no network route, bounded writable tmpfs,
 no mounts/secrets, enforced resource limits, seccomp/capabilities/user, and confirmed
 container absence after success/failure. Exercise controlled real timeout/output-
@@ -223,12 +231,16 @@ Protected evaluation additionally requires the separately qualified custody gate
 
 Candidate image and real synthetic isolation/resource/cleanup evidence are now
 recorded. Separate security review of the inventory and this evidence, bound to
-the exact image ID above, plus residual-risk acceptance remain outstanding:
-check-then-use race, same-user/admin attackers, offline revocation, name-only
-signer matching and installation integrity. `pdf_execution` remains `unqualified`.
+`sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944`,
+is the only remaining PDF-execution unlock; no reviewer has been named. The
+check-then-use race, same-user/admin attackers, offline-only revocation,
+name-only signer matching and installation integrity remain residual risks,
+accepted by Sami on 2026-11-23, not resolved or mitigated. `pdf_execution` remains
+`unqualified`.
 The earlier managed-socket `operation not permitted` result is historical, not
 the current image-availability blocker. RW-03 remains `blocked_external` while
-separate capability acceptance and authorized isolated custody remain absent.
+separate image security review remains absent. Protected custody separately
+remains NOT RUN; the next-real-rebuild receipt requirement above stays.
 
 RW-03 may inspect current authorized capabilities, assemble/review an image and
 collect real evidence autonomously when no new privileges, egress, secret access

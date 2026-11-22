@@ -109,7 +109,8 @@ result establishes current revocation status, installation integrity or qualific
 
 **PDF execution: UNQUALIFIED; candidate evidence recorded.** The pinned image and
 native synthetic isolation/resource/cleanup receipts below are available; separate
-security review and residual-risk acceptance remain outstanding. Sami's bounded
+security review remains outstanding; no reviewer has been named. Sami accepted
+the remaining pipe risks on 2026-11-23, as recorded below. Sami's bounded
 download approval was relayed by the coordinator on 2026-11-22. Pipe-server
 identity is narrowed, not resolved: the check
 requires a current-user or SYSTEM token owner and a resolved image location under
@@ -124,15 +125,18 @@ the CLI's separate connection, same-user/admin attackers, offline-only revocatio
 (revoked certificates are not detected), name-only signer matching and the rest
 of the installation's integrity. Another local process can
 create `\\.\pipe\docker_engine` when the daemon is absent. These residual risks
-require separate assurance before any Windows PDF
-qualification claim. `pdf_execution` stays `unqualified`. Protected custody
+were accepted, not resolved or mitigated, by Sami (project owner) on 2026-11-23:
+"Accept these risks", relayed by the ResearchWitness coordinator. This owner
+decision is not a review or an execution-qualification claim. `pdf_execution`
+stays `unqualified`. Protected custody
 was **NOT RUN** (no authorized isolated custodian); it stays `unqualified`.
 `scientific_wave_3` remains `not_run`. No human certification is claimed.
 
-**RW-03 remains `blocked_external`.** Remaining conditions are
-assurance for the remaining pipe-server identity risks, separate review of the
-image inventory and recorded evidence bound to its exact ID, and separately
-authorized isolated custody. The ledger's state rules do not promote a blocked
+**RW-03 remains `blocked_external`.** The only remaining PDF-execution unlock
+is separate security review of the image inventory and recorded evidence bound to
+`sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944`;
+no reviewer has been named. Protected custody separately remains NOT RUN. The
+ledger's state rules do not promote a blocked
 package merely because runtime evidence exists; capability acceptance is absent.
 `next_unblocked_task` was deliberately set to `null`: the old RW-01 pointer was
 stale, and no next eligible package is identified after RW-04L. Original-source
@@ -167,7 +171,8 @@ three fixtures, `smoke_passed_not_qualified`, `sandbox_qualified: false`.
 
 **No separate security review has happened.** The review must bind both inventory
 and native evidence to this exact image ID; AI review is acceptable, not a human
-audit. Windows pipe residual risks above remain open. All gates remain unchanged:
+audit. Windows pipe residual risks above remain present but were accepted by
+Sami's dated owner decision, not resolved or mitigated. All gates remain unchanged:
 `pdf_execution` and protected custody `unqualified`, custody **NOT RUN**,
 scientific gates unchanged. EUR 0; no new privileges.
 
@@ -211,6 +216,16 @@ This engineering approval and documentation follow-up do not qualify PDF
 execution or change any state: pdf_execution unqualified, RW-03 blocked_external,
 custody NOT RUN and scientific gates unchanged. No rebuild or Docker run was
 performed for this documentation-only change.
+
+### PR #97 merge receipt
+
+[PR #97](https://github.com/Smkzz/ResearchWitness/pull/97) was Reviewer-approved
+at `13d8def0ba191acb75d96ed8fc2ad97c7f8ff42a` and merged as main
+`5b2262cbeea5d6f21cea449eae2b752b0fa9545f`. The ResearchWitness coordinator
+verified post-merge **11/11 PASS**: nine CI matrix jobs, Release gate and Analyze
+Python/CodeQL. This is an engineering receipt, not the separate image security
+review. The next authorized real rebuild must still commit the required
+pre-import tar-hash and exact signer-set receipt; no rebuild is claimed here.
 
 ## RW-04L accepted engineering receipt
 
