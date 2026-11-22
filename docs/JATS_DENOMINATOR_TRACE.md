@@ -50,13 +50,16 @@ All optional sections are deterministically recomputed on bundle replay.
 
 ## Scientific, security and licensing limits
 
-The report schema is now `rw-jats-denominator-evidence.v2` (the version is
+The report schema is now `rw-jats-denominator-evidence.v3` (the version is
 recorded in bundles). Each relation adds `denominator_provenance`: resolution
 status/reason, relationship scope, selected value/source anchor and rejected
-competitors/reasons. `resolved_value_equals_detector_base` is null when
-unresolved; otherwise it compares the selected integer to the detector base
-(including a missing base). Top-level `resolution_status_counts` and
-`detector_resolver_disagreement_count` summarize those results. This does not
+competitors/reasons. `resolved_value_equals_detector_base` is null when the
+resolver selects no base or the detector base is missing; otherwise it compares
+the two integers. Top-level `resolution_status_counts` summarizes resolver
+statuses. `detector_resolver_disagreement_count` counts only relations where both
+bases exist and differ. `resolver_selected_without_detector_base_count` separately
+counts relations where the resolver selected a base but the detector had none.
+These v3 semantics replace v2's comparison against a missing base. This does not
 alter detector decisions. Implementation fingerprints are included in every
 product report, plain or trace. Any bundle made before an implementation
 change that alters those fingerprints will not replay exactly under the new

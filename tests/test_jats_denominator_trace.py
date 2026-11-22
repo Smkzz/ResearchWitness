@@ -53,8 +53,9 @@ def test_advisory_resolver_preserves_detector(header, label, status):
     if status == "RESOLVED":
         assert resolution["selected_denominator"]["value_exact"] == "20"
         assert resolution["selected_denominator"]["source_anchor"]["start_byte"] >= 0
-        assert row["resolved_value_equals_detector_base"] is (row["detector_denominator"] == 20)
-        assert report["detector_resolver_disagreement_count"] == int(row["detector_denominator"] != 20)
+        assert row["resolved_value_equals_detector_base"] is None
+        assert report["detector_resolver_disagreement_count"] == 0
+        assert report["resolver_selected_without_detector_base_count"] == 1
         assert any(item["value_exact"] == "100" and item["rejection_reasons"]
                    for item in resolution["rejected_competing_denominators"])
     else:
@@ -78,6 +79,25 @@ def test_empty_trace_has_empty_resolution_counts():
     report = traced.trace_denominators(b"<article><body/></article>")
     assert report["resolution_status_counts"] == {}
     assert report["detector_resolver_disagreement_count"] == 0
+    assert report["resolver_selected_without_detector_base_count"] == 0
+
+
+@pytest.mark.parametrize(("label", "equal", "disagreements", "resolver_only"), [
+    ("Event", True, 0, 0),
+    ("Event (n=20)", None, 0, 1),
+])
+def test_comparison_requires_both_bases(label, equal, disagreements, resolver_only):
+    report = traced.trace_denominators(synthetic(label=label))
+    assert report["relations"][0]["resolved_value_equals_detector_base"] is equal
+    assert report["detector_resolver_disagreement_count"] == disagreements
+    assert report["resolver_selected_without_detector_base_count"] == resolver_only
+
+
+def test_comparison_with_neither_base():
+    report = traced.trace_denominators(synthetic(header="Participants", label="Event"))
+    assert report["relations"][0]["resolved_value_equals_detector_base"] is None
+    assert report["detector_resolver_disagreement_count"] == 0
+    assert report["resolver_selected_without_detector_base_count"] == 0
 
 
 def test_printed_ratio_base_is_passed_to_resolver():
@@ -161,7 +181,7 @@ def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)
     trace = traced.trace_denominators(data, detector)
-    assert trace["schema_version"] == "rw-jats-denominator-evidence.v2"
+    assert trace["schema_version"] == "rw-jats-denominator-evidence.v3"
     assert trace["relation_count"] == detector["percentage_cells_reviewed"] == 3
     assert trace["fact_count"] >= 2
     assert trace["unresolved_relation_count"] == 1

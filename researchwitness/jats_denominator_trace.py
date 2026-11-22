@@ -16,7 +16,7 @@ from .denominator_provenance import parent_count_groups, resolve_denominator, su
 from .jats_table_projection import _paths, project_jats_tables
 from .paper_document import TableRow
 
-VERSION = "rw-jats-denominator-evidence.v2"
+VERSION = "rw-jats-denominator-evidence.v3"
 MAX_FACTS_PER_RELATION = 64
 MAX_TOTAL_FACTS = 32768
 _DETECTOR_STATES = frozenset({
@@ -119,6 +119,7 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                 cells[(anchor.start_byte, anchor.end_byte)] = (table, row, row_index, cell)
     resolution_states: Counter[str] = Counter()
     disagreements = 0
+    resolver_only_bases = 0
     relations: list[dict[str, Any]] = []
     states: Counter[str] = Counter()
     fact_roles: Counter[str] = Counter()
@@ -225,9 +226,10 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                 )
         selected = resolution["selected_denominator"]
         agrees = (int(selected["value_exact"]) == reported_denominator
-                  if selected is not None else None)
+                  if selected is not None and reported_denominator is not None else None)
         resolution_states[resolution["resolution_status"]] += 1
         disagreements += agrees is False
+        resolver_only_bases += selected is not None and reported_denominator is None
         relations.append({
             "denominator_provenance": resolution,
             "resolved_value_equals_detector_base": agrees,
@@ -261,6 +263,7 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
         "detector_status_counts": dict(sorted(states.items())),
         "resolution_status_counts": dict(sorted(resolution_states.items())),
         "detector_resolver_disagreement_count": disagreements,
+        "resolver_selected_without_detector_base_count": resolver_only_bases,
         "denominator_fact_roles": dict(sorted(fact_roles.items())),
         "relations": relations,
         "detector_method_scope_overflow": bool(original["method_scope_overflow"]),
