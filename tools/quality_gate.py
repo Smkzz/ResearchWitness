@@ -67,8 +67,18 @@ def check_source_checksums() -> None:
 
 
 def scan_ui() -> None:
+    allowed_modules = {'http', 'http.server', 'urllib.parse'}
+    banned_reexports = BANNED_IMPORT_ROOTS | {'client', 'request', 'socketserver'}
     for path in sorted((ROOT / 'researchwitness_ui').glob('*.py')):
         tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+        module_roots = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                module_roots.update(alias.asname or alias.name.split('.')[0]
+                                    for alias in node.names if alias.name in allowed_modules)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                module_roots.update(alias.asname or alias.name for alias in node.names
+                                    if f'{node.module}.{alias.name}' in allowed_modules)
         socket_nodes = set()
         # Only Windows exclusive bind may use socket; no general networking API.
         if path.name == 'server.py':
@@ -86,10 +96,13 @@ def scan_ui() -> None:
                 names = [alias.name for alias in node.names]
             elif isinstance(node, ast.ImportFrom) and node.module:
                 names = [node.module]
+                if node.module in allowed_modules and any(
+                        alias.name in banned_reexports for alias in node.names):
+                    raise RuntimeError('banned module re-export in UI adapter')
                 if node.module in {'http', 'urllib'}:
                     names = [f'{node.module}.{alias.name}' for alias in node.names]
             for name in names:
-                allowed = (name in {'http', 'http.server', 'urllib.parse'}
+                allowed = (name in allowed_modules
                            and path.name == 'server.py')
                 if (name == 'socket' and path.name == 'server.py'
                         and isinstance(node, ast.Import) and socket_nodes
@@ -99,6 +112,12 @@ def scan_ui() -> None:
                     raise RuntimeError(f'banned import in UI adapter: {path.name}: {name}')
             if isinstance(node, ast.Name) and node.id == 'socket' and node not in socket_nodes:
                 raise RuntimeError('socket is restricted to the Windows exclusive bind')
+            if isinstance(node, ast.Attribute) and node.attr in banned_reexports:
+                root = node.value
+                while isinstance(root, ast.Attribute):
+                    root = root.value
+                if isinstance(root, ast.Name) and root.id in module_roots:
+                    raise RuntimeError('banned module re-export in UI adapter')
             if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
                     and node.func.id in BANNED_CALLS):
                 raise RuntimeError(f'banned dynamic call in UI adapter: {path.name}: {node.func.id}')

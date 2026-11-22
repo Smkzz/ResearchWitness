@@ -450,7 +450,7 @@ def render_html(report: dict[str, Any]) -> bytes:
 
 
 def write_new(path: Path, data: bytes) -> None:
-    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb") as stream:
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o600), "wb") as stream:
         stream.write(data)
         stream.flush()
         os.fsync(stream.fileno())
