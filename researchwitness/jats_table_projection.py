@@ -345,6 +345,23 @@ def project_jats_tables(
     Reuse the same parser and detector implementation as the installed JATS
     audit. No independent scientific/source-correspondence review is implied.
     """
+    actual_report = jats.audit_jats_percentage_tables(source)
+    if detector_report is not None:
+        if (type(detector_report) is not dict or
+                detector_report.get("source_sha256") != sha256(source).hexdigest()):
+            raise jats.JATSSourceError("Source and detector report refer to different bytes")
+        if detector_report != actual_report:
+            raise jats.JATSSourceError("Supplied detector report does not match source")
+    return _project_jats_tables_from_report(
+        source, actual_report, include_body_paragraphs=include_body_paragraphs,
+    )
+
+
+def _project_jats_tables_from_report(
+    source: bytes, detector_report: dict,
+    *, include_body_paragraphs: bool = False,
+) -> PaperDocument:
+    """Internal path: caller must have computed the report from these bytes."""
     root = jats._parse_jats(source)
     source_hash = sha256(source).hexdigest()
     paths = _paths(root)
@@ -363,17 +380,6 @@ def project_jats_tables(
             estimated_cells += len(jats._cells(row))
             if estimated_rows > MAX_MODEL_ROWS or estimated_cells > MAX_MODEL_CELLS:
                 raise jats.JATSSourceError("JATS table projection exceeds row/cell limit")
-
-    # Recompute supplied detector results against original bytes; merely checking
-    # source hash and cell offset would permit fabricated numeric assertions.
-    actual_report = jats.audit_jats_percentage_tables(source)
-    if detector_report is not None:
-        if (type(detector_report) is not dict or
-                detector_report.get("source_sha256") != source_hash):
-            raise jats.JATSSourceError("Source and detector report refer to different bytes")
-        if detector_report != actual_report:
-            raise jats.JATSSourceError("Supplied detector report does not match source")
-    detector_report = actual_report
 
     identifiers: dict[str, int] = {}
     for wrapper, _table_node in table_pairs:

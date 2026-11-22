@@ -13,8 +13,8 @@ from typing import Any
 
 from . import _jats_parser as jats
 from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
-from .jats_table_projection import _paths, project_jats_tables
-from .paper_document import TableRow
+from .jats_table_projection import _paths, _project_jats_tables_from_report
+from .paper_document import PaperDocument, TableRow
 
 VERSION = "rw-jats-denominator-evidence.v3"
 MAX_FACTS_PER_RELATION = 64
@@ -97,15 +97,23 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
     trusted because their hash happens to match. Contradictory or unresolved
     source facts remain visible and are never overridden by arithmetic fit.
     """
-    root = jats._parse_jats(source)
-    source_hash = sha256(source).hexdigest()
     original = jats.audit_jats_percentage_tables(source)
     if detector_report is not None:
         _require(type(detector_report) is dict and detector_report == original,
                  "SUPPLIED_DETECTOR_RESULTS_NOT_REPLAYED_FROM_SOURCE")
+    return _trace_denominators_from_report(source, original)
+
+
+def _trace_denominators_from_report(
+    source: bytes, original: dict[str, Any], document: PaperDocument | None = None,
+) -> dict[str, Any]:
+    """Internal path: report and optional projection must derive from these bytes."""
+    root = jats._parse_jats(source)
+    source_hash = sha256(source).hexdigest()
     _require(original["source_sha256"] == source_hash, "SOURCE_DIGEST_CHANGED")
     positions, paths = _source_index(root), _paths(root)
-    document = project_jats_tables(source, original)
+    if document is None:
+        document = _project_jats_tables_from_report(source, original)
     cells = {}
     table_scopes = {}
     for table in document.tables:
