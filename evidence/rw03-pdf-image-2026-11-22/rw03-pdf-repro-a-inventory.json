@@ -1,0 +1,2823 @@
+[
+  {
+    "path": ".",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./etc",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/20-unhint-small-dejavu-lgc-sans-mono.conf",
+    "mode": "0o644",
+    "size": 874,
+    "sha256": "0a6b0f1c1f5d1c06a811b517a3d2690700bba8e961cd55dd2c7648cde3605a21",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/20-unhint-small-dejavu-lgc-sans.conf",
+    "mode": "0o644",
+    "size": 864,
+    "sha256": "144619057c0a040de247c74cf09f230d737b9c1c534f3ba8804fdd3ddeded8b0",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/20-unhint-small-dejavu-lgc-serif.conf",
+    "mode": "0o644",
+    "size": 866,
+    "sha256": "977c24eb43f10d21263bbdb624649e5edf63147bd7bb4f84db97ce7d53bb9054",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/20-unhint-small-dejavu-sans-mono.conf",
+    "mode": "0o644",
+    "size": 866,
+    "sha256": "3e90c9c36beef46f10d1529251f8683b9c4ac900695adbb4a23a4b6036f938a5",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/20-unhint-small-dejavu-sans.conf",
+    "mode": "0o644",
+    "size": 856,
+    "sha256": "0d9c177b6a85daa9957ed6750d4eb26122604da18d340e7ba31e6f4d24f963ed",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/20-unhint-small-dejavu-serif.conf",
+    "mode": "0o644",
+    "size": 858,
+    "sha256": "68777b1705ec7a05a86430def4be093668e84e305cc7e11291df52403a7318cc",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/57-dejavu-sans-mono.conf",
+    "mode": "0o644",
+    "size": 1201,
+    "sha256": "1f2ead86f8203d809abfc9d88d92b04316edd67b6291795ea74ea8a0c3c2e04d",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/57-dejavu-sans.conf",
+    "mode": "0o644",
+    "size": 1711,
+    "sha256": "f6285e2d336f93086acfa2ac7895ef75ef5ff34f833ba5a63c09fb2841aedc27",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/57-dejavu-serif.conf",
+    "mode": "0o644",
+    "size": 1357,
+    "sha256": "7c596f7e202090ded38fded904c4a17d5a189b6c9cc914a2e88554116f6474ca",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/58-dejavu-lgc-sans-mono.conf",
+    "mode": "0o644",
+    "size": 1545,
+    "sha256": "807e5222c6d11a72ad527ebc088f42daf2a807e7718c8f7ff227cbfecafd3d70",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/58-dejavu-lgc-sans.conf",
+    "mode": "0o644",
+    "size": 2063,
+    "sha256": "ecde2093f005c73d7da21cdd7b80c791910050609db36cb5eea84a4ba8da5cef",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.avail/58-dejavu-lgc-serif.conf",
+    "mode": "0o644",
+    "size": 1689,
+    "sha256": "e685632c3edbb6868a7ca5275e7c71f25486a8cfd16113a478194a5631205619",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.d",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/conf.d/10-scale-bitmap-fonts.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/10-scale-bitmap-fonts.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/10-sub-pixel-none.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/10-sub-pixel-none.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/10-yes-antialias.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/10-yes-antialias.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/11-lcdfilter-default.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/11-lcdfilter-default.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/20-unhint-small-dejavu-lgc-sans-mono.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/20-unhint-small-dejavu-lgc-sans-mono.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/20-unhint-small-dejavu-lgc-sans.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/20-unhint-small-dejavu-lgc-sans.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/20-unhint-small-dejavu-lgc-serif.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/20-unhint-small-dejavu-lgc-serif.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/20-unhint-small-dejavu-sans-mono.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/20-unhint-small-dejavu-sans-mono.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/20-unhint-small-dejavu-sans.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/20-unhint-small-dejavu-sans.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/20-unhint-small-dejavu-serif.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/20-unhint-small-dejavu-serif.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/20-unhint-small-vera.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/20-unhint-small-vera.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/30-metric-aliases.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/30-metric-aliases.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/40-nonlatin.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/40-nonlatin.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/45-generic.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/45-generic.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/45-latin.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/45-latin.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/48-spacing.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/48-spacing.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/49-sansserif.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/49-sansserif.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/50-user.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/50-user.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/51-local.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/51-local.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/57-dejavu-sans-mono.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/57-dejavu-sans-mono.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/57-dejavu-sans.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/57-dejavu-sans.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/57-dejavu-serif.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/57-dejavu-serif.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/58-dejavu-lgc-sans-mono.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/58-dejavu-lgc-sans-mono.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/58-dejavu-lgc-sans.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/58-dejavu-lgc-sans.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/58-dejavu-lgc-serif.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "../conf.avail/58-dejavu-lgc-serif.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/60-generic.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/60-generic.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/60-latin.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/60-latin.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/65-fonts-persian.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/65-fonts-persian.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/65-nonlatin.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/65-nonlatin.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/69-unifont.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/69-unifont.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/80-delicious.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/80-delicious.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/90-synthetic.conf",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/share/fontconfig/conf.avail/90-synthetic.conf"
+  },
+  {
+    "path": "./etc/fonts/conf.d/README",
+    "mode": "0o644",
+    "size": 979,
+    "sha256": "fdc29a3ebd8816eb07ed04c2cbe151076e95a7b0b2a0ec8fe94e5c8a67931d3c",
+    "symlink_target": null
+  },
+  {
+    "path": "./etc/fonts/fonts.conf",
+    "mode": "0o644",
+    "size": 2940,
+    "sha256": "93a23ba073996edb8b42d6c89ebc2ec5fd2101ce82cb65ba0db358dabf55ca22",
+    "symlink_target": null
+  },
+  {
+    "path": "./lib64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./lib64/ld-linux-x86-64.so.2",
+    "mode": "0o777",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2"
+  },
+  {
+    "path": "./usr",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/bin",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/bin/pdftotext",
+    "mode": "0o755",
+    "size": 51664,
+    "sha256": "7fe3559cac3ba61dd93650a1ba90499b9fc488184ef8d0f2f1305ddf52c0378b",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+    "mode": "0o755",
+    "size": 225672,
+    "sha256": "c8438e4fde1934e61c88311633f00949ff645d5c04cdb8671fa3d78164d2f307",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libLerc.so.4",
+    "mode": "0o644",
+    "size": 579608,
+    "sha256": "b04bc6a13a8cda1d3f60b7e8b9b69e38f8a998b3364705168510285c29719bee",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libassuan.so.9",
+    "mode": "0o644",
+    "size": 84120,
+    "sha256": "3cb64a2b25aa728b908fe9c3c11c17aeaba566c2c4ba90d82cb087b402d92207",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1",
+    "mode": "0o644",
+    "size": 141496,
+    "sha256": "7b0b0de90d8d3d4f07b99738c0285c6a0dbb6611d774ca44e7ea53a19a01ea68",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libbrotlidec.so.1",
+    "mode": "0o644",
+    "size": 51376,
+    "sha256": "06530583d5927000480f4214d80d0213fec3d34cc448527f932a6eceb50cefef",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libbz2.so.1.0",
+    "mode": "0o644",
+    "size": 74688,
+    "sha256": "c630f057efedc12f848710d71f40283895591e5b4608539f387895c64e0553da",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libc.so.6",
+    "mode": "0o755",
+    "size": 1995216,
+    "sha256": "9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libcom_err.so.2",
+    "mode": "0o644",
+    "size": 18344,
+    "sha256": "dc4828400674492839b630c001db424cd38e5cecfcf46dbf705a637647e04bea",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libcrypto.so.3",
+    "mode": "0o644",
+    "size": 6517312,
+    "sha256": "8bb5f3fdffe280d4453eb79a4663c2c47af70b7c247fe2e94e2da703cee1fd3d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4",
+    "mode": "0o644",
+    "size": 963560,
+    "sha256": "2bb1c5c8ee8800820269aee650e3c316a9dea080f4888cf69612badf48bf56d0",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libdeflate.so.0",
+    "mode": "0o644",
+    "size": 87944,
+    "sha256": "1f21f19cb8406b030cdf01b598ff399e084618e53164b56c813d8c2cd6e88aca",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libexpat.so.1",
+    "mode": "0o644",
+    "size": 186520,
+    "sha256": "0fd7d092bd0bf5dcc29f31daaba2bad993b0d18a1ab771fb844e0a6dfa8efe18",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libffi.so.8",
+    "mode": "0o644",
+    "size": 47576,
+    "sha256": "922024ec5a23f7de1095b1cff2f6cbfb377b5d58cd51fd0ec2e8fe35427653e2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libfontconfig.so.1",
+    "mode": "0o644",
+    "size": 317360,
+    "sha256": "d6344f71a0cfd5fcb154278f0be706021f75f79d1fcc973fc4ddb1dff40ab0ee",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libfreetype.so.6",
+    "mode": "0o644",
+    "size": 845736,
+    "sha256": "9e376992a91e92d86809893a3b9eea22a4e27849db1686f6ca58032f79cdafb5",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+    "mode": "0o644",
+    "size": 182856,
+    "sha256": "30c61ab012a4241bed033725a09b61f5fdd3bb7df95ee852d0b096520524c7af",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libgmp.so.10",
+    "mode": "0o644",
+    "size": 566080,
+    "sha256": "d15e1585c6c267296459570c8ac217ca9123044bcd4e896d2f686b32333445d2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libgnutls.so.30",
+    "mode": "0o644",
+    "size": 2246712,
+    "sha256": "4b14edde42e7cbeefd8a6d88d035e096f2e6412a535388bb1d073a1c196e2822",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libgpg-error.so.0",
+    "mode": "0o644",
+    "size": 170056,
+    "sha256": "0f791efb82fb4a48f2704bd2bebc509e97d91aeec6102f7148a9dadca1cb7594",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libgpgme.so.11",
+    "mode": "0o644",
+    "size": 363912,
+    "sha256": "04eadac3a19e7b37ac8cf4bd8a80d70722c44923a6f1b349979e1f123f80595a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libgpgmepp.so.6",
+    "mode": "0o644",
+    "size": 469000,
+    "sha256": "2c8ce3c7cd6de04cb3fc656615291a799f03fd433548b5897b65598807157a74",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2",
+    "mode": "0o644",
+    "size": 346904,
+    "sha256": "c290f761873ebeac539911010526e1c5db86218bfcb29672760da46841741de0",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libhogweed.so.6",
+    "mode": "0o644",
+    "size": 305144,
+    "sha256": "2663d9bdca20ba67d2d72f1d4c24b6fd0a3e97d5ee23e7b739788176cf904380",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libidn2.so.0",
+    "mode": "0o644",
+    "size": 202872,
+    "sha256": "299cdc741f1dd0834a49d5cb44f3da26b1960bb110c1f521a084400d9b603cbf",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libjbig.so.0",
+    "mode": "0o644",
+    "size": 66240,
+    "sha256": "7a4ff4cd3d0012f610f9eaed154ce593c5a26aaf08993456dbb3f4ac2d23cc6c",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libjpeg.so.62",
+    "mode": "0o644",
+    "size": 616512,
+    "sha256": "0928fd49fa79e10f72eb3276f1cf603d928201a628cd78e0118a2e9c01fd2dac",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libk5crypto.so.3",
+    "mode": "0o644",
+    "size": 187144,
+    "sha256": "c4c3221d0350f882cee0430b58d5fb289a5776c684d3156964864c8a9719dff1",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libkeyutils.so.1",
+    "mode": "0o644",
+    "size": 22448,
+    "sha256": "e5d5a7450d08eff7d4bbcaac75ef2b94d3447c81a1b2ddf3ab85d2de4709a9a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libkrb5.so.3",
+    "mode": "0o644",
+    "size": 883984,
+    "sha256": "c4ab64e6bc2874a83e649e4439be752465da027a0041e2bb5343f81c80f0882d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libkrb5support.so.0",
+    "mode": "0o644",
+    "size": 52208,
+    "sha256": "f559f051ee5d39f151a57d79f2cde475c484030098b0c73f9f7035b421b187c4",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/liblber.so.2",
+    "mode": "0o644",
+    "size": 63824,
+    "sha256": "ca319704dd4f58b5b3fc8510738850f03f18940544ba04bebf2fa8a23a798346",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/liblcms2.so.2",
+    "mode": "0o644",
+    "size": 422952,
+    "sha256": "a0afaac586186b4e6b06c157e48c49480fde35d671052ee1309f36881a4508e7",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libldap.so.2",
+    "mode": "0o644",
+    "size": 400912,
+    "sha256": "e8f34e65087f24f296fa7a65a8c65383f4a7e2b532c46e40463d4e59a206c20a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/liblzma.so.5",
+    "mode": "0o644",
+    "size": 198832,
+    "sha256": "01e05a4b5268805a10a2414a8904fb1fb45c60626dce53b5ea19c1d491049b99",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libm.so.6",
+    "mode": "0o644",
+    "size": 977112,
+    "sha256": "6d567d53e895273ca14a1f9dc164fc6c8d39aed2f60aa46a733c2784228915f3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libnettle.so.8",
+    "mode": "0o644",
+    "size": 346216,
+    "sha256": "34ac695c167a593d3587bd88592d33d53e5dc4035984f84446100962f57376fd",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libnghttp2.so.14",
+    "mode": "0o644",
+    "size": 199152,
+    "sha256": "207268890b5be3043575c97af4e08c8326a12321a8a83e7278681b6b6f7d5ea8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libnghttp3.so.9",
+    "mode": "0o644",
+    "size": 173392,
+    "sha256": "37ecaa050c23fee92d563eec8701164505ef880c00a513cbd6d1d03beeb8fa29",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libngtcp2.so.16",
+    "mode": "0o644",
+    "size": 301592,
+    "sha256": "ac58fdb952991fdb624bcb275e9a9ded9e59228eb7a989c4d18b4339103f50d3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libngtcp2_crypto_gnutls.so.8",
+    "mode": "0o644",
+    "size": 43608,
+    "sha256": "32ff8ebba031c45a407f0d4bb7f0f97b372089789de05e43a8d9deb97f569edf",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libnspr4.so",
+    "mode": "0o644",
+    "size": 258536,
+    "sha256": "bd0acf4c8a3e08970b0a187d4e2cbb52fefe2b5ccb9761d86b21d18d5f109830",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libnss3.so",
+    "mode": "0o644",
+    "size": 1443248,
+    "sha256": "b13e6eedabfe3d1cc2aa6d3d75da9cbfe894902d22a8012fff7f1ada25b7d0ed",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libnssutil3.so",
+    "mode": "0o644",
+    "size": 211248,
+    "sha256": "17048afceb6088836f42049dfbda80d2f096fb69a65786d51af8864fe783506e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libopenjp2.so.7",
+    "mode": "0o644",
+    "size": 465352,
+    "sha256": "aa1654c4757c8b37f744d1b12c75f19166b298c05c0c8dbcff5467e300e3da18",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libp11-kit.so.0",
+    "mode": "0o644",
+    "size": 1705664,
+    "sha256": "e4ae39be74740511cf8e49e80fdfc16aeee7b822ee313793da1b78ce148ba05f",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libplc4.so",
+    "mode": "0o644",
+    "size": 22632,
+    "sha256": "6236e9a36b61830d671668d0db7311042b5b48a226702c29523a12c25906798f",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libplds4.so",
+    "mode": "0o644",
+    "size": 14472,
+    "sha256": "cb1c194a3c6c7e8e16fcc99d2b3bf1f71e35c599179bda43fa883ec23a195aef",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libpng16.so.16",
+    "mode": "0o644",
+    "size": 231416,
+    "sha256": "56485ea502d222fa8b0d99f899470c1bacdca815a958d83c1b349d4e8f605255",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libpoppler.so.147",
+    "mode": "0o644",
+    "size": 3969912,
+    "sha256": "8f199d8f320d485c8a0051676b8a0d6c6019900e5643b685afd7e304250ef340",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libpsl.so.5",
+    "mode": "0o644",
+    "size": 75616,
+    "sha256": "d9a6975db1b66ed34bdc04195a92a77b7d29b8d6affe4c35c05d7eafe5424fef",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libresolv.so.2",
+    "mode": "0o644",
+    "size": 63936,
+    "sha256": "d41dd4adacf5a35df426461dd8a92d7bdd5ba29bb61a1c3531bec0ada386f8dd",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/librtmp.so.1",
+    "mode": "0o644",
+    "size": 122256,
+    "sha256": "7d4c54c51f62085d79a4c96c7ad52f680f1f2e6d38ff7c8b8fa18d57f89df130",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libsasl2.so.2",
+    "mode": "0o644",
+    "size": 109232,
+    "sha256": "3f93968591811eb3972c3467c69c2968dd9cb2b51f7b7bb48de22ba8e17d13fd",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libsharpyuv.so.0",
+    "mode": "0o644",
+    "size": 26656,
+    "sha256": "36969fea33a1afb64c381f053a8870b486c41cba93e9cc4779a42687c1b391ca",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libsmime3.so",
+    "mode": "0o644",
+    "size": 211200,
+    "sha256": "959dc25a7396f70eefdccff49b246cb91224b52e5b1b4f7ab8a4879b5e070aee",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libssh2.so.1",
+    "mode": "0o644",
+    "size": 297472,
+    "sha256": "bea384b0ed8797abdba6cb31b2de38ae2a6ad38d5a1cc13fb3704863bcbb15ca",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libssl.so.3",
+    "mode": "0o644",
+    "size": 1101760,
+    "sha256": "4b34859318555bf96d518131bed5fc4d5e35fefa4e1729f49eaa26bd05263850",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libstdc++.so.6",
+    "mode": "0o644",
+    "size": 2497768,
+    "sha256": "972bb2a18b71140dab0240f8a1f68ab3fb1d56bcd4c4f824a91b70888faf5a00",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libtasn1.so.6",
+    "mode": "0o644",
+    "size": 88064,
+    "sha256": "cea637336b0855f91260714181894bcea9f345a3a97ce68d6447f6031728cabd",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libtiff.so.6",
+    "mode": "0o644",
+    "size": 604168,
+    "sha256": "7f2309b13404f98171b54c07f75ad7c54673cec26ecaa874ac5273feda916c6f",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libunistring.so.5",
+    "mode": "0o644",
+    "size": 1996840,
+    "sha256": "9c200ec975ff24c0a259d4f6cf0d0fc1736d0c86da30fff3d499ad3d9a368b65",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libwebp.so.7",
+    "mode": "0o644",
+    "size": 527000,
+    "sha256": "5f547b804f9c8f70aa2d64a70d49eb406ec4e295fa0772ebcadfba719f8c8668",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libz.so.1",
+    "mode": "0o644",
+    "size": 125376,
+    "sha256": "85590dd58edf5445e18bc7193e5ebc01ac5841f1ae187e97705a662e90c6421e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/lib/x86_64-linux-gnu/libzstd.so.1",
+    "mode": "0o644",
+    "size": 825336,
+    "sha256": "27f07c9a49c2c956bcfb64cd4712976586a66facbf15fc7f09bc37413b5f2b21",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/adduser",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/adduser/copyright",
+    "mode": "0o644",
+    "size": 14636,
+    "sha256": "46a62796c410dd88c0df99066519127a29ddca803078f7a8554fc779c30101bb",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/base-passwd",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/base-passwd/copyright",
+    "mode": "0o644",
+    "size": 798,
+    "sha256": "0f1cde79bd80a75f9029ae9a8c252b642223027ef36f6989c63a8230aae576a7",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/debconf",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/debconf/copyright",
+    "mode": "0o644",
+    "size": 2764,
+    "sha256": "57163c71bd8a5289660892827dd0dfaa7fef47f89deedc9dc6711ced7d0a28d7",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/dirmngr",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/dirmngr/copyright",
+    "mode": "0o644",
+    "size": 13143,
+    "sha256": "c19276de1952e4d3926c293ac598065e2abcb5b9543600cf941d53fb3c6e41a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/fontconfig-config",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/fontconfig-config/copyright",
+    "mode": "0o644",
+    "size": 1301,
+    "sha256": "b215a61cdd3e62b5b17cc28b1852c78acb3dd38be0fb30706f7efc050dba91db",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/fonts-dejavu-core",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/fonts-dejavu-core/copyright",
+    "mode": "0o644",
+    "size": 3859,
+    "sha256": "63d3ba759d12804c5b31a9d5940d855c1820d1f5999e6b0872eb1c7ff045fbc9",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/fonts-dejavu-mono",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/fonts-dejavu-mono/copyright",
+    "mode": "0o644",
+    "size": 3859,
+    "sha256": "63d3ba759d12804c5b31a9d5940d855c1820d1f5999e6b0872eb1c7ff045fbc9",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gcc-14-base",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gcc-14-base/copyright",
+    "mode": "0o644",
+    "size": 69004,
+    "sha256": "20390f8a6f3b1e4d7cb45dd8652dabb259bbef688cbad839bcdb0b9ba7252f79",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gnupg",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gnupg-l10n",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gnupg-l10n/copyright",
+    "mode": "0o644",
+    "size": 13143,
+    "sha256": "c19276de1952e4d3926c293ac598065e2abcb5b9543600cf941d53fb3c6e41a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gnupg/copyright",
+    "mode": "0o644",
+    "size": 13143,
+    "sha256": "c19276de1952e4d3926c293ac598065e2abcb5b9543600cf941d53fb3c6e41a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpg",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpg-agent",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpg-agent/copyright",
+    "mode": "0o644",
+    "size": 13143,
+    "sha256": "c19276de1952e4d3926c293ac598065e2abcb5b9543600cf941d53fb3c6e41a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpg/copyright",
+    "mode": "0o644",
+    "size": 13143,
+    "sha256": "c19276de1952e4d3926c293ac598065e2abcb5b9543600cf941d53fb3c6e41a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpgconf",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpgconf/copyright",
+    "mode": "0o644",
+    "size": 13143,
+    "sha256": "c19276de1952e4d3926c293ac598065e2abcb5b9543600cf941d53fb3c6e41a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpgsm",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/gpgsm/copyright",
+    "mode": "0o644",
+    "size": 13143,
+    "sha256": "c19276de1952e4d3926c293ac598065e2abcb5b9543600cf941d53fb3c6e41a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/init-system-helpers",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/init-system-helpers/copyright",
+    "mode": "0o644",
+    "size": 3133,
+    "sha256": "7534601cc4fa513804d16490359f5831e7b6a1212da3bbf948bebdd4c8799783",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libacl1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libacl1/copyright",
+    "mode": "0o644",
+    "size": 2048,
+    "sha256": "9a2dfb4a5abc7e84be2cc41f1089be665519c9409549296f6c19de57ab1d37c2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libassuan9",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libassuan9/copyright",
+    "mode": "0o644",
+    "size": 12055,
+    "sha256": "77098ae4bd20a17039c27a742aaec873c0317793a2867332b3083509c16cfb9a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libattr1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libattr1/copyright",
+    "mode": "0o644",
+    "size": 1947,
+    "sha256": "0cbec745d85ea775450b2d54fac55277197f429e52d611f72852ed420450620e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libaudit-common",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libaudit-common/copyright",
+    "mode": "0o644",
+    "size": 1596,
+    "sha256": "6c7011e93f643b112c4cc3622131e28a30477afad6c4f5efe466b13aa7f603cc",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libaudit1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libaudit1/copyright",
+    "mode": "0o644",
+    "size": 1596,
+    "sha256": "6c7011e93f643b112c4cc3622131e28a30477afad6c4f5efe466b13aa7f603cc",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libbrotli1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libbrotli1/copyright",
+    "mode": "0o644",
+    "size": 1354,
+    "sha256": "24a64e5bb83d0960d1835696a1e23c0896ad6055b0ca47c66ab0eb9a766324b1",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libbsd0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libbsd0/copyright",
+    "mode": "0o644",
+    "size": 22378,
+    "sha256": "47eaa031b1741a33a93e7cc8909bfe153acaec7ddff12e4dc7377d0e2ec10e91",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libbz2-1.0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libbz2-1.0/copyright",
+    "mode": "0o644",
+    "size": 2228,
+    "sha256": "832ed535ff3c3d025a8d2348eb1b697b89addcf2eaadbc17650262040b9145e2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libc6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libc6/copyright",
+    "mode": "0o644",
+    "size": 51200,
+    "sha256": "f5788886720a2605a946e81d571e6c8162b09f58d2e2ceb8d36e5768fccd850d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcairo2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcairo2/copyright",
+    "mode": "0o644",
+    "size": 28461,
+    "sha256": "408fb9e704e875cd42d432e7c9b3b378f568e3c89db2b5c5ef3d11c025319574",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcap-ng0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcap-ng0/copyright",
+    "mode": "0o644",
+    "size": 1621,
+    "sha256": "567997de097e3738564c90e6fe13343b2daae21a7926d6fb161df41322c1840b",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcap2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcap2/copyright",
+    "mode": "0o644",
+    "size": 4496,
+    "sha256": "04f9fb974e10f6ca0cd226811f72b3855f8383daad0e5de7adac8d5b0b7796c3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcom-err2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcom-err2/copyright",
+    "mode": "0o644",
+    "size": 20459,
+    "sha256": "2041b5febdc110151ca3372d01b16b85dda1888e33f3f60fce0f59940eed7d19",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcrypt1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcrypt1/copyright",
+    "mode": "0o644",
+    "size": 6010,
+    "sha256": "5a5e7ca0e9f3f9679977e3a3e9ede45ad92885a3297ea78e766979f9866c5a16",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcurl3t64-gnutls",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libcurl3t64-gnutls/copyright",
+    "mode": "0o644",
+    "size": 22132,
+    "sha256": "e1b7678c8443b4f8ac69350e1eefd6132339b010cc3b870675fec0c0c29779a5",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libdb5.3t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libdb5.3t64/copyright",
+    "mode": "0o644",
+    "size": 17177,
+    "sha256": "8b53da37d73289d9df7317b3a2dbe16491f1fa9fec8b77b86d69704b40ce2c26",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libdebconfclient0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libdebconfclient0/copyright",
+    "mode": "0o644",
+    "size": 5856,
+    "sha256": "cf63099896d1c0f6529c41b8d95738e6fea342ffba609187d339c4f38ce36ecc",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libdeflate0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libdeflate0/copyright",
+    "mode": "0o644",
+    "size": 1666,
+    "sha256": "b08d3438a0eadaee3103fba087a3e0f639506388ed71e7e2dfbb3e3484e9742c",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libexpat1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libexpat1/copyright",
+    "mode": "0o644",
+    "size": 1756,
+    "sha256": "60919fe1a156395ff14511bb6ff79756c50ade2fff59ac60c9bae1d8a7fe6292",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libffi8",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libffi8/copyright",
+    "mode": "0o644",
+    "size": 10164,
+    "sha256": "25ee86cfccc2b7eb9a156a127f1e1b38c46c231f516ff201912223eaf62ee186",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libfontconfig1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libfontconfig1/copyright",
+    "mode": "0o644",
+    "size": 1301,
+    "sha256": "b215a61cdd3e62b5b17cc28b1852c78acb3dd38be0fb30706f7efc050dba91db",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libfreetype6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libfreetype6/copyright",
+    "mode": "0o644",
+    "size": 31206,
+    "sha256": "acdab1506824347784d2cc0a634cfa17dbf525c0d5b4902b4ac9d0d4e1fed6c7",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgcrypt20",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgcrypt20/copyright",
+    "mode": "0o644",
+    "size": 26983,
+    "sha256": "4feae258cab1ad4743fb569a77e0b2a5b7a0199520bdbc0a613916291b9aa8a8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgmp10",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgmp10/copyright",
+    "mode": "0o644",
+    "size": 4153,
+    "sha256": "7d366aef5ba325150246de1d7820c4c9926cd27ca61a69948492b26cd3b61601",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgnutls30t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgnutls30t64/copyright",
+    "mode": "0o644",
+    "size": 57443,
+    "sha256": "a07e99815cf1998f1dabbc21fe199460bfa09b85ead0d56b49a32cac3d1791b5",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgpg-error0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgpg-error0/copyright",
+    "mode": "0o644",
+    "size": 5301,
+    "sha256": "1edb3be55cf9371e8e7a71e53fadc2a3d33b44d7d7f15c78a7669c92ce0fade2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgpgme11t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgpgme11t64/copyright",
+    "mode": "0o644",
+    "size": 3964,
+    "sha256": "634b667cb8c01f73d9d59ce522faee9f6c7e910f431b084e247d5e07634cbb03",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgpgmepp6t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgpgmepp6t64/copyright",
+    "mode": "0o644",
+    "size": 3964,
+    "sha256": "634b667cb8c01f73d9d59ce522faee9f6c7e910f431b084e247d5e07634cbb03",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgssapi-krb5-2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libgssapi-krb5-2/copyright",
+    "mode": "0o644",
+    "size": 63047,
+    "sha256": "936728f4181718f42951b881c1e8f1386bf6b2723c4fbc533c374d6f42c71816",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libhogweed6t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libhogweed6t64/copyright",
+    "mode": "0o644",
+    "size": 24407,
+    "sha256": "344396197142cd506468b20029ea5722d507c980129bb3db4af02424ed6f39c6",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libidn2-0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libidn2-0/copyright",
+    "mode": "0o644",
+    "size": 6566,
+    "sha256": "32df8170a3c5e55c553f684576a2911e6a0611320ccd7fd65f7dceae26be61ee",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libjbig0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libjbig0/copyright",
+    "mode": "0o644",
+    "size": 1849,
+    "sha256": "89ab20c324a191652e94598f2144a65442faed4f14f77bbd10516130ee20f05a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libjpeg62-turbo",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libjpeg62-turbo/copyright",
+    "mode": "0o644",
+    "size": 38846,
+    "sha256": "3821184e23385bf2cdc01f56bd999b34036fc3aa03d5135d41680374eb81bf8a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libk5crypto3",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libk5crypto3/copyright",
+    "mode": "0o644",
+    "size": 63047,
+    "sha256": "936728f4181718f42951b881c1e8f1386bf6b2723c4fbc533c374d6f42c71816",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libkeyutils1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libkeyutils1/copyright",
+    "mode": "0o644",
+    "size": 2148,
+    "sha256": "73f5682b0466f41cea2b9b7f1ff8a8052464f6c09fb29eeac4490512af09bd50",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libkrb5-3",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libkrb5-3/copyright",
+    "mode": "0o644",
+    "size": 63047,
+    "sha256": "936728f4181718f42951b881c1e8f1386bf6b2723c4fbc533c374d6f42c71816",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libkrb5support0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libkrb5support0/copyright",
+    "mode": "0o644",
+    "size": 63047,
+    "sha256": "936728f4181718f42951b881c1e8f1386bf6b2723c4fbc533c374d6f42c71816",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libksba8",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libksba8/copyright",
+    "mode": "0o644",
+    "size": 4718,
+    "sha256": "62f4bbaeb37f9e2c0795dd3ea7b1bfcf34fc9fef7a680bd863ee50fae0b4cf12",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/liblcms2-2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/liblcms2-2/copyright",
+    "mode": "0o644",
+    "size": 5362,
+    "sha256": "420fd2c72204652c08a48548a0d1002edab3d9b180d3c416578c61f74092f460",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libldap2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libldap2/copyright",
+    "mode": "0o644",
+    "size": 62859,
+    "sha256": "2656a8ac4f2fda614be8fe6fd7f649665a6ca3abcf19f6ac125e2ff165b60939",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/liblerc4",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/liblerc4/copyright",
+    "mode": "0o644",
+    "size": 1242,
+    "sha256": "6e694f6e6063e7b1ffb5f723ce4e696aa015944cf1b4d15e8f3ea7e90417a71d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/liblzma5",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/liblzma5/copyright",
+    "mode": "0o644",
+    "size": 11875,
+    "sha256": "d755588e2d89d7845d0d4e718ac45d49ae9fc53cec4540af105963c20598f9d7",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libmd0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libmd0/copyright",
+    "mode": "0o644",
+    "size": 8018,
+    "sha256": "4365ef6255ad553fce69dd4bc0e093472c5d0e41b8ea493a545cc926ce171aa6",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnettle8t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnettle8t64/copyright",
+    "mode": "0o644",
+    "size": 24407,
+    "sha256": "344396197142cd506468b20029ea5722d507c980129bb3db4af02424ed6f39c6",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnghttp2-14",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnghttp2-14/copyright",
+    "mode": "0o644",
+    "size": 6535,
+    "sha256": "a34ae32a5eba61e535835a8de7c398f47e420247d339bc400a3b9c618ba29a3d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnghttp3-9",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnghttp3-9/copyright",
+    "mode": "0o644",
+    "size": 8614,
+    "sha256": "e66d68610e086493b2dcf19539793786017922591dee5d0795b57e4219e5cc91",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libngtcp2-16",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libngtcp2-16/copyright",
+    "mode": "0o644",
+    "size": 9543,
+    "sha256": "e192f8ca275520fbd3f2f75251483cbf208ef6bd8759d6b736b8fc0b59f8fb55",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libngtcp2-crypto-gnutls8",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libngtcp2-crypto-gnutls8/copyright",
+    "mode": "0o644",
+    "size": 9543,
+    "sha256": "e192f8ca275520fbd3f2f75251483cbf208ef6bd8759d6b736b8fc0b59f8fb55",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnpth0t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnpth0t64/copyright",
+    "mode": "0o644",
+    "size": 1164,
+    "sha256": "df6909abb38f4e84d237d8617e948bdbb391b2004ecf573863011d54a88ccf22",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnspr4",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnspr4/copyright",
+    "mode": "0o644",
+    "size": 331,
+    "sha256": "3c4fcc131809b2b6993513bfe4cf6f1ede391ec84f1d5ceca78fb75537b22452",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnss3",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libnss3/copyright",
+    "mode": "0o644",
+    "size": 4058,
+    "sha256": "3f450f9453233852b3a469a36a897cc68fb87be3e8b3a5ba64f63a7904528408",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libopenjp2-7",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libopenjp2-7/copyright",
+    "mode": "0o644",
+    "size": 34923,
+    "sha256": "ba3ae385ad2337d6cfc862e280a9f155bb421b43f6ee47e77ebcaaf24e992151",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libp11-kit0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libp11-kit0/copyright",
+    "mode": "0o644",
+    "size": 15605,
+    "sha256": "008107de203c9f89a6c71b625fb47e10074c6b7ccb0e310694014d4551f67b2b",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpam-modules",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpam-modules-bin",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpam-modules-bin/copyright",
+    "mode": "0o644",
+    "size": 9727,
+    "sha256": "6b11ef9ab5429d9618cc72e8dfd4efefde363165ef174be0549918e0c44f5dcb",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpam-modules/copyright",
+    "mode": "0o644",
+    "size": 9727,
+    "sha256": "6b11ef9ab5429d9618cc72e8dfd4efefde363165ef174be0549918e0c44f5dcb",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpam0g",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpam0g/copyright",
+    "mode": "0o644",
+    "size": 9727,
+    "sha256": "6b11ef9ab5429d9618cc72e8dfd4efefde363165ef174be0549918e0c44f5dcb",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpcre2-8-0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpcre2-8-0/copyright",
+    "mode": "0o644",
+    "size": 6627,
+    "sha256": "e915cde4251f96ec6af107ecd2e194440a4e69440893b0c982802f8a1e4ae40a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpixman-1-0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpixman-1-0/copyright",
+    "mode": "0o644",
+    "size": 2247,
+    "sha256": "1b3fb5690861e15ca4fd6640fd4def4b2576617942eec04b6fcb7d8bc6c4c9da",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpng16-16t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpng16-16t64/copyright",
+    "mode": "0o644",
+    "size": 13217,
+    "sha256": "7e729164c60950b2b57f1712d82a051c9ba54f421c9b69815d9e4686ddc5709b",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpoppler147",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpoppler147/copyright",
+    "mode": "0o644",
+    "size": 12730,
+    "sha256": "484de4197d7d27f12f5b18df19e557808fa0bbbd060004bd56385c5f7cbfd880",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpsl5t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libpsl5t64/copyright",
+    "mode": "0o644",
+    "size": 3310,
+    "sha256": "bbafb0cf52d34465fc69f5ffd22d724224f6a2f28402c88b045c69d88af06aaf",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libreadline8t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libreadline8t64/copyright",
+    "mode": "0o644",
+    "size": 4314,
+    "sha256": "854c6f5f249a109a913e1e58528445c4fec96f063ae8ba496bfb2b460bcc6866",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/librtmp1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/librtmp1/copyright",
+    "mode": "0o644",
+    "size": 2726,
+    "sha256": "4302abcc1ea1b6cbe8d19c79b892acf78878030220210707c19006828866207c",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsasl2-2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsasl2-2/copyright",
+    "mode": "0o644",
+    "size": 24643,
+    "sha256": "ddb128a81d3a140ef5b3574ae000a1a50d0cb9a2ec59917121a155f91b670166",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsasl2-modules-db",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsasl2-modules-db/copyright",
+    "mode": "0o644",
+    "size": 24643,
+    "sha256": "ddb128a81d3a140ef5b3574ae000a1a50d0cb9a2ec59917121a155f91b670166",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libselinux1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libselinux1/copyright",
+    "mode": "0o644",
+    "size": 1957,
+    "sha256": "864f1bb189f609075d580b8c4aada16d85a44546884f1687989e1cacc8c56751",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsemanage-common",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsemanage-common/copyright",
+    "mode": "0o644",
+    "size": 1921,
+    "sha256": "fe5876a94047cafbeb8b164fd98304912d94b6028e19415f08b7a8a2f90645fe",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsemanage2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsemanage2/copyright",
+    "mode": "0o644",
+    "size": 1921,
+    "sha256": "fe5876a94047cafbeb8b164fd98304912d94b6028e19415f08b7a8a2f90645fe",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsepol2",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsepol2/copyright",
+    "mode": "0o644",
+    "size": 3750,
+    "sha256": "78d2a34606a0302057ec499a3b3c07bcbc43ca334064ce4c80891a0f69c8f6c6",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsharpyuv0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsharpyuv0/copyright",
+    "mode": "0o644",
+    "size": 6490,
+    "sha256": "725344c9200f6e6dad88d1ea88add2d673cdf1d8fbc3961bcd2693ab0c26d30d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsqlite3-0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsqlite3-0/copyright",
+    "mode": "0o644",
+    "size": 1770,
+    "sha256": "7b1679aaa97e6e49ec12460eefa85a82b432053bc468dd89dbdb50f2326589f3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libssh2-1t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libssh2-1t64/copyright",
+    "mode": "0o644",
+    "size": 2975,
+    "sha256": "fb5d6b7a53710b6ba04e412a016d222a3e56b9d6e1a2572a8ffc2eae05e6acfb",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libssl3t64",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libssl3t64/copyright",
+    "mode": "0o644",
+    "size": 2543,
+    "sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsystemd0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libsystemd0/copyright",
+    "mode": "0o644",
+    "size": 12521,
+    "sha256": "a79e4b379cabbd960bb44f6cc1a069081a3778c59a25ee529b68df5a2cb7d27d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libtasn1-6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libtasn1-6/copyright",
+    "mode": "0o644",
+    "size": 3359,
+    "sha256": "5f9f7b538d221104bdb561ae80fd794ec5f813eb8fd04650293bddcc0f856e7d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libtiff6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libtiff6/copyright",
+    "mode": "0o644",
+    "size": 1935,
+    "sha256": "d73e31b03a0d7a515851601c19fee5792c7db03a312efacae146ddf9c91f86f1",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libtinfo6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libtinfo6/copyright",
+    "mode": "0o644",
+    "size": 4670,
+    "sha256": "f838d6048fbc59356b7e56c207a7cb32dc6bf4adea95514a002596bde8f6e1e7",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libunistring5",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libunistring5/copyright",
+    "mode": "0o644",
+    "size": 103761,
+    "sha256": "a585cd2cc2a5fcb8e58f12c7a710a35e06e5b897c59cd5ae4a7d835f0b49eae3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libwebp7",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libwebp7/copyright",
+    "mode": "0o644",
+    "size": 6490,
+    "sha256": "725344c9200f6e6dad88d1ea88add2d673cdf1d8fbc3961bcd2693ab0c26d30d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libx11-6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libx11-6/copyright",
+    "mode": "0o644",
+    "size": 47102,
+    "sha256": "0b380a7fd5b2228f26e9585e56f14812efd3350f3df307507d2bc055dfd8de3e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libx11-data",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libx11-data/copyright",
+    "mode": "0o644",
+    "size": 47102,
+    "sha256": "0b380a7fd5b2228f26e9585e56f14812efd3350f3df307507d2bc055dfd8de3e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxau6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxau6/copyright",
+    "mode": "0o644",
+    "size": 1224,
+    "sha256": "118dd263a7b91c8f21c489f949bf13281dff9e766deea92b829dac4dce66601a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxcb-render0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxcb-render0/copyright",
+    "mode": "0o644",
+    "size": 1781,
+    "sha256": "4f7cb9db6bf6542f5417e3d674c780d3a5fd12291a54d63054fb576ee0cfae80",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxcb-shm0",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxcb-shm0/copyright",
+    "mode": "0o644",
+    "size": 1781,
+    "sha256": "4f7cb9db6bf6542f5417e3d674c780d3a5fd12291a54d63054fb576ee0cfae80",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxcb1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxcb1/copyright",
+    "mode": "0o644",
+    "size": 1781,
+    "sha256": "4f7cb9db6bf6542f5417e3d674c780d3a5fd12291a54d63054fb576ee0cfae80",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxdmcp6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxdmcp6/copyright",
+    "mode": "0o644",
+    "size": 1265,
+    "sha256": "1bcbb50f8603fe8b86d330bfa460b772ea04fbd3c70e4499f0768b5340b9fd6e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxext6",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxext6/copyright",
+    "mode": "0o644",
+    "size": 10421,
+    "sha256": "bc57e445ca1d9fe082c8d54189dd411ff26caa8552c9c63d44ea06a982f32124",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxrender1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libxrender1/copyright",
+    "mode": "0o644",
+    "size": 2252,
+    "sha256": "ed2a78123a5076b4f11da38cb1ffb85b5cb9fdc26b5746c517b1d7e7a9029704",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libzstd1",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/libzstd1/copyright",
+    "mode": "0o644",
+    "size": 5332,
+    "sha256": "5cec9fef4d3fa7e0371fbef4ec3fc416e0105dc2a9922117f84e825cb11f50f8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/login.defs",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/login.defs/copyright",
+    "mode": "0o644",
+    "size": 5869,
+    "sha256": "305494b6f5f6bb65ead9160077d4fdf45ccdf06de7c958ff96f27a632b8729a3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/openssl-provider-legacy",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/openssl-provider-legacy/copyright",
+    "mode": "0o644",
+    "size": 2543,
+    "sha256": "6a7da622fe0637a334d2a8fc470852d2ffb77d9a2b2f930f854e32a41ad6ef35",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/passwd",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/passwd/copyright",
+    "mode": "0o644",
+    "size": 5869,
+    "sha256": "305494b6f5f6bb65ead9160077d4fdf45ccdf06de7c958ff96f27a632b8729a3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/pinentry-curses",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/pinentry-curses/copyright",
+    "mode": "0o644",
+    "size": 6437,
+    "sha256": "21126014091396a9a25b5095466b609de0e6502969a416018405946e40cc9d79",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/poppler-utils",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/poppler-utils/copyright",
+    "mode": "0o644",
+    "size": 12730,
+    "sha256": "484de4197d7d27f12f5b18df19e557808fa0bbbd060004bd56385c5f7cbfd880",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/readline-common",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/readline-common/copyright",
+    "mode": "0o644",
+    "size": 4314,
+    "sha256": "854c6f5f249a109a913e1e58528445c4fec96f063ae8ba496bfb2b460bcc6866",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/zlib1g",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/doc/zlib1g/copyright",
+    "mode": "0o644",
+    "size": 2927,
+    "sha256": "9e5b96d63773a5d177ba264254390f792be07e41748ebd94730981c6cac31cc6",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/05-reset-dirs-sample.conf",
+    "mode": "0o644",
+    "size": 213,
+    "sha256": "7dae5045441ce7ab4ce9ee0ccbee84e2ae90daee9cfd2ac64cd887ee85c528df",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/09-autohint-if-no-hinting.conf",
+    "mode": "0o644",
+    "size": 717,
+    "sha256": "f04d1737c2a85925a6294f4b966597d03a30c9e4c551c7a8c270eaad514b2689",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-autohint.conf",
+    "mode": "0o644",
+    "size": 630,
+    "sha256": "9ae4308a18941969ea42f5881c202be052fe12da3fb1fb4fc4b940642ec74db0",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-hinting-full.conf",
+    "mode": "0o644",
+    "size": 616,
+    "sha256": "aa01699d6a43a1be2996233e67daf1570b9000bd1a59763463d3a12b852cdc3a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-hinting-medium.conf",
+    "mode": "0o644",
+    "size": 620,
+    "sha256": "f0eaec3db6879f3460bd0e1ef3e09dd965168ca460a79d098eb0648c6740095d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-hinting-none.conf",
+    "mode": "0o644",
+    "size": 616,
+    "sha256": "5970fa53c69874ee51349300ef3412592e46e7f133c06074befcf6ab2a3ef6e2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-hinting-slight.conf",
+    "mode": "0o644",
+    "size": 620,
+    "sha256": "d138eca2bac3f78d45ff7cfb649ad792caa4a6e61f73cea7cf0ea54b091f1ef4",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-no-antialias.conf",
+    "mode": "0o644",
+    "size": 260,
+    "sha256": "75412c70f3a78ad090c79a9dc63cce6aae41b2cfc2f67f4a1a1b533526216d2e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-scale-bitmap-fonts.conf",
+    "mode": "0o644",
+    "size": 2068,
+    "sha256": "df8e99abb6f82384c61978906a45a95794940545da95790d87f01d9391e0894b",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-sub-pixel-bgr.conf",
+    "mode": "0o644",
+    "size": 672,
+    "sha256": "719006f7887a958da8efe5ad010a2cde689313074607ae20f0be4cd9e8bfffad",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-sub-pixel-none.conf",
+    "mode": "0o644",
+    "size": 647,
+    "sha256": "0f00b5cf0ce07062ec65b9b340aa888f6c5fbc215aafebd26781be2d5a13ff6a",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-sub-pixel-rgb.conf",
+    "mode": "0o644",
+    "size": 672,
+    "sha256": "e4cfc04f5fc5093d2ba20c40f8709c9dfc099997313d0f96bc8256597a15d057",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-sub-pixel-vbgr.conf",
+    "mode": "0o644",
+    "size": 682,
+    "sha256": "15178eb45f3206433bace02053214d5750b9d74a4ece727f48c7fbc8f8c9adb3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-sub-pixel-vrgb.conf",
+    "mode": "0o644",
+    "size": 682,
+    "sha256": "049680ed134d34c560be493a47301bf6542050e7e89c27d3df25145b41f8133e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-unhinted.conf",
+    "mode": "0o644",
+    "size": 625,
+    "sha256": "dca27a149268da3aeaa3416dc236fd1d76e2f997b1ba91e1292297e78c9281d4",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/10-yes-antialias.conf",
+    "mode": "0o644",
+    "size": 258,
+    "sha256": "e6d82a642d1b37f7d24dc37f938b999f00ff7aa4303b2602d04164d53f221005",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/11-lcdfilter-default.conf",
+    "mode": "0o644",
+    "size": 695,
+    "sha256": "76aec9d8dac48faabe1bbde9e887cfb09fa45f30be5f8826e945a394a0097e48",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/11-lcdfilter-legacy.conf",
+    "mode": "0o644",
+    "size": 692,
+    "sha256": "0768fd57ae0a50d54f2f2e5efae98437ae8623573b652f246ac22e574d5f38b0",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/11-lcdfilter-light.conf",
+    "mode": "0o644",
+    "size": 689,
+    "sha256": "0708443f97406b100a5ccfa67ea8a1c1473ff60ff03848e536bc62e2b2ddcea3",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/11-lcdfilter-none.conf",
+    "mode": "0o644",
+    "size": 686,
+    "sha256": "8c2b7c2db7bf8e54fb4f449e726ad97d824195085f97a5c19d75914ad7b4b074",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/20-unhint-small-vera.conf",
+    "mode": "0o644",
+    "size": 1377,
+    "sha256": "278732c68c16177f2aa3c7e4ea318b9f720aee13a433c32eb15ba626806c609d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/25-unhint-nonlatin.conf",
+    "mode": "0o644",
+    "size": 3329,
+    "sha256": "8b8c05318fb3f4893a9522e7989dd9280d14233adbc21be867bd173add4a0d5c",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/30-metric-aliases.conf",
+    "mode": "0o644",
+    "size": 13610,
+    "sha256": "3baf25c82e1a14c606d45c212296852be06ae9795d60e84aab573226151450a2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/35-lang-normalize.conf",
+    "mode": "0o644",
+    "size": 48373,
+    "sha256": "fb06f0e9206cc711a68719940e670a3756ae6656ea9b73197f3bbc0c921ee433",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/40-nonlatin.conf",
+    "mode": "0o644",
+    "size": 7981,
+    "sha256": "9c56aeed6490db1d29602d7f8e028742b5e7a0268eaaa60de2fde582c6403715",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/45-generic.conf",
+    "mode": "0o644",
+    "size": 3490,
+    "sha256": "24de9f68189d544bb4cc084d9bd8f3a59d8b988a9dc44b11e9877d5add5fc948",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/45-latin.conf",
+    "mode": "0o644",
+    "size": 7159,
+    "sha256": "807638284032d8d8f6ed8b014a0edae79a4d4f3c4e70317fdb0bfa8edd66779e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/48-spacing.conf",
+    "mode": "0o644",
+    "size": 441,
+    "sha256": "99d839cd8aa28854e8f54f26e7200b6e57951f39f56791a0ed473662488bcef6",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/49-sansserif.conf",
+    "mode": "0o644",
+    "size": 639,
+    "sha256": "7849a11ce5243e8bb3d06bcad558737a8682e5122e73c8e427f4c011a2054818",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/50-user.conf",
+    "mode": "0o644",
+    "size": 751,
+    "sha256": "449137ccce57d60bca178d57519ba54e1942d757ad171f3a88cd78df2161c970",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/51-local.conf",
+    "mode": "0o644",
+    "size": 263,
+    "sha256": "dca9d917e1f66f73bfa495943b4d1eaab2d93810a51bc8e600cf4d4e9df03e67",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/60-generic.conf",
+    "mode": "0o644",
+    "size": 1911,
+    "sha256": "195bc8605dd23289d42c10d79cc13a5ce4a4b3cf965df5b30ecc0b7149bb951f",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/60-latin.conf",
+    "mode": "0o644",
+    "size": 2166,
+    "sha256": "2de7c687e03b1fedf9fd016aa14ed8088f52578896a73f06158dda8acd264f09",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/65-fonts-persian.conf",
+    "mode": "0o644",
+    "size": 10132,
+    "sha256": "c675fab143a3638346874798be45f51f6878ebec591b4362d83cfffb828ec4ca",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/65-khmer.conf",
+    "mode": "0o644",
+    "size": 304,
+    "sha256": "0bc1c077ef01cb409f51f95218b97b144278c0568b5de03683047b2a1963c590",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/65-nonlatin.conf",
+    "mode": "0o644",
+    "size": 9876,
+    "sha256": "e309e38d7fb47cc3f639f4313b19e72c9be4d1f2db92d7d892ea65bfdd0cbd30",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/69-unifont.conf",
+    "mode": "0o644",
+    "size": 687,
+    "sha256": "fa97c0cf5f79d70e2dc3dc48155d4c9220cd7c6a8bc95b89c4ebcc517f97479e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/70-force-bitmaps.conf",
+    "mode": "0o644",
+    "size": 326,
+    "sha256": "46fb68f9ec27605f880379b753c1afcc1cacfc75021e3a288f4cf62c945e394f",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/70-no-bitmaps-and-emoji.conf",
+    "mode": "0o644",
+    "size": 373,
+    "sha256": "313260028904353a026faa457bacea58df88ceff7dc97b269e526130dc797a7e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/70-no-bitmaps-except-emoji.conf",
+    "mode": "0o644",
+    "size": 429,
+    "sha256": "bb5df65896bf3011b2f2935b63ab12db1ecf078674ff73a533123445f122a92b",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/70-no-bitmaps.conf",
+    "mode": "0o644",
+    "size": 304,
+    "sha256": "5994ce306887448ec29b2d6624696bb2dd7e333dd51cc5818f9ebe72abc077da",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/70-yes-bitmaps.conf",
+    "mode": "0o644",
+    "size": 77,
+    "sha256": "87228113c2e8ffbf5565ffaa80d5e5fde33b14f0725accf69e1e31c80df398c0",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/80-delicious.conf",
+    "mode": "0o644",
+    "size": 437,
+    "sha256": "34f27b7fe9cd83b2b6d46f16ef9c477412f2d7ef63634f86b9b38b79bc4f81ad",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fontconfig/conf.avail/90-synthetic.conf",
+    "mode": "0o644",
+    "size": 1757,
+    "sha256": "cdd0aac7840c664a7127b64db66bdfe8dc22be3774d10bc22f4a41c98de5d85e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu",
+    "mode": "0o755",
+    "size": 0,
+    "sha256": null,
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "mode": "0o644",
+    "size": 708920,
+    "sha256": "a4c5bc453ca281d90ea079e596da7ae0dfeb5777497c29ec254e76d97ff6f890",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "mode": "0o644",
+    "size": 759720,
+    "sha256": "57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
+    "mode": "0o644",
+    "size": 334268,
+    "sha256": "0d3c03d1b667192f91223660a3163325cf83132662fe4d9f7d6e596bf7a995c2",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSansMono-BoldOblique.ttf",
+    "mode": "0o644",
+    "size": 254960,
+    "sha256": "2084995adab143b149258f5944b7f863804796b753014526bd7f7915b1b20770",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSansMono-Oblique.ttf",
+    "mode": "0o644",
+    "size": 253448,
+    "sha256": "710323dd803666c37988df68e736c233d96efdf5c770c8ee28f4c4f4b84fb32d",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+    "mode": "0o644",
+    "size": 343140,
+    "sha256": "54bf827eb99404e8f430c330ad30f063334f637eba0109b6a18d4f566a8e9dd8",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+    "mode": "0o644",
+    "size": 356668,
+    "sha256": "aac3f559445d23f0f567a243f91f3f6ad6cb4b5cafa1521a3479fffe0637f0bd",
+    "symlink_target": null
+  },
+  {
+    "path": "./usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+    "mode": "0o644",
+    "size": 380660,
+    "sha256": "8cb29f7db250ebb2551a6ce2c1e0bfd5a0eb520e9e233370db0493e82e1f36f7",
+    "symlink_target": null
+  }
+]

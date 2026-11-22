@@ -1,0 +1,31 @@
+UTC: 2026-11-22T01:40:21.393474+00:00
+OS: Windows-2022Server-10.0.20348-SP0
+$ git rev-parse HEAD
+947ac3126ebd4867bfa91912dcd047c6a95ef580
+
+EXIT CODE: 0
+$ "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+
+EXIT CODE: 0
+$ "C:\Program Files\Python313\python.exe" -m ruff check .
+All checks passed!
+
+EXIT CODE: 0
+RW_NATIVE_DOCKER_DESKTOP=1
+$ "C:\Program Files\Python313\python.exe" -m pytest -q tests/test_pdf_percentage_audit_unittest.py tests/test_windows_docker_pipe.py tests/test_pdf_sandbox_image.py tests/test_pdf_sandbox_qualify.py tests/test_documentation_unittest.py tests/test_agent_plan_unittest.py
+........................................s........................... [ 93%]
+..... [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_windows_docker_pipe.py:316: Docker Desktop acceptance is opted in
+72 passed, 1 skipped, 366 subtests passed in 1.74s
+
+EXIT CODE: 0
+RW_NATIVE_DOCKER_DESKTOP=UNSET
+$ "C:\Program Files\Python313\python.exe" -m pytest -q tests/test_windows_docker_pipe.py
+.................s                                   [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_windows_docker_pipe.py:307: set RW_NATIVE_DOCKER_DESKTOP=1 for Docker Desktop acceptance
+17 passed, 1 skipped, 20 subtests passed in 0.38s
+
+EXIT CODE: 0

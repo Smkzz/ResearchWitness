@@ -1,0 +1,13 @@
+$ docker build --network=none --pull=false --no-cache --iidfile C:\Users\Administrator\rw03-pdf-build-two\image-id.txt -
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            BuildKit is currently disabled; enable it by removing the DOCKER_BUILDKIT=0
+            environment-variable.
+
+Sending build context to Docker daemon  44.32MB
+Step 1/2 : FROM scratch
+ --->
+Step 2/2 : COPY rootfs/ /
+ ---> 1e8bacbfa2a1
+Successfully built 1e8bacbfa2a1
+
+EXIT CODE: 0

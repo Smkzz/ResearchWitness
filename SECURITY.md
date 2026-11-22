@@ -93,8 +93,10 @@ detect revoked certificates and does not verify the entire installation's integr
 A check-then-use race remains:
 the Docker CLI opens its own connection after this check. An administrator or
 same-user attacker is not defended against. These residual risks remain explicit
-qualification limitations; `pdf_execution` stays unqualified, including because
-no reviewed Poppler image is provisioned. Sami authorized native RW-03 qualification on the org Windows Devin
+qualification limitations; `pdf_execution` stays unqualified. A pinned candidate
+image and native synthetic evidence are now recorded, but no separate image/
+evidence security review or residual-risk acceptance has happened. Sami authorized
+native RW-03 qualification on the org Windows Devin
 machine in his answer to the "Use a Windows machine" card on **2026-11-21
 19:59 UTC**; this authority does not establish server identity or waive the gate.
 
@@ -113,6 +115,23 @@ kernel and image provenance remain trusted assumptions. This does not prove esca
 resistance. Text/candidates remain untrusted; hashes do not establish full fidelity,
 source origin or scientific truth. Real qualification remains outstanding under
 [PDF_SANDBOX_QUALIFICATION.md](docs/PDF_SANDBOX_QUALIFICATION.md).
+
+Sami's Docker Hub/snapshot.debian.org download approval was relayed by the
+coordinator on 2026-11-22, with EUR 0 and no new privileges or custody authority.
+HTTP snapshot transport was separately authorized: the pinned builder's archive
+keyring verifies OpenPGP InRelease signatures and the signed SHA256 chain; TLS is
+not relied on. The [candidate provenance and native receipts](docs/PDF_SANDBOX_QUALIFICATION.md#candidate-image-provenance-and-native-evidence---2026-11-22)
+record the builder digest, snapshot, 114-package lock/signers, rootfs/layer hash,
+image and export identities, approved source hosts and existing internal proxy.
+The exact candidate ID is
+`sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944`.
+Offline docker import avoids the default PATH injected by both tested builders;
+rootfs tar bytes reproduce, but import image IDs differ with creation timestamps.
+The overwritten BuildKit log is an explicit evidence gap, not a fabricated log.
+Effective create/inspect settings, real synthetic timeout/output-overflow and
+success/failure CID cleanup were recorded; cleanup-failure injection is mocked.
+These observations and a passing smoke are not image review, residual-risk
+acceptance, escape-resistance proof or permission for real documents/custody.
 
 ## Private data and export
 

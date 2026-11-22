@@ -1,0 +1,154 @@
+UTC: 2026-11-22T01:29:57.103633+00:00
+OS: Windows-2022Server-10.0.20348-SP0
+$ git rev-parse HEAD
+62a8e32f030335bdccbaf3ee77f7384ddcb542d3
+
+EXIT CODE: 0
+$ "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+
+EXIT CODE: 0
+$ docker version
+Client:
+ Version:           29.9.2
+ API version:       1.56
+ Go version:        go1.26.10
+ Git commit:        a82e528
+ Built:             Tue Oct 20 19:44:07 2026
+ OS/Arch:           windows/amd64
+ Context:           desktop-linux
+
+Server: Docker Desktop 4.98.0 (245422)
+ Engine:
+  Version:          29.9.2
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.10
+  Git commit:       0367cbe
+  Built:            Tue Oct 20 18:45:02 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+
+EXIT CODE: 0
+$ docker image inspect sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944 sha256:f410b28090506815349ba6964bd23cbb1e72114c790cbb42eca1df3e90b581da
+[
+    {
+        "Id": "sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944",
+        "RepoTags": [],
+        "RepoDigests": [],
+        "Comment": "Imported from -",
+        "Created": "2026-11-22T01:29:19.855153514Z",
+        "Config": {},
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 63268113,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-11-22T01:29:19.931292197Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944",
+            "size": 406
+        }
+    },
+    {
+        "Id": "sha256:f410b28090506815349ba6964bd23cbb1e72114c790cbb42eca1df3e90b581da",
+        "RepoTags": [],
+        "RepoDigests": [],
+        "Comment": "Imported from -",
+        "Created": "2026-11-22T01:29:29.153018169Z",
+        "Config": {},
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 63268113,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-11-22T01:29:29.206480565Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:f410b28090506815349ba6964bd23cbb1e72114c790cbb42eca1df3e90b581da",
+            "size": 406
+        }
+    }
+]
+
+EXIT CODE: 0
+$ docker image inspect debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392
+[
+    {
+        "Id": "sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392",
+        "RepoTags": [
+            "debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392"
+        ],
+        "RepoDigests": [
+            "debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392"
+        ],
+        "Comment": "debuerreotype 0.17",
+        "Created": "2026-11-04T21:23:39Z",
+        "Config": {
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            ],
+            "Cmd": [
+                "bash"
+            ]
+        },
+        "Architecture": "amd64",
+        "Os": "linux",
+        "Size": 117565252,
+        "RootFS": {
+            "Type": "layers",
+            "Layers": [
+                "sha256:dd57f90311a2567b55ff22eeacff1602fd04ad7566e315957731359eab173b90"
+            ]
+        },
+        "Metadata": {
+            "LastTagTime": "2026-11-22T01:16:39.73572174Z"
+        },
+        "Descriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392",
+            "size": 1021
+        },
+        "Identity": {
+            "Pull": [
+                {
+                    "Repository": "docker.io/library/debian"
+                }
+            ]
+        }
+    }
+]
+
+EXIT CODE: 0
+$ docker history --no-trunc sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+IMAGE                                                                     CREATED          CREATED BY   SIZE      COMMENT
+sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944   38 seconds ago                45.1MB    Imported from -
+
+EXIT CODE: 0
+$ docker save --output C:\Users\Administrator\rw03-pdf-final-image.tar sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Python313\python.exe" -m tools.pdf_sandbox_smoke --output C:\Users\Administrator\repos\rw03-pdf-image\evidence\rw03-pdf-image-2026-11-22\pdf-final-smoke.json
+
+EXIT CODE: 0

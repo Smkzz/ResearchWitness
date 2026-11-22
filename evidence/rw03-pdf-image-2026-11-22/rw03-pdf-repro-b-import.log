@@ -1,0 +1,4 @@
+$ docker import C:\Users\Administrator\rw03-pdf-repro-b\rootfs.tar
+sha256:f410b28090506815349ba6964bd23cbb1e72114c790cbb42eca1df3e90b581da
+
+EXIT CODE: 0

@@ -107,9 +107,11 @@ which does not validate the signature (metadata status `NOT_CHECKED`). A separat
 offline name-based `WinVerifyTrust` check records **PASS**, exit **0**. Neither
 result establishes current revocation status, installation integrity or qualification.
 
-**Real PDF isolation: BLOCKED / NOT RUN.** No reviewed SHA-256-pinned Poppler
-image is provisioned; Docker Hub and snapshot.debian.org build downloads await
-Sami's egress decision. Pipe-server identity is narrowed, not resolved: the check
+**PDF execution: UNQUALIFIED; candidate evidence recorded.** The pinned image and
+native synthetic isolation/resource/cleanup receipts below are available; separate
+security review and residual-risk acceptance remain outstanding. Sami's bounded
+download approval was relayed by the coordinator on 2026-11-22. Pipe-server
+identity is narrowed, not resolved: the check
 requires a current-user or SYSTEM token owner and a resolved image location under
 `Program Files\Docker`, obtained via `SHGetKnownFolderPath`, not the environment.
 The executable must pass an offline, name-based Authenticode signature check;
@@ -128,11 +130,45 @@ was **NOT RUN** (no authorized isolated custodian); it stays `unqualified`.
 `scientific_wave_3` remains `not_run`. No human certification is claimed.
 
 **RW-03 remains `blocked_external`.** Remaining conditions are
-assurance for the remaining pipe-server identity risks, the image egress decision
-and reviewed-image isolation evidence, and separately authorized isolated custody.
+assurance for the remaining pipe-server identity risks, separate review of the
+image inventory and recorded evidence bound to its exact ID, and separately
+authorized isolated custody. The ledger's state rules do not promote a blocked
+package merely because runtime evidence exists; capability acceptance is absent.
 `next_unblocked_task` was deliberately set to `null`: the old RW-01 pointer was
 stale, and no next eligible package is identified after RW-04L. Original-source
 RW-01O/RW-01Q evidence remains missing. No gate is waived by this receipt.
+
+### RW-03 PDF candidate-image evidence - 2026-11-22
+
+Step A at `947ac3126ebd4867bfa91912dcd047c6a95ef580` records a 114-package
+signed snapshot lock (`20261120T000000Z`, trixie/main) using builder
+`debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392`.
+The candidate ID is
+`sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944`.
+The [full provenance and identity table](PDF_SANDBOX_QUALIFICATION.md#candidate-image-provenance-and-native-evidence---2026-11-22)
+records signature fingerprints, rootfs/layer and archive SHA256, approved hosts,
+HTTP plus OpenPGP/SHA256 integrity and the Docker Desktop internal proxy.
+Offline docker import was necessary because both builders injected PATH.
+Inventories/rootfs tar reproduce; import image IDs do not. The overwritten raw
+BuildKit build log remains a disclosed gap; its rejected smoke is preserved.
+
+Step B's [native report](../evidence/rw03-pdf-image-2026-11-22/isolation-final.json),
+[raw inspect](../evidence/rw03-pdf-image-2026-11-22/isolation-final-container-inspect.json)
+and [command log](../evidence/rw03-pdf-image-2026-11-22/isolation-final.log) record
+all configured isolation checks passing on the authorized Windows machine,
+using the production argument helper and unchanged production defaults. The
+created inspection container was not started. Real success, malformed input,
+0.5-second lowered-timeout rejection and over-2-MiB output rejection each left
+zero ancestor containers, with individual CID absence checked. Cleanup-denial
+regressions were **mocked**, 3 passed / 12 subtests, exit 0. No downloads or
+external network were used for Step B. The image's earlier smoke passed all
+three fixtures, `smoke_passed_not_qualified`, `sandbox_qualified: false`.
+
+**No separate security review has happened.** The review must bind both inventory
+and native evidence to this exact image ID; AI review is acceptable, not a human
+audit. Windows pipe residual risks above remain open. All gates remain unchanged:
+`pdf_execution` and protected custody `unqualified`, custody **NOT RUN**,
+scientific gates unchanged. EUR 0; no new privileges.
 
 ## RW-04L accepted engineering receipt
 
