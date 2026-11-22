@@ -491,6 +491,10 @@ def _validate_relationship(source: bytes, raw: object, *,
         reject("NUMERATOR_COUNT_CUE_NOT_EXPLICIT")
     for extra in additional_numeric_spans:
         require_nested_span(context, extra)
+    for value in (percentage, *additional_numeric_spans):
+        prefix = source[context[1]:value[1]].decode("utf-8").rstrip()
+        if prefix.endswith(("-", "+", "\u2212", "\uff0d", "\uff0b")):
+            reject("SIGNED_SOURCE_VALUE_UNSUPPORTED")
 
     covered = bytearray(context[2] - context[1])
     for selected in (table_locator, numerator, denominator, percentage, *additional_numeric_spans):

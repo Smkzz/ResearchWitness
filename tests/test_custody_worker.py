@@ -131,6 +131,15 @@ class CustodyWorkerV5Tests(unittest.TestCase):
                                           review_id="review-abbreviated", table_locator="Table 1"))
         self.assertEqual(verify_all(self.root)["reviews"], 1)
 
+    def test_percentage_span_cannot_hide_source_sign(self):
+        for index, sign in enumerate(("-", "−", "+", "- ")):
+            with self.subTest(sign=sign):
+                text = self.original_text(sign + "28.6%")
+                item, _ = self.source_setup(original=text, source_version=f"v{index}")
+                with self.assertRaisesRegex(CustodyError, "SIGNED_SOURCE_VALUE_UNSUPPORTED"):
+                    self.record(self.review_object(item, None, original_text=text,
+                                                  review_id=f"review-sign-{index}"))
+
     def test_import_limits_refuse_before_writing_objects(self):
         item, _ = self.source_setup(original=self.original_text())
         before = verify_all(self.root)
