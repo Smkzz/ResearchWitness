@@ -57,8 +57,12 @@ competitors/reasons. `resolved_value_equals_detector_base` is null when
 unresolved; otherwise it compares the selected integer to the detector base
 (including a missing base). Top-level `resolution_status_counts` and
 `detector_resolver_disagreement_count` summarize those results. This does not
-alter detector decisions. Old v1 bundles are not migrated; exact replay may
-reject them after this implementation change.
+alter detector decisions. Implementation fingerprints are included in every
+product report, plain or trace. Any bundle made before an implementation
+change that alters those fingerprints will not replay exactly under the new
+implementation. Replay it with the implementation commit that created it.
+Old bundles are not migrated; exact replay stays strict, with no compatibility
+shim. See [the release process](RELEASING.md#exact-bundle-replay).
 
 Tables are projected once and indexed by original cell byte spans. The adapter
 binds row-group identity to the original enclosing XML element's byte offset,

@@ -95,6 +95,17 @@ the new exact head. Preserve main protection and all scientific/security boundar
 After merging, inspect the new main CI and CodeQL. The PR success is not itself
 post-merge evidence. Record the exact commits, checks and limitations in the receipt.
 
+## Exact bundle replay
+
+Every JATS product report includes implementation-file fingerprints, including
+plain reports without a denominator trace. Any bundle made before a fingerprinted
+implementation change will not replay exactly under the new implementation,
+even if its source bytes and detector findings are unchanged. Replay a bundle
+with the implementation commit that created it. Trace schema changes (including
+v1 to v2) also prevent exact replay across implementations. There is no migration
+or compatibility shim: replay continues to require the exact recorded report
+and HTML, not merely equivalent arithmetic.
+
 ## Build and publish scoped artifacts
 
 With staged intended files and a consistent manifest, use a fresh external directory:
