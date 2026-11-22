@@ -74,6 +74,8 @@ permit address reuse for restart. Neither provides HTTP account authentication.
 
 Independent adapter security review still gates any RW-09 preview release and
 any use with non-public sources. Protected custody remains out of scope.
+The import scan is a static guard, not a sandbox; that security review must still
+assess re-exported networking surfaces, not treat the scan as closing that risk.
 
 Human visual and assistive-technology review is pending. No browser-automation
 qualification or scientific-performance claim accompanies this preview.
