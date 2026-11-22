@@ -190,6 +190,27 @@ class LocalUITests(unittest.TestCase):
         self.assertEqual(self.request("GET", f"/api/jobs/{job_id}/report")[0], 409)
         self.assertEqual(self.request("GET", f"/api/jobs/{job_id}/export")[0], 409)
 
+    def test_unknown_xml_encoding_finishes_failed_and_can_be_deleted(self):
+        source = b'<?xml version="1.0" encoding="x-bogus"?><article><body/></article>'
+        status, _, data = self.upload(source=source)
+        self.assertEqual(status, 202)
+        job_id = json.loads(data)["job"]["job_id"]
+        job = self.wait(job_id)
+        self.assertEqual(job["status"], "failed")
+        self.assertNotIn("x-bogus", job["error"])
+        self.server.store.get(job_id).future.result(timeout=3)
+        self.assertEqual(self.request("DELETE", f"/api/jobs/{job_id}")[0], 200)
+
+    def test_unexpected_audit_exception_has_safe_failure_message(self):
+        with mock.patch.object(jats_product, "audit_source", side_effect=RuntimeError("private details")):
+            status, _, data = self.upload()
+            self.assertEqual(status, 202)
+            job_id = json.loads(data)["job"]["job_id"]
+            job = self.wait(job_id)
+            self.assertEqual(job["status"], "failed")
+            self.assertNotIn("private details", job["error"])
+            self.server.store.get(job_id).future.result(timeout=3)
+
     def test_delete_retention_and_reopen_history(self):
         self.server.store.max_jobs = 1
         first = self.completed()

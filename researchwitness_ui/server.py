@@ -229,28 +229,30 @@ class LocalAuditStore:
             return job.public()
 
     def _run(self, job: AuditJob) -> None:
-        with self.lock:
-            if job.status != "queued":
-                return
-            job.status = "running"
-            self._save(job)
         try:
+            with self.lock:
+                if job.status != "queued":
+                    return
+                job.status = "running"
+                self._save(job)
             path = self._path(job.job_id)
             result = jats_product.audit_source(
                 path / "upload.xml", path / "bundle", job.document_id,
                 expected_source_sha256=job.source_sha256, **job.flags,
             )
-        except (ValueError, OSError):
-            with self.lock:
-                job.status = "failed"
-                job.error = "JATS audit failed: use well-formed supported JATS XML and a private, unchanged state directory."
-                self._save(job)
-        else:
             with self.lock:
                 job.summary = result["summary"]
                 job.manifest_sha256 = result["manifest_sha256"]
                 job.status = "done"
                 self._save(job)
+        except Exception:
+            with self.lock:
+                job.status = "failed"
+                job.error = "JATS audit failed: use well-formed supported JATS XML and a private, unchanged state directory."
+                try:
+                    self._save(job)
+                except (OSError, LocalUIError):
+                    pass
 
     def get(self, job_id: str) -> AuditJob:
         if not JOB_ID.fullmatch(job_id) or job_id not in self.jobs:
