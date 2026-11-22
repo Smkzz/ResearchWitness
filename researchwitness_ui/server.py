@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import secrets
 import shutil
+import socket
 import stat
 import threading
 import time
@@ -126,8 +127,7 @@ class LocalAuditStore:
         path = self._path(job.job_id)
         pending = path / ("job-" + secrets.token_hex(8) + ".pending")
         data = jats_product.canonical_json(job.public())
-        with pending.open("xb") as stream:
-            stream.write(data)
+        jats_product.write_new(pending, data)
         os.replace(pending, path / "job.json")
 
     def _load(self) -> None:
@@ -217,8 +217,7 @@ class LocalAuditStore:
             path = self.root / job.job_id
             path.mkdir(mode=0o700)
             try:
-                with (path / "upload.xml").open("xb") as stream:
-                    stream.write(source)
+                jats_product.write_new(path / "upload.xml", source)
                 self.jobs[job.job_id] = job
                 self._save(job)
                 job.future = self.executor.submit(self._run, job)
@@ -330,6 +329,11 @@ class LocalUIHTTPServer(http.server.ThreadingHTTPServer):
     daemon_threads = True
     # POSIX reuse permits quick restarts; Windows reuse can allow port hijacking.
     allow_reuse_address = os.name != "nt"
+
+    def server_bind(self) -> None:
+        if os.name == "nt":
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
     def __init__(self, address: tuple[str, int], store: LocalAuditStore, token: str):
         if address[0] != "127.0.0.1":

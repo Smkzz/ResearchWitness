@@ -69,6 +69,17 @@ def check_source_checksums() -> None:
 def scan_ui() -> None:
     for path in sorted((ROOT / 'researchwitness_ui').glob('*.py')):
         tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+        socket_nodes = set()
+        # Only Windows exclusive bind may use socket; no general networking API.
+        if path.name == 'server.py':
+            expected = ast.parse('''def server_bind(self) -> None:
+    if os.name == "nt":
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+    super().server_bind()
+''').body[0]
+            for item in ast.walk(tree):
+                if isinstance(item, ast.FunctionDef) and ast.dump(item) == ast.dump(expected):
+                    socket_nodes.update(ast.walk(item))
         for node in ast.walk(tree):
             names = []
             if isinstance(node, ast.Import):
@@ -80,8 +91,14 @@ def scan_ui() -> None:
             for name in names:
                 allowed = (name in {'http', 'http.server', 'urllib.parse'}
                            and path.name == 'server.py')
+                if (name == 'socket' and path.name == 'server.py'
+                        and isinstance(node, ast.Import) and socket_nodes
+                        and all(alias.asname is None for alias in node.names)):
+                    allowed = True
                 if name.split('.')[0] in BANNED_IMPORT_ROOTS and not allowed:
                     raise RuntimeError(f'banned import in UI adapter: {path.name}: {name}')
+            if isinstance(node, ast.Name) and node.id == 'socket' and node not in socket_nodes:
+                raise RuntimeError('socket is restricted to the Windows exclusive bind')
             if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
                     and node.func.id in BANNED_CALLS):
                 raise RuntimeError(f'banned dynamic call in UI adapter: {path.name}: {node.func.id}')

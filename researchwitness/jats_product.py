@@ -450,7 +450,7 @@ def render_html(report: dict[str, Any]) -> bytes:
 
 
 def write_new(path: Path, data: bytes) -> None:
-    with path.open("xb") as stream:
+    with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "wb") as stream:
         stream.write(data)
         stream.flush()
         os.fsync(stream.fileno())
@@ -499,7 +499,7 @@ def audit_source(source: Path, output_dir: Path, document_id: str,
     manifest_bytes = canonical_json(manifest)
     if len(manifest_bytes) > MAX_MANIFEST_BYTES:
         raise ValueError("Manifest exceeds its limit")
-    root.mkdir(exist_ok=False)
+    root.mkdir(mode=0o700, exist_ok=False)
     for name in PAYLOADS:
         write_new(root / name, payloads[name])
     write_new(root / MANIFEST_NAME, manifest_bytes)
