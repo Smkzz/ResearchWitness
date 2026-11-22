@@ -67,7 +67,11 @@ implementation. Replay it with the implementation commit that created it.
 Old bundles are not migrated; exact replay stays strict, with no compatibility
 shim. See [the release process](RELEASING.md#exact-bundle-replay).
 
-Tables are projected once and indexed by original cell byte spans. The adapter
+Product reports run the detector once and build at most one table projection,
+shared between trace and all structure-backed modes. Public `trace_denominators`
+and `project_jats_tables` still recompute and compare any supplied detector report
+in full; only private product paths reuse reports computed from the same bytes.
+Tables are indexed by original cell byte spans. The adapter
 retains `RELATION_CELL_NOT_PROJECTED` as defense in depth: projection normally
 raises on an unbound detector finding, so this branch requires bypassing that
 contract (as the existing monkeypatch test does). The adapter

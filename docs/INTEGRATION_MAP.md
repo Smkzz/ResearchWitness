@@ -161,7 +161,11 @@ The standalone `denominator_provenance.py` from PR #11 is ported without
 `paper_ratio.py`, paper-audit, table-arithmetic, telemetry or validation replays.
 It consumes projected Tables with row groups bound to original XML group spans;
 original cell byte spans bind relations. It reports advisory selections,
-rejected competitors, scope and detector/base disagreement in trace v2. In particular,
+rejected competitors, scope and detector/base disagreement in trace v3. Disagreement
+requires two existing bases; resolver selections without detector bases have a
+separate count. The product computes the detector once and shares one projection
+across enabled modes through private paths; public trace/projection entry points
+still recompute and fully compare supplied detector reports. In particular,
 arithmetic fit is **never used** to choose a denominator, and a conflict
 flag means multiple *visible* values, not that the publication is erroneous.
 One unchanged default audit and one optional private report/replay path

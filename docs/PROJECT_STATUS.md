@@ -12,6 +12,28 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## Denominator trace follow-ups — pre-merge receipt
+
+Base: main `da7c28b`; branch:
+`devin/1795391107-denominator-trace-followups`. Commits `dc1ce89`, `dd942d1`,
+`0d5af12` and `330fde6` cover exact-replay documentation, v3 comparison semantics,
+the defensive missing-cell contract and shared detector/projection execution.
+Every product report fingerprints its implementation, so plain and trace bundles
+must be replayed with the implementation commit that created them; replay remains
+strict. Trace v3 counts only differing existing bases as disagreement and records
+resolver selections without detector bases separately. The missing projected-cell
+fallback remains defense in depth and is covered by a contract-bypassing test.
+Private paths let products run the detector once and project at most once, while
+public adapters retain full supplied-report recomputation and comparison.
+
+Synthetic tests cover all 128 product-mode combinations on populated and empty
+XML, invalid input, public adapters, missing/equal/different bases and unchanged
+detector findings; existing fabricated-report rejection tests remain applicable.
+Required local acceptance: Ruff, full coverage (core >=90%), quality gate; command
+outputs belong to the final implementation handoff. No CI, separate review, merge
+or postmerge result is claimed for this branch. Detector decisions and arithmetic
+are unchanged; no scientific adjudication or PDF/custody qualification is claimed.
+
 ## Advisory denominator resolver port — pre-merge receipt
 
 Base: main `4389217`; source resolver: closed PR #11 head `6843593`.
