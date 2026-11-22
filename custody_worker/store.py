@@ -873,6 +873,13 @@ def import_batch(root: Path, batch_id: str) -> dict:
                 )
                 current_versions.setdefault(key, set()).add(digest)
         for item in manifest["files"]:
+            for entry in current_sources.get(item["sha256"], []):
+                if (entry["document_id"], entry["source_version"], entry["role"]) == (
+                    item["document_id"], item["source_version"], item["role"],
+                ) and (entry["source_id"], entry["name"].rsplit(".", 1)[-1].casefold()) != (
+                    item["source_id"], item["name"].rsplit(".", 1)[-1].casefold(),
+                ):
+                    reject("SOURCE_MAPPING_AMBIGUOUS")
             key = (
                 item["document_id"], item["source_id"],
                 item["source_version"], item["role"],

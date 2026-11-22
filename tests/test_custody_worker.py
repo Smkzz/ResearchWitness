@@ -112,6 +112,15 @@ class CustodyWorkerV5Tests(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.root)
 
+    def test_reimport_cannot_invalidate_review_source_mapping(self):
+        text = self.original_text()
+        item, _ = self.source_setup(original=text)
+        self.record(self.review_object(item, None))
+        before = verify_all(self.root)
+        with self.assertRaisesRegex(CustodyError, "SOURCE_MAPPING_AMBIGUOUS"):
+            self.source_setup(original=text, extension="md")
+        self.assertEqual(verify_all(self.root), before)
+
     def source_setup(self, *, original: str, correction: str | None = None,
                      document_id: str = DOCUMENT, source_version: str = "v1",
                      correction_document_id: str | None = None,
