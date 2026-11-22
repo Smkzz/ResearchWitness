@@ -80,6 +80,16 @@ def test_empty_trace_has_empty_resolution_counts():
     assert report["detector_resolver_disagreement_count"] == 0
 
 
+def test_printed_ratio_base_is_passed_to_resolver():
+    data = synthetic(label="Event").replace(b"4 (20%)", b"4/20 (20%)")
+    report = traced.trace_denominators(data)
+    row = report["relations"][0]
+    selected = row["denominator_provenance"]["selected_denominator"]
+    assert selected["value_exact"] == "20"
+    assert selected["provenance_class"] == "CELL_LOCAL_EXPLICIT"
+    assert row["detector_denominator"] == 20
+
+
 def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)

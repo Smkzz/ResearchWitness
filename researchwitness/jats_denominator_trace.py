@@ -186,6 +186,11 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
             boundaries, groups = table_scopes[id(table)]
             resolution = resolve_denominator(
                 table, row, cell, row_index, boundaries, groups,
+                explicit_cell_denominator=(
+                    str(reported_denominator)
+                    if relation.get("denominator_scope") == "cell_ratio"
+                    and reported_denominator is not None else None
+                ),
             )["denominator_provenance"]
         selected = resolution["selected_denominator"]
         agrees = (int(selected["value_exact"]) == reported_denominator
