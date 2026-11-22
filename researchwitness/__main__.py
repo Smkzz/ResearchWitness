@@ -79,6 +79,11 @@ def main(argv: list[str] | None = None) -> int:
     command.add_argument('--as-of', type=date.fromisoformat, default=date.today())
     command.add_argument('--html', type=Path, default=None)
 
+    command = sub.add_parser('ui', help='Open the local JATS-only preview (not a custody boundary).')
+    command.add_argument('--port', type=int, default=8765)
+    command.add_argument('--no-browser', action='store_true')
+    command.add_argument('--state-dir', type=Path)
+
     command = sub.add_parser('audit-jats')
     command.add_argument('source', type=Path)
     command.add_argument('--output-dir', type=Path, required=True)
@@ -115,6 +120,15 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     try:
+        if args.command == 'ui':
+            if not 0 <= args.port <= 65535:
+                raise Invalid('UI port must be between 0 and 65535')
+            from researchwitness_ui.server import LocalUIError, serve_ui
+            try:
+                return serve_ui(port=args.port, open_browser=not args.no_browser,
+                                state_dir=args.state_dir)
+            except (LocalUIError, OSError, ValueError) as exc:
+                raise Invalid('Unable to start local UI: ' + str(exc)) from exc
         if args.command in ('audit-jats', 'replay-jats'):
             from .jats_product import audit_source, replay_bundle
             try:

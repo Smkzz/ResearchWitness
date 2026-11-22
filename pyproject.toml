@@ -37,10 +37,11 @@ researchwitness = "researchwitness.__main__:main"
 dev = ["pytest>=8,<10", "jsonschema>=4,<5", "coverage>=7.6,<8", "ruff>=0.14,<0.18"]
 
 [tool.setuptools.packages.find]
-include = ["researchwitness*"]
+include = ["researchwitness*", "researchwitness_ui*"]
 
 [tool.setuptools.package-data]
 researchwitness = ["capability_examples.json", "schemas/*.json"]
+researchwitness_ui = ["webui/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
