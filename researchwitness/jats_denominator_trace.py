@@ -187,6 +187,7 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                      "ACCEPTED_BASE_HAS_NO_SOURCE_ELEMENT")
         projected = cells.get((evidence["byte_start"], evidence["byte_end"]))
         if projected is None:
+            # Defense in depth: projection normally raises on unbound findings.
             resolution = {
                 "resolution_status": "UNRESOLVED",
                 "resolution_reason": "RELATION_CELL_NOT_PROJECTED",

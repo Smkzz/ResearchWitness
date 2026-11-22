@@ -68,6 +68,9 @@ Old bundles are not migrated; exact replay stays strict, with no compatibility
 shim. See [the release process](RELEASING.md#exact-bundle-replay).
 
 Tables are projected once and indexed by original cell byte spans. The adapter
+retains `RELATION_CELL_NOT_PROJECTED` as defense in depth: projection normally
+raises on an unbound detector finding, so this branch requires bypassing that
+contract (as the existing monkeypatch test does). The adapter
 binds row-group identity to the original enclosing XML element's byte offset,
 including separate unnamed body groups, preserving cells and anchors. Subgroup
 boundaries and parent-count groups stop at group boundaries and are computed
