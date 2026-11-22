@@ -137,14 +137,15 @@ class LocalAuditStore:
             try:
                 job = self._load_job(path)
                 self._job_size(job.job_id)
-                if job.status in {"queued", "running"}:
-                    job.status, job.error = "failed", "Server stopped before this audit completed; upload again."
-                    self._save(job)
             except (LocalUIError, OSError, ValueError, TypeError, KeyError):
-                self._discard_partial(path)
                 continue
+            if job.status in {"queued", "running"}:
+                job.status, job.error = "failed", "Server stopped before this audit completed; upload again."
+                try:
+                    self._save(job)
+                except (OSError, LocalUIError):
+                    pass
             self.jobs[job.job_id] = job
-        self._retain(0)
 
     def _load_job(self, path: Path) -> AuditJob:
         _directory(path)

@@ -289,7 +289,7 @@ class LocalUITests(unittest.TestCase):
             self.assertEqual(list(store.root.iterdir()), [])
         self.completed()
 
-    def test_restart_skips_and_removes_incomplete_or_invalid_jobs(self):
+    def test_restart_preserves_incomplete_invalid_and_unreadable_jobs(self):
         good = self.completed()
         root = self.server.store.root
         for index, content in enumerate((None, b"{", b"{}", b'{"status": []}')):
@@ -298,6 +298,17 @@ class LocalUITests(unittest.TestCase):
             (path / "upload.xml").write_bytes(SOURCE)
             if content is not None:
                 (path / "job.json").write_bytes(content)
+        unreadable = root / ("e" * 32)
+        unreadable.mkdir()
+        (unreadable / "job.json").write_bytes(b"unreadable metadata")
+        original_read = ui.read_regular
+
+        def read_saved(path, limit):
+            if path.parent == unreadable:
+                raise OSError("metadata unreadable")
+            return original_read(path, limit)
+
+        before = {path: path.read_bytes() for path in root.rglob("*") if path.is_file()}
         outside = self.root / "outside"
         outside.mkdir()
         marker = outside / "keep.txt"
@@ -307,14 +318,13 @@ class LocalUITests(unittest.TestCase):
             link.symlink_to(outside, target_is_directory=True)
         except OSError:
             pass
-        reopened = ui.LocalAuditStore(root)
+        with mock.patch.object(ui, "read_regular", side_effect=read_saved):
+            reopened = ui.LocalAuditStore(root, max_jobs=0)
         try:
             self.assertEqual([job["job_id"] for job in reopened.list_jobs()], [good["job_id"]])
-            for index in range(4):
-                self.assertFalse((root / f"{index:032x}").exists())
+            for path, content in before.items():
+                self.assertEqual(path.read_bytes(), content)
             self.assertEqual(marker.read_text(), "do not remove")
-            reopened._discard_partial(outside)
-            self.assertTrue(marker.exists())
         finally:
             reopened.close()
 
@@ -361,6 +371,16 @@ class LocalUIContractTests(unittest.TestCase):
             finally:
                 blocker.set()
                 store.close()
+            saved = {path: path.read_bytes() for path in root.rglob("*") if path.is_file()}
+            with mock.patch.object(ui.LocalAuditStore, "_save", side_effect=OSError("disk full")):
+                reopened = ui.LocalAuditStore(root)
+            try:
+                self.assertEqual(reopened.list_jobs()[0]["status"], "failed")
+                self.assertIn("Server stopped", reopened.list_jobs()[0]["error"])
+                for path, content in saved.items():
+                    self.assertEqual(path.read_bytes(), content)
+            finally:
+                reopened.close()
             reopened = ui.LocalAuditStore(root)
             try:
                 self.assertEqual(reopened.list_jobs()[0]["status"], "failed")
