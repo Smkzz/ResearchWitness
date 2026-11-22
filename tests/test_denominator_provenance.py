@@ -245,3 +245,26 @@ def test_table_resolution(name, head, body, old_status, denominators, reason):
             assert provenance["selected_denominator"]["source_anchor"]["element_path"]
         assert all(candidate["rejection_reasons"]
                    for candidate in provenance["rejected_competing_denominators"])
+
+
+def test_boundary_scope_cells_come_from_the_boundary_row():
+    source = (
+        '<article><body><table-wrap><table><thead><tr><th>Outcome</th>'
+        '<th>Arm A</th><th>Arm B</th></tr></thead><tbody>'
+        '<tr><th>Women</th><td>N=20</td><td>-</td></tr>'
+        '<tr><th>Event</th><td>4 (20%)</td><td>1 (10%)</td></tr>'
+        '</tbody></table></table-wrap></body></article>'
+    ).encode()
+    table = project_jats_tables(source).tables[0]
+    boundaries = subgroup_boundaries(table)
+    assert len(boundaries) == 1
+    boundary = boundaries[0]
+    assert boundary.scope_cells == table.rows[boundary.source_row_index].cells[1:]
+    row = table.rows[-1]
+    result = resolve_denominator(table, row, row.cells[-1], len(table.rows) - 1,
+                                 boundaries, parent_count_groups(table))
+    rejected = result["denominator_provenance"]["rejected_competing_denominators"]
+    assert any(item["raw_value"] == "-"
+               and item["source_anchor"]["element_path"]
+               == table.rows[boundary.source_row_index].cells[-1].source_anchor.element_path
+               for item in rejected)

@@ -548,7 +548,7 @@ def subgroup_boundaries(table: Table) -> tuple[SubgroupBoundary, ...]:
                         or (next_label is not None and next_label.raw_text.strip() and not any(other_values))):
                     end = next_index
                     break
-        scope_cells = tuple(cell for cell in row.cells if cell.column_start > 0)
+        scope_cells = tuple(cell for cell in table.rows[row_index].cells if cell.column_start > 0)
         result.append(SubgroupBoundary(row_index, row_index + 1, end, label, cells, scope_cells))
     return tuple(result[:10_000])
 
