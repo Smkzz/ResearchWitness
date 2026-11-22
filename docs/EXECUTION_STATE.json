@@ -3,6 +3,16 @@
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 3,
   "updated_on": "2026-11-22",
+  "custody_worker_port": {
+    "source_pr": 12,
+    "source_commit": "78b26e2d9a31a1eafcc9a0f668b19f09283ce5e9",
+    "scope": "Synthetic-only engineering code; separate from the researchwitness wheel",
+    "production": "disabled",
+    "protected_custody": "NOT RUN",
+    "qualification": "not qualified",
+    "security_review": "awaiting Sami's separate security review",
+    "note": "CLI refuses without --dev-root before production preflight or store access. No historical qualification receipts, private sources or production installation claims ported. Synthetic checks do not change capability gates."
+  },
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
   "baseline": {

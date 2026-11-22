@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "span": {
+      "type": "object", "additionalProperties": false,
+      "required": ["start", "end", "text"],
+      "properties": {
+        "start": {"type": "integer", "minimum": 0, "maximum": 33554432},
+        "end": {"type": "integer", "minimum": 1, "maximum": 33554432},
+        "text": {"type": "string", "minLength": 1, "maxLength": 2000}
+      }
+    },
+    "relationship": {
+      "description": "Eligibility v5 requires a complete relation on one exact physical source line, a literal count field label immediately before the numerator, and no overlap between the table locator and relation values. Every numeric token on that line must be bound as a selected operand, a table locator, or an explicit correction old value; multi-line table/header joins remain unresolved.",
+      "type": "object", "additionalProperties": false,
+      "required": ["table_locator_span", "object_locator_span", "context_span", "numerator_span", "denominator_span", "percentage_span", "scope_span", "scope_status"],
+      "properties": {
+        "table_locator_span": {"$ref": "#/$defs/span"},
+        "object_locator_span": {"$ref": "#/$defs/span"},
+        "context_span": {"$ref": "#/$defs/span"},
+        "numerator_span": {"$ref": "#/$defs/span"},
+        "denominator_span": {"$ref": "#/$defs/span"},
+        "percentage_span": {"$ref": "#/$defs/span"},
+        "scope_span": {"$ref": "#/$defs/span"},
+        "scope_status": {"enum": ["CUSTODIAN_CONFIRMED_SAME_SCOPE", "UNRESOLVED", "DISPUTED"]}
+      }
+    },
+    "correction_binding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["statement_span", "corrected_relation", "old_value_spans", "changed_fields", "mapping_status"],
+      "properties": {
+        "statement_span": {"$ref": "#/$defs/span"},
+        "corrected_relation": {"$ref": "#/$defs/relationship"},
+        "old_value_spans": {
+          "type": "object", "minProperties": 1, "maxProperties": 3,
+          "additionalProperties": false,
+          "properties": {
+            "numerator": {"$ref": "#/$defs/span"},
+            "denominator": {"$ref": "#/$defs/span"},
+            "percentage": {"$ref": "#/$defs/span"}
+          }
+        },
+        "changed_fields": {
+          "type": "array", "minItems": 1, "maxItems": 3, "uniqueItems": true,
+          "items": {"enum": ["numerator", "denominator", "percentage"]}
+        },
+        "mapping_status": {"const": "CUSTODIAN_CONFIRMED_EXACT_CORRECTION"}
+      }
+    }
+  },
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "review_id", "role", "eligibility", "document_id", "source_sha256", "source_version", "correction_sha256", "correction_source_version", "source_version_status", "relationship", "correction_binding", "objections"],
+  "properties": {
+    "schema_version": {"const": "rw-custody-review/5"},
+    "review_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$"},
+    "role": {"enum": ["CORRECTION_POSITIVE", "CORRECT_NEGATIVE_RELATION", "OTHER"]},
+    "eligibility": {"enum": ["ELIGIBLE", "INELIGIBLE", "UNRESOLVED"]},
+    "document_id": {"type": "string", "pattern": "^doi:10\\.[0-9]{4,9}/[^\\s<>?#]+$"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_version": {"type": "string", "minLength": 1, "maxLength": 160},
+    "correction_sha256": {"anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "null"}]},
+    "correction_source_version": {"anyOf": [{"type": "string", "minLength": 1, "maxLength": 160}, {"type": "null"}]},
+    "source_version_status": {"enum": ["CUSTODIAN_CONFIRMED_SOURCE_VERSION", "UNRESOLVED", "DISPUTED"]},
+    "relationship": {"$ref": "#/$defs/relationship"},
+    "correction_binding": {"anyOf": [{"$ref": "#/$defs/correction_binding"}, {"type": "null"}]},
+    "objections": {"type": "array", "maxItems": 24, "items": {"type": "string", "maxLength": 240}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"role": {"const": "CORRECTION_POSITIVE"}, "eligibility": {"const": "ELIGIBLE"}}, "required": ["role", "eligibility"]},
+      "then": {"properties": {"correction_binding": {"$ref": "#/$defs/correction_binding"}, "correction_sha256": {"type": "string"}, "correction_source_version": {"type": "string"}}}
+    },
+    {
+      "if": {"properties": {"eligibility": {"const": "ELIGIBLE"}}, "required": ["eligibility"]},
+      "then": {
+        "properties": {
+          "source_version_status": {"const": "CUSTODIAN_CONFIRMED_SOURCE_VERSION"},
+          "objections": {"maxItems": 0},
+          "relationship": {
+            "properties": {
+              "scope_status": {"const": "CUSTODIAN_CONFIRMED_SAME_SCOPE"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"role": {"const": "CORRECTION_POSITIVE"}, "eligibility": {"enum": ["INELIGIBLE", "UNRESOLVED"]}}, "required": ["role", "eligibility"]},
+      "then": {"properties": {"correction_binding": {"type": "null"}}}
+    },
+    {
+      "if": {"properties": {"role": {"enum": ["CORRECT_NEGATIVE_RELATION", "OTHER"]}}, "required": ["role"]},
+      "then": {
+        "properties": {
+          "correction_sha256": {"type": "null"},
+          "correction_source_version": {"type": "null"},
+          "correction_binding": {"type": "null"}
+        }
+      }
+    },
+    {
+      "not": {
+        "properties": {
+          "role": {"const": "OTHER"},
+          "eligibility": {"const": "ELIGIBLE"}
+        },
+        "required": ["role", "eligibility"]
+      }
+    }
+  ]
+}
