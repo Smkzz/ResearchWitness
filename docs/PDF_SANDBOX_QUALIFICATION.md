@@ -45,6 +45,12 @@ check-then-use race, same-user/admin attackers, offline-only revocation,
 name-only signer matching and installation-integrity risks: **"Accept these risks"**,
 relayed by the ResearchWitness coordinator. This is an owner decision,
 not a review; risks are **accepted, not resolved or mitigated**.
+
+Source: Sami answered the decision prompt in the ResearchWitness coordinator
+bot's Devin chat on 2026-11-23 at about **00:39 EET** (**22:39 UTC on
+2026-11-22**). The record lives on the [coordinator bot page](https://app.devin.ai/org/smkzz/bots/bb5d480d5bb849b6abf8208c64dd5111).
+**No direct link to the answer exists**; the bot-page URL is not an answer permalink.
+
 The authority
 for native RW-03 qualification runs on the org Windows Devin machine is Sami's
 answer to the "Use a Windows machine" card, **2026-11-21 19:59 UTC**. That
@@ -238,9 +244,12 @@ name-only signer matching and installation integrity remain residual risks,
 accepted by Sami on 2026-11-23, not resolved or mitigated. `pdf_execution` remains
 `unqualified`.
 The earlier managed-socket `operation not permitted` result is historical, not
-the current image-availability blocker. RW-03 remains `blocked_external` while
-separate image security review remains absent. Protected custody separately
-remains NOT RUN; the next-real-rebuild receipt requirement above stays.
+the current image-availability blocker. RW-03 remains `blocked_external` until
+**both** remaining unlocks are satisfied: (a) the separate exact-image security
+review above, with no reviewer named, and (b) protected custody, **NOT RUN**,
+requiring an authorized, actually isolated custodian and its capability receipt.
+Accepting the pipe risks satisfies neither condition. The next-real-rebuild
+receipt requirement above stays.
 
 RW-03 may inspect current authorized capabilities, assemble/review an image and
 collect real evidence autonomously when no new privileges, egress, secret access

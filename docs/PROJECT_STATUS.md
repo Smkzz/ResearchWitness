@@ -127,16 +127,27 @@ of the installation's integrity. Another local process can
 create `\\.\pipe\docker_engine` when the daemon is absent. These residual risks
 were accepted, not resolved or mitigated, by Sami (project owner) on 2026-11-23:
 "Accept these risks", relayed by the ResearchWitness coordinator. This owner
-decision is not a review or an execution-qualification claim. `pdf_execution`
-stays `unqualified`. Protected custody
+decision is not a review or an execution-qualification claim.
+
+Source: Sami answered the decision prompt in the ResearchWitness coordinator
+bot's Devin chat on 2026-11-23 at about **00:39 EET** (**22:39 UTC on
+2026-11-22**). The record lives on the [coordinator bot page](https://app.devin.ai/org/smkzz/bots/bb5d480d5bb849b6abf8208c64dd5111).
+**No direct link to the answer exists**; the bot-page URL is not an answer permalink.
+
+`pdf_execution` stays `unqualified`. Protected custody
 was **NOT RUN** (no authorized isolated custodian); it stays `unqualified`.
 `scientific_wave_3` remains `not_run`. No human certification is claimed.
 
-**RW-03 remains `blocked_external`.** The only remaining PDF-execution unlock
-is separate security review of the image inventory and recorded evidence bound to
-`sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944`;
-no reviewer has been named. Protected custody separately remains NOT RUN. The
-ledger's state rules do not promote a blocked
+**RW-03 remains `blocked_external`. Both remaining unlocks must be satisfied:**
+
+1. Separate security review of the image inventory and recorded evidence bound to
+   `sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944`;
+   no reviewer has been named.
+2. Protected custody is **NOT RUN** and requires an authorized, actually isolated
+   custodian and its capability receipt. Owner pipe-risk acceptance is not custody
+   qualification and does not satisfy this unlock.
+
+The ledger's state rules do not promote a blocked
 package merely because runtime evidence exists; capability acceptance is absent.
 `next_unblocked_task` was deliberately set to `null`: the old RW-01 pointer was
 stale, and no next eligible package is identified after RW-04L. Original-source
@@ -226,6 +237,16 @@ verified post-merge **11/11 PASS**: nine CI matrix jobs, Release gate and Analyz
 Python/CodeQL. This is an engineering receipt, not the separate image security
 review. The next authorized real rebuild must still commit the required
 pre-import tar-hash and exact signer-set receipt; no rebuild is claimed here.
+
+### PR #103 merge receipt
+
+[Reviewer approval](https://github.com/Smkzz/ResearchWitness/pull/103#pullrequestreview-6014942102)
+for PR #103 was at `8d221c7544ab813a44ef2d1853b72916c942c484`, merged as main
+`bbf4d0415ec60f04fcb3b9ffc2d2cc4a197f286a`. This engineering approval is not the
+separate image security review or protected-custody qualification.
+
+Post-merge main CI: **11/11 PASS**, verified by the ResearchWitness coordinator:
+nine-job Python matrix, Release gate and Analyze Python/CodeQL.
 
 ## RW-04L accepted engineering receipt
 
