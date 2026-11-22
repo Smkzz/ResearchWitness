@@ -1007,8 +1007,7 @@ def resolve_denominator(
 
     # Preserve the selected source separately; all other structurally
     # applicable candidates retain explicit rejection reasons.
-    if selected is not None:
-        rejected.extend(item for item in candidates if item is not selected and item not in rejected)
+    rejected.extend(item for item in candidates if item is not selected and item not in rejected)
     rejected = list({item['candidate_id']: item for item in rejected}.values())
     return {
         'denominator_scope_resolved': selected is not None,

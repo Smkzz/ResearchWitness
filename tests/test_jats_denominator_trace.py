@@ -118,6 +118,21 @@ def test_ambiguous_header_layout_abstains(span):
     assert row["resolved_value_equals_detector_base"] is None
 
 
+@pytest.mark.parametrize(("header", "reason", "raw_value"), [
+    ("Patients (N=1,000)", "GROUPED_INTEGER_FORMAT_UNSUPPORTED", "1,000"),
+    ('Patients (N=20)<xref ref-type="table-fn" rid="f1">a</xref>',
+     "FOOTNOTE_SCOPE_UNRESOLVED", "20"),
+])
+def test_unresolved_retains_invalid_denominator_candidates(header, reason, raw_value):
+    row = traced.trace_denominators(synthetic(header=header, label="Event"))["relations"][0]
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    rejected = provenance["rejected_competing_denominators"]
+    assert any(item["raw_value"] == raw_value
+               and item["source_anchor"]["start_byte"] > 0
+               and reason in item["rejection_reasons"] for item in rejected)
+
+
 def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)
