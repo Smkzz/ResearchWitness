@@ -7,7 +7,28 @@ Use the already provisioned linux/amd64 builder in `build.py`. The committed loc
 is `evidence/rw03-pdf-image-2026-11-22/packages.lock.json`. Keep an immutable copy
 of that lock; the resolve command creates a new lock, not an update to use silently.
 
-From the repository root, with fresh work directories outside Git:
+## Next authorized rebuild: mandatory new-check receipt
+
+[Reviewer note on #96](https://github.com/Smkzz/ResearchWitness/pull/96#pullrequestreview-6009671867):
+the new build.py tar-hash and signer-set checks have **not run end to end in a
+real rebuild**. Mocked regressions and standalone offline signature verification
+do not replace that evidence; the existing image was not rebuilt with these checks.
+
+The next authorized real rebuild must **commit a new receipt** recording the code
+HEAD, lock/image identities, commands, outputs and exit codes, explicitly showing:
+
+1. The build.py rootfs.tar SHA256 check ran **before import** and passed: computed
+   digest equals the recipe pin
+   `01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074`.
+2. The build.py signer-set check ran and passed: sqv exited 0 and returned exactly
+   the complete locked fingerprint set (record both expected and verified sets).
+
+Preserve earlier receipts; do not infer either check ran from a successful old
+smoke or isolated unit test. This requirement grants no rebuild, egress, privilege
+or spending authority and does not qualify PDF execution.
+
+For that authorized rebuild, from the repository root, with fresh work directories
+outside Git, capture the receipt while executing these steps:
 
 ```text
 python tools/pdf_sandbox_image/build.py resolve --work-dir <resolution-dir> --evidence <new-evidence-dir>
