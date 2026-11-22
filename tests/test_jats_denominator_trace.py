@@ -133,6 +133,18 @@ def test_unresolved_retains_invalid_denominator_candidates(header, reason, raw_v
                and reason in item["rejection_reasons"] for item in rejected)
 
 
+def test_grouped_ratio_token_is_not_normalized_before_resolution():
+    data = synthetic(label="Event").replace(b"4 (20%)", b"4/1,000 (0.4%)")
+    row = traced.trace_denominators(data)["relations"][0]
+    assert row["detector_denominator"] == 1000
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    assert provenance["resolution_reason"] == "GROUPED_INTEGER_FORMAT_UNSUPPORTED"
+    assert any(item["raw_value"] == "1,000"
+               and "GROUPED_INTEGER_FORMAT_UNSUPPORTED" in item["rejection_reasons"]
+               for item in provenance["rejected_competing_denominators"])
+
+
 def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)

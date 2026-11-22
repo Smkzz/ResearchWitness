@@ -196,13 +196,21 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
         else:
             table, row, row_index, cell = projected
             boundaries, groups = table_scopes[id(table)]
+            ratio_token = None
+            if relation.get("denominator_scope") == "cell_ratio":
+                ratio_quote = cell.raw_text
+                if "component_label" in evidence:
+                    ratio_quote = next((
+                        fragment["numeric_quote"] for fragment in jats._fragments(cell.raw_text)
+                        if fragment is not None
+                        and fragment["character_start"] == evidence["normalized_character_start"]
+                        and fragment["character_end"] == evidence["normalized_character_end"]
+                    ), "")
+                ratio = jats._COUNT_RATIO_PERCENT_RE.fullmatch(ratio_quote)
+                ratio_token = ratio.group("denominator") if ratio is not None else ""
             resolution = resolve_denominator(
                 table, row, cell, row_index, boundaries, groups,
-                explicit_cell_denominator=(
-                    str(reported_denominator)
-                    if relation.get("denominator_scope") == "cell_ratio"
-                    and reported_denominator is not None else None
-                ),
+                explicit_cell_denominator=ratio_token,
             )["denominator_provenance"]
             if {"header_layout_ambiguous", "body_layout_ambiguous",
                     "spanning_cell_role_ambiguous"}.intersection(table.limitations):
