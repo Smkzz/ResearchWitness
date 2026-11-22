@@ -63,7 +63,8 @@ def implementation_files() -> dict[str, str]:
                      "jats_product.py", "jats_table_projection.py", "paper_document.py",
                      "paper_statistics.py", "paper_two_by_two_source.py",
                      "paper_flow.py", "paper_flow_source.py", "paper_prisma_flow.py",
-                     "paper_statistics_source.py", "paper_count_totals.py", "jats_denominator_trace.py")
+                     "paper_statistics_source.py", "paper_count_totals.py", "jats_denominator_trace.py",
+                     "denominator_provenance.py")
     }
 
 

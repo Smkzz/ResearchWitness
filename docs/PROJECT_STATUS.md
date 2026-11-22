@@ -12,6 +12,20 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## Advisory denominator resolver port — pre-merge receipt
+
+Base: main `4389217`; source resolver: closed PR #11 head `6843593`.
+Branch: `devin/1795389451-denominator-provenance-port`. Trace v2 adds a
+deterministic fail-closed scope-first resolver report over original-byte Tables,
+without changing detector decisions. The resolver is advisory, not adjudication.
+Only the standalone resolver was imported; no legacy audit/arithmetic/replay stack.
+Synthetic Table and JATS tests cover local and broader bases, ambiguity,
+missing explicit bases, missing projected cells and unchanged detector results.
+Local acceptance commands: Ruff, full coverage (core >=90%), quality gate.
+Results belong to the implementation commit receipt; no exact-head CI, separate
+review, merge or postmerge success is claimed here. No reviewer is invented.
+PDF qualification and protected custody gates are unchanged.
+
 ## RW-03 native test run receipt
 
 This is a **native test run (logs linked)**, not a qualification claim.

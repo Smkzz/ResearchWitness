@@ -1,19 +1,21 @@
 """Offline JATS denominator-evidence trace over the EXISTING percentage detector.
 
-This module DOES NOT RESOLVE scopes, select bases, change arithmetic decisions
-or authenticate a scientific paper. It proves that the detector's already
-reported XML element references exist in the preserved, identical source bytes.
+This deterministic fail-closed scope-first resolver report is advisory, not
+adjudication. It does not alter detector decisions or arithmetic. It also checks
+the detector's XML element references against preserved original source bytes.
 """
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import replace
 from hashlib import sha256
 from typing import Any
 
 from . import _jats_parser as jats
-from .jats_table_projection import _paths
+from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
+from .jats_table_projection import _paths, project_jats_tables
 
-VERSION = "rw-jats-denominator-evidence.v1"
+VERSION = "rw-jats-denominator-evidence.v2"
 MAX_FACTS_PER_RELATION = 64
 MAX_TOTAL_FACTS = 32768
 _DETECTOR_STATES = frozenset({
@@ -90,6 +92,21 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                  "SUPPLIED_DETECTOR_RESULTS_NOT_REPLAYED_FROM_SOURCE")
     _require(original["source_sha256"] == source_hash, "SOURCE_DIGEST_CHANGED")
     positions, paths = _source_index(root), _paths(root)
+    document = project_jats_tables(source, original)
+    cells = {}
+    table_scopes = {}
+    for table in document.tables:
+        # The standalone resolver uses tag names, not projection group identities.
+        table = replace(table, rows=tuple(
+            replace(row, row_group=row.row_group.split(":", 1)[0]) for row in table.rows
+        ))
+        table_scopes[id(table)] = (subgroup_boundaries(table), parent_count_groups(table))
+        for row_index, row in enumerate(table.rows):
+            for cell in row.cells:
+                anchor = cell.source_anchor
+                cells[(anchor.start_byte, anchor.end_byte)] = (table, row, row_index, cell)
+    resolution_states: Counter[str] = Counter()
+    disagreements = 0
     relations: list[dict[str, Any]] = []
     states: Counter[str] = Counter()
     fact_roles: Counter[str] = Counter()
@@ -155,7 +172,29 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
         if status in _CHECKED_STATES:
             _require(any(fact["numeric_equals_detector_base"] for fact in traced),
                      "ACCEPTED_BASE_HAS_NO_SOURCE_ELEMENT")
+        projected = cells.get((evidence["byte_start"], evidence["byte_end"]))
+        if projected is None:
+            resolution = {
+                "resolution_status": "UNRESOLVED",
+                "resolution_reason": "RELATION_CELL_NOT_PROJECTED",
+                "relationship_scope": None,
+                "selected_denominator": None,
+                "rejected_competing_denominators": [],
+            }
+        else:
+            table, row, row_index, cell = projected
+            boundaries, groups = table_scopes[id(table)]
+            resolution = resolve_denominator(
+                table, row, cell, row_index, boundaries, groups,
+            )["denominator_provenance"]
+        selected = resolution["selected_denominator"]
+        agrees = (int(selected["value_exact"]) == reported_denominator
+                  if selected is not None else None)
+        resolution_states[resolution["resolution_status"]] += 1
+        disagreements += agrees is False
         relations.append({
+            "denominator_provenance": resolution,
+            "resolved_value_equals_detector_base": agrees,
             "relation_id": f"{source_hash[:16]}:den-{index:04d}",
             "source_relation_index": index,
             "detector_status": status,
@@ -184,6 +223,8 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
         "unresolved_relation_count": unresolved,
         "multiple_fact_values_relation_count": conflicts,
         "detector_status_counts": dict(sorted(states.items())),
+        "resolution_status_counts": dict(sorted(resolution_states.items())),
+        "detector_resolver_disagreement_count": disagreements,
         "denominator_fact_roles": dict(sorted(fact_roles.items())),
         "relations": relations,
         "detector_method_scope_overflow": bool(original["method_scope_overflow"]),
@@ -191,6 +232,7 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
         "source_origin_authenticated": False,
         "paper_error_established": False,
         "limitations": [
+            "Deterministic fail-closed scope-first resolver report: advisory, not adjudication; does not alter detector decisions.",
             "This replays the same detector. It does not independently validate its source interpretation.",
             "XML element byte spans include markup; they are not numeric-token byte offsets.",
             "Different explicit base values can be correctly scoped to different strata; a flag is not a verdict.",
