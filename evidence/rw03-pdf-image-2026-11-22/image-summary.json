@@ -1,0 +1,23 @@
+{
+  "image_id": "sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944",
+  "second_image_id": "sha256:f410b28090506815349ba6964bd23cbb1e72114c790cbb42eca1df3e90b581da",
+  "image_ids_equal": false,
+  "created": [
+    "2026-11-22T01:29:19.855153514Z",
+    "2026-11-22T01:29:29.153018169Z"
+  ],
+  "rootfs_tar_sha256": [
+    "01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074",
+    "01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074"
+  ],
+  "inventories_equal": true,
+  "layers": [
+    [
+      "sha256:01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074"
+    ],
+    [
+      "sha256:01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074"
+    ]
+  ],
+  "save_archive_sha256": "625d839aae1cd03ac798d8f78ab417b2d54fe73ab6f6d6f797e6cf0c3ea786e4"
+}

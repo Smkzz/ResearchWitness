@@ -1,0 +1,184 @@
+$ docker run --rm --interactive --pull=never --platform linux/amd64 --mount type=bind,source=C:\Users\Administrator\rw03-pdf-resolve-final,target=/work debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392 sh -s < prepare.sh
+GET /archive/debian/20261120T000000Z/dists/trixie/InRelease HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/archive/debian/20261120T000000Z/dists/trixie/InRelease
+HTTP/1.1 302 FOUND
+Connection: keep-alive
+Content-Length: 299
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+location: /file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease
+cache-control: max-age=86400, public
+expires: Sun, 22 Nov 2026 10:04:42 GMT
+x-clacks-overhead: GNU Terry Pratchett
+content-type: text/html; charset=utf-8
+via: 1.1 snapshot-mmx-01 (Varnish/7.7), 1.1 varnish, 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:23:49 GMT
+Age: 55147
+X-Served-By: cache-bma-essb1270076-BMA, cache-bfi-kbfi7400118-BFI
+X-Cache: HIT, HIT
+X-Cache-Hits: 11, 1
+X-Timer: S1795310629.475038,VS0,VE1
+Vary: x-download-directly
+
+GET /file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 140421
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+last-modified: Sat, 12 Sep 2026 08:14:01 GMT
+etag: "22485-65b44c890a334"
+x-clacks-overhead: GNU Terry Pratchett
+cache-control: max-age=31536000, public
+content-disposition: attachment; filename=InRelease
+via: 1.1 varnish (Varnish/7.1), 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:23:49 GMT
+Age: 1093256
+X-Served-By: cache-bfi-kbfi7400118-BFI
+X-Cache: HIT
+X-Cache-Hits: 1
+X-Timer: S1795310629.486458,VS0,VE3
+Vary: x-download-directly
+
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie InRelease [140 kB]
+201 URI Done: http://snapshot.debian.org/file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease
+ReceivedHash:
+	- SHA512:43677730593a882cb26d848fb97ca5dbe9b54bd715b196341ca055a8f17a2ec092ce220f10cbe69ca33eccb3d43a34b54e768d9fc018adbb414d44befd23a313
+	- SHA256:0584fba32e13e0ab8285fb16c27adea1ec03a73669c18702821094fd6ca86675
+	- SHA1:aa33cb317177428f33c9ff72fc3e9b634645f6ae
+	- MD5Sum:81c04f3e10dd129d4afb2ff19048ea1d
+	- Checksum-FileSize:140421
+ExpectedHash:
+
+Setting SEQUOIA_CRYPTO_POLICY=/usr/share/apt/default-sequoia.config
+Executing /usr/bin/sqv --keyring /usr/share/keyrings/debian-archive-keyring.gpg /tmp/apt.sig.ZzO1kx /tmp/apt.data.S5LZ1c --policy-as-of 2027-11-22
+sqv exited with status 0
+Got GOODSIG 04B54C3CDCA79751B16BC6B5225629DF75B188BD
+Got GOODSIG 41587F7DB8C774BCCF131416762F67A0B2C39DE4
+Got GOODSIG B8B80B5B623EAB6AD8775C45B7C5D7D6350947F8
+sqv succeeded
+201 URI Done: sqv:/var/lib/apt/lists/partial/snapshot.debian.org_archive_debian_20261120T000000Z_dists_trixie_InRelease
+ReceivedHash:
+ExpectedHash:
+
+Signature verification succeeded: /var/lib/apt/lists/partial/snapshot.debian.org_archive_debian_20261120T000000Z_dists_trixie_InRelease
+Got Codename: trixie
+Got Suite: stable
+Expecting Dist: trixie
+GET /archive/debian/20261120T000000Z/dists/trixie/main/binary-amd64/by-hash/SHA256/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498 HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/archive/debian/20261120T000000Z/dists/trixie/main/binary-amd64/by-hash/SHA256/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+HTTP/1.1 302 FOUND
+Connection: keep-alive
+Content-Length: 409
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+location: /file/32fc3b1c3e78ef911b125ee266a7e73d5884083f/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+cache-control: max-age=86400, public
+expires: Mon, 23 Nov 2026 00:02:07 GMT
+x-clacks-overhead: GNU Terry Pratchett
+content-type: text/html; charset=utf-8
+via: 1.1 snapshot-mmx-01 (Varnish/7.7), 1.1 varnish, 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:23:49 GMT
+Age: 4902
+X-Served-By: cache-bma-essb1270078-BMA, cache-bfi-kbfi7400118-BFI
+X-Cache: HIT, HIT
+X-Cache-Hits: 7, 1
+X-Timer: S1795310630.535219,VS0,VE6
+Vary: x-download-directly
+
+GET /file/32fc3b1c3e78ef911b125ee266a7e73d5884083f/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498 HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/file/32fc3b1c3e78ef911b125ee266a7e73d5884083f/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 9678380
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+last-modified: Sat, 12 Sep 2026 08:09:20 GMT
+etag: "93ae2c-65b44b7d7aec2"
+x-clacks-overhead: GNU Terry Pratchett
+cache-control: max-age=31536000, public
+content-disposition: attachment; filename=7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+via: 1.1 varnish (Varnish/7.1), 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:23:50 GMT
+Age: 429846
+X-Served-By: cache-bfi-kbfi7400118-BFI
+X-Cache: HIT
+X-Cache-Hits: 1
+X-Timer: S1795310630.552830,VS0,VE1054
+Vary: x-download-directly
+
+Get:2 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 Packages [9678 kB]
+201 URI Done: http://snapshot.debian.org/file/32fc3b1c3e78ef911b125ee266a7e73d5884083f/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+ReceivedHash:
+	- SHA256:7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+	- MD5Sum:2d47057a46b268c5f031facecf74b20a
+	- Checksum-FileSize:9678380
+ExpectedHash:
+	- Checksum-FileSize:9678380
+	- SHA256:7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+	- MD5Sum:2d47057a46b268c5f031facecf74b20a
+
+201 URI Done: store:/var/lib/apt/lists/partial/snapshot.debian.org_archive_debian_20261120T000000Z_dists_trixie_main_binary-amd64_Packages.xz
+ReceivedHash:
+	- SHA256:4f2c68d67001d595fbd343f6dbad44468953a51c4d9dec3a4803249f6e295940
+	- MD5Sum:e08be5a2aa84e0f84bd976c3ce580092
+	- Checksum-FileSize:56620099
+ExpectedHash:
+	- Checksum-FileSize:56620099
+	- SHA256:4f2c68d67001d595fbd343f6dbad44468953a51c4d9dec3a4803249f6e295940
+	- MD5Sum:e08be5a2aa84e0f84bd976c3ce580092
+
+Fetched 9819 kB in 2s (4039 kB/s)
+Reading package lists...
+0584fba32e13e0ab8285fb16c27adea1ec03a73669c18702821094fd6ca86675  /work/InRelease
+
+EXIT CODE: 0

@@ -1,0 +1,36 @@
+Console receipt from the preceding acquisition phase, retained as a transcript
+excerpt rather than a newly executed pull. Base HEAD:
+62a8e32f030335bdccbaf3ee77f7384ddcb542d3
+
+Registry tag request: GET https://registry-1.docker.io/v2/library/debian/manifests/trixie-slim
+Token service: https://auth.docker.io/token (token not recorded)
+INDEX_DIGEST=sha256:a72b4433de1cf7d6bae0c4cee74d0547f58601a643b3375f070c51600d63b6b2
+Selected platform: linux/amd64
+MANIFEST_DIGEST=sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392
+Manifest layer: sha256:37fb86c2a767b88d500c6872195f88078f64765fe0d2f9cc375cc2efbd4c0a41
+BLOB_REDIRECT 307 registry-1.docker.io -> production.cloudfront.docker.com
+The redirect probe deliberately did not follow the signed blob URL; urllib
+reported HTTP Error 307. The later docker pull acquired the layer.
+
+$ docker pull --platform linux/amd64 debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392
+docker.io/library/debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392: Pulling from library/debian
+37fb86c2a767: Pulling fs layer
+37fb86c2a767: Download complete
+37fb86c2a767: Pull complete
+Digest: sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392
+Status: Downloaded newer image for debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392
+docker.io/library/debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392
+PULL_EXIT=0
+
+$ curl.exe --head --location --max-redirs 1 https://snapshot.debian.org/archive/debian/20261120T000000Z/dists/trixie/InRelease
+HTTP/1.1 302 FOUND
+location: /file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease
+HTTP/1.1 200 OK
+
+First HTTPS apt attempt, before the explicit HTTP authority decision:
+SSL connection failed: error:0A000086:SSL routines::certificate verify failed / Success
+SNAPSHOT_UPDATE_EXIT=100
+
+HTTP apt transport was then explicitly authorized. The final signed apt
+resolution and two rootfs assemblies have full command/output/exit logs beside
+this file. HTTP Host headers and relative redirect paths are retained there.

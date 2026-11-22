@@ -1,0 +1,210 @@
+$ docker run --rm --interactive --pull=never --platform linux/amd64 --mount type=bind,source=C:\Users\Administrator\rw03-pdf-build-one,target=/work debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392 sh -s < build_rootfs.sh
+GET /archive/debian/20261120T000000Z/dists/trixie/InRelease HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/archive/debian/20261120T000000Z/dists/trixie/InRelease
+HTTP/1.1 302 FOUND
+Connection: keep-alive
+Content-Length: 299
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+location: /file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease
+cache-control: max-age=86400, public
+expires: Sun, 22 Nov 2026 10:04:42 GMT
+x-clacks-overhead: GNU Terry Pratchett
+content-type: text/html; charset=utf-8
+via: 1.1 snapshot-mmx-01 (Varnish/7.7), 1.1 varnish, 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:20:33 GMT
+Age: 54950
+X-Served-By: cache-bma-essb1270076-BMA, cache-bfi-krnt7300049-BFI
+X-Cache: HIT, HIT
+X-Cache-Hits: 11, 1
+X-Timer: S1795310433.298781,VS0,VE3
+Vary: x-download-directly
+
+GET /file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/file/aa33cb317177428f33c9ff72fc3e9b634645f6ae/InRelease
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 140421
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+last-modified: Sat, 12 Sep 2026 08:14:01 GMT
+etag: "22485-65b44c890a334"
+x-clacks-overhead: GNU Terry Pratchett
+cache-control: max-age=31536000, public
+content-disposition: attachment; filename=InRelease
+via: 1.1 varnish (Varnish/7.1), 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:20:33 GMT
+Age: 1093060
+X-Served-By: cache-bfi-krnt7300049-BFI
+X-Cache: HIT
+X-Cache-Hits: 42
+X-Timer: S1795310433.313665,VS0,VE0
+Vary: x-download-directly
+
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie InRelease [140 kB]
+GET /archive/debian/20261120T000000Z/dists/trixie/main/binary-amd64/by-hash/SHA256/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498 HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/archive/debian/20261120T000000Z/dists/trixie/main/binary-amd64/by-hash/SHA256/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+HTTP/1.1 302 FOUND
+Connection: keep-alive
+Content-Length: 409
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+location: /file/32fc3b1c3e78ef911b125ee266a7e73d5884083f/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+cache-control: max-age=86400, public
+expires: Mon, 23 Nov 2026 00:02:07 GMT
+x-clacks-overhead: GNU Terry Pratchett
+content-type: text/html; charset=utf-8
+via: 1.1 snapshot-mmx-01 (Varnish/7.7), 1.1 varnish, 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:20:33 GMT
+Age: 4706
+X-Served-By: cache-bma-essb1270078-BMA, cache-bfi-krnt7300049-BFI
+X-Cache: HIT, HIT
+X-Cache-Hits: 7, 1
+X-Timer: S1795310433.362451,VS0,VE1
+Vary: x-download-directly
+
+GET /file/32fc3b1c3e78ef911b125ee266a7e73d5884083f/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498 HTTP/1.1
+Host: snapshot.debian.org
+Cache-Control: max-age=0
+Accept: text/*
+User-Agent: Debian APT-HTTP/1.3 (3.0.4)
+
+
+Answer for: http://snapshot.debian.org/file/32fc3b1c3e78ef911b125ee266a7e73d5884083f/7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 9678380
+server: Apache
+x-content-type-options: nosniff
+x-frame-options: sameorigin
+referrer-policy: no-referrer
+x-xss-protection: 1
+permissions-policy: interest-cohort=()
+last-modified: Sat, 12 Sep 2026 08:09:20 GMT
+etag: "93ae2c-65b44b7d7aec2"
+x-clacks-overhead: GNU Terry Pratchett
+cache-control: max-age=31536000, public
+content-disposition: attachment; filename=7778d3e3f303b7ddb8ce0fe7c8d57473a076c6bf2e8f241f75421d2396352498
+via: 1.1 varnish (Varnish/7.1), 1.1 varnish
+strict-transport-security: max-age=15768000; preload
+Accept-Ranges: bytes
+Date: Sun, 22 Nov 2026 01:20:33 GMT
+Age: 429649
+X-Served-By: cache-bfi-krnt7300049-BFI
+X-Cache: HIT
+X-Cache-Hits: 51
+X-Timer: S1795310433.379938,VS0,VE2
+Vary: x-download-directly
+
+Get:2 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 Packages [9678 kB]
+Fetched 9819 kB in 1s (7052 kB/s)
+Reading package lists...
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 adduser all 3.152 [191 kB]
+Fetched 191 kB in 0s (852 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/adduser_3.152_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+adduser_3.152_all.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 base-passwd amd64 3.6.7 [53.7 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/base-passwd_3.6.7_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 53.7 kB in 0s (260 kB/s)
+base-passwd_3.6.7_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 debconf all 1.5.91 [121 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/debconf_1.5.91_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 121 kB in 0s (573 kB/s)
+debconf_1.5.91_all.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 dirmngr amd64 2.4.7-21+deb13u1+b5 [384 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/dirmngr_2.4.7-21+deb13u1+b5_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 384 kB in 0s (4727 kB/s)
+dirmngr_2.4.7-21+deb13u1+b5_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 fontconfig-config amd64 2.15.0-2.3 [318 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/fontconfig-config_2.15.0-2.3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 318 kB in 0s (1986 kB/s)
+fontconfig-config_2.15.0-2.3_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 fonts-dejavu-core all 2.37-8 [840 kB]
+Fetched 840 kB in 0s (7468 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/fonts-dejavu-core_2.37-8_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+fonts-dejavu-core_2.37-8_all.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 fonts-dejavu-mono all 2.37-8 [489 kB]
+Fetched 489 kB in 0s (3810 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/fonts-dejavu-mono_2.37-8_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+fonts-dejavu-mono_2.37-8_all.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 gcc-14-base amd64 14.2.0-19 [49.4 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/gcc-14-base_14.2.0-19_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 49.4 kB in 0s (212 kB/s)
+gcc-14-base_14.2.0-19_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 gnupg all 2.4.7-21+deb13u1 [417 kB]
+Fetched 417 kB in 0s (4032 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/gnupg_2.4.7-21+deb13u1_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+gnupg_2.4.7-21+deb13u1_all.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 gnupg-l10n all 2.4.7-21+deb13u1 [749 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/gnupg-l10n_2.4.7-21+deb13u1_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 749 kB in 0s (6668 kB/s)
+gnupg-l10n_2.4.7-21+deb13u1_all.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 gpg amd64 2.4.7-21+deb13u1+b5 [636 kB]
+Fetched 636 kB in 0s (6535 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/gpg_2.4.7-21+deb13u1+b5_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+gpg_2.4.7-21+deb13u1+b5_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 gpg-agent amd64 2.4.7-21+deb13u1+b5 [271 kB]
+Fetched 271 kB in 0s (3587 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/gpg-agent_2.4.7-21+deb13u1+b5_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+gpg-agent_2.4.7-21+deb13u1+b5_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 gpgconf amd64 2.4.7-21+deb13u1+b5 [129 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/gpgconf_2.4.7-21+deb13u1+b5_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 129 kB in 0s (1707 kB/s)
+gpgconf_2.4.7-21+deb13u1+b5_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 gpgsm amd64 2.4.7-21+deb13u1+b5 [276 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/gpgsm_2.4.7-21+deb13u1+b5_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 276 kB in 0s (2741 kB/s)
+gpgsm_2.4.7-21+deb13u1+b5_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 init-system-helpers all 1.69~deb13u1 [39.4 kB]
+Fetched 39.4 kB in 0s (616 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/init-system-helpers_1.69~deb13u1_all.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+init-system-helpers_1.69~deb13u1_all.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 libacl1 amd64 2.3.2-2+b1 [32.9 kB]
+Fetched 32.9 kB in 0s (548 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/libacl1_2.3.2-2+b1_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+libacl1_2.3.2-2+b1_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 libassuan9 amd64 3.0.2-2 [61.5 kB]
+W: Download is performed unsandboxed as root as file '/work/debs/libassuan9_3.0.2-2_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+Fetched 61.5 kB in 0s (956 kB/s)
+libassuan9_3.0.2-2_amd64.deb: OK
+Get:1 http://snapshot.debian.org/archive/debian/20261120T000000Z trixie/main amd64 libattr1 amd64 1:2.5.2-3 [22.9 kB]
+Fetched 22.9 kB in 0s (105 kB/s)
+W: Download is performed unsandboxed as root as file '/work/debs/libattr1_1%3a2.5.2-3_amd64.deb' couldn't be accessed by user '_apt'. - pkgAcquire::Run (13: Permission denied)
+
+EXIT CODE: 1
