@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -10,12 +11,18 @@ from tools.pdf_sandbox_image import build
 
 
 class PDFSandboxImageTests(unittest.TestCase):
+    def import_image(self, work):
+        data = b'synthetic rootfs tar'
+        (work / 'rootfs.tar').write_bytes(data)
+        with patch.object(build, 'ROOTFS_SHA256', hashlib.sha256(data).hexdigest()):
+            build.image(work, work)
+
     def lock(self):
         return {
             'builder': build.BUILDER, 'snapshot': build.SNAPSHOT, 'suite': 'trixie',
             'architecture': 'amd64',
             'source': f'http://snapshot.debian.org/archive/debian/{build.SNAPSHOT}/',
-            'inrelease_sha256': 'a' * 64, 'signing_fingerprints': ['A' * 40],
+            'inrelease_sha256': 'a' * 64, 'signing_fingerprints': sorted(build.SIGNING_FINGERPRINTS),
             'packages': [{'name': 'poppler-utils', 'version': '1:25.03.0-5+deb13u4',
                           'arch': 'amd64', 'filename': 'pool/main/p/poppler/poppler-utils.deb',
                           'sha256': 'b' * 64}],
@@ -59,7 +66,7 @@ class PDFSandboxImageTests(unittest.TestCase):
                            subprocess.CompletedProcess([], 0, (image_id + '\n').encode()),
                            subprocess.CompletedProcess([], 0, b'[{"Architecture":"amd64","Os":"linux"}]')]
                 with patch.object(build.subprocess, 'run', side_effect=results) as run:
-                    build.image(work, work)
+                    self.import_image(work)
                 self.assertEqual(run.call_args_list[0].args[0],
                                  ['docker', 'version', '--format', '{{json .Server}}'])
                 self.assertEqual(run.call_args_list[1].args[0],
@@ -75,7 +82,7 @@ class PDFSandboxImageTests(unittest.TestCase):
                 result = subprocess.CompletedProcess([], 0, json.dumps(platform).encode())
                 with patch.object(build.subprocess, 'run', return_value=result) as run, \
                      self.assertRaisesRegex(ValueError, 'linux amd64/x86_64 Docker daemon'):
-                    build.image(work, work)
+                    self.import_image(work)
                 run.assert_called_once()
                 self.assertFalse((work / 'image-id.txt').exists())
 
@@ -89,7 +96,7 @@ class PDFSandboxImageTests(unittest.TestCase):
                            subprocess.CompletedProcess([], 0, json.dumps(metadata).encode())]
                 with patch.object(build.subprocess, 'run', side_effect=results), \
                      self.assertRaisesRegex(ValueError, 'Architecture amd64 and Os linux'):
-                    build.image(work, work)
+                    self.import_image(work)
                 self.assertFalse((work / 'image-id.txt').exists())
 
     def test_platform_command_errors_fail_closed(self):
@@ -102,7 +109,7 @@ class PDFSandboxImageTests(unittest.TestCase):
                                     subprocess.CompletedProcess([], 0, ('sha256:' + 'c' * 64).encode())])
                 results.append(subprocess.CompletedProcess([], 1, b'daemon failed'))
                 with patch.object(build.subprocess, 'run', side_effect=results), self.assertRaises(SystemExit):
-                    build.image(work, work)
+                    self.import_image(work)
                 self.assertFalse((work / 'image-id.txt').exists())
 
     def test_import_failure_or_invalid_id_never_writes_pin(self):
@@ -112,8 +119,70 @@ class PDFSandboxImageTests(unittest.TestCase):
                 result = subprocess.CompletedProcess([], code, output)
                 server = subprocess.CompletedProcess([], 0, b'{"Os":"linux","Arch":"amd64"}')
                 with patch.object(build.subprocess, 'run', side_effect=[server, result]), self.assertRaises(error):
-                    build.image(work, work)
+                    self.import_image(work)
                 self.assertFalse((work / 'image-id.txt').exists())
+
+    def test_rootfs_digest_matches_recorded_evidence(self):
+        evidence = Path(__file__).resolve().parents[1] / 'evidence/rw03-pdf-image-2026-11-22/image-summary.json'
+        self.assertEqual(set(json.loads(evidence.read_text())['rootfs_tar_sha256']), {build.ROOTFS_SHA256})
+
+    def test_rootfs_mismatch_or_absence_stops_before_docker(self):
+        for data in (None, b'', b'wrong tar'):
+            with self.subTest(data=data), tempfile.TemporaryDirectory() as directory:
+                work = Path(directory)
+                if data is not None:
+                    (work / 'rootfs.tar').write_bytes(data)
+                with patch.object(build.subprocess, 'run') as run, \
+                     self.assertRaises((ValueError, FileNotFoundError)):
+                    build.image(work, work)
+                run.assert_not_called()
+                self.assertFalse((work / 'image-id.txt').exists())
+
+    def test_lock_rejects_changed_signer_set(self):
+        for signers in (['A' * 40], sorted(build.SIGNING_FINGERPRINTS)[:-1],
+                        [*sorted(build.SIGNING_FINGERPRINTS), 'A' * 40]):
+            lock = self.lock()
+            lock['signing_fingerprints'] = signers
+            with self.subTest(signers=signers), self.assertRaisesRegex(ValueError, 'pinned signer set'):
+                build.validate_lock(lock)
+
+    def test_inrelease_verification_enforces_exact_signers(self):
+        valid = sorted(build.SIGNING_FINGERPRINTS)
+        for signers in (valid, [], valid[:-1], [*valid, 'A' * 40]):
+            with self.subTest(signers=signers), tempfile.TemporaryDirectory() as directory:
+                work = Path(directory)
+                (work / 'InRelease').write_bytes(b'synthetic signed metadata')
+                lock = self.lock()
+                lock['inrelease_sha256'] = hashlib.sha256((work / 'InRelease').read_bytes()).hexdigest()
+                result = subprocess.CompletedProcess([], 0, ('\n'.join(signers) + '\n').encode(), b'')
+                with patch.object(build.subprocess, 'run', return_value=result) as run:
+                    if signers == valid:
+                        build.verify_inrelease(work, lock)
+                    else:
+                        with self.assertRaisesRegex(ValueError, 'Verified InRelease signers'):
+                            build.verify_inrelease(work, lock)
+                command = run.call_args.args[0]
+                self.assertIn('none', command)
+                self.assertIn('--pull=never', command)
+                self.assertIn(build.BUILDER, command)
+                self.assertIn('--cleartext', command)
+                self.assertIn('type=bind,source=' + str(work) + ',target=/evidence,readonly', command)
+
+    def test_inrelease_hash_or_verifier_failure_blocks_assembly(self):
+        for code in (None, 1):
+            with self.subTest(code=code), tempfile.TemporaryDirectory() as directory:
+                work = Path(directory)
+                (work / 'InRelease').write_bytes(b'metadata')
+                lock = self.lock()
+                if code is not None:
+                    lock['inrelease_sha256'] = hashlib.sha256(b'metadata').hexdigest()
+                (work / 'packages.lock.json').write_text(json.dumps(lock))
+                result = subprocess.CompletedProcess([], 1, b'', b'verification failed')
+                with patch.object(build.subprocess, 'run', return_value=result) as verifier, \
+                     patch.object(build, 'run_script') as assembly, self.assertRaises((ValueError, SystemExit)):
+                    build.build(work, work)
+                assembly.assert_not_called()
+                self.assertEqual(verifier.call_count, 0 if code is None else 1)
 
     def test_invalid_lock_stops_before_builder_invocation(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -155,7 +155,8 @@ BuildKit build log remains a disclosed gap; its rejected smoke is preserved.
 Step B's [native report](../evidence/rw03-pdf-image-2026-11-22/isolation-final.json),
 [raw inspect](../evidence/rw03-pdf-image-2026-11-22/isolation-final-container-inspect.json)
 and [command log](../evidence/rw03-pdf-image-2026-11-22/isolation-final.log) record
-all configured isolation checks passing on the authorized Windows machine,
+all 32 effective-config inspection and synthetic benign fixture checks passing
+on the authorized Windows machine; these are **not escape or exploit attempts**,
 using the production argument helper and unchanged production defaults. The
 created inspection container was not started. Real success, malformed input,
 0.5-second lowered-timeout rejection and over-2-MiB output rejection each left
@@ -169,6 +170,27 @@ and native evidence to this exact image ID; AI review is acceptable, not a human
 audit. Windows pipe residual risks above remain open. All gates remain unchanged:
 `pdf_execution` and protected custody `unqualified`, custody **NOT RUN**,
 scientific gates unchanged. EUR 0; no new privileges.
+
+### PR #95 merge and follow-up receipt
+
+[PR #95](https://github.com/Smkzz/ResearchWitness/pull/95) at exact head
+`bcdf888c862a74790966555771e6f98faa5b90f4` merged as main
+`6a26ab5147c2443b7bff1e8cd5469d1409b43c96`.
+[Reviewer approval](https://github.com/Smkzz/ResearchWitness/pull/95#pullrequestreview-6009551621)
+is an engineering review, not separate security qualification of the image.
+Post-merge main CI: **11/11 PASS**, confirmed by the coordinator on 2026-11-22
+(nine Python/platform matrix jobs, Release gate, Analyze Python/CodeQL).
+
+The old isolation capture recorded base HEAD 947ac31 with uncommitted source
+hashes: Git proves the runner differs at merged main and the harness was absent
+from that base commit. Therefore fresh [local-only isolation and smoke receipts](../evidence/rw03-pdf-followup-2026-11-22/provenance.md)
+were recorded against the unchanged merged-main runtime sources and existing
+local pinned image; old evidence is preserved. All 32 effective-config/benign
+synthetic checks and three smoke fixtures passed, without escape/exploit attempts.
+The follow-up recipe also enforces the recorded tar digest and independently
+verified exact signer set. No new build, package download or egress was used.
+PDF execution remains unqualified, RW-03 blocked_external, custody NOT RUN and
+scientific gates unchanged.
 
 ## RW-04L accepted engineering receipt
 
