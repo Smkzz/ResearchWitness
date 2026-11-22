@@ -81,7 +81,7 @@
         "head_sha": "87bd4f43759dcf198f176f3914488ea94777d4ca",
         "merged_main_sha": "a304c71b32cf07edece7817fd59fa856ebcfa5f6",
         "reviewer_approval": "https://github.com/Smkzz/ResearchWitness/pull/96#pullrequestreview-6009671867",
-        "post_merge_ci": "PENDING_COORDINATOR_CONFIRMATION",
+        "post_merge_ci": "11/11 PASS, confirmed by the coordinator on 2026-11-22: nine Python/platform matrix jobs, Release gate, Analyze Python/CodeQL.",
         "note": "Engineering approval with a next-rebuild receipt requirement, not independent image-inventory/evidence security qualification. New hash and signer-set checks have not run end to end in a rebuild. All existing gate/task states remain unchanged."
       },
       "unlock_condition": "Evidence recorded; separate security review of the candidate image inventory/provenance and native evidence bound to exact image ID sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944 is outstanding (AI security review acceptable; none yet). Obtain acceptance or resolution of Windows pipe residual risks: check-then-use race, same-user/admin attackers, offline revocation, name-only signer matching and installation integrity. Configured/runtime synthetic evidence is not qualification or proof of escape resistance."

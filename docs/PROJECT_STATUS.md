@@ -204,7 +204,8 @@ showing the rootfs.tar SHA256 matched the pin before import and sqv returned
 exactly the locked fingerprint set, with both checks executed and passed.
 Mocked tests and standalone offline verification are not a rebuild receipt.
 
-Post-merge main CI: **PENDING_COORDINATOR_CONFIRMATION** (not yet recorded).
+Post-merge main CI: **11/11 PASS**, confirmed by the coordinator on 2026-11-22
+(nine Python/platform matrix jobs, Release gate, Analyze Python/CodeQL).
 
 This engineering approval and documentation follow-up do not qualify PDF
 execution or change any state: pdf_execution unqualified, RW-03 blocked_external,
