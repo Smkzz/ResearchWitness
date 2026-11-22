@@ -76,6 +76,11 @@ Independent adapter security review still gates any RW-09 preview release and
 any use with non-public sources. Protected custody remains out of scope.
 The import scan is a static guard, not a sandbox; that security review must still
 assess re-exported networking surfaces, not treat the scan as closing that risk.
+Indirect routes the scan does not catch remain items for that review:
+
+- Assigning a module to a variable: `x = http.server; x.socket`.
+- Dynamic attribute lookup: `getattr(http.server, "socket")`.
+- `sys.modules` lookups, for example `http.server.sys.modules["socket"]`.
 
 Human visual and assistive-technology review is pending. No browser-automation
 qualification or scientific-performance claim accompanies this preview.
