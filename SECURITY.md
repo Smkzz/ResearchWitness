@@ -100,11 +100,21 @@ evidence security review has happened; no reviewer has been named. On
 same-user/admin attackers, offline-only revocation, name-only signer matching
 and installation-integrity risks: **"Accept these risks"**, relayed by the
 ResearchWitness coordinator. These risks are **accepted, not resolved or
-mitigated**. This is an owner decision, not a review. The only remaining
+mitigated**. This is an owner decision, not a review.
+
+Source: Sami answered the decision prompt in the ResearchWitness coordinator
+bot's Devin chat on 2026-11-23 at about **00:39 EET** (**22:39 UTC on
+2026-11-22**). The record lives on the [coordinator bot page](https://app.devin.ai/org/smkzz/bots/bb5d480d5bb849b6abf8208c64dd5111).
+**No direct link to the answer exists**; the bot-page URL is not an answer permalink.
+
+The only remaining
 PDF-execution unlock is separate security review of the inventory and evidence
 bound to the exact candidate image ID below. The next-real-rebuild receipt
-requirement in the recipe remains; custody stays NOT RUN and scientific gates
-are unchanged. Sami authorized
+requirement in the recipe remains. RW-03 has **both** remaining unlocks: that
+exact-image security review (no reviewer named), and protected custody, which is
+NOT RUN and requires an authorized, actually isolated custodian and its capability
+receipt. RW-03 stays blocked_external until both are satisfied; custody and the
+scientific gates are unchanged. Sami authorized
 native RW-03 qualification on the org Windows Devin
 machine in his answer to the "Use a Windows machine" card on **2026-11-21
 19:59 UTC**; this authority does not establish server identity or waive the gate.
