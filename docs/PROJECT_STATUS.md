@@ -1236,7 +1236,7 @@ No GitHub Release or PyPI publication is claimed for this development version.
 | Paper-audit stack #6-#11 | Stack unmerged; 2x2 helper and canonical model selectively reused | RW-01 |
 | Canonical JATS bridge | Original-byte source evidence and exact percentage replay; not full rich table consolidation | RW-01 |
 | Registered development execution | Fixed JATS worker, bounded recording and read-only recovery | RW-04 |
-| #12 local preview/custody worker | Draft, unmerged; authority not qualified | RW-03/RW-09 |
+| #12 local preview/custody worker | #12 closed on GitHub; UI half landed as #99 (JATS-only on main's pipeline); custody separate in #98, held for Sami's security review; authority not qualified | RW-03/RW-09 |
 | Real PDF extraction | Disabled pending real sandbox/image qualification | RW-03 |
 | Windows managed metadata | Fails closed pending ACL ownership qualification | RW-03 |
 | Claim compiler and adversarial search | Proposed system components, not implemented end to end | RW-06/RW-07 |
@@ -1277,3 +1277,48 @@ The following are dated evidence, not instructions to repeat old approval loops:
 Preserve frozen dates, source hashes, failed attempts, exposure decisions and labels.
 Append new evidence; never relabel old results as independent, human-reviewed or
 successful. No private custody records belong in public Git or run receipts.
+
+## RW-09 local JATS UI merge receipt
+
+[PR #99](https://github.com/Smkzz/ResearchWitness/pull/99) merged as
+`c973f802d5dc9a4dd8eefd9bacce810c68391389`, from head
+`ae155a2a22de5dd6b57035aad1e51160f1f2dcbe`. This partial engineering slice
+adds the loopback local preview on main's JATS pipeline, installed assets and
+manifest-pinned bundle replay; it does not complete RW-09. The ledger retains
+`todo` because the package dependencies and full acceptance remain unmet.
+
+Post-merge checks were awaited on that exact merge SHA (12 success, no failures,
+pending or skipped). GitHub check-runs and the separate CodeQL workflow were
+also inspected. Exact check conclusions and job IDs:
+
+| Check | Conclusion | Job ID |
+|---|---|---|
+| Python 3.11 / ubuntu-latest | success | 137374193602 |
+| Python 3.12 / ubuntu-latest | success | 137374193683 |
+| Python 3.13 / ubuntu-latest | success | 137374193624 |
+| Python 3.11 / windows-latest | success | 137374193656 |
+| Python 3.12 / windows-latest | success | 137374193694 |
+| Python 3.13 / windows-latest | success | 137374193663 |
+| Python 3.11 / macos-latest | success | 137374193629 |
+| Python 3.12 / macos-latest | success | 137374193630 |
+| Python 3.13 / macos-latest | success | 137374193712 |
+| Release gate | success | 137374193479 |
+| Analyze Python (CodeQL workflow) | success | 137374193348 |
+| update-pip-graph | success | 137374215058 |
+
+Runs: [CI 45076312218](https://github.com/Smkzz/ResearchWitness/actions/runs/45076312218),
+[CodeQL 45076312187](https://github.com/Smkzz/ResearchWitness/actions/runs/45076312187),
+[graph update 45076318299](https://github.com/Smkzz/ResearchWitness/actions/runs/45076318299).
+There is no additional check named `CodeQL` on this merge SHA: its workflow's
+check is `Analyze Python`. Dependency evidence and Devin Review were PR checks,
+not additional post-merge checks.
+
+Reviewer approved for engineering only. Devin Review was automated AI review;
+the Devin testing agent's browser test was at `1959024`, not the final head.
+That is not independent human visual/accessibility or security review.
+Human visual and accessibility review remain pending. Independent security
+review of the `researchwitness_ui` HTTP adapter remains pending and gates **any
+RW-09 preview release and any use with non-public sources**. JATS XML only;
+scientific performance remains unestablished. Protected custody stays **NOT RUN**,
+PDF stays **unqualified**, and custody PR #98 stays held for Sami's security
+review. No release, security qualification or custody activation is recorded.
