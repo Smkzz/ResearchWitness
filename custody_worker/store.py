@@ -153,6 +153,18 @@ def _immutable_write(root: Path, path: Path, data: bytes) -> str:
         if previous != data:
             reject("IMMUTABLE_RECORD_CONFLICT")
         return digest
+    if path.parent in (root / "manifests" / "imports", root / "manifests" / "reviews",
+                       root / "sealed-labels"):
+        is_seal = path.parent == root / "sealed-labels"
+        limit = MAX_SEAL_BYTES if is_seal else MAX_JSON_BYTES
+        pattern = r"seal-[0-9a-f]{64}\.json" if is_seal else r"[a-z][a-z0-9-]{2,63}\.json"
+        existing = _iter_json_files(path.parent, pattern, max_file_bytes=limit)
+        if len(data) > limit:
+            reject("INVENTORY_FILE_TOO_LARGE")
+        if (len(existing) >= MAX_LEDGER_RECORDS
+            or sum(guarded_stat(entry, file=True).st_size for entry in existing)
+            + len(data) > MAX_LEDGER_BYTES):
+            reject("INVENTORY_LIMIT_EXCEEDED")
     try:
         fd, name = tempfile.mkstemp(prefix=".rw-tmp-", dir=path.parent)
         temporary = Path(name)
@@ -888,6 +900,18 @@ def import_batch(root: Path, batch_id: str) -> dict:
             if prior and item["sha256"] not in prior:
                 reject("SOURCE_VERSION_CONTENT_CONFLICT")
         blobs: dict[str, bytes] = {}
+        prospective_sizes = {digest: entries[0]["size"] for digest, entries in current_sources.items()}
+        for item in manifest["files"]:
+            prospective_sizes[item["sha256"]] = item["size"]
+        if (sum(map(len, current_sources.values())) + len(manifest["files"]) > MAX_SOURCE_OBJECTS
+            or sum(prospective_sizes.values()) > MAX_SOURCE_STORE_BYTES):
+            reject("SOURCE_INVENTORY_LIMIT_EXCEEDED")
+        import_files = _iter_json_files(existing_path.parent, r"[a-z][a-z0-9-]{2,63}\.json")
+        if (len(manifest_bytes) > MAX_JSON_BYTES
+            or len(import_files) >= MAX_LEDGER_RECORDS
+            or sum(guarded_stat(path, file=True).st_size for path in import_files)
+            + len(manifest_bytes) > MAX_LEDGER_BYTES):
+            reject("INVENTORY_LIMIT_EXCEEDED")
         for item in manifest["files"]:
             path = safe_source_file(root / "incoming" / item["name"], root / "incoming")
             data = checked_read(path, max_bytes=MAX_SOURCE_BYTES)

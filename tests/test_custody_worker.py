@@ -121,6 +121,40 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             self.source_setup(original=text, extension="md")
         self.assertEqual(verify_all(self.root), before)
 
+    def test_import_limits_refuse_before_writing_objects(self):
+        item, _ = self.source_setup(original=self.original_text())
+        before = verify_all(self.root)
+        for name, limit in (("MAX_LEDGER_RECORDS", 1), ("MAX_LEDGER_BYTES", 1),
+                            ("MAX_SOURCE_OBJECTS", 1), ("MAX_SOURCE_STORE_BYTES", item["size"])):
+            with self.subTest(limit=name):
+                with patch("custody_worker.store." + name, limit):
+                    with self.assertRaisesRegex(CustodyError, "LIMIT_EXCEEDED"):
+                        self.source_setup(original=self.original_text(group="Group B"),
+                                          document_id="doi:10.5555/another-work")
+                self.assertEqual(verify_all(self.root), before)
+
+    def test_review_and_seal_limits_do_not_poison_store(self):
+        item, _ = self.source_setup(original=self.original_text())
+        review = self.review_object(item, None)
+        with patch("custody_worker.store.MAX_LEDGER_BYTES", 1):
+            with self.assertRaisesRegex(CustodyError, "INVENTORY_LIMIT_EXCEEDED"):
+                self.record(review)
+        self.record(review)
+        seal_inventory(self.root)
+        with patch("custody_worker.store.MAX_LEDGER_RECORDS", 1):
+            with self.assertRaisesRegex(CustodyError, "INVENTORY_LIMIT_EXCEEDED"):
+                self.record(self.review_object(item, None, review_id="review-two",
+                                              eligibility="UNRESOLVED"))
+        item2, _ = self.source_setup(original=self.original_text(group="Group B"),
+                                     document_id="doi:10.5555/another-work")
+        self.record(self.review_object(item2, None, review_id="review-three",
+                                      original_text=self.original_text(group="Group B"), group="Group B"))
+        with patch("custody_worker.store.MAX_LEDGER_RECORDS", 2), \
+             patch("custody_worker.store.MAX_LEDGER_BYTES", 1):
+            with self.assertRaisesRegex(CustodyError, "INVENTORY_LIMIT_EXCEEDED"):
+                seal_inventory(self.root)
+        verify_all(self.root)
+
     def source_setup(self, *, original: str, correction: str | None = None,
                      document_id: str = DOCUMENT, source_version: str = "v1",
                      correction_document_id: str | None = None,
