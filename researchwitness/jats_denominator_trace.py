@@ -14,6 +14,7 @@ from typing import Any
 from . import _jats_parser as jats
 from .denominator_provenance import parent_count_groups, resolve_denominator, subgroup_boundaries
 from .jats_table_projection import _paths, project_jats_tables
+from .paper_document import TableRow
 
 VERSION = "rw-jats-denominator-evidence.v2"
 MAX_FACTS_PER_RELATION = 64
@@ -42,6 +43,18 @@ def _source_index(root: jats._Node) -> dict[tuple[int, int], jats._Node]:
         output[key] = node
         stack.extend(node.children)
     return output
+
+
+def _resolver_row_group(row: TableRow, positions: dict[tuple[int, int], jats._Node]) -> str:
+    if row.cells:
+        anchor = row.cells[0].source_anchor
+        node = positions[(anchor.start_byte, anchor.end_byte)].parent
+        while node is not None:
+            tag = jats._local_name(node.tag)
+            if tag in {"tbody", "thead", "tfoot", "table"}:
+                return f"{tag}:{node.byte_start}"
+            node = node.parent
+    return row.row_group
 
 
 def _anchor(
@@ -96,9 +109,8 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
     cells = {}
     table_scopes = {}
     for table in document.tables:
-        # The standalone resolver uses tag names, not projection group identities.
         table = replace(table, rows=tuple(
-            replace(row, row_group=row.row_group.split(":", 1)[0]) for row in table.rows
+            replace(row, row_group=_resolver_row_group(row, positions)) for row in table.rows
         ))
         table_scopes[id(table)] = (subgroup_boundaries(table), parent_count_groups(table))
         for row_index, row in enumerate(table.rows):

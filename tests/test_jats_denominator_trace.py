@@ -90,6 +90,23 @@ def test_printed_ratio_base_is_passed_to_resolver():
     assert row["detector_denominator"] == 20
 
 
+@pytest.mark.parametrize("ids", [("", ""), (' id="first"', ' id="second"')])
+def test_subgroup_base_does_not_cross_body_groups(ids):
+    data = (
+        '<article><body><table-wrap><table><thead><tr><th>Outcome</th>'
+        '<th>Overall patients (N=100)</th></tr></thead>'
+        '<tbody' + ids[0] + '><tr><th>Women</th><td>N=20</td></tr>'
+        '<tr><th>Event</th><td>4 (20%)</td></tr></tbody>'
+        '<tbody' + ids[1] + '><tr><th>Other event</th><td>10 (10%)</td></tr></tbody>'
+        '</table></table-wrap></body></article>'
+    ).encode()
+    report = traced.trace_denominators(data)
+    assert [
+        row["denominator_provenance"]["selected_denominator"]["value_exact"]
+        for row in report["relations"]
+    ] == ["20", "100"]
+
+
 def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)

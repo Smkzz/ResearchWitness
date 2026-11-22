@@ -466,14 +466,14 @@ def parent_count_groups(table: Table) -> tuple[ParentCountGroup, ...]:
     rows = table.rows
     groups: list[ParentCountGroup] = []
     for heading_index, heading_row in enumerate(rows):
-        if heading_row.row_group != 'tbody':
+        if heading_row.row_group.split(':', 1)[0] != 'tbody':
             continue
         heading = _is_label_only_group_row(heading_row)
         if heading is None or heading_index == 0:
             continue
         parent_index = heading_index - 1
         parent_row = rows[parent_index]
-        if parent_row.row_group != 'tbody':
+        if parent_row.row_group != heading_row.row_group:
             continue
         parent_label = _row_label(parent_row)
         if parent_label is None or not _same_parent_label(parent_label.raw_text, heading.raw_text):
@@ -488,7 +488,7 @@ def parent_count_groups(table: Table) -> tuple[ParentCountGroup, ...]:
         end = len(rows)
         for following_index in range(heading_index + 1, len(rows)):
             following = rows[following_index]
-            if following.row_group != 'tbody':
+            if following.row_group != heading_row.row_group:
                 end = following_index
                 break
             following_label = _row_label(following)
@@ -525,7 +525,8 @@ def _active_parent_count_groups(
 
 
 def subgroup_boundaries(table: Table) -> tuple[SubgroupBoundary, ...]:
-    rows = [(index, row) for index, row in enumerate(table.rows) if row.row_group == 'tbody']
+    rows = [(index, row) for index, row in enumerate(table.rows)
+            if row.row_group.split(':', 1)[0] == 'tbody']
     boundaries: list[tuple[int, TableCell, tuple[TableCell, ...]]] = []
     for row_index, row in rows:
         label, cells = _is_denominator_boundary_row(row)
@@ -535,8 +536,12 @@ def subgroup_boundaries(table: Table) -> tuple[SubgroupBoundary, ...]:
     for position, (row_index, label, cells) in enumerate(boundaries):
         next_boundary = boundaries[position + 1][0] if position + 1 < len(boundaries) else len(table.rows)
         end = next_boundary
+        for next_index in range(row_index + 1, next_boundary):
+            if table.rows[next_index].row_group != table.rows[row_index].row_group:
+                end = next_index
+                break
         for next_index, next_row in rows:
-            if row_index < next_index < next_boundary:
+            if row_index < next_index < end:
                 next_label = _row_label(next_row)
                 other_values = [item.raw_text.strip() for item in next_row.cells if item.column_start > 0]
                 if (not any(item.raw_text.strip() for item in next_row.cells)
