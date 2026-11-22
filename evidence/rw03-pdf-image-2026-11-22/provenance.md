@@ -108,3 +108,42 @@ This image has not received the separate rootfs/package/provenance security
 review, current vulnerability/license assessment, or real isolation/resource/
 cleanup qualification. The supplied tar/rootfs reconstruction is reproducible,
 but image ID reconstruction is not. Gate and status documents remain untouched.
+
+## Step B - native synthetic isolation evidence (2026-11-22)
+
+The paragraph above describes the Step A receipt. Step B now updates the gate
+notes/status documents while retaining every gate value as unqualified/not_run.
+The coordinator relayed Sami's bounded download approval on 2026-11-22; the
+subsequent HTTP decision did not waive archive signatures, hashes or security
+review. Step B itself used only local tools and daemon operations, no downloads,
+new privileges, protected custody or scientific evaluation.
+
+isolation-final.json/log and isolation-final-container-inspect.json bind the
+native results to the exact candidate ID above and record source SHA256 over
+Step A base 947ac3126ebd4867bfa91912dcd047c6a95ef580. The harness reuses the
+production argument helper and real extraction runner. The inspection container
+was created, not started, and removed. Every configured isolation check passed:
+network none, read-only root, capabilities dropped, no-new-privileges, UID/GID,
+memory/swap/CPU/PID/ulimits, bounded secure tmpfs, no mounts/binds or unexpected
+environment, exact pin and daemon default seccomp.
+
+Real success, malformed-input rejection, 0.5-second lowered-timeout rejection
+and over-2-MiB output rejection all passed. All per-run ancestor inventories were
+empty before and after, and each recorded CID was independently confirmed
+absent. Production timeout remains 20 seconds. Timeout is the runner's
+Docker-client extraction deadline (including startup), not parser-only CPU time.
+The timeout PDF is 7,000,552 bytes of benign drawing instructions; overflow is a
+70,672-byte synthetic shared-stream multipage text PDF. Neither is an exploit.
+Cleanup-denial/error-preservation tests were mocked: 3 passed, 12 subtests, exit
+0; they do not prove real cleanup-denial handling on this daemon.
+
+The earlier isolation.json/log and container-inspect.json are retained as the
+first harness capture. The final run followed logging and missing-inspection
+failure-handling changes; it is not an unchanged confidence-inflation rerun.
+Both have sandbox_qualified=false. Separate security review of the image
+inventory and this evidence bound to the exact candidate ID has NOT happened;
+an AI reviewer is acceptable, but no human audit is claimed. Windows pipe risks
+remain open: race, same-user/admin attackers, offline-only revocation, name-only
+signer matching and installation integrity. RW-03 remains blocked_external;
+custody NOT RUN and scientific gates unchanged. The overwritten standalone
+BuildKit log remains a disclosed gap, not repaired by these runtime receipts.

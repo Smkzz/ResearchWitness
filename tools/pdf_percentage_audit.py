@@ -232,7 +232,32 @@ def _remove_sandbox_container(
         raise PDFSourceError("Could not confirm isolated Poppler container cleanup")
 
 
-def _extract_layout_text(data: bytes) -> str:
+def _sandbox_arguments(image: str, container_id_file: Path) -> list[str]:
+    return [
+        "--pull=never", "--interactive", "--cidfile", str(container_id_file),
+        "--network", "none", "--read-only", "--user", "65534:65534",
+        "--cap-drop", "ALL", "--security-opt", "no-new-privileges:true",
+        "--memory", SANDBOX_MEMORY, "--memory-swap", SANDBOX_MEMORY,
+        "--cpus", "1", "--pids-limit", "8",
+        "--ulimit", "cpu=20:20", "--ulimit", "fsize=2097152:2097152",
+        "--ulimit", "nofile=64:64", "--ulimit", "core=0:0",
+        "--tmpfs", f"/tmp:rw,nosuid,nodev,noexec,size={SANDBOX_TMPFS},mode=1777",
+        "--env", "PATH=/usr/bin:/bin", "--env", "LANG=C", "--env", "LC_ALL=C",
+        "--env", "HOME=/tmp", "--env", "TMPDIR=/tmp", "--workdir", "/tmp",
+        "--env", "HTTP_PROXY=", "--env", "HTTPS_PROXY=", "--env", "ALL_PROXY=",
+        "--env", "NO_PROXY=", "--env", "FTP_PROXY=", "--env", "http_proxy=",
+        "--env", "https_proxy=", "--env", "all_proxy=", "--env", "no_proxy=",
+        "--env", "ftp_proxy=", image,
+        "/usr/bin/pdftotext", "-layout", "-enc", "UTF-8", "-", "-",
+    ]
+
+
+def _extract_layout_text(
+    data: bytes, *, _timeout: float = EXTRACTION_TIMEOUT_SECONDS,
+    _cidfile: Path | None = None,
+) -> str:
+    if not 0 < _timeout <= EXTRACTION_TIMEOUT_SECONDS:
+        raise ValueError("Extraction timeout must be positive and cannot exceed the production limit")
     image = os.environ.get(SANDBOX_IMAGE_ENV, "")
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", image):
         raise PDFSourceError(
@@ -319,43 +344,8 @@ def _extract_layout_text(data: bytes) -> str:
                 "The Poppler sandbox image must have no baked environment, entrypoint, or volumes"
             )
 
-        container_id_file = Path(config_dir) / "container-id"
-        command = [
-            *docker_prefix,
-            "run", "--pull=never", "--interactive", "--cidfile", str(container_id_file),
-            "--network", "none",
-            "--read-only",
-            "--user", "65534:65534",
-            "--cap-drop", "ALL",
-            "--security-opt", "no-new-privileges:true",
-            "--memory", SANDBOX_MEMORY,
-            "--memory-swap", SANDBOX_MEMORY,
-            "--cpus", "1",
-            "--pids-limit", "8",
-            "--ulimit", "cpu=20:20",
-            "--ulimit", "fsize=2097152:2097152",
-            "--ulimit", "nofile=64:64",
-            "--ulimit", "core=0:0",
-            "--tmpfs", f"/tmp:rw,nosuid,nodev,noexec,size={SANDBOX_TMPFS},mode=1777",
-            "--env", "PATH=/usr/bin:/bin",
-            "--env", "LANG=C",
-            "--env", "LC_ALL=C",
-            "--env", "HOME=/tmp",
-            "--env", "TMPDIR=/tmp",
-            "--workdir", "/tmp",
-            "--env", "HTTP_PROXY=",
-            "--env", "HTTPS_PROXY=",
-            "--env", "ALL_PROXY=",
-            "--env", "NO_PROXY=",
-            "--env", "FTP_PROXY=",
-            "--env", "http_proxy=",
-            "--env", "https_proxy=",
-            "--env", "all_proxy=",
-            "--env", "no_proxy=",
-            "--env", "ftp_proxy=",
-            image,
-            "/usr/bin/pdftotext", "-layout", "-enc", "UTF-8", "-", "-",
-        ]
+        container_id_file = _cidfile if _cidfile is not None else Path(config_dir) / "container-id"
+        command = [*docker_prefix, "run", *_sandbox_arguments(image, container_id_file)]
 
         output = bytearray()
         exceeded_limit = Event()
@@ -398,14 +388,14 @@ def _extract_layout_text(data: bytes) -> str:
                 reader = Thread(target=drain_stdout, daemon=True)
                 reader.start()
                 try:
-                    return_code = process.wait(timeout=EXTRACTION_TIMEOUT_SECONDS)
+                    return_code = process.wait(timeout=_timeout)
                 except subprocess.TimeoutExpired as exc:
                     process.kill()
                     process.wait()
                     reader.join(timeout=2)
                     process.stdout.close()
                     raise PDFSourceError(
-                        "Isolated Poppler exceeded the 20-second extraction limit"
+                        f"Isolated Poppler exceeded the {_timeout:g}-second extraction limit"
                     ) from exc
                 reader.join(timeout=2)
                 if reader.is_alive():

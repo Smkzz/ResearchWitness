@@ -1,0 +1,347 @@
+{"utc": "2026-11-22T01:35:49.032642+00:00", "os": "Windows-2022Server-10.0.20348-SP0", "image_id": "sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944"}
+$ git rev-parse HEAD
+947ac3126ebd4867bfa91912dcd047c6a95ef580
+
+EXIT CODE: 0
+$ "C:\Program Files\Python313\python.exe" -VV
+Python 3.13.12 (tags/v3.13.12:1cbe481, Feb  3 2026, 18:22:25) [MSC v.1944 64 bit (AMD64)]
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config version
+Client:
+ Version:           29.9.2
+ API version:       1.56
+ Go version:        go1.26.10
+ Git commit:        a82e528
+ Built:             Tue Oct 20 19:44:07 2026
+ OS/Arch:           windows/amd64
+ Context:           default
+
+Server: Docker Desktop 4.98.0 (245422)
+ Engine:
+  Version:          29.9.2
+  API version:      1.56 (minimum version 1.40)
+  Go version:       go1.26.10
+  Git commit:       0367cbe
+  Built:            Tue Oct 20 18:45:02 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.4.2
+  GitCommit:        b7a25261e029d68978bbf290df0a62fc819b3c51
+ runc:
+  Version:          1.5.2
+  GitCommit:        v1.5.2-0-g29dd3dc2
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config info --format "{{json .SecurityOptions}}"
+["name=seccomp,profile=builtin","name=cgroupns"]
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config create --pull=never --interactive --cidfile C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\inspection-cid --network none --read-only --user 65534:65534 --cap-drop ALL --security-opt no-new-privileges:true --memory 512m --memory-swap 512m --cpus 1 --pids-limit 8 --ulimit cpu=20:20 --ulimit fsize=2097152:2097152 --ulimit nofile=64:64 --ulimit core=0:0 --tmpfs /tmp:rw,nosuid,nodev,noexec,size=32m,mode=1777 --env PATH=/usr/bin:/bin --env LANG=C --env LC_ALL=C --env HOME=/tmp --env TMPDIR=/tmp --workdir /tmp --env HTTP_PROXY= --env HTTPS_PROXY= --env ALL_PROXY= --env NO_PROXY= --env FTP_PROXY= --env http_proxy= --env https_proxy= --env all_proxy= --env no_proxy= --env ftp_proxy= sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944 /usr/bin/pdftotext -layout -enc UTF-8 - -
+180b49c3d3978a9e354efd6e2c8e26ad58688992fde7d291c959eebc1483ee02
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container inspect 180b49c3d3978a9e354efd6e2c8e26ad58688992fde7d291c959eebc1483ee02
+[
+    {
+        "Id": "180b49c3d3978a9e354efd6e2c8e26ad58688992fde7d291c959eebc1483ee02",
+        "Created": "2026-11-22T01:36:02.418584383Z",
+        "Path": "/usr/bin/pdftotext",
+        "Args": [
+            "-layout",
+            "-enc",
+            "UTF-8",
+            "-",
+            "-"
+        ],
+        "State": {
+            "Status": "created",
+            "Running": false,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 0,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "0001-01-01T00:00:00Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944",
+        "ResolvConfPath": "",
+        "HostnamePath": "",
+        "HostsPath": "",
+        "LogPath": "",
+        "Name": "/modest_mestorf",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\rw03-isolation-78_287fj\\inspection-cid",
+            "LogConfig": {
+                "Type": "local",
+                "Config": {}
+            },
+            "NetworkMode": "none",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": [
+                "ALL"
+            ],
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": true,
+            "SecurityOpt": [
+                "no-new-privileges:true"
+            ],
+            "Tmpfs": {
+                "/tmp": "rw,nosuid,nodev,noexec,size=32m,mode=1777"
+            },
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 536870912,
+            "NanoCpus": 1000000000,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 536870912,
+            "MemorySwappiness": null,
+            "OomKillDisable": false,
+            "PidsLimit": 8,
+            "Ulimits": [
+                {
+                    "Name": "core",
+                    "Hard": 0,
+                    "Soft": 0
+                },
+                {
+                    "Name": "cpu",
+                    "Hard": 20,
+                    "Soft": 20
+                },
+                {
+                    "Name": "fsize",
+                    "Hard": 2097152,
+                    "Soft": 2097152
+                },
+                {
+                    "Name": "nofile",
+                    "Hard": 64,
+                    "Soft": 64
+                }
+            ],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "180b49c3d397",
+            "Domainname": "",
+            "User": "65534:65534",
+            "AttachStdin": true,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "Tty": false,
+            "OpenStdin": true,
+            "StdinOnce": true,
+            "Env": [
+                "NO_PROXY=",
+                "https_proxy=",
+                "all_proxy=",
+                "ftp_proxy=",
+                "HTTPS_PROXY=",
+                "FTP_PROXY=",
+                "no_proxy=",
+                "ALL_PROXY=",
+                "PATH=/usr/bin:/bin",
+                "LANG=C",
+                "LC_ALL=C",
+                "TMPDIR=/tmp",
+                "HTTP_PROXY=",
+                "http_proxy=",
+                "HOME=/tmp"
+            ],
+            "Cmd": [
+                "/usr/bin/pdftotext",
+                "-layout",
+                "-enc",
+                "UTF-8",
+                "-",
+                "-"
+            ],
+            "Image": "sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944",
+            "Volumes": null,
+            "WorkingDir": "/tmp",
+            "Entrypoint": null,
+            "Labels": {}
+        },
+        "NetworkSettings": {
+            "SandboxID": "",
+            "SandboxKey": "",
+            "Ports": {},
+            "Networks": {
+                "none": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944",
+            "size": 406,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container rm --force 180b49c3d3978a9e354efd6e2c8e26ad58688992fde7d291c959eebc1483ee02
+180b49c3d3978a9e354efd6e2c8e26ad58688992fde7d291c959eebc1483ee02
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter id=180b49c3d3978a9e354efd6e2c8e26ad58688992fde7d291c959eebc1483ee02
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter id=0f06d4fd8c617177b5bb9f86df52c3448f9f76b7140795db132348c4ca973902
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter id=327258ca7c1cdaabd61cf6000b4b9c595c659d8cf43336920ac0069f135e42d5
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter id=0acfa3475c7cd0b8dac8deafa74218987a87e845ed96aea8eb3ed362ba79bfd1
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter ancestor=sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944
+
+EXIT CODE: 0
+$ "C:\Program Files\Docker\Docker\resources\bin\docker.EXE" --host npipe:////./pipe/docker_engine --config C:\Users\ADMINI~1\AppData\Local\Temp\rw03-isolation-78_287fj\config container ls --all --quiet --no-trunc --filter id=c28714382a494f793969e1a291085f7df244e977f6ca36f7d4d61084c7136580
+
+EXIT CODE: 0
+$ "C:\Program Files\Python313\python.exe" -m pytest -q tests/test_pdf_percentage_audit_unittest.py -k "cleanup_failure or timeout_removes or output_overflow"
+...                                                          [100%]
+3 passed, 22 deselected, 12 subtests passed in 0.11s
+
+EXIT CODE: 0
