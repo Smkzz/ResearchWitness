@@ -65,10 +65,13 @@ binds row-group identity to the original enclosing XML element's byte offset,
 including separate unnamed body groups, preserving cells and anchors. Subgroup
 boundaries and parent-count groups stop at group boundaries and are computed
 once per table. Printed cell-ratio denominators are passed as explicit local
-source facts, not inferred from arithmetic agreement. Ambiguous header/body
+source facts with their original printed numeric spelling (grouped tokens
+remain unsupported), not inferred from arithmetic agreement. Ambiguous header/body
 layouts and spanning-cell roles produce `UNRESOLVED / TABLE_STRUCTURE_UNSUPPORTED`.
 Invalid candidates retain their printed value, source anchor and rejection
-reasons even when no denominator resolves. A missing
+reasons even when no denominator resolves. A
+valid broader candidate blocked by an invalid equally or more specific base
+retains an explicit blocking reason. A missing
 projected relation cell produces `UNRESOLVED / RELATION_CELL_NOT_PROJECTED`.
 Neither arithmetic fit nor a detector-inferred base is fed to the resolver.
 Review packets continue to expose source facts, not these advisory preferences.

@@ -34,6 +34,13 @@ scope-cell anchors. Focused fixes are in `c98d457`, `76dcfa0`, `e857593`,
 are not a completed approval; final local checks and exact-head CI remain
 separate receipts. No detector decisions or arithmetic were changed.
 
+Second-review regressions at `f29b106` reproduced normalization of grouped
+ratio tokens and an empty rejection reason on a broader candidate blocked by
+an invalid local base. Fixes `be3d8cc` and `f2e6286` preserve printed numeric
+tokens for resolver validation and explicitly explain blocked competitors,
+respectively. At the observed `f29b106` CI snapshot, 13 checks had passed,
+none failed and Devin Review was pending; this is not a 14/14 receipt.
+
 ## RW-03 native test run receipt
 
 This is a **native test run (logs linked)**, not a qualification claim.
