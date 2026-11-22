@@ -204,6 +204,17 @@ def trace_denominators(source: bytes, detector_report: dict[str, Any] | None = N
                     and reported_denominator is not None else None
                 ),
             )["denominator_provenance"]
+            if {"header_layout_ambiguous", "body_layout_ambiguous",
+                    "spanning_cell_role_ambiguous"}.intersection(table.limitations):
+                selected = resolution["selected_denominator"]
+                if selected is not None:
+                    selected["rejection_reasons"] = ["TABLE_STRUCTURE_UNSUPPORTED"]
+                    resolution["rejected_competing_denominators"].append(selected)
+                resolution.update(
+                    resolution_status="UNRESOLVED",
+                    resolution_reason="TABLE_STRUCTURE_UNSUPPORTED",
+                    selected_denominator=None,
+                )
         selected = resolution["selected_denominator"]
         agrees = (int(selected["value_exact"]) == reported_denominator
                   if selected is not None else None)

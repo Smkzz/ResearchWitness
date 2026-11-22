@@ -107,6 +107,17 @@ def test_subgroup_base_does_not_cross_body_groups(ids):
     ] == ["20", "100"]
 
 
+@pytest.mark.parametrize("span", [b'colspan="bad"', b'rowspan="bad"'])
+def test_ambiguous_header_layout_abstains(span):
+    data = synthetic(label="Event").replace(b"<th>Overall", b"<th " + span + b">Overall")
+    row = traced.trace_denominators(data)["relations"][0]
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    assert provenance["resolution_reason"] == "TABLE_STRUCTURE_UNSUPPORTED"
+    assert provenance["selected_denominator"] is None
+    assert row["resolved_value_equals_detector_base"] is None
+
+
 def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)
