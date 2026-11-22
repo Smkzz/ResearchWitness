@@ -1,7 +1,7 @@
 # Source-anchored JATS denominator evidence trace — RW-01I
 
-**Type:** optional engineering/source-continuity audit, not a denominator
-*resolver*, source-authenticity proof, correction finding, study-level
+**Type:** optional deterministic fail-closed scope-first resolver report;
+advisory, not adjudication, source-authenticity proof, correction finding, study-level
 verification or scientific benchmark evaluation.
 
 ## Interface
@@ -24,8 +24,8 @@ All optional sections are deterministically recomputed on bundle replay.
 ## What the trace independently checks — and what it does not
 
 - It uses only the existing bounded, original-byte JATS XML parser. The old
-  normalizing XML parser and the legacy full denominator resolver are **not**
-  imported; current detector numerator, denominator, status, scope and
+  normalizing XML parser is not imported. The standalone PR #11 resolver
+  consumes projected Table objects; current detector numerator, denominator, status, scope and
   ambiguity decisions are **never changed**.
 - Every relationship is replayed against unchanged source bytes. A supplied
   detector report that merely has the correct SHA-256 but differs in facts,
@@ -49,6 +49,32 @@ All optional sections are deterministically recomputed on bundle replay.
   private JSON/HTML and manifest size ceilings.
 
 ## Scientific, security and licensing limits
+
+The report schema is now `rw-jats-denominator-evidence.v2` (the version is
+recorded in bundles). Each relation adds `denominator_provenance`: resolution
+status/reason, relationship scope, selected value/source anchor and rejected
+competitors/reasons. `resolved_value_equals_detector_base` is null when
+unresolved; otherwise it compares the selected integer to the detector base
+(including a missing base). Top-level `resolution_status_counts` and
+`detector_resolver_disagreement_count` summarize those results. This does not
+alter detector decisions. Old v1 bundles are not migrated; exact replay may
+reject them after this implementation change.
+
+Tables are projected once and indexed by original cell byte spans. The adapter
+binds row-group identity to the original enclosing XML element's byte offset,
+including separate unnamed body groups, preserving cells and anchors. Subgroup
+boundaries and parent-count groups stop at group boundaries and are computed
+once per table. Printed cell-ratio denominators are passed as explicit local
+source facts with their original printed numeric spelling (grouped tokens
+remain unsupported), not inferred from arithmetic agreement. Ambiguous header/body
+layouts and spanning-cell roles produce `UNRESOLVED / TABLE_STRUCTURE_UNSUPPORTED`.
+Invalid candidates retain their printed value, source anchor and rejection
+reasons even when no denominator resolves. A
+valid broader candidate blocked by an invalid equally or more specific base
+retains an explicit blocking reason. A missing
+projected relation cell produces `UNRESOLVED / RELATION_CELL_NOT_PROJECTED`.
+Neither arithmetic fit nor a detector-inferred base is fed to the resolver.
+Review packets continue to expose source facts, not these advisory preferences.
 
 A contradictory header and table caption may refer to different analysis
 populations; different numeric facts are not automatically false. This

@@ -5,6 +5,7 @@ scientific-denominator validation is asserted by these software tests.
 """
 from __future__ import annotations
 
+from dataclasses import replace
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -25,11 +26,142 @@ def source() -> bytes:
     return FIXTURE.read_bytes()
 
 
+def synthetic(header="Overall participants (N=100)", label="Event (n=20)"):
+    return (
+        "<article><body><table-wrap><table><thead><tr><th>Outcome</th><th>"
+        + header + "</th></tr></thead><tbody><tr><th scope='row'>"
+        + label + "</th><td>4 (20%)</td></tr></tbody></table></table-wrap></body></article>"
+    ).encode()
+
+
+@pytest.mark.parametrize(("header", "label", "status"), [
+    ("Overall participants (N=100)", "Event (n=20)", "RESOLVED"),
+    ("Women (N=20; n=25)", "Event", "AMBIGUOUS"),
+    ("Participants", "Event", "UNRESOLVED"),
+])
+def test_advisory_resolver_preserves_detector(header, label, status):
+    data = synthetic(header, label)
+    before = jats.audit_jats_percentage_tables(data)
+    report = traced.trace_denominators(data, before)
+    row = report["relations"][0]
+    resolution = row["denominator_provenance"]
+    assert resolution["resolution_status"] == status
+    assert row["detector_status"] == before["results"][0]["status"]
+    assert row["detector_denominator"] == before["results"][0]["denominator"]
+    assert jats.audit_jats_percentage_tables(data) == before
+    assert report["resolution_status_counts"] == {status: 1}
+    if status == "RESOLVED":
+        assert resolution["selected_denominator"]["value_exact"] == "20"
+        assert resolution["selected_denominator"]["source_anchor"]["start_byte"] >= 0
+        assert row["resolved_value_equals_detector_base"] is (row["detector_denominator"] == 20)
+        assert report["detector_resolver_disagreement_count"] == int(row["detector_denominator"] != 20)
+        assert any(item["value_exact"] == "100" and item["rejection_reasons"]
+                   for item in resolution["rejected_competing_denominators"])
+    else:
+        assert row["resolved_value_equals_detector_base"] is None
+        if header == "Participants":
+            assert resolution["resolution_reason"] == "DENOMINATOR_NOT_EXPLICIT"
+
+
+def test_missing_projected_cell_fails_closed(monkeypatch):
+    project = traced.project_jats_tables
+    monkeypatch.setattr(traced, "project_jats_tables",
+                        lambda *args: replace(project(*args), tables=()))
+    report = traced.trace_denominators(synthetic())
+    row = report["relations"][0]
+    assert row["denominator_provenance"]["resolution_status"] == "UNRESOLVED"
+    assert row["denominator_provenance"]["resolution_reason"] == "RELATION_CELL_NOT_PROJECTED"
+    assert row["resolved_value_equals_detector_base"] is None
+
+
+def test_empty_trace_has_empty_resolution_counts():
+    report = traced.trace_denominators(b"<article><body/></article>")
+    assert report["resolution_status_counts"] == {}
+    assert report["detector_resolver_disagreement_count"] == 0
+
+
+def test_printed_ratio_base_is_passed_to_resolver():
+    data = synthetic(label="Event").replace(b"4 (20%)", b"4/20 (20%)")
+    report = traced.trace_denominators(data)
+    row = report["relations"][0]
+    selected = row["denominator_provenance"]["selected_denominator"]
+    assert selected["value_exact"] == "20"
+    assert selected["provenance_class"] == "CELL_LOCAL_EXPLICIT"
+    assert row["detector_denominator"] == 20
+
+
+@pytest.mark.parametrize("ids", [("", ""), (' id="first"', ' id="second"')])
+def test_subgroup_base_does_not_cross_body_groups(ids):
+    data = (
+        '<article><body><table-wrap><table><thead><tr><th>Outcome</th>'
+        '<th>Overall patients (N=100)</th></tr></thead>'
+        '<tbody' + ids[0] + '><tr><th>Women</th><td>N=20</td></tr>'
+        '<tr><th>Event</th><td>4 (20%)</td></tr></tbody>'
+        '<tbody' + ids[1] + '><tr><th>Other event</th><td>10 (10%)</td></tr></tbody>'
+        '</table></table-wrap></body></article>'
+    ).encode()
+    report = traced.trace_denominators(data)
+    assert [
+        row["denominator_provenance"]["selected_denominator"]["value_exact"]
+        for row in report["relations"]
+    ] == ["20", "100"]
+
+
+@pytest.mark.parametrize("span", [b'colspan="bad"', b'rowspan="bad"'])
+def test_ambiguous_header_layout_abstains(span):
+    data = synthetic(label="Event").replace(b"<th>Overall", b"<th " + span + b">Overall")
+    row = traced.trace_denominators(data)["relations"][0]
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    assert provenance["resolution_reason"] == "TABLE_STRUCTURE_UNSUPPORTED"
+    assert provenance["selected_denominator"] is None
+    assert row["resolved_value_equals_detector_base"] is None
+
+
+@pytest.mark.parametrize(("header", "reason", "raw_value"), [
+    ("Patients (N=1,000)", "GROUPED_INTEGER_FORMAT_UNSUPPORTED", "1,000"),
+    ('Patients (N=20)<xref ref-type="table-fn" rid="f1">a</xref>',
+     "FOOTNOTE_SCOPE_UNRESOLVED", "20"),
+])
+def test_unresolved_retains_invalid_denominator_candidates(header, reason, raw_value):
+    row = traced.trace_denominators(synthetic(header=header, label="Event"))["relations"][0]
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    rejected = provenance["rejected_competing_denominators"]
+    assert any(item["raw_value"] == raw_value
+               and item["source_anchor"]["start_byte"] > 0
+               and reason in item["rejection_reasons"] for item in rejected)
+
+
+def test_grouped_ratio_token_is_not_normalized_before_resolution():
+    data = synthetic(label="Event").replace(b"4 (20%)", b"4/1,000 (0.4%)")
+    row = traced.trace_denominators(data)["relations"][0]
+    assert row["detector_denominator"] == 1000
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    assert provenance["resolution_reason"] == "GROUPED_INTEGER_FORMAT_UNSUPPORTED"
+    assert any(item["raw_value"] == "1,000"
+               and "GROUPED_INTEGER_FORMAT_UNSUPPORTED" in item["rejection_reasons"]
+               for item in provenance["rejected_competing_denominators"])
+
+
+def test_invalid_local_base_explains_why_broader_competitor_is_blocked():
+    row = traced.trace_denominators(synthetic(label="Event (n=1,000)"))["relations"][0]
+    provenance = row["denominator_provenance"]
+    assert provenance["resolution_status"] == "UNRESOLVED"
+    rejected = provenance["rejected_competing_denominators"]
+    broader = next(item for item in rejected if item["value_exact"] == "100")
+    assert broader["rejection_reasons"] == ["BLOCKED_BY_INVALID_MORE_SPECIFIC_OR_EQUAL_SCOPE"]
+    assert any(item["raw_value"] == "1,000"
+               and "GROUPED_INTEGER_FORMAT_UNSUPPORTED" in item["rejection_reasons"]
+               for item in rejected)
+
+
 def test_trace_all_existing_decisions_without_scientific_promotion():
     data = source()
     detector = jats.audit_jats_percentage_tables(data)
     trace = traced.trace_denominators(data, detector)
-    assert trace["schema_version"] == "rw-jats-denominator-evidence.v1"
+    assert trace["schema_version"] == "rw-jats-denominator-evidence.v2"
     assert trace["relation_count"] == detector["percentage_cells_reviewed"] == 3
     assert trace["fact_count"] >= 2
     assert trace["unresolved_relation_count"] == 1

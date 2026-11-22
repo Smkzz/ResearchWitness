@@ -12,6 +12,35 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
+## Advisory denominator resolver port — pre-merge receipt
+
+Base: main `4389217`; source resolver: closed PR #11 head `6843593`.
+Branch: `devin/1795389451-denominator-provenance-port`. Trace v2 adds a
+deterministic fail-closed scope-first resolver report over original-byte Tables,
+without changing detector decisions. The resolver is advisory, not adjudication.
+Only the standalone resolver was imported; no legacy audit/arithmetic/replay stack.
+Synthetic Table and JATS tests cover local and broader bases, ambiguity,
+missing explicit bases, missing projected cells and unchanged detector results.
+Local acceptance commands: Ruff, full coverage (core >=90%), quality gate.
+Results belong to the implementation commit receipt; no exact-head CI, separate
+review, merge or postmerge success is claimed here. No reviewer is invented.
+PDF qualification and protected custody gates are unchanged.
+
+PR #106's Devin Review raised five reproducible synthetic failures at
+`7a54b14`: ignored printed ratios, cross-body subgroup leakage, unsupported
+header layouts resolving, lost invalid-candidate evidence and stale subgroup
+scope-cell anchors. Focused fixes are in `c98d457`, `76dcfa0`, `e857593`,
+`845846f` and `45bd664` respectively, with regression tests. Review findings
+are not a completed approval; final local checks and exact-head CI remain
+separate receipts. No detector decisions or arithmetic were changed.
+
+Second-review regressions at `f29b106` reproduced normalization of grouped
+ratio tokens and an empty rejection reason on a broader candidate blocked by
+an invalid local base. Fixes `be3d8cc` and `f2e6286` preserve printed numeric
+tokens for resolver validation and explicitly explain blocked competitors,
+respectively. At the observed `f29b106` CI snapshot, 13 checks had passed,
+none failed and Devin Review was pending; this is not a 14/14 receipt.
+
 ## RW-03 native test run receipt
 
 This is a **native test run (logs linked)**, not a qualification claim.
