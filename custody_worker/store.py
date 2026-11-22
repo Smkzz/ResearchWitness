@@ -1109,7 +1109,8 @@ def _summarize(root: Path) -> dict:
     for path in seal_files:
         data = checked_read(path, max_bytes=MAX_SEAL_BYTES)
         digest = path.stem.removeprefix("seal-")
-        record = require_keys(strict_json_bytes(data), {"schema_version", "commitment", "snapshot"})
+        record = require_keys(strict_json_bytes(data, max_bytes=MAX_SEAL_BYTES),
+                              {"schema_version", "commitment", "snapshot"})
         if record["schema_version"] != SEAL_VERSION or record["commitment"] != digest:
             reject("SEAL_UNSUPPORTED_OR_CORRUPT")
         snapshot = require_keys(record["snapshot"], {"schema_version", "inventory_records", "inventory_counts"})

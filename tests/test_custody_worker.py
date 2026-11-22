@@ -121,6 +121,23 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             self.source_setup(original=text, extension="md")
         self.assertEqual(verify_all(self.root), before)
 
+    def test_large_seal_uses_seal_json_bound(self):
+        from custody_worker.policy import SEAL_VERSION, strict_json_bytes
+
+        snapshot = {
+            "schema_version": SEAL_VERSION,
+            "inventory_records": [{"path": "manifests/reviews/" + "a" * 63 + ".json",
+                                   "sha256": "0" * 64}] * 8000,
+            "inventory_counts": verify_all(self.root),
+        }
+        with patch("custody_worker.store._inventory_snapshot", return_value=snapshot):
+            seal_inventory(self.root)
+            self.assertTrue(summarize(self.root)["current_inventory_sealed"])
+        data = next((self.root / "sealed-labels").iterdir()).read_bytes()
+        self.assertGreater(len(data), 1_000_000)
+        with self.assertRaisesRegex(CustodyError, "JSON_TOO_LARGE"):
+            strict_json_bytes(data)
+
     def test_supplementary_locator_cannot_be_abbreviated(self):
         text = self.original_text().replace("Table 1", "Supplementary Table 1")
         item, _ = self.source_setup(original=text)

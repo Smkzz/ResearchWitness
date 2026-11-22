@@ -262,8 +262,8 @@ def unique_pairs(pairs: list[tuple[str, object]]) -> None:
         reject("DUPLICATE_ENTRY")
 
 
-def strict_json_bytes(data: bytes) -> object:
-    if len(data) > MAX_JSON_BYTES:
+def strict_json_bytes(data: bytes, *, max_bytes: int = MAX_JSON_BYTES) -> object:
+    if len(data) > max_bytes:
         reject("JSON_TOO_LARGE")
 
     def pairs_hook(pairs):
