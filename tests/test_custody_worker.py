@@ -121,6 +121,25 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             self.source_setup(original=text, extension="md")
         self.assertEqual(verify_all(self.root), before)
 
+    def test_schema_requires_evidence_for_unresolved_correction_reviews(self):
+        original = self.original_text("28.5%")
+        correction = self.correction_text()
+        item, corrected = self.source_setup(original=original, correction=correction)
+        review = self.review_object(item, corrected, role="CORRECTION_POSITIVE",
+                                    eligibility="UNRESOLVED", original_text=original,
+                                    original_percent="28.5%", correction_text=correction)
+        review["correction_binding"] = None
+        schema = json.loads((Path(__file__).parents[1] / "custody_worker" / "schemas"
+                             / "review.v5.schema.json").read_text())
+        validator = Draft202012Validator(schema)
+        validator.validate(review)
+        self.record(review)
+        for key in ("correction_sha256", "correction_source_version"):
+            invalid = {**review, key: None}
+            self.assertTrue(list(validator.iter_errors(invalid)))
+            with self.assertRaisesRegex(CustodyError, "CORRECTION_EVIDENCE_REQUIRED"):
+                self.record(invalid)
+
     def test_review_accepts_zero_integer_part_at_printed_precision(self):
         for index, (count, percent) in enumerate((("0", "0.0%"), ("1", "0.5%"))):
             text = f"Table 1 / Group A / main cohort / N = 200 / count {count} / {percent}\n"

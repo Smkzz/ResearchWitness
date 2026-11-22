@@ -67,6 +67,10 @@
   },
   "allOf": [
     {
+      "if": {"properties": {"role": {"const": "CORRECTION_POSITIVE"}}, "required": ["role"]},
+      "then": {"properties": {"correction_sha256": {"type": "string"}, "correction_source_version": {"type": "string"}}}
+    },
+    {
       "if": {"properties": {"role": {"const": "CORRECTION_POSITIVE"}, "eligibility": {"const": "ELIGIBLE"}}, "required": ["role", "eligibility"]},
       "then": {"properties": {"correction_binding": {"$ref": "#/$defs/correction_binding"}, "correction_sha256": {"type": "string"}, "correction_source_version": {"type": "string"}}}
     },
