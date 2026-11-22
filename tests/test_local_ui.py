@@ -258,6 +258,45 @@ class LocalUITests(unittest.TestCase):
         with mock.patch.object(ui, "MAX_STORE_BYTES", 1):
             self.assertEqual(self.upload()[0], 429)
 
+    def test_failed_submit_removes_partial_directory_and_job(self):
+        store = self.server.store
+        for target in (mock.patch.object(store, "_save", side_effect=OSError("disk full")),
+                       mock.patch.object(store.executor, "submit", side_effect=RuntimeError("stopped"))):
+            with target, self.assertRaises((OSError, RuntimeError)):
+                store.submit(SOURCE, "article.xml", "synthetic", {})
+            self.assertEqual(store.list_jobs(), [])
+            self.assertEqual(list(store.root.iterdir()), [])
+        self.completed()
+
+    def test_restart_skips_and_removes_incomplete_or_invalid_jobs(self):
+        good = self.completed()
+        root = self.server.store.root
+        for index, content in enumerate((None, b"{", b"{}", b'{"status": []}')):
+            path = root / f"{index:032x}"
+            path.mkdir()
+            (path / "upload.xml").write_bytes(SOURCE)
+            if content is not None:
+                (path / "job.json").write_bytes(content)
+        outside = self.root / "outside"
+        outside.mkdir()
+        marker = outside / "keep.txt"
+        marker.write_text("do not remove")
+        link = root / ("f" * 32)
+        try:
+            link.symlink_to(outside, target_is_directory=True)
+        except OSError:
+            pass
+        reopened = ui.LocalAuditStore(root)
+        try:
+            self.assertEqual([job["job_id"] for job in reopened.list_jobs()], [good["job_id"]])
+            for index in range(4):
+                self.assertFalse((root / f"{index:032x}").exists())
+            self.assertEqual(marker.read_text(), "do not remove")
+            reopened._discard_partial(outside)
+            self.assertTrue(marker.exists())
+        finally:
+            reopened.close()
+
 
 class LocalUIContractTests(unittest.TestCase):
     def test_cli_port_and_lazy_dispatch(self):

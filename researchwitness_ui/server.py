@@ -134,48 +134,66 @@ class LocalAuditStore:
         for path in self.root.iterdir():
             if not JOB_ID.fullmatch(path.name):
                 continue
-            _directory(path)
-            row = jats_product.strict_json(read_regular(path / "job.json", MAX_METADATA_BYTES))
-            expected = (set(AuditJob.__dataclass_fields__) - {"future"}) | {"paper_error_established"}
-            if (set(row) != expected
-                    or row.get("job_id") != path.name or row.get("status") not in TERMINAL | {"queued", "running"}
-                    or type(row.get("created")) not in (float, int)
-                    or type(row.get("document_id")) is not str
-                    or not jats_product.IDENTIFIER.fullmatch(row["document_id"])
-                    or type(row.get("source_sha256")) is not str
-                    or not jats_product.HASH.fullmatch(row["source_sha256"])
-                    or type(row.get("filename")) is not str
-                    or (row.get("manifest_sha256") is not None
-                        and (type(row["manifest_sha256"]) is not str
-                             or not jats_product.HASH.fullmatch(row["manifest_sha256"])))
-                    or type(row.get("flags")) is not dict
-                    or set(row["flags"]) - set(SLICE_FLAGS)
-                    or any(type(value) is not bool for value in row["flags"].values())
-                    or type(row.get("summary")) is not dict):
-                raise LocalUIError("Invalid saved job metadata", 500)
-            job = AuditJob(**{key: row[key] for key in AuditJob.__dataclass_fields__ if key != "future"})
-            if job.status in {"queued", "running"}:
-                job.status, job.error = "failed", "Server stopped before this audit completed; upload again."
-                self._save(job)
+            try:
+                job = self._load_job(path)
+                self._job_size(job.job_id)
+                if job.status in {"queued", "running"}:
+                    job.status, job.error = "failed", "Server stopped before this audit completed; upload again."
+                    self._save(job)
+            except (LocalUIError, OSError, ValueError, TypeError, KeyError):
+                self._discard_partial(path)
+                continue
             self.jobs[job.job_id] = job
         self._retain(0)
 
-    def _size(self) -> int:
+    def _load_job(self, path: Path) -> AuditJob:
+        _directory(path)
+        row = jats_product.strict_json(read_regular(path / "job.json", MAX_METADATA_BYTES))
+        expected = (set(AuditJob.__dataclass_fields__) - {"future"}) | {"paper_error_established"}
+        if (set(row) != expected
+                or row.get("job_id") != path.name or row.get("status") not in TERMINAL | {"queued", "running"}
+                or type(row.get("created")) not in (float, int)
+                or type(row.get("document_id")) is not str
+                or not jats_product.IDENTIFIER.fullmatch(row["document_id"])
+                or type(row.get("source_sha256")) is not str
+                or not jats_product.HASH.fullmatch(row["source_sha256"])
+                or type(row.get("filename")) is not str
+                or (row.get("manifest_sha256") is not None
+                    and (type(row["manifest_sha256"]) is not str
+                         or not jats_product.HASH.fullmatch(row["manifest_sha256"])))
+                or type(row.get("flags")) is not dict
+                or set(row["flags"]) - set(SLICE_FLAGS)
+                or any(type(value) is not bool for value in row["flags"].values())
+                or type(row.get("summary")) is not dict):
+            raise LocalUIError("Invalid saved job metadata", 500)
+        return AuditJob(**{key: row[key] for key in AuditJob.__dataclass_fields__ if key != "future"})
+
+    def _discard_partial(self, path: Path) -> None:
+        if path.parent != self.root or not JOB_ID.fullmatch(path.name):
+            return
+        try:
+            _directory(path)
+            shutil.rmtree(path)
+        except (OSError, LocalUIError):
+            return
+
+    def _job_size(self, job_id: str) -> int:
         total = 0
-        for job_id in self.jobs:
-            path = self._path(job_id)
-            for item in path.iterdir():
-                if item.name == "bundle":
-                    _directory(item)
-                    children = list(item.iterdir())
-                else:
-                    children = [item]
-                for child in children:
-                    info = child.lstat()
-                    if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-                        raise LocalUIError("Unsafe state file", 500)
-                    total += info.st_size
+        for item in self._path(job_id).iterdir():
+            if item.name == "bundle":
+                _directory(item)
+                children = list(item.iterdir())
+            else:
+                children = [item]
+            for child in children:
+                info = child.lstat()
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                    raise LocalUIError("Unsafe state file", 500)
+                total += info.st_size
         return total
+
+    def _size(self) -> int:
+        return sum(self._job_size(job_id) for job_id in self.jobs)
 
     def _retain(self, reserve: int) -> None:
         while len(self.jobs) + bool(reserve) > self.max_jobs or self._size() + reserve > MAX_STORE_BYTES:
@@ -197,11 +215,17 @@ class LocalAuditStore:
             job = AuditJob(secrets.token_hex(16), filename, document_id, flags, hashlib.sha256(source).hexdigest())
             path = self.root / job.job_id
             path.mkdir(mode=0o700)
-            with (path / "upload.xml").open("xb") as stream:
-                stream.write(source)
-            self.jobs[job.job_id] = job
-            self._save(job)
-            job.future = self.executor.submit(self._run, job)
+            try:
+                with (path / "upload.xml").open("xb") as stream:
+                    stream.write(source)
+                self.jobs[job.job_id] = job
+                self._save(job)
+                job.future = self.executor.submit(self._run, job)
+            except Exception:
+                job.status = "failed"
+                self.jobs.pop(job.job_id, None)
+                self._discard_partial(path)
+                raise
             return job.public()
 
     def _run(self, job: AuditJob) -> None:
