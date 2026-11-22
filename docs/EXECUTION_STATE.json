@@ -11,7 +11,16 @@
     "protected_custody": "NOT RUN",
     "qualification": "not qualified",
     "security_review": "awaiting Sami's separate security review",
-    "note": "CLI refuses without --dev-root before production preflight or store access. No historical qualification receipts, private sources or production installation claims ported. Synthetic checks do not change capability gates."
+    "note": "CLI refuses without --dev-root before production preflight or store access. No historical qualification receipts, private sources or production installation claims ported. Synthetic checks do not change capability gates.",
+    "production_prerequisites": [
+      {
+        "id": "custody-store-recovery",
+        "status": "todo",
+        "requirement": "Bounded store recovery before production can be enabled: detect and safely recover orphaned source objects left when import_batch fails after writing an object but before its batch manifest, and temporary files left by a killed or interrupted write, so verify and retry succeed without manual edits.",
+        "origin": "Devin Review finding on PR #98 (failed import strands source objects), deferred by engineering review",
+        "blocks": "enabling production custody"
+      }
+    ]
   },
   "plan_path": "docs/DEVELOPMENT_PLAN.md",
   "entry_point": "AGENTS.md",
