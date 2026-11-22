@@ -52,21 +52,66 @@ class PDFSandboxImageTests(unittest.TestCase):
 
     def test_import_is_local_without_config_changes(self):
         image_id = 'sha256:' + 'c' * 64
-        with tempfile.TemporaryDirectory() as directory:
-            work = Path(directory)
-            result = subprocess.CompletedProcess([], 0, (image_id + '\n').encode())
-            with patch.object(build.subprocess, 'run', return_value=result) as run:
-                build.image(work, work)
-            self.assertEqual(run.call_args.args[0], ['docker', 'import', str(work / 'rootfs.tar')])
-            self.assertEqual((work / 'image-id.txt').read_text().strip(), image_id)
-            self.assertIn('EXIT CODE: 0', (work / f'{work.name}-import.log').read_text())
+        for arch in ('amd64', 'x86_64'):
+            with self.subTest(arch=arch), tempfile.TemporaryDirectory() as directory:
+                work = Path(directory)
+                results = [subprocess.CompletedProcess([], 0, json.dumps({'Os': 'linux', 'Arch': arch}).encode()),
+                           subprocess.CompletedProcess([], 0, (image_id + '\n').encode()),
+                           subprocess.CompletedProcess([], 0, b'[{"Architecture":"amd64","Os":"linux"}]')]
+                with patch.object(build.subprocess, 'run', side_effect=results) as run:
+                    build.image(work, work)
+                self.assertEqual(run.call_args_list[0].args[0],
+                                 ['docker', 'version', '--format', '{{json .Server}}'])
+                self.assertEqual(run.call_args_list[1].args[0],
+                                 ['docker', 'import', str(work / 'rootfs.tar')])
+                self.assertEqual(run.call_args_list[2].args[0], ['docker', 'image', 'inspect', image_id])
+                self.assertEqual((work / 'image-id.txt').read_text().strip(), image_id)
+                self.assertIn('EXIT CODE: 0', (work / f'{work.name}-import.log').read_text())
+
+    def test_incompatible_or_missing_daemon_platform_stops_before_import(self):
+        for platform in ({'Os': 'linux', 'Arch': 'arm64'}, {'Os': 'windows', 'Arch': 'amd64'}, {}):
+            with self.subTest(platform=platform), tempfile.TemporaryDirectory() as directory:
+                work = Path(directory)
+                result = subprocess.CompletedProcess([], 0, json.dumps(platform).encode())
+                with patch.object(build.subprocess, 'run', return_value=result) as run, \
+                     self.assertRaisesRegex(ValueError, 'linux amd64/x86_64 Docker daemon'):
+                    build.image(work, work)
+                run.assert_called_once()
+                self.assertFalse((work / 'image-id.txt').exists())
+
+    def test_imported_platform_must_be_linux_amd64_before_writing_pin(self):
+        for metadata in ([{'Architecture': 'arm64', 'Os': 'linux'}],
+                         [{'Architecture': 'amd64', 'Os': 'windows'}], [{}], []):
+            with self.subTest(metadata=metadata), tempfile.TemporaryDirectory() as directory:
+                work = Path(directory)
+                results = [subprocess.CompletedProcess([], 0, b'{"Os":"linux","Arch":"amd64"}'),
+                           subprocess.CompletedProcess([], 0, ('sha256:' + 'c' * 64).encode()),
+                           subprocess.CompletedProcess([], 0, json.dumps(metadata).encode())]
+                with patch.object(build.subprocess, 'run', side_effect=results), \
+                     self.assertRaisesRegex(ValueError, 'Architecture amd64 and Os linux'):
+                    build.image(work, work)
+                self.assertFalse((work / 'image-id.txt').exists())
+
+    def test_platform_command_errors_fail_closed(self):
+        for stage in ('version', 'inspect'):
+            with self.subTest(stage=stage), tempfile.TemporaryDirectory() as directory:
+                work = Path(directory)
+                results = []
+                if stage == 'inspect':
+                    results.extend([subprocess.CompletedProcess([], 0, b'{"Os":"linux","Arch":"amd64"}'),
+                                    subprocess.CompletedProcess([], 0, ('sha256:' + 'c' * 64).encode())])
+                results.append(subprocess.CompletedProcess([], 1, b'daemon failed'))
+                with patch.object(build.subprocess, 'run', side_effect=results), self.assertRaises(SystemExit):
+                    build.image(work, work)
+                self.assertFalse((work / 'image-id.txt').exists())
 
     def test_import_failure_or_invalid_id_never_writes_pin(self):
         for code, output, error in [(1, b'failed', SystemExit), (0, b'', ValueError)]:
             with self.subTest(code=code), tempfile.TemporaryDirectory() as directory:
                 work = Path(directory)
                 result = subprocess.CompletedProcess([], code, output)
-                with patch.object(build.subprocess, 'run', return_value=result), self.assertRaises(error):
+                server = subprocess.CompletedProcess([], 0, b'{"Os":"linux","Arch":"amd64"}')
+                with patch.object(build.subprocess, 'run', side_effect=[server, result]), self.assertRaises(error):
                     build.image(work, work)
                 self.assertFalse((work / 'image-id.txt').exists())
 

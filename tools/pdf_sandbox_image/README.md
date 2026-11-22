@@ -36,7 +36,10 @@ Tar ownership and timestamps are normalized; a second assembly must be compared.
 creation method**. BuildKit injects a default PATH, and this machine's classic
 builder does too. Both violate the production runner's empty-Env requirement.
 The `image` operation therefore uses local, offline `docker import rootfs.tar`,
-without any `--change` flags. Inspect Config before use; Env, Entrypoint and
+without any `--change` flags. Because import uses the daemon's native platform,
+the operation rejects any daemon other than linux amd64/x86_64 before importing,
+then requires the inspected image to report Architecture amd64 and Os linux
+before writing the image pin. Inspect Config before use; Env, Entrypoint and
 Volumes must be absent/empty. Do not relax the runner. Imports include creation
 timestamps, so identical rootfs/layer hashes need not yield identical image IDs.
 Pin and review each resulting local ID separately; do not claim image-ID

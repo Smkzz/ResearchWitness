@@ -106,6 +106,13 @@ def build(work: Path, evidence: Path) -> None:
 
 
 def image(work: Path, evidence: Path) -> None:
+    server = subprocess.run(['docker', 'version', '--format', '{{json .Server}}'],
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
+    if server.returncode:
+        raise SystemExit(server.returncode)
+    platform = json.loads(server.stdout)
+    if platform.get('Os') != 'linux' or platform.get('Arch') not in ('amd64', 'x86_64'):
+        raise ValueError('Image import requires a linux amd64/x86_64 Docker daemon')
     command = ['docker', 'import', str(work / 'rootfs.tar')]
     result = subprocess.run(command, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, check=False)
@@ -119,6 +126,14 @@ def image(work: Path, evidence: Path) -> None:
     image_id = output.strip()
     if not re.fullmatch(r'sha256:[0-9a-f]{64}', image_id):
         raise ValueError('Import did not return a SHA256 image ID')
+    inspected = subprocess.run(['docker', 'image', 'inspect', image_id], stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, check=False)
+    if inspected.returncode:
+        raise SystemExit(inspected.returncode)
+    metadata = json.loads(inspected.stdout)
+    if (len(metadata) != 1 or metadata[0].get('Architecture') != 'amd64'
+            or metadata[0].get('Os') != 'linux'):
+        raise ValueError('Imported image must have Architecture amd64 and Os linux')
     (work / 'image-id.txt').write_text(image_id + '\n', encoding='ascii', newline='\n')
 
 
