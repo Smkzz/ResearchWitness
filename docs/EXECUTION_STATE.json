@@ -656,7 +656,13 @@
       "base_sha": null,
       "lease_expires_at_utc": null,
       "acceptance_section": "docs/DEVELOPMENT_PLAN.md#rw-09---usable-product-and-preview-release",
-      "evidence": [],
+      "evidence": [
+        "https://github.com/Smkzz/ResearchWitness/pull/99",
+        "https://github.com/Smkzz/ResearchWitness/commit/c973f802d5dc9a4dd8eefd9bacce810c68391389",
+        "https://github.com/Smkzz/ResearchWitness/commit/ae155a2a22de5dd6b57035aad1e51160f1f2dcbe",
+        "docs/PROJECT_STATUS.md#rw-09-local-jats-ui-merge-receipt",
+        "Partial engineering slice only; RW-09 stays todo because dependencies and full acceptance remain unmet. Post-merge c973f802d5dc9a4dd8eefd9bacce810c68391389: 12/12 checks success (nine Python/OS jobs, Release gate, Analyze Python in the separately verified CodeQL workflow, update-pip-graph); exact IDs are in the linked receipt. Reviewer approval is engineering only; Devin Review is automated AI review. Devin testing agent browser test was at 1959024, not the final head. Human visual/accessibility review and independent security review of researchwitness_ui remain pending. Adapter security review gates any RW-09 preview release and any use with non-public sources. JATS XML only; custody NOT RUN; PDF unqualified; PR #98 held for Sami's security review."
+      ],
       "blocker": null
     },
     {
