@@ -21,11 +21,13 @@ from custody_worker.policy import (
     CustodyError, DEV_PARENT, MARKER, IMPORT_VERSION, REVIEW_VERSION,
     canonical_bytes, computed_percent, normalize_doi, preflight, sha256_bytes,
     validate_source_provenance, validate_utc_timestamp,
+    SEAL_VERSION, strict_json_bytes,
 )
 from custody_worker.store import (
     import_batch, make_store, record_review, verify_all, seal_inventory,
     summarize, export_public_summary, SCOPE_STATUS, SOURCE_VERSION_STATUS,
     CORRECTION_STATUS, _review_validation, _source_index,
+    _immutable_write,
 )
 
 DOCUMENT = "doi:10.5555/synthetic-study"
@@ -147,12 +149,10 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             self.record(self.review_object(item, None, original_text=text,
                                           original_percent=percent, numerator=count,
                                           denominator="N = 200", review_id=f"review-zero-{index}",
-                                          numerator_occurrence=1 if count == "0" else 0))
+                                          numerator_occurrence=text[:text.index("count ")].count(count)))
         self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 2)
 
     def test_large_seal_uses_seal_json_bound(self):
-        from custody_worker.policy import SEAL_VERSION, strict_json_bytes
-
         snapshot = {
             "schema_version": SEAL_VERSION,
             "inventory_records": [{"path": "manifests/reviews/" + "a" * 63 + ".json",
@@ -162,6 +162,8 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         with patch("custody_worker.store._inventory_snapshot", return_value=snapshot):
             seal_inventory(self.root)
             self.assertTrue(summarize(self.root)["current_inventory_sealed"])
+            with self.assertRaisesRegex(CustodyError, "PUBLIC_EXPORT_THRESHOLDS_NOT_MET"):
+                export_public_summary(self.root)
         data = next((self.root / "sealed-labels").iterdir()).read_bytes()
         self.assertGreater(len(data), 1_000_000)
         with self.assertRaisesRegex(CustodyError, "JSON_TOO_LARGE"):
@@ -208,8 +210,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         seal_inventory(self.root)
         with patch("custody_worker.store.MAX_LEDGER_RECORDS", 1):
             with self.assertRaisesRegex(CustodyError, "INVENTORY_LIMIT_EXCEEDED"):
-                self.record(self.review_object(item, None, review_id="review-two",
-                                              eligibility="UNRESOLVED"))
+                _immutable_write(self.root, self.root / "manifests" / "reviews" / "review-two.json", b"{}")
         item2, _ = self.source_setup(original=self.original_text(group="Group B"),
                                      document_id="doi:10.5555/another-work")
         self.record(self.review_object(item2, None, review_id="review-three",
@@ -217,7 +218,7 @@ class CustodyWorkerV5Tests(unittest.TestCase):
         with patch("custody_worker.store.MAX_LEDGER_RECORDS", 2), \
              patch("custody_worker.store.MAX_LEDGER_BYTES", 1):
             with self.assertRaisesRegex(CustodyError, "INVENTORY_LIMIT_EXCEEDED"):
-                seal_inventory(self.root)
+                _immutable_write(self.root, self.root / "sealed-labels" / ("seal-" + "0" * 64 + ".json"), b"{}")
         verify_all(self.root)
 
     def source_setup(self, *, original: str, correction: str | None = None,

@@ -14,3 +14,10 @@ escape-resistance evidence or scientific performance measurements.
 Run README.md's commands and ../RELEASING.md's release checks. Record exact-head
 results separately. Platform skips remain evidence gaps; synthetic success does
 not authorize protected material or qualify custody.
+
+Review follow-up: interrupted imports can leave unreferenced source objects
+when object writes succeed but the manifest write fails. Verification and retry
+then fail closed with UNREFERENCED_SOURCE_OBJECT. Crash-safe transaction/recovery
+design is outside this synthetic port and remains escalated; do not manually
+delete or repair protected records. Production remains disabled, not qualified,
+and protected custody NOT RUN pending Sami's separate security review.
