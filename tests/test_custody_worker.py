@@ -121,6 +121,16 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             self.source_setup(original=text, extension="md")
         self.assertEqual(verify_all(self.root), before)
 
+    def test_supplementary_locator_cannot_be_abbreviated(self):
+        text = self.original_text().replace("Table 1", "Supplementary Table 1")
+        item, _ = self.source_setup(original=text)
+        self.record(self.review_object(item, None, original_text=text,
+                                      table_locator="Supplementary Table 1"))
+        with self.assertRaisesRegex(CustodyError, "TABLE_LOCATOR_NOT_COMPLETE"):
+            self.record(self.review_object(item, None, original_text=text,
+                                          review_id="review-abbreviated", table_locator="Table 1"))
+        self.assertEqual(verify_all(self.root)["reviews"], 1)
+
     def test_import_limits_refuse_before_writing_objects(self):
         item, _ = self.source_setup(original=self.original_text())
         before = verify_all(self.root)

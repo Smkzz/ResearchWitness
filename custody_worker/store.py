@@ -471,6 +471,13 @@ def _validate_relationship(source: bytes, raw: object, *,
         reject("RELATION_CONTEXT_NOT_EXACT_SOURCE_LINE")
     if not re.fullmatch(r"(?i)(?:supplementary\s+)?table\s+(?:s?[0-9]+|[ivxlcdm]+)[a-z]?", table_locator[0]):
         reject("TABLE_LOCATOR_NOT_EXPLICIT")
+    locators = re.finditer(
+        rb"(?i)\b(?:supplementary\s+)?table\s+(?:s?[0-9]+|[ivxlcdm]+)[a-z]?\b",
+        source[context[1]:context[2]],
+    )
+    if not any((context[1] + match.start(), context[1] + match.end())
+               == (table_locator[1], table_locator[2]) for match in locators):
+        reject("TABLE_LOCATOR_NOT_COMPLETE")
     if re.search(r"[0-9%]", object_locator[0] + scope[0]):
         reject("NUMERIC_OBJECT_OR_SCOPE_LABEL_UNRESOLVED")
     numeric_operands = sorted((numerator, denominator, percentage, *additional_numeric_spans),
