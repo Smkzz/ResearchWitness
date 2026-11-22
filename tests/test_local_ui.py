@@ -9,6 +9,7 @@ import io
 import json
 import os
 from pathlib import Path
+import stat
 import tempfile
 import threading
 import time
@@ -18,6 +19,7 @@ from urllib.parse import quote
 import zipfile
 
 from researchwitness import jats_product
+import researchwitness_ui
 from researchwitness.__main__ import main
 from researchwitness_ui import server as ui
 from tools import make_release, quality_gate
@@ -330,6 +332,50 @@ class LocalUITests(unittest.TestCase):
 
 
 class LocalUIContractTests(unittest.TestCase):
+    def test_windows_exclusive_address_use_precedes_bind(self):
+        server = ui.LocalUIHTTPServer.__new__(ui.LocalUIHTTPServer)
+        server.socket = mock.Mock()
+        calls = mock.Mock()
+        calls.attach_mock(server.socket.setsockopt, "setsockopt")
+        platform = mock.Mock()
+        with mock.patch.object(ui, "os", platform), \
+                mock.patch.object(ui.socket, "SO_EXCLUSIVEADDRUSE", 12345, create=True), \
+                mock.patch.object(ui.http.server.HTTPServer, "server_bind") as bind:
+            calls.attach_mock(bind, "bind")
+            for name in ("nt", "posix"):
+                platform.name = name
+                calls.reset_mock()
+                ui.LocalUIHTTPServer.server_bind(server)
+                expected = ([mock.call.setsockopt(ui.socket.SOL_SOCKET, 12345, 1)]
+                            if name == "nt" else [])
+                self.assertEqual(calls.mock_calls, expected + [mock.call.bind()])
+
+    @unittest.skipIf(os.name == "nt", "POSIX permission bits")
+    def test_new_state_and_bundle_are_owner_only_with_permissive_umask(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve() / "state"
+            previous = os.umask(0)
+            try:
+                with running_server(root) as server:
+                    job = server.store.submit(SOURCE, "article.xml", "synthetic", {})
+                    server.store.get(job["job_id"]).future.result(timeout=8)
+                    self.assertEqual(server.store.get(job["job_id"]).status, "done")
+                    for path in (root, *root.rglob("*")):
+                        self.assertEqual(stat.S_IMODE(path.stat().st_mode),
+                                         0o700 if path.is_dir() else 0o600, path)
+            finally:
+                os.umask(previous)
+
+    def test_cli_rejects_adapter_from_other_installation(self):
+        for filename in (None, str(ROOT / "other-install/researchwitness_ui/__init__.py")):
+            with self.subTest(filename=filename), \
+                    mock.patch.object(researchwitness_ui, "__file__", filename), \
+                    mock.patch.object(ui, "serve_ui") as serve, \
+                    mock.patch("sys.stderr", new_callable=io.StringIO) as errors:
+                self.assertEqual(main(["ui", "--no-browser"]), 2)
+                self.assertIn("same ResearchWitness installation", errors.getvalue())
+                serve.assert_not_called()
+
     @unittest.skipIf(os.name == "nt", "Windows address reuse permits port hijacking")
     def test_posix_server_rebinds_same_port_after_serving_request(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -370,6 +416,17 @@ class LocalUIContractTests(unittest.TestCase):
                 root = Path(directory)
                 (root / "researchwitness_ui").mkdir()
                 (root / "researchwitness_ui/server.py").write_text(source)
+                with mock.patch.object(quality_gate, "ROOT", root), self.assertRaises(RuntimeError):
+                    quality_gate.scan_ui()
+
+    def test_ui_socket_exception_rejects_other_uses(self):
+        source = (ROOT / "researchwitness_ui/server.py").read_text()
+        for extra in ("socket.socket()", "client = socket", "socket.getaddrinfo('host', 80)",
+                      "from socket import socket", "import socket as network"):
+            with self.subTest(extra=extra), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                (root / "researchwitness_ui").mkdir()
+                (root / "researchwitness_ui/server.py").write_text(source + "\n" + extra + "\n")
                 with mock.patch.object(quality_gate, "ROOT", root), self.assertRaises(RuntimeError):
                     quality_gate.scan_ui()
 

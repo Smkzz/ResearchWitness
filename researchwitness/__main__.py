@@ -123,6 +123,11 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == 'ui':
             if not 0 <= args.port <= 65535:
                 raise Invalid('UI port must be between 0 and 65535')
+            import researchwitness_ui
+            expected_adapter = Path(__file__).resolve().parent.parent / 'researchwitness_ui' / '__init__.py'
+            if (not researchwitness_ui.__file__
+                    or Path(researchwitness_ui.__file__).resolve() != expected_adapter):
+                raise Invalid('Local UI adapter must come from the same ResearchWitness installation')
             from researchwitness_ui.server import LocalUIError, serve_ui
             try:
                 return serve_ui(port=args.port, open_browser=not args.no_browser,
