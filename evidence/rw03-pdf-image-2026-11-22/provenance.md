@@ -147,3 +147,18 @@ remain open: race, same-user/admin attackers, offline-only revocation, name-only
 signer matching and installation integrity. RW-03 remains blocked_external;
 custody NOT RUN and scientific gates unchanged. The overwritten standalone
 BuildKit log remains a disclosed gap, not repaired by these runtime receipts.
+
+## Follow-up scope and continuity clarification
+
+The 32 isolation check records mean effective-config inspection plus synthetic
+benign fixture runs (timeout, overflow, success/failure cleanup) and explicitly
+mocked cleanup-denial regressions. They are not escape or exploit attempts.
+The base HEAD 947ac31 recorded during Step B does not mean its uncommitted
+runner/harness source hashes were present in that Git commit. Comparison with
+merged main 6a26ab5 found the runner changed and the harness was absent in
+947ac31. The smoke tool and other imported runtime source files were unchanged.
+The exact per-file old/new hashes and a fresh local-only capture against
+6a26ab5's runtime are preserved alongside this historical bundle in
+../rw03-pdf-followup-2026-11-22/. Neither historical raw receipts nor this
+qualification boundary have been replaced: the 32 checks are not security
+certification, and PDF execution remains unqualified.

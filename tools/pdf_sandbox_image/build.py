@@ -12,6 +12,12 @@ import tarfile
 
 BUILDER = 'debian@sha256:7378260c0a098d27ac206225db5e7d92b8c7c84ea7afccc86eeb513756bbd392'
 SNAPSHOT = '20261120T000000Z'
+ROOTFS_SHA256 = '01e8b685061d4cec687b4f451c4e3a2e8299fbcf3e9b8ddd83cd8e6c5f1e9074'
+SIGNING_FINGERPRINTS = frozenset({
+    '04B54C3CDCA79751B16BC6B5225629DF75B188BD',
+    '41587F7DB8C774BCCF131416762F67A0B2C39DE4',
+    'B8B80B5B623EAB6AD8775C45B7C5D7D6350947F8',
+})
 
 
 def validate_lock(lock: dict) -> None:
@@ -24,6 +30,9 @@ def validate_lock(lock: dict) -> None:
     if not lock.get('signing_fingerprints') or any(not re.fullmatch(r'[0-9A-F]{40}', signer)
                                                  for signer in lock['signing_fingerprints']):
         raise ValueError('Missing signature fingerprints')
+    if (set(lock['signing_fingerprints']) != SIGNING_FINGERPRINTS
+            or len(lock['signing_fingerprints']) != len(SIGNING_FINGERPRINTS)):
+        raise ValueError('Signature fingerprints do not match the pinned signer set')
     if not lock.get('packages'):
         raise ValueError('Empty package closure')
     names = set()
@@ -54,6 +63,23 @@ def run_script(script: str, work: Path, log: Path) -> str:
     return output
 
 
+def verify_inrelease(directory: Path, lock: dict) -> None:
+    validate_lock(lock)
+    if hashlib.sha256((directory / 'InRelease').read_bytes()).hexdigest() != lock['inrelease_sha256']:
+        raise ValueError('InRelease hash does not match the lock')
+    command = ['docker', 'run', '--rm', '--network', 'none', '--pull=never',
+               '--mount', f'type=bind,source={directory},target=/evidence,readonly',
+               BUILDER, 'sqv', '--keyring', '/usr/share/keyrings/debian-archive-keyring.gpg',
+               '--cleartext', '--output', '/tmp/authenticated-release', '--signatures',
+               str(len(SIGNING_FINGERPRINTS)), '/evidence/InRelease']
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    if result.returncode:
+        raise SystemExit(result.returncode)
+    verified = result.stdout.decode('ascii').splitlines()
+    if set(verified) != set(lock['signing_fingerprints']):
+        raise ValueError('Verified InRelease signers do not match the locked fingerprint set')
+
+
 def resolve(work: Path, evidence: Path) -> None:
     output = run_script('prepare.sh', work, evidence / 'resolve.log')
     packages = []
@@ -79,6 +105,7 @@ def resolve(work: Path, evidence: Path) -> None:
             'signing_fingerprints': sorted(set(re.findall(r'Got GOODSIG ([0-9A-F]{40})', output))),
             'packages': sorted(packages, key=lambda p: p['name'])}
     validate_lock(lock)
+    verify_inrelease(work, lock)
     (evidence / 'packages.lock.json').write_text(json.dumps(lock, indent=2) + '\n',
                                                 encoding='utf-8', newline='\n')
     shutil.copyfile(work / 'InRelease', evidence / 'InRelease')
@@ -87,6 +114,7 @@ def resolve(work: Path, evidence: Path) -> None:
 def build(work: Path, evidence: Path) -> None:
     lock = json.loads((evidence / 'packages.lock.json').read_text())
     validate_lock(lock)
+    verify_inrelease(evidence, lock)
     (work / 'inrelease.sha256').write_text(lock['inrelease_sha256'] + '  InRelease\n',
                                           encoding='ascii', newline='\n')
     (work / 'lock.tsv').write_text(''.join(' '.join(p[k] for k in
@@ -106,6 +134,10 @@ def build(work: Path, evidence: Path) -> None:
 
 
 def image(work: Path, evidence: Path) -> None:
+    with (work / 'rootfs.tar').open('rb') as stream:
+        digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+    if digest != ROOTFS_SHA256:
+        raise ValueError('Rootfs tar SHA256 does not match the pinned recipe digest')
     server = subprocess.run(['docker', 'version', '--format', '{{json .Server}}'],
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False)
     if server.returncode:

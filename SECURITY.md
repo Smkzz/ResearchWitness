@@ -130,6 +130,14 @@ rootfs tar bytes reproduce, but import image IDs differ with creation timestamps
 The overwritten BuildKit log is an explicit evidence gap, not a fabricated log.
 Effective create/inspect settings, real synthetic timeout/output-overflow and
 success/failure CID cleanup were recorded; cleanup-failure injection is mocked.
+The 32 checks are effective-config inspection plus synthetic benign fixture
+runs (timeout, overflow, cleanup), **not escape or exploit attempts**. A
+[fresh merged-head capture](evidence/rw03-pdf-followup-2026-11-22/provenance.md)
+was required because Git showed the runner changed and the harness was absent
+at the old recorded base 947ac31. The original receipts remain intact, with
+per-file continuity hashes and new local-only smoke/isolation results alongside.
+#95's engineering approval is not the outstanding independent security review
+of this image inventory and evidence.
 These observations and a passing smoke are not image review, residual-risk
 acceptance, escape-resistance proof or permission for real documents/custody.
 

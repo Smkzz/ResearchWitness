@@ -131,7 +131,10 @@ and [full command log](../evidence/rw03-pdf-image-2026-11-22/isolation-final.log
 record working-tree source hashes over base `947ac3126ebd4867bfa91912dcd047c6a95ef580`.
 The [raw create/inspect result](../evidence/rw03-pdf-image-2026-11-22/isolation-final-container-inspect.json)
 uses the production argument helper, replacing only `run` with `create`; it was
-never started. All these observed checks passed:
+never started. The 32 check records combine effective-config inspection and
+synthetic benign fixture runs (timeout, overflow and success/failure cleanup),
+including explicitly mocked cleanup-denial regressions. They are **not escape or
+exploit attempts**. All these observed checks passed:
 
 - NetworkMode `none`, no networks except `none`; read-only root; ALL capabilities
   dropped; no-new-privileges; UID/GID `65534:65534`.
@@ -158,6 +161,28 @@ logging and missing-inspection failure handling, rather than repeating an
 unchanged run. The original standalone BuildKit build log was overwritten by
 the classic attempt: its result is summarized in provenance and its rejected
 smoke is retained, but the missing raw build log has not been reconstructed.
+
+### Capture continuity and merged-head recapture
+
+Git comparison of `947ac3126ebd4867bfa91912dcd047c6a95ef580` against #95's
+merged main `6a26ab5147c2443b7bff1e8cd5469d1409b43c96` found that the runner
+changed and the qualification harness did not yet exist at the older commit.
+The old isolation log's HEAD was a **working-tree base**, not a claim that its
+hashed uncommitted runner/harness bytes existed in commit 947ac31. The smoke
+tool and other imported runtime modules are unchanged; individual old/new hashes
+and missing files are recorded in the [continuity inventory](../evidence/rw03-pdf-followup-2026-11-22/dependency-continuity.json).
+The old receipts have not been overwritten.
+
+Because dependency identity was not established, both the
+[isolation harness](../evidence/rw03-pdf-followup-2026-11-22/isolation.json)
+and [smoke](../evidence/rw03-pdf-followup-2026-11-22/smoke.json) were recaptured
+with the merged-head runtime sources and the same existing local image, whose
+ID/platform were inspected first. No pull, apt, package build or new egress was
+used. All 32 effective-config/benign synthetic check records passed, as did all
+three smoke fixtures; both receipts still say `sandbox_qualified: false`.
+The [new provenance](../evidence/rw03-pdf-followup-2026-11-22/provenance.md)
+lists the source hashes and exact scope; it does not turn benign tests into
+escape/exploit testing or qualify PDF execution.
 
 ## Executable preparation
 

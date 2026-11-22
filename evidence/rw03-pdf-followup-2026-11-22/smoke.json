@@ -1,0 +1,133 @@
+{
+  "remaining_qualification": [
+    "Independent image rootfs/package/provenance review and pinned image ID",
+    "Effective runtime isolation, environment and mount inspection on the authorized daemon",
+    "Real resource-limit/timeout/output-overflow and success/failure cleanup evidence",
+    "Separate hermetic failure-injection tests do not establish real runtime enforcement"
+  ],
+  "results": [
+    {
+      "expected": "two_relationships",
+      "fixture": "normal",
+      "passed": true,
+      "report": {
+        "extractor": "pdftotext -layout -enc UTF-8",
+        "layout_text_sha256": "40884eaae318524597e7ac623a67a8ec9dafc0594ec0fa5bcbc41d154225e9db",
+        "limitations": [
+          "PDF table identification uses layout-text heuristics; all candidates require human review.",
+          "The extracted text hash and page-local character spans support replay but do not authenticate source origin.",
+          "Only text-based PDFs are supported; image-only pages and OCR are not supported.",
+          "A mismatch candidate is not proof of scientific error or correction eligibility."
+        ],
+        "percentage_cells_reviewed": 2,
+        "results": [
+          {
+            "contract_expected_percent": "10.0",
+            "denominator": 40,
+            "denominator_scope": "table_header",
+            "display_precision": 1,
+            "evidence": {
+              "context_corroborating_rows": [
+                {
+                  "line": 3,
+                  "page": 1,
+                  "quote": "A 4 (10.0)"
+                }
+              ],
+              "extractor": "pdftotext -layout -enc UTF-8",
+              "layout_text_sha256": "40884eaae318524597e7ac623a67a8ec9dafc0594ec0fa5bcbc41d154225e9db",
+              "line": 3,
+              "offset_note": "Offsets are character positions in the extracted page layout text, not byte offsets in the PDF.",
+              "page": 1,
+              "page_text_char_end": 44,
+              "page_text_char_start": 34,
+              "percentage_context_basis": "explicit_percent_header_or_symbol",
+              "row_label": "A",
+              "row_quote": "A 4 (10.0)",
+              "row_quote_truncated": false,
+              "source_pdf_sha256": "41118ac02e09559aa6b5cefcc7f1d688978eac4fca604bb8ec7bd60402a8c033",
+              "table_header_denominator_sources": [
+                {
+                  "line": 2,
+                  "page": 1,
+                  "page_text_char_end": 33,
+                  "page_text_char_start": 19,
+                  "quote": "Count (%) N=40"
+                }
+              ],
+              "table_title": "Table 1: Synthetic"
+            },
+            "exact_ratio_percent": "400/40",
+            "numerator": 4,
+            "reason": null,
+            "reported_percent": "10.0",
+            "status": "arithmetic_match"
+          },
+          {
+            "contract_expected_percent": "10.0",
+            "denominator": 40,
+            "denominator_scope": "table_header",
+            "display_precision": 1,
+            "evidence": {
+              "context_corroborating_rows": [
+                {
+                  "line": 3,
+                  "page": 1,
+                  "quote": "A 4 (10.0)"
+                }
+              ],
+              "extractor": "pdftotext -layout -enc UTF-8",
+              "layout_text_sha256": "40884eaae318524597e7ac623a67a8ec9dafc0594ec0fa5bcbc41d154225e9db",
+              "line": 4,
+              "offset_note": "Offsets are character positions in the extracted page layout text, not byte offsets in the PDF.",
+              "page": 1,
+              "page_text_char_end": 55,
+              "page_text_char_start": 45,
+              "percentage_context_basis": "explicit_percent_header_or_symbol",
+              "row_label": "B",
+              "row_quote": "B 4 (11.0)",
+              "row_quote_truncated": false,
+              "source_pdf_sha256": "41118ac02e09559aa6b5cefcc7f1d688978eac4fca604bb8ec7bd60402a8c033",
+              "table_header_denominator_sources": [
+                {
+                  "line": 2,
+                  "page": 1,
+                  "page_text_char_end": 33,
+                  "page_text_char_start": 19,
+                  "quote": "Count (%) N=40"
+                }
+              ],
+              "table_title": "Table 1: Synthetic"
+            },
+            "exact_ratio_percent": "400/40",
+            "numerator": 4,
+            "reason": null,
+            "reported_percent": "11.0",
+            "status": "arithmetic_mismatch_candidate"
+          }
+        ],
+        "source_format": "PDF text layer",
+        "source_sha256": "41118ac02e09559aa6b5cefcc7f1d688978eac4fca604bb8ec7bd60402a8c033",
+        "tables_inspected": 1
+      },
+      "source_sha256": "41118ac02e09559aa6b5cefcc7f1d688978eac4fca604bb8ec7bd60402a8c033"
+    },
+    {
+      "expected": "extraction_failure",
+      "fixture": "malformed",
+      "passed": true,
+      "reason": "Isolated Poppler could not extract this PDF",
+      "source_sha256": "e9876217a536dee12c6d81c54c01f0109f946677e70da0f61f95fd5ecf4f7d91"
+    },
+    {
+      "expected": "extraction_failure",
+      "fixture": "unsupported_empty_page",
+      "passed": true,
+      "reason": "PDF has no extractable text; OCR is not supported",
+      "source_sha256": "032e720816ca204e044c1d6bf1346070b3eb549b6b98bb59a7c6c2b2e75275a3"
+    }
+  ],
+  "sandbox_qualified": false,
+  "schema_version": 1,
+  "status": "smoke_passed_not_qualified"
+}
