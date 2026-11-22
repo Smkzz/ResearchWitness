@@ -43,7 +43,7 @@ class LocalUITests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.context = running_server(self.root / "state")
         self.server = self.context.__enter__()
         self.addCleanup(self.context.__exit__, None, None, None)
@@ -348,7 +348,8 @@ class LocalUIContractTests(unittest.TestCase):
 
     def test_restart_marks_interrupted_job_failed(self):
         with tempfile.TemporaryDirectory() as directory:
-            store = ui.LocalAuditStore(Path(directory))
+            root = Path(directory).resolve()
+            store = ui.LocalAuditStore(root)
             blocker = threading.Event()
             executor = ThreadPoolExecutor(max_workers=1)
             executor.submit(blocker.wait, 3)
@@ -360,7 +361,7 @@ class LocalUIContractTests(unittest.TestCase):
             finally:
                 blocker.set()
                 store.close()
-            reopened = ui.LocalAuditStore(Path(directory))
+            reopened = ui.LocalAuditStore(root)
             try:
                 self.assertEqual(reopened.list_jobs()[0]["status"], "failed")
                 self.assertIn("Server stopped", reopened.list_jobs()[0]["error"])
