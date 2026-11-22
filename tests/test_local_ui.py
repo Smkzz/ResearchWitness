@@ -7,6 +7,7 @@ import hashlib
 import http.client
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import threading
@@ -141,13 +142,22 @@ class LocalUITests(unittest.TestCase):
         output = self.root / "extracted"
         output.mkdir()
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
-            self.assertEqual(set(archive.namelist()), set(ui.BUNDLE_FILES) | {"REPLAY.txt"})
-            self.assertIn(f"researchwitness replay-jats <dir> --expected-manifest-sha256 {job['manifest_sha256']}".encode(), archive.read("REPLAY.txt"))
-            self.assertEqual(hashlib.sha256(archive.read("manifest.json")).hexdigest(), job["manifest_sha256"])
-            for name in ui.BUNDLE_FILES:
-                (output / name).write_bytes(archive.read(name))
-        self.assertEqual(jats_product.replay_bundle(output, job["manifest_sha256"])["status"], "verified")
-        content = json.loads((output / "report.json").read_bytes())
+            self.assertEqual(set(archive.namelist()), {f"bundle/{name}" for name in ui.BUNDLE_FILES} | {"REPLAY.txt"})
+            instruction = next(line for line in archive.read("REPLAY.txt").decode().splitlines()
+                               if line.startswith("researchwitness "))
+            self.assertEqual(instruction, f"researchwitness replay-jats bundle --expected-manifest-sha256 {job['manifest_sha256']}")
+            self.assertEqual(hashlib.sha256(archive.read("bundle/manifest.json")).hexdigest(), job["manifest_sha256"])
+            archive.extractall(output)
+        previous = Path.cwd()
+        try:
+            os.chdir(output)
+            with mock.patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                self.assertEqual(main(instruction.split()[1:]), 0)
+            self.assertEqual(json.loads(stdout.getvalue())["status"], "verified")
+        finally:
+            os.chdir(previous)
+        self.assertEqual(jats_product.replay_bundle(output / "bundle", job["manifest_sha256"])["status"], "verified")
+        content = json.loads((output / "bundle/report.json").read_bytes())
         self.assertIn("table_projection", content)
         self.assertIn("denominator_evidence_trace", content)
         self.assertFalse(content["paper_error_established"])

@@ -29,11 +29,12 @@ state directory and keep it private and unchanged while the server runs.
 4. Review the arithmetic-match, mismatch-candidate and abstention summary,
    manifest SHA-256 and sandboxed full HTML report. Read its coverage and
    assumptions. `paper_error_established` remains false.
-5. Export a deterministic ZIP containing only `source.xml`, `report.json`,
-   `report.html`, `manifest.json` and `REPLAY.txt`. Extract into a new directory
-   and run the exact pinned `researchwitness replay-jats <dir>
-   --expected-manifest-sha256 HASH` command in REPLAY.txt, replacing `<dir>`
-   with your extracted path. Use the same installed implementation for replay.
+5. Export a deterministic ZIP containing `bundle/source.xml`, `bundle/report.json`,
+   `bundle/report.html`, `bundle/manifest.json` and top-level `REPLAY.txt`.
+   Extract into a new directory, open a terminal there and run the exact pinned
+   `researchwitness replay-jats bundle --expected-manifest-sha256 HASH` command
+   in REPLAY.txt. Keep REPLAY.txt outside `bundle/`: replay rejects extra bundle
+   files. Use the same installed implementation for replay.
    There is **no executable replay launcher**.
 
 ## Local attack surface and privacy limits

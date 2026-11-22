@@ -278,12 +278,12 @@ class LocalAuditStore:
 
     def export(self, job_id: str) -> bytes:
         with self.lock:
-            data = self.bundle(job_id)
+            data = {f"bundle/{name}": value for name, value in self.bundle(job_id).items()}
             pin = self.get(job_id).manifest_sha256
             data["REPLAY.txt"] = (
-                "Extract these files into a new directory. With the same ResearchWitness installation, run:\n\n"
-                f"researchwitness replay-jats <dir> --expected-manifest-sha256 {pin}\n\n"
-                "Replace <dir> with the extracted directory path (quote paths containing spaces).\n"
+                "Extract this ZIP, open a terminal in the extracted directory, and run\n"
+                "with the same ResearchWitness installation:\n\n"
+                f"researchwitness replay-jats bundle --expected-manifest-sha256 {pin}\n\n"
                 "This is a local preview, not a custody boundary or scientific error finding.\n"
             ).encode("ascii")
             output = io.BytesIO()
