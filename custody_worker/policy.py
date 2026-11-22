@@ -126,7 +126,7 @@ def parse_count_span(raw: str, *, explicit_denominator: bool = False) -> int:
 
 
 def parse_percent_span(raw: str) -> tuple[str, int]:
-    match = re.fullmatch(r"\s*(?P<value>0|[1-9][0-9]{0,8}(?:\.[0-9]{1,4})?)\s*%\s*", raw, re.ASCII)
+    match = re.fullmatch(r"\s*(?P<value>(?:0|[1-9][0-9]{0,8})(?:\.[0-9]{1,4})?)\s*%\s*", raw, re.ASCII)
     if not match:
         reject("SOURCE_PERCENT_NOT_EXPLICIT")
     value = match.group("value")

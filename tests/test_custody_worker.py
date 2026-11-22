@@ -121,6 +121,16 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             self.source_setup(original=text, extension="md")
         self.assertEqual(verify_all(self.root), before)
 
+    def test_review_accepts_zero_integer_part_at_printed_precision(self):
+        for index, (count, percent) in enumerate((("0", "0.0%"), ("1", "0.5%"))):
+            text = f"Table 1 / Group A / main cohort / N = 200 / count {count} / {percent}\n"
+            item, _ = self.source_setup(original=text, document_id=f"doi:10.5555/zero-{index}")
+            self.record(self.review_object(item, None, original_text=text,
+                                          original_percent=percent, numerator=count,
+                                          denominator="N = 200", review_id=f"review-zero-{index}",
+                                          numerator_occurrence=1 if count == "0" else 0))
+        self.assertEqual(verify_all(self.root)["eligible_negative_relations"], 2)
+
     def test_large_seal_uses_seal_json_bound(self):
         from custody_worker.policy import SEAL_VERSION, strict_json_bytes
 
