@@ -44,7 +44,7 @@ New changes require their own exact-head checks; historical green runs do not
 qualify a later commit. A plan, source bridge or execution runner does not establish
 independent scientific performance or qualify PDF/custody execution.
 
-## Denominator trace follow-ups — pre-merge receipt
+## Denominator trace follow-ups — merged engineering receipt
 
 Base: main `da7c28b`; branch:
 `devin/1795391107-denominator-trace-followups`. Commits `dc1ce89`, `dd942d1`,
@@ -61,9 +61,13 @@ public adapters retain full supplied-report recomputation and comparison.
 Synthetic tests cover all 128 product-mode combinations on populated and empty
 XML, invalid input, public adapters, missing/equal/different bases and unchanged
 detector findings; existing fabricated-report rejection tests remain applicable.
-Required local acceptance: Ruff, full coverage (core >=90%), quality gate; command
-outputs belong to the final implementation handoff. No CI, separate review, merge
-or postmerge result is claimed for this branch. Detector decisions and arithmetic
+PR #107 merged head `2cf7b5115bca921eca7399f686827218d419305f` as
+`bf08705cb81c357e6d6d699a32090c762e4efcef`. Exact-head checks observed:
+14/14 PASS, including Devin Review with no issues found. The PR review records
+engineering Verdict: APPROVE at that head. Post-merge checks observed at
+`bf08705`: 11/11 PASS (nine Python/platform matrix jobs, Release gate and Analyze
+Python). Evidence links and the closed lease are in EXECUTION_STATE.json.
+Detector decisions and arithmetic
 are unchanged; no scientific adjudication or PDF/custody qualification is claimed.
 
 ## Advisory denominator resolver port — pre-merge receipt
