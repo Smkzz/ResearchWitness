@@ -2,14 +2,21 @@
 from __future__ import annotations
 
 import contextlib
+import errno
 import hashlib
 import hmac
 import os
 import re
 import secrets
+import stat
 import tempfile
 from pathlib import Path
 from typing import Any
+
+if os.name == "nt":
+    import msvcrt
+else:
+    import fcntl
 
 from .policy import (
     IMPORT_VERSION, REVIEW_VERSION, SEAL_VERSION, SUMMARY_VERSION,
@@ -119,26 +126,76 @@ def store_lock(root: Path):
         yield
 
 
+def _lock_fd(fd: int, *, unlock: bool = False) -> None:
+    if os.name == "nt":
+        os.lseek(fd, 4096, os.SEEK_SET)
+        msvcrt.locking(fd, msvcrt.LK_UNLCK if unlock else msvcrt.LK_NBLCK, 1)
+    else:
+        fcntl.flock(fd, fcntl.LOCK_UN if unlock else fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _write_lock_marker(fd: int, marker: bytes) -> None:
+    os.lseek(fd, 0, os.SEEK_SET)
+    os.ftruncate(fd, 0)
+    if os.write(fd, marker) != len(marker):
+        raise OSError("Incomplete lock marker write")
+    os.fsync(fd)
+
+
 @contextlib.contextmanager
-def _store_lock(root: Path):
+def _store_lock(root: Path, *, recover_legacy: bool = False):
     lock = root / "audit" / ".exclusive-lock"
     guarded_stat(root / "audit", file=False)
+    if lock.exists() or lock.is_symlink():
+        guarded_stat(lock, file=True)
     try:
-        fd = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o600)
-    except FileExistsError:
-        reject("STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED")
+        fd = os.open(lock, os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0)
+                     | getattr(os, "O_BINARY", 0), 0o600)
     except OSError:
         reject("STORE_LOCK_FAILED")
+    acquired = False
     try:
-        with os.fdopen(fd, "wb") as stream:
-            stream.write(b"OFFLINE_WORKER_LOCK_V2\n")
-            stream.flush()
-            os.fsync(stream.fileno())
-        yield
+        try:
+            info = os.fstat(fd)
+            if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_size > 64:
+                reject("STORE_LOCK_FAILED")
+            path_info = guarded_stat(lock, file=True)
+            if os.name != "nt" and (info.st_dev, info.st_ino) != (path_info.st_dev, path_info.st_ino):
+                reject("STORE_LOCK_FAILED")
+            try:
+                _lock_fd(fd)
+                acquired = True
+            except OSError as exc:
+                if exc.errno in (errno.EAGAIN, errno.EACCES, getattr(errno, "EDEADLK", errno.EAGAIN)):
+                    reject("STORE_LOCK_HELD_BY_LIVE_PROCESS")
+                raise
+        except OSError:
+            reject("STORE_LOCK_FAILED")
+        try:
+            os.lseek(fd, 0, os.SEEK_SET)
+            marker = os.read(fd, 65)
+            if marker == b"OFFLINE_WORKER_LOCK_V2\n":
+                if not recover_legacy:
+                    reject("STORE_LOCK_LEGACY_STALE_MANUAL_REVIEW_REQUIRED")
+            elif marker not in (b"", b"OFFLINE_WORKER_LOCK_V3_RELEASED\n", b"OFFLINE_WORKER_LOCK_V3_HELD\n"):
+                reject("STORE_LOCK_UNRECOGNIZED_MANUAL_REVIEW_REQUIRED")
+            _write_lock_marker(fd, b"OFFLINE_WORKER_LOCK_V3_HELD\n")
+        except OSError:
+            reject("STORE_LOCK_FAILED")
+        try:
+            yield
+        finally:
+            try:
+                _write_lock_marker(fd, b"OFFLINE_WORKER_LOCK_V3_RELEASED\n")
+            except OSError:
+                reject("STORE_LOCK_CLEANUP_FAILED")
     finally:
         try:
-            if lock.is_file() and not lock.is_symlink():
-                lock.unlink()
+            try:
+                if acquired:
+                    _lock_fd(fd, unlock=True)
+            finally:
+                os.close(fd)
         except OSError:
             reject("STORE_LOCK_CLEANUP_FAILED")
 
@@ -391,7 +448,7 @@ def _recover_store(root: Path) -> dict:
 
 def recover_store(root: Path) -> dict:
     root = authorize_store_root(root)
-    with _store_lock(root):
+    with _store_lock(root, recover_legacy=True):
         return _recover_store(root)
 
 

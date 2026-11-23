@@ -17,9 +17,13 @@ not authorize protected material or qualify custody.
 
 Recovery regressions cover injected manifest-write failure and retry, hash-valid
 orphans, interrupted-write temporaries, corrupt imports, bad object hashes,
-unsafe file types, scan limits, stale-lock refusal and unchanged records/seals.
-These are synthetic engineering checks, not real process-kill or durability proof.
-Explicit `recover` and automatic import recovery do not clear stale locks or
-repair corrupt ledgers/objects; those still require manual review. Production
+unsafe file types, scan limits and unchanged records/seals.
+These are synthetic engineering checks, not power-loss or storage-durability proof.
+Lock regressions use real subprocess holders and forced termination to exercise
+live-holder refusal and V3 recovery after death, plus nested acquisition, explicit
+legacy V2 takeover, invalid lock rejection and persistent RELEASED markers.
+These are synthetic engineering tests, not production qualification. Advisory
+locks require a trusted local filesystem; network filesystems are unsupported.
+Recovery does not repair corrupt ledgers/objects; those require manual review. Production
 remains disabled, not qualified, and protected custody NOT RUN pending Sami's
 separate security review.

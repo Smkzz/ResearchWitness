@@ -17,6 +17,10 @@ and static analysis do not substitute for that review.
 
 Recovery validates the complete bounded import ledger and hashes objects before
 deleting exact mkstemp residues or valid unreferenced objects. It refuses links,
-directories, unexpected names and corrupted objects; it does not clear stale
-locks or repair records. The trusted, quiescent-filesystem assumption still
+directories, unexpected names and corrupted objects; it does not repair records.
+Persistent kernel advisory locks prevent takeover of a live V3 holder and permit
+recovery after its death without unlinking the lock file. Legacy V2 takeover
+requires explicit `recover` and the operator's assertion that no legacy worker is
+active. Unknown markers fail closed. Network filesystems are unsupported.
+The trusted, quiescent-filesystem assumption still
 applies; this is not a defense against same-token races or crash-durability proof.

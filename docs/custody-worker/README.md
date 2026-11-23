@@ -49,7 +49,16 @@ The scan uses existing file/count/byte limits and refuses unknown entries, unsaf
 file types, invalid manifests and object corruption without deleting candidates.
 Seals commit to manifests, so removing unreferenced objects leaves seals unchanged.
 Recovery is not atomic across deletions; an unlink failure may leave work for retry.
-A stale audit/.exclusive-lock is never cleared: it still raises
-STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED. No real-root recovery is authorized.
+The persistent audit/.exclusive-lock uses non-blocking OS advisory locking
+(POSIX flock or Windows byte-range locking). It is never unlinked. Live holders
+cause STORE_LOCK_HELD_BY_LIVE_PROCESS, including nested acquisition. The kernel
+releases the lock when a holder dies; a later operation safely replaces its V3
+HELD marker under the acquired lock and leaves V3 RELEASED on normal exit.
+Legacy V2 markers require explicit `recover` as an operator assertion that no
+old-version worker is active; other commands fail with
+STORE_LOCK_LEGACY_STALE_MANUAL_REVIEW_REQUIRED. Unknown markers fail with
+STORE_LOCK_UNRECOGNIZED_MANUAL_REVIEW_REQUIRED and are never overwritten.
+Only trusted local filesystems honoring these locks are supported; network
+filesystems are unsupported. No real-root recovery is authorized.
 Production remains disabled / NOT RUN / not qualified / awaiting Sami's security
 review, including for the new command.

@@ -25,5 +25,10 @@ objects after bounded import-ledger validation. Referenced objects and manifest
 records remain untouched; seals bind those manifests, not orphan presence.
 Import rollback is best-effort and touches only that call's new objects before
 manifest commit. Deletion is not an atomic transaction and may need retry after
-an I/O error. Stale operation locks, corruption and over-limit inventories remain
-manual-review failures, not reasons to enable production or bypass isolation.
+an I/O error. Persistent OS advisory locks are released by the kernel on holder
+death; no PID probing or lock-file deletion is used. Live V3 holders cannot be
+taken over. Explicit legacy V2 recovery asserts no old-version worker is active;
+the OS lock cannot prove this for the old protocol. Unknown lock markers,
+corruption and over-limit inventories remain manual-review failures. Network
+filesystems are unsupported because advisory locking may not be honored. These
+synthetic checks do not enable production or establish custody qualification.
