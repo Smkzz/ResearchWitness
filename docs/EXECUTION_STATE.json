@@ -2,7 +2,7 @@
   "schema_version": "researchwitness-execution-state.v1",
   "plan_id": "RW-PLAN-2026-10-24",
   "plan_revision": 3,
-  "updated_on": "2026-11-22",
+  "updated_on": "2026-11-23",
   "custody_worker_port": {
     "source_pr": 12,
     "source_commit": "78b26e2d9a31a1eafcc9a0f668b19f09283ce5e9",
@@ -45,6 +45,19 @@
           "exact_head_ci": "14/14 PASS, including Devin Review; no post-merge CI claim.",
           "reviewer_approval": "Reviewer engineering approval https://github.com/Smkzz/ResearchWitness/pull/110#pullrequestreview-6015692024; Devin Review completed at the approved head with no issues found. Engineering review only, not custody qualification or Sami's security review."
         },
+        "merge_receipt_111": {
+          "approved_head_sha": "1bb35c699c7ed8877ee6afa917fedffbbeb9b16a",
+          "merged_main_sha": "8e682d4730db5e3cacfaae4d14ea2b92ee57090a",
+          "exact_head_ci": "14/14 PASS, including Devin Review, verified with git_commit_checks at the exact head; Devin Review reported no issues found.",
+          "post_merge_ci": "11/11 PASS at 8e682d4, verified with git_commit_checks: nine Python/platform matrix jobs, Release gate and Analyze Python; 0 failed, pending or skipped.",
+          "reviewer_approval": "Engineering Verdict: APPROVE at the approved head in the PR #111 review dated 2026-11-23T01:49:03Z. Review text verified via git_view_pr and git_pr_events; GitHub review permalink not exposed by these tools.",
+          "evidence": [
+            "https://github.com/Smkzz/ResearchWitness/pull/111",
+            "https://github.com/Smkzz/ResearchWitness/commit/8e682d4730db5e3cacfaae4d14ea2b92ee57090a/checks",
+            "https://app.devin.ai/sessions/60b741d58432479a8596575cf54e8fe0"
+          ],
+          "note": "Docs follow-up: never-delete lock warning and legacy V2 takeover recorded as a security-review open item. Engineering receipt only; production disabled / NOT RUN / not qualified / awaiting Sami's security review."
+        },
         "requirement": "Safe live-holder detection and bounded stale-lock recovery before production custody can be enabled, without clearing a lock held by a live process.",
         "origin": "Reviewer follow-up after PR #108; stale operation locks were outside bounded store recovery scope",
         "blocks": "enabling production custody"
@@ -71,15 +84,27 @@
   },
   "next_task": null,
   "denominator_trace_followups": {
-    "status": "in_progress",
-    "owner": "Devin",
+    "status": "done",
+    "owner": null,
     "branch": "devin/1795391107-denominator-trace-followups",
     "base_sha": "da7c28bda64cef4f5e52b1259280fb3d4e6ac499",
-    "lease_expires_at_utc": "2026-11-23T01:46:59Z",
+    "lease_expires_at_utc": null,
     "implementation_commits": ["dc1ce89", "dd942d1", "0d5af12", "330fde6"],
     "write_scope": ["researchwitness/jats_denominator_trace.py", "researchwitness/jats_product.py", "researchwitness/jats_table_projection.py", "tests/test_jats_denominator_trace.py", "docs/JATS_DENOMINATOR_TRACE.md", "docs/RELEASING.md", "docs/INTEGRATION_MAP.md", "docs/PROJECT_STATUS.md", "docs/EXECUTION_STATE.json", "CHECKSUMS.sha256"],
-    "receipt": "Pre-merge trace v3: strict exact replay documented for plain and trace implementation fingerprints; disagreements require two existing bases; resolver-only bases counted separately; defensive missing-cell fallback retained; private paths share one detector report and at most one projection. Public supplied-report validation retained. Synthetic tests only; no detector decisions/arithmetic changed. Required local acceptance: Ruff, full coverage/core >=90%, quality gate. Outputs belong to final handoff. No CI, separate review, merge or postmerge result claimed; scientific and PDF/custody gates unchanged.",
-    "next_action": "Run required local acceptance, push for owner-created PR; no PR creation authorized in this handoff."
+    "receipt": "Trace v3 merged in PR #107: strict exact replay documented for plain and trace implementation fingerprints; disagreements require two existing bases; resolver-only bases counted separately; defensive missing-cell fallback retained; private paths share one detector report and at most one projection. Public supplied-report validation retained. Synthetic tests only; no detector decisions/arithmetic changed. Verified engineering review, exact-head CI and post-merge CI are recorded below; scientific and PDF/custody gates unchanged.",
+    "merge_receipt_107": {
+      "approved_head_sha": "2cf7b5115bca921eca7399f686827218d419305f",
+      "merged_main_sha": "bf08705cb81c357e6d6d699a32090c762e4efcef",
+      "exact_head_ci": "14/14 PASS, including Devin Review, verified with git_commit_checks at the exact head; Devin Review reported no issues found.",
+      "post_merge_ci": "11/11 PASS at bf08705, verified with git_commit_checks: nine Python/platform matrix jobs, Release gate and Analyze Python; 0 failed, pending or skipped.",
+      "reviewer_approval": "Engineering Verdict: APPROVE at 2cf7b51 in the PR #107 review dated 2026-11-22T23:53:21Z. Review text verified via git_view_pr and git_pr_events; GitHub review permalink not exposed by these tools.",
+      "evidence": [
+        "https://github.com/Smkzz/ResearchWitness/pull/107",
+        "https://github.com/Smkzz/ResearchWitness/commit/bf08705cb81c357e6d6d699a32090c762e4efcef/checks",
+        "https://app.devin.ai/sessions/ccfc96845d9d4f86ad57b2a5892164fb"
+      ]
+    },
+    "next_action": null
   },
   "denominator_resolver_port": {
     "status": "in_review",
