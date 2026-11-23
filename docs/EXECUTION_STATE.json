@@ -41,6 +41,40 @@
     "scientific_or_security_gates_waived": false
   },
   "next_task": null,
+  "denominator_trace_followups": {
+    "status": "in_progress",
+    "owner": "Devin",
+    "branch": "devin/1795391107-denominator-trace-followups",
+    "base_sha": "da7c28bda64cef4f5e52b1259280fb3d4e6ac499",
+    "lease_expires_at_utc": "2026-11-23T01:46:59Z",
+    "implementation_commits": ["dc1ce89", "dd942d1", "0d5af12", "330fde6"],
+    "write_scope": ["researchwitness/jats_denominator_trace.py", "researchwitness/jats_product.py", "researchwitness/jats_table_projection.py", "tests/test_jats_denominator_trace.py", "docs/JATS_DENOMINATOR_TRACE.md", "docs/RELEASING.md", "docs/INTEGRATION_MAP.md", "docs/PROJECT_STATUS.md", "docs/EXECUTION_STATE.json", "CHECKSUMS.sha256"],
+    "receipt": "Pre-merge trace v3: strict exact replay documented for plain and trace implementation fingerprints; disagreements require two existing bases; resolver-only bases counted separately; defensive missing-cell fallback retained; private paths share one detector report and at most one projection. Public supplied-report validation retained. Synthetic tests only; no detector decisions/arithmetic changed. Required local acceptance: Ruff, full coverage/core >=90%, quality gate. Outputs belong to final handoff. No CI, separate review, merge or postmerge result claimed; scientific and PDF/custody gates unchanged.",
+    "next_action": "Run required local acceptance, push for owner-created PR; no PR creation authorized in this handoff."
+  },
+  "denominator_resolver_port": {
+    "status": "in_review",
+    "owner": "Devin",
+    "branch": "devin/1795389451-denominator-provenance-port",
+    "base_sha": "438921727693caf6931bd40fec43ad780dd7908a",
+    "lease_expires_at_utc": "2026-11-23T01:20:41Z",
+    "source_head": "6843593",
+    "review_followup": {
+      "reviewed_head": "7a54b14ed52d3932cd6a8f9504d5b45ef19262fd",
+      "review": "PR #106 Devin Review: all five findings reproduced with synthetic regressions; not a completed approval.",
+      "fix_commits": ["c98d457", "76dcfa0", "e857593", "845846f", "45bd664"],
+      "second_review": {
+        "reviewed_head": "f29b106c9a3064c508ae3640741d361a5a61ec4e",
+        "fix_commits": ["be3d8cc", "f2e6286"],
+        "scope": "Preserve raw grouped ratio tokens for resolver validation; rework invalid-candidate rejection assembly and explain blocked valid competitors.",
+        "ci_snapshot": "13 passed, 0 failed, 1 pending (Devin Review); not a completed 14/14 receipt."
+      },
+      "scope": "Printed ratio evidence, original XML body-group boundaries, ambiguous-layout abstention, retained invalid competitors and boundary-owned scope anchors; detector decisions/arithmetic unchanged."
+    },
+    "write_scope": ["researchwitness/denominator_provenance.py", "researchwitness/jats_denominator_trace.py", "researchwitness/jats_product.py", "tests/test_denominator_provenance.py", "tests/test_jats_denominator_trace.py", "docs/JATS_DENOMINATOR_TRACE.md", "docs/INTEGRATION_MAP.md", "docs/PROJECT_STATUS.md", "docs/EXECUTION_STATE.json", "CHECKSUMS.sha256"],
+    "receipt": "Pre-merge advisory scope-first trace v2; synthetic tests only. Required local acceptance: Ruff, full coverage/core >=90%, quality gate. No separate review, exact-head CI, merge or postmerge result claimed. No scientific adjudication; detector decisions unchanged.",
+    "next_action": "Record local command outcomes in handoff; obtain exact-head CI and separate review before routine merge."
+  },
   "allowed_states": [
     "todo",
     "ready",
@@ -106,7 +140,22 @@
           "name-only signer matching",
           "installation integrity"
         ],
-        "note": "Owner decision, not a review. Risks accepted, not resolved or mitigated. This does not qualify PDF execution or protected custody."
+        "note": "Owner decision, not a review. Risks accepted, not resolved or mitigated. This does not qualify PDF execution or protected custody.",
+        "source": {
+          "record": "Sami's answer to the decision prompt in the ResearchWitness coordinator bot's Devin chat",
+          "local_time": "2026-11-23 about 00:39 EET",
+          "utc_time": "2026-11-22 about 22:39 UTC",
+          "bot_page": "https://app.devin.ai/org/smkzz/bots/bb5d480d5bb849b6abf8208c64dd5111",
+          "direct_answer_link": null,
+          "note": "No direct link to the answer exists. The bot page is the location of the record, not an answer permalink; source details relayed by the ResearchWitness coordinator."
+        }
+      },
+      "merge_receipt_103": {
+        "approved_head_sha": "8d221c7544ab813a44ef2d1853b72916c942c484",
+        "merged_main_sha": "bbf4d0415ec60f04fcb3b9ffc2d2cc4a197f286a",
+        "reviewer_approval": "https://github.com/Smkzz/ResearchWitness/pull/103#pullrequestreview-6014942102",
+        "post_merge_ci": "11/11 PASS: nine-job Python matrix, Release gate, Analyze Python/CodeQL, verified by the ResearchWitness coordinator.",
+        "note": "Engineering approval, not the separate image-inventory/evidence security review; owner pipe-risk acceptance is not security review or protected-custody qualification."
       },
       "merge_receipt_97": {
         "approved_head_sha": "13d8def0ba191acb75d96ed8fc2ad97c7f8ff42a",
@@ -408,7 +457,7 @@
       ],
       "blocker": {
         "category": "environment",
-        "reason": "Docker CLI and native Windows execution are available. #86 merged at 7a5f550f4f815adc37fccb1409d6203d1db68bcf with a native test run (logs linked) and 11/11 post-merge checks PASS. #87 merged at 09286c1b88a2e31ddfcc97565d2f5d80c0e8788f, #89 at 0ad921cfc22e5c09973e09b6b9d2f686f1f0d6ff, #90 at a776a165bf5be9b96aaf8287a2aa36dca2cfffef, #91 at 83fec7e65eb54ed9dcedd14388323e1e476b5cac, #92 at 03963c0370f3cdc7ceda2994435d93b807ff8a73 and #93 at ba7dc5db97556b88eead5f20f0aaf808a46a5074, each with 11/11 post-merge checks PASS; gates remain unqualified. Pipe-server identity is narrowed, not resolved: current-user or SYSTEM owner, image under Program Files/Docker from SHGetKnownFolderPath rather than the environment, and offline name-based Authenticode checking of the leaf signer simple display name Docker Inc. No issuer restriction, chain-root pin or certificate-fingerprint check: any otherwise valid signature chaining to a trusted root with that subject name passes the signer check. A standalone Docker-signed Engine there could also pass. Residual risks: check-then-use race, same-user/admin attackers, offline-only revocation, name-only signer matching and installation integrity. Candidate image and isolation evidence recorded on 2026-11-22; only separate security review of inventory and evidence bound to the exact image ID remains outstanding; no reviewer has been named. On 2026-11-23 Sami (project owner) accepted the listed pipe risks with the decision \"Accept these risks\", relayed by the ResearchWitness coordinator. Risks accepted, not resolved or mitigated; this is an owner decision, not a review. See pdf_execution.followup_note and linked native receipts; no security certification is claimed. Protected custody is NOT RUN without an authorized isolated custodian. next_unblocked_task is deliberately null because the old RW-01 pointer was stale; no next eligible package is identified after RW-04L.",
+        "reason": "Docker CLI and native Windows execution are available. #86 merged at 7a5f550f4f815adc37fccb1409d6203d1db68bcf with a native test run (logs linked) and 11/11 post-merge checks PASS. #87 merged at 09286c1b88a2e31ddfcc97565d2f5d80c0e8788f, #89 at 0ad921cfc22e5c09973e09b6b9d2f686f1f0d6ff, #90 at a776a165bf5be9b96aaf8287a2aa36dca2cfffef, #91 at 83fec7e65eb54ed9dcedd14388323e1e476b5cac, #92 at 03963c0370f3cdc7ceda2994435d93b807ff8a73 and #93 at ba7dc5db97556b88eead5f20f0aaf808a46a5074, each with 11/11 post-merge checks PASS; gates remain unqualified. Pipe-server identity is narrowed, not resolved: current-user or SYSTEM owner, image under Program Files/Docker from SHGetKnownFolderPath rather than the environment, and offline name-based Authenticode checking of the leaf signer simple display name Docker Inc. No issuer restriction, chain-root pin or certificate-fingerprint check: any otherwise valid signature chaining to a trusted root with that subject name passes the signer check. A standalone Docker-signed Engine there could also pass. Residual risks: check-then-use race, same-user/admin attackers, offline-only revocation, name-only signer matching and installation integrity. Candidate image and isolation evidence recorded on 2026-11-22; two RW-03 unlocks remain: (a) separate security review of the exact candidate image inventory/evidence (no reviewer named), and (b) protected custody, NOT RUN, requiring an authorized, actually isolated custodian. On 2026-11-23 Sami (project owner) accepted the listed pipe risks with the decision \"Accept these risks\", relayed by the ResearchWitness coordinator. Decision source and approximate local/UTC time are recorded in pdf_execution.pipe_risk_acceptance.source: the coordinator bot chat, with no direct answer link. Risks accepted, not resolved or mitigated; this is an owner decision, not a review. See pdf_execution.followup_note and linked native receipts; no security certification is claimed. Protected custody is NOT RUN without an authorized isolated custodian. next_unblocked_task is deliberately null because the old RW-01 pointer was stale; no next eligible package is identified after RW-04L.",
         "evidence": [
           "evidence/rw03-native-2026-11-21/windows-focused.log and windows-release.log: Windows Server 2022 Standard build 10.0.20348.5622, Python 3.13.12, native main test run on 2026-11-21 UTC.",
           "evidence/rw03-native-2026-11-21/pdf-runtime.log and pdf-release.log (landed with #87): Docker Desktop 4.98.0, Linux engine 29.9.2; counts and outcomes recorded in pdf_execution above.",
@@ -440,7 +489,7 @@
           "Native test run (logs linked): native-signature.log records offline certificate metadata reading, name-based WinVerifyTrust verification and both native test modes plus fake-pipe rejection, with no network retrieval.",
           "2026-11-22: local candidate-image isolation harness passed effective create/inspect checks, real timeout/overflow and success/failure CID cleanup; hermetic cleanup denial tests are mocked. No downloads, new privileges, custody or scientific execution."
         ],
-        "unlock_condition": "Only remaining PDF-execution unlock: separate security review of the candidate image inventory/provenance and native evidence bound to exact image ID sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944. AI security review is acceptable, but no reviewer has been named and no such review has happened. Configured/runtime synthetic evidence is not qualification or proof of escape resistance. RW-03 stays blocked_external. Protected custody separately remains NOT RUN and unqualified; this owner decision does not authorize custody or change scientific gates. The next-real-rebuild receipt requirement in pdf_execution.next_work remains.",
+        "unlock_condition": "Both remaining RW-03 unlocks are required: (a) separate security review of the candidate image inventory/provenance and native evidence bound to exact image ID sha256:a526f5d88b02e0af23ae5105d4f14da0f8c664595462afc65cac73b94744c944; no reviewer has been named and no such review has happened; (b) protected custody remains NOT RUN and unqualified, requiring an authorized, actually isolated custodian and its capability receipt. RW-03 stays blocked_external until both are satisfied; pdf_execution remains unqualified and the scientific gates are unchanged. Sami's accepted pipe risks are not resolved or mitigated and do not satisfy either unlock. The next-real-rebuild receipt requirement in pdf_execution.next_work remains.",
         "next_unblocked_task": null
       }
     },

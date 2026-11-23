@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 from typing import Any
 
+from . import jats_denominator_trace, jats_table_projection
 from ._jats_files import read_regular
 from ._jats_parser import MAX_SOURCE_BYTES, audit_jats_percentage_tables
 
@@ -63,7 +64,8 @@ def implementation_files() -> dict[str, str]:
                      "jats_product.py", "jats_table_projection.py", "paper_document.py",
                      "paper_statistics.py", "paper_two_by_two_source.py",
                      "paper_flow.py", "paper_flow_source.py", "paper_prisma_flow.py",
-                     "paper_statistics_source.py", "paper_count_totals.py", "jats_denominator_trace.py")
+                     "paper_statistics_source.py", "paper_count_totals.py", "jats_denominator_trace.py",
+                     "denominator_provenance.py")
     }
 
 
@@ -124,16 +126,18 @@ def make_report(source: bytes, document_id: str, source_pin_present: bool,
             "PDF/OCR, sealed evaluation, network, AI providers and author contact are outside scope.",
         ],
     }
-    if include_denominator_trace:
-        from .jats_denominator_trace import trace_denominators
-        report["denominator_evidence_trace"] = trace_denominators(source, result)
-    if (include_structure or include_odds_ratio or include_prose_flows
-            or include_prisma_flows or include_count_totals or include_sd_se_n):
-        from .jats_table_projection import project_jats_tables
-        projection = project_jats_tables(
+    include_projection = (include_structure or include_odds_ratio or include_prose_flows
+                          or include_prisma_flows or include_count_totals or include_sd_se_n)
+    if include_denominator_trace or include_projection:
+        projection = jats_table_projection._project_jats_tables_from_report(
             source, result,
             include_body_paragraphs=include_prose_flows or include_prisma_flows,
         )
+    if include_denominator_trace:
+        report["denominator_evidence_trace"] = jats_denominator_trace._trace_denominators_from_report(
+            source, result, projection,
+        )
+    if include_projection:
         if include_structure:
             report["table_projection"] = projection.to_dict()
         if include_odds_ratio:

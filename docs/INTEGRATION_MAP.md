@@ -52,7 +52,7 @@ source-mapped detectors, or completion of the installed product.
 |---|---|
 | #5 ancestor and #6 foundation | Refresh effective changes; do not merge #5 twice or close it before proving no unique changes are lost. |
 | Canonical model | Preserved unchanged; source-anchor/numeric-assertion bridge implemented. An opt-in rich table projection is now in RW-01D; full legacy source-mapped ratio and flow integration remains pending. |
-| Legacy JATS parser and denominator provenance | Not imported. Reconcile exact original-byte mappings, layouts and denominator semantics before adoption. |
+| Legacy JATS parser and denominator provenance | Parser not imported. Standalone scope-first resolver is advisory over original-byte projected Tables; detector unchanged. |
 | Flow, ratios, statistics source mapping | Not yet imported; retain their actual tests with their dependencies. |
 | `paper_audit`, coverage, review/CLI/schema wiring | Pending; create one installed audit path, not conflicting public commands. |
 | #12 local UI/custody and old `_pdf_worker` | Not imported or activated; safety gates unchanged. |
@@ -147,7 +147,7 @@ semantics outside the table. The same report/replay path produces separately
 labelled private unreviewed candidates; the ten trusted verifier families
 remain unchanged. This does not qualify PR #11's entire stack.
 
-## RW-01I: inspect original-byte denominator evidence without importing a second resolver
+## RW-01I: original-byte evidence and advisory scope-first resolution
 
 `researchwitness/jats_denominator_trace.py` calls the **existing**
 `_jats_parser.audit_jats_percentage_tables` and refuses any supplied
@@ -157,9 +157,15 @@ logic used by `jats_table_projection`, then checks every denominator fact
 against the exact element span/normalized quote. It preserves each printed
 numeric value, provider role, scope label, status and unresolved reason.
 
-This is NOT a merge of legacy `denominator_provenance.py` (46+ KiB) or
-`paper_ratio.py`: their complex subgroup and model-semantic decisions are
-not presumed compatible with the current source parser. In particular,
+The standalone `denominator_provenance.py` from PR #11 is ported without
+`paper_ratio.py`, paper-audit, table-arithmetic, telemetry or validation replays.
+It consumes projected Tables with row groups bound to original XML group spans;
+original cell byte spans bind relations. It reports advisory selections,
+rejected competitors, scope and detector/base disagreement in trace v3. Disagreement
+requires two existing bases; resolver selections without detector bases have a
+separate count. The product computes the detector once and shares one projection
+across enabled modes through private paths; public trace/projection entry points
+still recompute and fully compare supplied detector reports. In particular,
 arithmetic fit is **never used** to choose a denominator, and a conflict
 flag means multiple *visible* values, not that the publication is erroneous.
 One unchanged default audit and one optional private report/replay path
@@ -178,9 +184,9 @@ Reconciliation accounts for different bases, uncertain/missing facts,
 different opinions and copy-identical submissions; it is NOT independent
 scientific review or a new automatic denominator resolver.
 
-The legacy PR #11 `denominator_provenance.py` remains unmerged; a genuinely
-labelled development comparison is needed before importing its complex
-subgroup/population semantics. No alternate JATS parser or protected-custody
+The PR #11 resolver is now advisory only; a genuinely labelled development
+comparison is still needed to evaluate its subgroup/population semantics.
+No alternate JATS parser or protected-custody
 authority was introduced.
 
 
