@@ -15,7 +15,9 @@
     "production_prerequisites": [
       {
         "id": "custody-store-recovery",
-        "status": "todo",
+        "status": "in_progress",
+        "branch": "devin/1795395912-custody-store-recovery",
+        "note": "Bounded synthetic-only recovery and import rollback implemented on this branch; awaiting engineering review and merge. Stale locks remain manual-review failures. Production disabled / NOT RUN / not qualified / awaiting Sami's security review; no capability gate changed.",
         "requirement": "Bounded store recovery before production can be enabled: detect and safely recover orphaned source objects left when import_batch fails after writing an object but before its batch manifest, and temporary files left by a killed or interrupted write, so verify and retry succeed without manual edits.",
         "origin": "Devin Review finding on PR #98 (failed import strands source objects), deferred by engineering review",
         "blocks": "enabling production custody"

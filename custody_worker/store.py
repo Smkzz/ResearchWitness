@@ -266,14 +266,13 @@ def _iter_json_files(directory: Path, pattern: str, *, max_file_bytes: int = MAX
     return result
 
 
-def _source_index(root: Path) -> dict[str, list[dict[str, Any]]]:
+def _import_index(root: Path, paths: list[Path]) -> dict[str, list[dict[str, Any]]]:
     index: dict[str, list[dict[str, Any]]] = {}
-    directory = root / "manifests" / "imports"
     unique_sizes: dict[str, int] = {}
     version_bindings: dict[tuple[str, str, str, str], str] = {}
     record_count = 0
     unique_total_bytes = 0
-    for path in _iter_json_files(directory, r"[a-z][a-z0-9-]{2,63}\.json"):
+    for path in paths:
         manifest = _manifest_validation(
             read_json(path), synthetic_only=within(root, DEV_PARENT),
         )
@@ -299,6 +298,14 @@ def _source_index(root: Path) -> dict[str, list[dict[str, Any]]]:
             if record_count > MAX_SOURCE_OBJECTS or unique_total_bytes > MAX_SOURCE_STORE_BYTES:
                 reject("SOURCE_INVENTORY_LIMIT_EXCEEDED")
             index.setdefault(digest, []).append(item)
+    return index
+
+
+def _source_index(root: Path) -> dict[str, list[dict[str, Any]]]:
+    index = _import_index(root, _iter_json_files(
+        root / "manifests" / "imports", r"[a-z][a-z0-9-]{2,63}\.json",
+    ))
+    unique_sizes = {digest: entries[0]["size"] for digest, entries in index.items()}
     object_dir = root / "objects" / "sha256"
     object_names: set[str] = set()
     object_bytes = 0
@@ -327,6 +334,65 @@ def _source_index(root: Path) -> dict[str, list[dict[str, Any]]]:
         if len(data) != expected_size or sha256_bytes(data) != digest:
             reject("SOURCE_OBJECT_INTEGRITY_FAILURE")
     return index
+
+
+def _recover_store(root: Path) -> dict:
+    temporary_files: list[Path] = []
+    inventories: dict[str, list[Path]] = {}
+    for relative in ("objects/sha256", "manifests/imports", "manifests/reviews", "sealed-labels"):
+        directory = root / relative
+        guarded_stat(directory, file=False)
+        is_objects = relative == "objects/sha256"
+        is_seals = relative == "sealed-labels"
+        count_limit = MAX_SOURCE_OBJECTS if is_objects else MAX_LEDGER_RECORDS
+        byte_limit = MAX_SOURCE_STORE_BYTES if is_objects else MAX_LEDGER_BYTES
+        file_limit = MAX_SOURCE_BYTES if is_objects else (MAX_SEAL_BYTES if is_seals else MAX_JSON_BYTES)
+        pattern = (r"[0-9a-f]{64}" if is_objects else
+                   r"seal-[0-9a-f]{64}\.json" if is_seals else r"[a-z][a-z0-9-]{2,63}\.json")
+        paths: list[Path] = []
+        total_bytes = 0
+        count = 0
+        with os.scandir(directory) as entries:
+            for entry in entries:
+                count += 1
+                if count > count_limit:
+                    reject("SOURCE_INVENTORY_LIMIT_EXCEEDED" if is_objects else "INVENTORY_LIMIT_EXCEEDED")
+                path = directory / entry.name
+                temporary = re.fullmatch(r"\.rw-tmp-[a-z0-9_]{8}", entry.name, re.ASCII) is not None
+                if not temporary and not re.fullmatch(pattern, entry.name, re.ASCII):
+                    reject("UNEXPECTED_SOURCE_OBJECT" if is_objects else "UNEXPECTED_INVENTORY_ENTRY")
+                info = guarded_stat(path, file=True)
+                total_bytes += info.st_size
+                if info.st_size > file_limit or total_bytes > byte_limit:
+                    reject("SOURCE_INVENTORY_LIMIT_EXCEEDED" if is_objects else "INVENTORY_LIMIT_EXCEEDED")
+                if temporary:
+                    temporary_files.append(path)
+                else:
+                    paths.append(path)
+        inventories[relative] = sorted(paths)
+    index = _import_index(root, inventories["manifests/imports"])
+    object_paths = {path.name: path for path in inventories["objects/sha256"]}
+    if not set(index).issubset(object_paths):
+        reject("UNREFERENCED_SOURCE_OBJECT")
+    orphaned_objects = []
+    for digest, path in object_paths.items():
+        data = checked_read(path, max_bytes=MAX_SOURCE_BYTES)
+        if (sha256_bytes(data) != digest
+            or (digest in index and len(data) != index[digest][0]["size"])):
+            reject("SOURCE_OBJECT_INTEGRITY_FAILURE")
+        if digest not in index:
+            orphaned_objects.append(path)
+    for path in temporary_files + orphaned_objects:
+        guarded_stat(path, file=True)
+        path.unlink()
+    return {"status": "RECOVERED", "temporary_files_removed": len(temporary_files),
+            "orphaned_objects_removed": len(orphaned_objects)}
+
+
+def recover_store(root: Path) -> dict:
+    root = authorize_store_root(root)
+    with _store_lock(root):
+        return _recover_store(root)
 
 
 def imported_hashes(root: Path) -> set[str]:
@@ -868,6 +934,7 @@ def import_batch(root: Path, batch_id: str) -> dict:
     root = authorize_store_root(root)
     id_valid(batch_id)
     with _store_lock(root):
+        _recover_store(root)
         manifest_path = root / "incoming" / (batch_id + ".json")
         manifest = _manifest_validation(
             read_json(safe_source_file(manifest_path, root / "incoming")),
@@ -929,9 +996,22 @@ def import_batch(root: Path, batch_id: str) -> dict:
             if len(data) != item["size"] or sha256_bytes(data) != item["sha256"]:
                 reject("SOURCE_HASH_OR_SIZE_MISMATCH")
             blobs[item["sha256"]] = data
-        for digest, data in sorted(blobs.items()):
-            _immutable_write(root, root / "objects" / "sha256" / digest, data)
-        _immutable_write(root, existing_path, manifest_bytes)
+        created: list[Path] = []
+        try:
+            for digest, data in sorted(blobs.items()):
+                object_path = root / "objects" / "sha256" / digest
+                if not object_path.exists():
+                    created.append(object_path)
+                _immutable_write(root, object_path, data)
+            _immutable_write(root, existing_path, manifest_bytes)
+        except BaseException:
+            if not existing_path.exists() and not existing_path.is_symlink():
+                for path in created:
+                    with contextlib.suppress(OSError, CustodyError):
+                        guarded_stat(path, file=True)
+                        if sha256_bytes(checked_read(path, max_bytes=MAX_SOURCE_BYTES)) == path.name:
+                            path.unlink()
+            raise
         return {
             "status": "IMPORTED",
             "file_count": len(manifest["files"]),

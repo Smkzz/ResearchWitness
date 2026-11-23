@@ -30,3 +30,26 @@ contain RESEARCHWITNESS_SYNTHETIC_ONLY_V1 followed by a newline. Use only the
 checked-in synthetic examples; the tests create roots and rehearse the workflow.
 Missing --dev-root refuses before production preflight; invalid roots fail
 closed without a production fallback. See the other documents in this directory.
+
+## Bounded synthetic recovery
+
+    python -m custody_worker --dev-root SYNTHETIC_DIRECTORY recover
+
+Recovery holds the operation lock and validates the import ledger before deleting
+anything. In objects/sha256, manifests/imports, manifests/reviews and sealed-labels,
+it removes only regular, single-link files matching `.rw-tmp-[a-z0-9_]{8}` (the
+mkstemp suffix). It removes unreferenced 64-hex objects only when their bounded
+content hash equals their name. Referenced objects and records are never removed.
+Output contains only status and removal counts, no paths or source bytes.
+
+Import automatically performs the same recovery before indexing. On failure
+before manifest commit it best-effort removes only objects newly created by that
+call; a later retry/recover handles remaining valid orphans. `verify` never repairs.
+The scan uses existing file/count/byte limits and refuses unknown entries, unsafe
+file types, invalid manifests and object corruption without deleting candidates.
+Seals commit to manifests, so removing unreferenced objects leaves seals unchanged.
+Recovery is not atomic across deletions; an unlink failure may leave work for retry.
+A stale audit/.exclusive-lock is never cleared: it still raises
+STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED. No real-root recovery is authorized.
+Production remains disabled / NOT RUN / not qualified / awaiting Sami's security
+review, including for the new command.
