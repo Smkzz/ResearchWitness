@@ -19,3 +19,11 @@ This is not a sandbox against administrators, compromised tokens or parent-path
 replacement races. A marked temp directory is not independent custody.
 Provenance URL validation does not fetch sources or enforce network egress.
 Future protected controls require separate review; they remain unproven here.
+
+Locked recovery removes only exact mkstemp regular files and hash-valid orphan
+objects after bounded import-ledger validation. Referenced objects and manifest
+records remain untouched; seals bind those manifests, not orphan presence.
+Import rollback is best-effort and touches only that call's new objects before
+manifest commit. Deletion is not an atomic transaction and may need retry after
+an I/O error. Stale operation locks, corruption and over-limit inventories remain
+manual-review failures, not reasons to enable production or bypass isolation.

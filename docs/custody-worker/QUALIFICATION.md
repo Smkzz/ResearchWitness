@@ -15,9 +15,11 @@ Run README.md's commands and ../RELEASING.md's release checks. Record exact-head
 results separately. Platform skips remain evidence gaps; synthetic success does
 not authorize protected material or qualify custody.
 
-Review follow-up: interrupted imports can leave unreferenced source objects
-when object writes succeed but the manifest write fails. Verification and retry
-then fail closed with UNREFERENCED_SOURCE_OBJECT. Crash-safe transaction/recovery
-design is outside this synthetic port and remains escalated; do not manually
-delete or repair protected records. Production remains disabled, not qualified,
-and protected custody NOT RUN pending Sami's separate security review.
+Recovery regressions cover injected manifest-write failure and retry, hash-valid
+orphans, interrupted-write temporaries, corrupt imports, bad object hashes,
+unsafe file types, scan limits, stale-lock refusal and unchanged records/seals.
+These are synthetic engineering checks, not real process-kill or durability proof.
+Explicit `recover` and automatic import recovery do not clear stale locks or
+repair corrupt ledgers/objects; those still require manual review. Production
+remains disabled, not qualified, and protected custody NOT RUN pending Sami's
+separate security review.

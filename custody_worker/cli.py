@@ -9,7 +9,7 @@ from pathlib import Path
 from .policy import CustodyError, preflight
 from .store import (
     make_store, import_batch, verify_all, record_review, seal_inventory,
-    summarize, export_public_summary,
+    summarize, export_public_summary, recover_store,
 )
 
 
@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dev-root", type=Path, metavar="SYNTHETIC_DIRECTORY",
                         help="synthetic tests only; must be a marked child of the system temp directory")
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("doctor", "init", "verify", "seal", "summary", "export-summary"):
+    for name in ("doctor", "init", "verify", "recover", "seal", "summary", "export-summary"):
         commands.add_parser(name)
     imp = commands.add_parser("import")
     imp.add_argument("--batch-id", required=True)
@@ -53,6 +53,8 @@ def main(argv: list[str] | None = None) -> int:
             result = record_review(root, args.review_id)
         elif args.command == "verify":
             result = {"status": "VERIFIED", **verify_all(root)}
+        elif args.command == "recover":
+            result = recover_store(root)
         elif args.command == "seal":
             result = seal_inventory(root)
         elif args.command == "summary":

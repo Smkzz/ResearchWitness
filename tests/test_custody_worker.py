@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 from jsonschema import Draft202012Validator
 
+from custody_worker import store as worker_store
 from custody_worker.cli import main
 from custody_worker.policy import (
     CustodyError, DEV_PARENT, MARKER, IMPORT_VERSION, REVIEW_VERSION,
@@ -27,7 +28,7 @@ from custody_worker.store import (
     import_batch, make_store, record_review, verify_all, seal_inventory,
     summarize, export_public_summary, SCOPE_STATUS, SOURCE_VERSION_STATUS,
     CORRECTION_STATUS, _review_validation, _source_index,
-    _immutable_write,
+    _immutable_write, recover_store,
 )
 
 DOCUMENT = "doi:10.5555/synthetic-study"
@@ -37,7 +38,7 @@ CORRECTION_ID = "doi:10.5555/synthetic-correction"
 class ProductionDisabledTests(unittest.TestCase):
     def test_all_commands_refuse_before_preflight_or_store_access(self):
         commands = [(name,) for name in (
-            "doctor", "init", "verify", "seal", "summary", "export-summary",
+            "doctor", "init", "verify", "recover", "seal", "summary", "export-summary",
         )] + [("import", "--batch-id", "synthetic-batch"),
              ("record-review", "--review-id", "synthetic-review")]
         with patch("custody_worker.cli.preflight") as preflight_mock:
@@ -220,6 +221,192 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             with self.assertRaisesRegex(CustodyError, "INVENTORY_LIMIT_EXCEEDED"):
                 _immutable_write(self.root, self.root / "sealed-labels" / ("seal-" + "0" * 64 + ".json"), b"{}")
         verify_all(self.root)
+
+    def test_failed_import_rolls_back_new_objects_and_retry_succeeds(self):
+        def fail_manifest(root, path, data):
+            if path.parent == root / "manifests" / "imports":
+                raise CustodyError("INJECTED_MANIFEST_FAILURE")
+            return _immutable_write(root, path, data)
+
+        with patch.object(worker_store, "_immutable_write", side_effect=fail_manifest):
+            with self.assertRaisesRegex(CustodyError, "INJECTED_MANIFEST_FAILURE"):
+                self.source_setup(original=self.original_text())
+        self.assertEqual(list((self.root / "objects" / "sha256").iterdir()), [])
+        verify_all(self.root)
+        batch = next((self.root / "incoming").glob("synthetic-batch-*.json")).stem
+        self.assertEqual(import_batch(self.root, batch)["status"], "IMPORTED")
+        self.assertEqual(verify_all(self.root)["import_batches"], 1)
+
+    def test_failed_import_preserves_preexisting_objects_and_records(self):
+        self.source_setup(original=self.original_text())
+        before = {p: p.read_bytes() for directory in ("objects/sha256", "manifests/imports")
+                  for p in (self.root / directory).iterdir()}
+
+        def fail_manifest(root, path, data):
+            if path.parent == root / "manifests" / "imports":
+                raise CustodyError("INJECTED_MANIFEST_FAILURE")
+            return _immutable_write(root, path, data)
+
+        with patch.object(worker_store, "_immutable_write", side_effect=fail_manifest):
+            with self.assertRaisesRegex(CustodyError, "INJECTED_MANIFEST_FAILURE"):
+                self.source_setup(original=self.original_text(), correction=self.correction_text())
+        after = {p: p.read_bytes() for directory in ("objects/sha256", "manifests/imports")
+                 for p in (self.root / directory).iterdir()}
+        self.assertEqual(after, before)
+        verify_all(self.root)
+
+    def test_import_retry_recovers_preexisting_orphan(self):
+        self.source_setup(original=self.original_text())
+        batch = next((self.root / "incoming").glob("synthetic-batch-*.json")).stem
+        orphan = b"synthetic interrupted import"
+        path = self.root / "objects" / "sha256" / sha256_bytes(orphan)
+        path.write_bytes(orphan)
+        with self.assertRaisesRegex(CustodyError, "UNREFERENCED_SOURCE_OBJECT"):
+            verify_all(self.root)
+        self.assertTrue(path.exists())
+        self.assertEqual(import_batch(self.root, batch)["status"], "ALREADY_IMPORTED")
+        self.assertFalse(path.exists())
+        verify_all(self.root)
+
+    def test_error_after_manifest_commit_does_not_remove_referenced_objects(self):
+        def fail_after_manifest(root, path, data):
+            result = _immutable_write(root, path, data)
+            if path.parent == root / "manifests" / "imports":
+                raise CustodyError("INJECTED_POST_COMMIT_FAILURE")
+            return result
+
+        with patch.object(worker_store, "_immutable_write", side_effect=fail_after_manifest):
+            with self.assertRaisesRegex(CustodyError, "INJECTED_POST_COMMIT_FAILURE"):
+                self.source_setup(original=self.original_text())
+        self.assertEqual(verify_all(self.root)["import_files"], 1)
+
+    def test_rollback_cleanup_failure_preserves_original_error_and_can_recover(self):
+        def fail_manifest(root, path, data):
+            if path.parent == root / "manifests" / "imports":
+                raise CustodyError("INJECTED_MANIFEST_FAILURE")
+            return _immutable_write(root, path, data)
+
+        real_unlink = Path.unlink
+
+        def fail_object_unlink(path, *args, **kwargs):
+            if path.parent == self.root / "objects" / "sha256" and len(path.name) == 64:
+                raise OSError("synthetic cleanup failure")
+            return real_unlink(path, *args, **kwargs)
+
+        with patch.object(worker_store, "_immutable_write", side_effect=fail_manifest), \
+             patch.object(Path, "unlink", fail_object_unlink):
+            with self.assertRaisesRegex(CustodyError, "INJECTED_MANIFEST_FAILURE"):
+                self.source_setup(original=self.original_text())
+        self.assertEqual(recover_store(self.root)["orphaned_objects_removed"], 1)
+        verify_all(self.root)
+
+    def test_recover_cli_removes_orphan_without_changing_seal_or_records(self):
+        item, _ = self.source_setup(original=self.original_text())
+        self.record(self.review_object(item, None))
+        seal_inventory(self.root)
+        before = summarize(self.root)
+        records = {p: p.read_bytes() for directory in (
+            "objects/sha256", "manifests/imports", "manifests/reviews", "sealed-labels",
+        ) for p in (self.root / directory).iterdir()}
+        orphan = b"synthetic kill residue"
+        path = self.root / "objects" / "sha256" / sha256_bytes(orphan)
+        path.write_bytes(orphan)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = main(["--dev-root", str(self.root), "recover"])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(output.getvalue()), {
+            "status": "RECOVERED", "temporary_files_removed": 0, "orphaned_objects_removed": 1,
+        })
+        self.assertNotIn(str(self.root), output.getvalue())
+        self.assertNotIn(path.name, output.getvalue())
+        self.assertEqual({p: p.read_bytes() for p in records}, records)
+        self.assertEqual(summarize(self.root), before)
+        self.assertEqual(recover_store(self.root), {
+            "status": "RECOVERED", "temporary_files_removed": 0, "orphaned_objects_removed": 0,
+        })
+
+    def test_recover_removes_only_exact_temporary_names_in_all_four_directories(self):
+        for directory in ("objects/sha256", "manifests/imports", "manifests/reviews", "sealed-labels"):
+            (self.root / directory / ".rw-tmp-abcd123_").write_bytes(b"interrupted synthetic write")
+        with self.assertRaises(CustodyError):
+            verify_all(self.root)
+        self.assertEqual(recover_store(self.root)["temporary_files_removed"], 4)
+        verify_all(self.root)
+
+    def test_recover_keeps_bad_orphan_and_all_temporary_files(self):
+        path = self.root / "objects" / "sha256" / ("0" * 64)
+        path.write_bytes(b"not the named hash")
+        temporary = self.root / "manifests" / "imports" / ".rw-tmp-abcd123_"
+        temporary.write_bytes(b"synthetic partial write")
+        with self.assertRaisesRegex(CustodyError, "SOURCE_OBJECT_INTEGRITY_FAILURE"):
+            recover_store(self.root)
+        self.assertEqual(path.read_bytes(), b"not the named hash")
+        self.assertTrue(temporary.exists())
+
+    def test_corrupt_import_ledger_prevents_any_recovery_deletion(self):
+        self.source_setup(original=self.original_text())
+        manifest = next((self.root / "manifests" / "imports").iterdir())
+        manifest.write_bytes(b"{}")
+        orphan = b"synthetic orphan"
+        path = self.root / "objects" / "sha256" / sha256_bytes(orphan)
+        path.write_bytes(orphan)
+        temporary = self.root / "manifests" / "imports" / ".rw-tmp-abcd123_"
+        temporary.write_bytes(b"partial write")
+        with self.assertRaises(CustodyError):
+            recover_store(self.root)
+        self.assertTrue(path.exists())
+        self.assertTrue(temporary.exists())
+        self.assertEqual(manifest.read_bytes(), b"{}")
+
+    def test_temporary_symlinks_and_directories_are_not_removed(self):
+        path = self.root / "objects" / "sha256" / ".rw-tmp-abcd123_"
+        path.mkdir()
+        with self.assertRaisesRegex(CustodyError, "UNSAFE_FILE_TYPE_OR_HARDLINK"):
+            recover_store(self.root)
+        path.rmdir()
+        target = self.root / "incoming" / "synthetic.txt"
+        target.write_bytes(b"keep synthetic target")
+        try:
+            path.symlink_to(target)
+        except (OSError, NotImplementedError):
+            self.skipTest("symlink creation unavailable")
+        with self.assertRaisesRegex(CustodyError, "REPARSE_POINT_REJECTED"):
+            recover_store(self.root)
+        self.assertTrue(path.is_symlink())
+        self.assertEqual(target.read_bytes(), b"keep synthetic target")
+
+    def test_recovery_rejects_unknown_names_and_respects_limits(self):
+        path = self.root / "objects" / "sha256" / ".rw-tmp-INVALID"
+        path.write_bytes(b"keep unknown entry")
+        with self.assertRaisesRegex(CustodyError, "UNEXPECTED_SOURCE_OBJECT"):
+            recover_store(self.root)
+        self.assertTrue(path.exists())
+        path.unlink()
+        for text in (b"orphan one", b"orphan two"):
+            (self.root / "objects" / "sha256" / sha256_bytes(text)).write_bytes(text)
+        with patch.object(worker_store, "MAX_SOURCE_OBJECTS", 1):
+            with self.assertRaisesRegex(CustodyError, "SOURCE_INVENTORY_LIMIT_EXCEEDED"):
+                recover_store(self.root)
+        self.assertEqual(len(list((self.root / "objects" / "sha256").iterdir())), 2)
+        with patch.object(worker_store, "MAX_SOURCE_STORE_BYTES", 1):
+            with self.assertRaisesRegex(CustodyError, "SOURCE_INVENTORY_LIMIT_EXCEEDED"):
+                recover_store(self.root)
+        self.assertEqual(len(list((self.root / "objects" / "sha256").iterdir())), 2)
+
+    def test_recovery_keeps_unknown_ledger_entries(self):
+        path = self.root / "manifests" / "imports" / "unknown.txt"
+        path.write_bytes(b"not a temporary or manifest")
+        with self.assertRaisesRegex(CustodyError, "UNEXPECTED_INVENTORY_ENTRY"):
+            recover_store(self.root)
+        self.assertTrue(path.exists())
+
+    def test_recover_does_not_clear_stale_lock(self):
+        path = self.root / "audit" / ".exclusive-lock"
+        path.write_bytes(b"synthetic stale lock")
+        with self.assertRaisesRegex(CustodyError, "STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED"):
+            recover_store(self.root)
+        self.assertTrue(path.exists())
 
     def source_setup(self, *, original: str, correction: str | None = None,
                      document_id: str = DOCUMENT, source_version: str = "v1",

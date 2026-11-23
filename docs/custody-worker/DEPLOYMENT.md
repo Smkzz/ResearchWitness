@@ -15,3 +15,8 @@ identity/access separation, installed-code integrity, descendant/temp/log/backup
 isolation, independent egress enforcement, source rights and output handling.
 This port neither configures nor authorizes those controls. No accounts, ACLs,
 network rules or privileges are changed.
+
+The synthetic `recover` command has the same mandatory --dev-root boundary.
+It never removes referenced objects or records, and never clears stale
+.exclusive-lock files. Stale locks remain STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED;
+no automatic account/process probing or real-root repair is authorized.
