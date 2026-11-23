@@ -15,11 +15,28 @@
     "production_prerequisites": [
       {
         "id": "custody-store-recovery",
-        "status": "in_progress",
+        "status": "done",
         "branch": "devin/1795395912-custody-store-recovery",
-        "note": "Bounded synthetic-only recovery and import rollback implemented on this branch; awaiting engineering review and merge. Stale locks remain manual-review failures. Production disabled / NOT RUN / not qualified / awaiting Sami's security review; no capability gate changed.",
+        "note": "Bounded synthetic-only recovery and import rollback merged in PR #108. Production disabled / NOT RUN / not qualified / awaiting Sami's security review; no capability gate changed.",
+        "evidence": [
+          "https://github.com/Smkzz/ResearchWitness/pull/108"
+        ],
+        "merge_receipt_108": {
+          "approved_head_sha": "6c3c748c552e8d976bef82c5ab7fb2207b1880af",
+          "merged_main_sha": "91c170c3bd9b76daf55adffb3f157be9c75ab2c3",
+          "exact_head_ci": "14/14 PASS, including Devin Review; no post-merge CI claim.",
+          "reviewer_approval": "Reviewer engineering approval https://github.com/Smkzz/ResearchWitness/pull/108#pullrequestreview-6015571018; Devin Review completed at the approved head with 0 findings. Engineering review only, not custody qualification or Sami's security review."
+        },
         "requirement": "Bounded store recovery before production can be enabled: detect and safely recover orphaned source objects left when import_batch fails after writing an object but before its batch manifest, and temporary files left by a killed or interrupted write, so verify and retry succeed without manual edits.",
         "origin": "Devin Review finding on PR #98 (failed import strands source objects), deferred by engineering review",
+        "blocks": "enabling production custody"
+      },
+      {
+        "id": "custody-stale-lock-recovery",
+        "status": "todo",
+        "note": "A stale .exclusive-lock left by a killed process fails with STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED and is not auto-cleared. Safe live-holder detection/recovery is needed before production. Production disabled / NOT RUN / not qualified / awaiting Sami's security review.",
+        "requirement": "Safe live-holder detection and bounded stale-lock recovery before production custody can be enabled, without clearing a lock held by a live process.",
+        "origin": "Reviewer follow-up after PR #108; stale operation locks were outside bounded store recovery scope",
         "blocks": "enabling production custody"
       }
     ]

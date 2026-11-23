@@ -11,14 +11,16 @@ installation or historical qualification results are imported by this port.
 The existing pytest matrix collects the worker unittest suite; the release job
 also exercises the offline synthetic zipapp. These are engineering checks only.
 
-The `devin/1795395912-custody-store-recovery` working branch adds bounded,
+PR #108 (merge `91c170c`, head `6c3c748`, 14/14 exact-head CI and Devin Review
+0 findings) adds bounded,
 locked synthetic recovery: `recover` and import retries remove exact interrupted
 write temporaries and hash-valid unreferenced objects only after validating the
 import ledger and object integrity. Failed imports best-effort roll back only
 newly created objects before manifest commit. Verification remains read-only;
 referenced objects, records and manifest-based seals are preserved. Stale locks
-still require manual review. This implementation is not yet committed/reviewed/
-merged; production disabled / NOT RUN / not qualified / awaiting Sami's security
+still require manual review and have a separate `custody-stale-lock-recovery`
+production prerequisite in EXECUTION_STATE.json. Production disabled / NOT RUN /
+not qualified / awaiting Sami's security
 review remain unchanged.
 
 **As of:** 2026-11-21
