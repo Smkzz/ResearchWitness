@@ -166,7 +166,7 @@ def _store_lock(root: Path, *, recover_legacy: bool = False):
                 _lock_fd(fd)
                 acquired = True
             except OSError as exc:
-                if exc.errno in (errno.EAGAIN, errno.EACCES):
+                if exc.errno in (errno.EAGAIN, errno.EACCES, getattr(errno, "EDEADLK", errno.EAGAIN)):
                     reject("STORE_LOCK_HELD_BY_LIVE_PROCESS")
                 raise
         except OSError:
