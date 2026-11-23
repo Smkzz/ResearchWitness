@@ -25,7 +25,7 @@
           "approved_head_sha": "6c3c748c552e8d976bef82c5ab7fb2207b1880af",
           "merged_main_sha": "91c170c3bd9b76daf55adffb3f157be9c75ab2c3",
           "exact_head_ci": "14/14 PASS, including Devin Review; no post-merge CI claim.",
-          "reviewer_approval": "Devin Review: 0 findings, as reported by the owner. Engineering review only, not custody qualification or Sami's security review."
+          "reviewer_approval": "Reviewer engineering approval https://github.com/Smkzz/ResearchWitness/pull/108#pullrequestreview-6015571018; Devin Review completed at the approved head with 0 findings. Engineering review only, not custody qualification or Sami's security review."
         },
         "requirement": "Bounded store recovery before production can be enabled: detect and safely recover orphaned source objects left when import_batch fails after writing an object but before its batch manifest, and temporary files left by a killed or interrupted write, so verify and retry succeed without manual edits.",
         "origin": "Devin Review finding on PR #98 (failed import strands source objects), deferred by engineering review",
