@@ -24,3 +24,12 @@ requires explicit `recover` and the operator's assertion that no legacy worker i
 active. Unknown markers fail closed. Network filesystems are unsupported.
 The trusted, quiescent-filesystem assumption still
 applies; this is not a defense against same-token races or crash-durability proof.
+
+Never delete `audit/.exclusive-lock` by hand: deleting it while a holder is live
+lets a second process acquire a lock on a new inode. Stop all workers, then use
+`recover`; leave unknown-content locks for manual review without deletion.
+
+## Open items for Sami's security review
+
+- Drop the legacy V2 takeover in `recover` (operator assertion) before production.
+  An operator assertion cannot prove that no live legacy holder remains.

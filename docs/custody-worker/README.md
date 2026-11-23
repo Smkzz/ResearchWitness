@@ -58,6 +58,9 @@ Legacy V2 markers require explicit `recover` as an operator assertion that no
 old-version worker is active; other commands fail with
 STORE_LOCK_LEGACY_STALE_MANUAL_REVIEW_REQUIRED. Unknown markers fail with
 STORE_LOCK_UNRECOGNIZED_MANUAL_REVIEW_REQUIRED and are never overwritten.
+Never delete `audit/.exclusive-lock` by hand: deleting it while a holder is live
+lets a second process acquire a lock on a new inode. Stop all workers, then use
+`recover`; leave unknown-content locks for manual review without deletion.
 Only trusted local filesystems honoring these locks are supported; network
 filesystems are unsupported. No real-root recovery is authorized.
 Production remains disabled / NOT RUN / not qualified / awaiting Sami's security

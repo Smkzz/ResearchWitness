@@ -32,3 +32,9 @@ the OS lock cannot prove this for the old protocol. Unknown lock markers,
 corruption and over-limit inventories remain manual-review failures. Network
 filesystems are unsupported because advisory locking may not be honored. These
 synthetic checks do not enable production or establish custody qualification.
+
+Never delete `audit/.exclusive-lock` by hand: deleting it while a holder is live
+lets a second process acquire a lock on a new inode. Stop all workers, then use
+`recover`; leave unknown-content locks for manual review without deletion.
+Dropping legacy V2 takeover before production is an open item in
+[Sami's security review](SECURITY_REVIEW.md#open-items-for-samis-security-review).

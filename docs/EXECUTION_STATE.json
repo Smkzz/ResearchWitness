@@ -33,9 +33,18 @@
       },
       {
         "id": "custody-stale-lock-recovery",
-        "status": "in_progress",
+        "status": "done",
         "branch": "devin/1795397327-custody-stale-lock-recovery",
-        "note": "Persistent OS advisory locks and bounded V3 stale-marker recovery implemented on this branch; awaiting engineering review and merge. Live V3 holders are never cleared; legacy V2 takeover requires explicit recover and an operator assertion of no live legacy holder. Network filesystems unsupported. Production disabled / NOT RUN / not qualified / awaiting Sami's security review.",
+        "note": "Persistent OS advisory locks and bounded V3 stale-marker recovery merged in PR #110. Production disabled / NOT RUN / not qualified / awaiting Sami's security review.",
+        "evidence": [
+          "https://github.com/Smkzz/ResearchWitness/pull/110"
+        ],
+        "merge_receipt_110": {
+          "approved_head_sha": "6d75e6d48173e15c42aac9f206a6a3aa15b7c7d6",
+          "merged_main_sha": "0173072454ef01a723168fb7bd2ca84e8daff375",
+          "exact_head_ci": "14/14 PASS, including Devin Review; no post-merge CI claim.",
+          "reviewer_approval": "Reviewer engineering approval https://github.com/Smkzz/ResearchWitness/pull/110#pullrequestreview-6015692024; Devin Review completed at the approved head with no issues found. Engineering review only, not custody qualification or Sami's security review."
+        },
         "requirement": "Safe live-holder detection and bounded stale-lock recovery before production custody can be enabled, without clearing a lock held by a live process.",
         "origin": "Reviewer follow-up after PR #108; stale operation locks were outside bounded store recovery scope",
         "blocks": "enabling production custody"
