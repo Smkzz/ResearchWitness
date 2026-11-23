@@ -23,7 +23,7 @@ TOP_FILES = {
     'README.md', 'SECURITY.md', 'SUPPORT.md', 'pyproject.toml', 'CHECKSUMS.sha256',
     'RESEARCHWITNESS_NEXT_CAMPAIGN_REPORT.md',
 }
-TOP_DIRS = {'.github', 'researchwitness', 'researchwitness_ui', 'schemas', 'examples', 'benchmarks', 'prompts', 'tests', 'tools', 'docs', 'evidence', 'validation'}
+TOP_DIRS = {'.github', 'researchwitness', 'researchwitness_ui', 'custody_worker', 'schemas', 'examples', 'benchmarks', 'prompts', 'tests', 'tools', 'docs', 'evidence', 'validation'}
 EXCLUDED_PARTS = {'.git', '.pytest_cache', '__pycache__', 'build', 'dist', 'researchwitness.egg-info'}
 EXCLUDED_SUFFIXES = {'.pyc', '.pyo'}
 EXCLUDED_REL_PATHS = {'evidence/synthetic-scenarios.jsonl', 'evidence/synthetic-summary.json'}

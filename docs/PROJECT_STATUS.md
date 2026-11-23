@@ -1,5 +1,16 @@
 # Project status
 
+## Synthetic-only custody worker port
+
+The offline worker from source PR #12 (`78b26e2`) is ported as synthetic-only
+engineering code, separate from the installed verifier wheel. The CLI refuses
+all commands without `--dev-root` before production preflight or store access.
+Production is disabled pending Sami's separate security review; protected
+custody **NOT RUN**, not custody-qualified. No private sources, production
+installation or historical qualification results are imported by this port.
+The existing pytest matrix collects the worker unittest suite; the release job
+also exercises the offline synthetic zipapp. These are engineering checks only.
+
 **As of:** 2026-11-21
 **Version:** `0.3.1` (technically accepted engineering preview on main)
 **Release:** NO tagged GitHub Release / no PyPI upload
