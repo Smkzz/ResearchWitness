@@ -50,7 +50,7 @@
           "merged_main_sha": "8e682d4730db5e3cacfaae4d14ea2b92ee57090a",
           "exact_head_ci": "14/14 PASS, including Devin Review, verified with git_commit_checks at the exact head; Devin Review reported no issues found.",
           "post_merge_ci": "11/11 PASS at 8e682d4, verified with git_commit_checks: nine Python/platform matrix jobs, Release gate and Analyze Python; 0 failed, pending or skipped.",
-          "reviewer_approval": "Engineering Verdict: APPROVE at the approved head in the PR #111 review dated 2026-11-23T01:49:03Z. Review text verified via git_view_pr and git_pr_events; GitHub review permalink not exposed by these tools.",
+          "reviewer_approval": "Reviewer engineering approval https://github.com/Smkzz/ResearchWitness/pull/111#pullrequestreview-6015725836; engineering Verdict: APPROVE at the approved head in the PR #111 review dated 2026-11-23T01:49:03Z. Review text verified via git_view_pr and git_pr_events.",
           "evidence": [
             "https://github.com/Smkzz/ResearchWitness/pull/111",
             "https://github.com/Smkzz/ResearchWitness/commit/8e682d4730db5e3cacfaae4d14ea2b92ee57090a/checks",
@@ -97,7 +97,7 @@
       "merged_main_sha": "bf08705cb81c357e6d6d699a32090c762e4efcef",
       "exact_head_ci": "14/14 PASS, including Devin Review, verified with git_commit_checks at the exact head; Devin Review reported no issues found.",
       "post_merge_ci": "11/11 PASS at bf08705, verified with git_commit_checks: nine Python/platform matrix jobs, Release gate and Analyze Python; 0 failed, pending or skipped.",
-      "reviewer_approval": "Engineering Verdict: APPROVE at 2cf7b51 in the PR #107 review dated 2026-11-22T23:53:21Z. Review text verified via git_view_pr and git_pr_events; GitHub review permalink not exposed by these tools.",
+      "reviewer_approval": "Reviewer engineering approval https://github.com/Smkzz/ResearchWitness/pull/107#pullrequestreview-6015207163; engineering Verdict: APPROVE at 2cf7b51 in the PR #107 review dated 2026-11-22T23:53:21Z. Review text verified via git_view_pr and git_pr_events.",
       "evidence": [
         "https://github.com/Smkzz/ResearchWitness/pull/107",
         "https://github.com/Smkzz/ResearchWitness/commit/bf08705cb81c357e6d6d699a32090c762e4efcef/checks",
