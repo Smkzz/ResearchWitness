@@ -22,3 +22,7 @@ is never deleted: kernel advisory locks distinguish live V3 holders from dead
 ones. Explicit `recover` may migrate a legacy V2 marker only as an operator
 assertion that no old-version worker remains active. Use trusted local filesystems
 only; network filesystems are unsupported. No real-root repair is authorized.
+
+Never delete `audit/.exclusive-lock` by hand: deleting it while a holder is live
+lets a second process acquire a lock on a new inode. Stop all workers, then use
+`recover`; leave unknown-content locks for manual review without deletion.

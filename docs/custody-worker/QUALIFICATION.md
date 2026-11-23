@@ -22,6 +22,9 @@ These are synthetic engineering checks, not power-loss or storage-durability pro
 Lock regressions use real subprocess holders and forced termination to exercise
 live-holder refusal and V3 recovery after death, plus nested acquisition, explicit
 legacy V2 takeover, invalid lock rejection and persistent RELEASED markers.
+Never delete `audit/.exclusive-lock` by hand: deleting it while a holder is live
+lets a second process acquire a lock on a new inode. Stop all workers, then use
+`recover`; leave unknown-content locks for manual review without deletion.
 These are synthetic engineering tests, not production qualification. Advisory
 locks require a trusted local filesystem; network filesystems are unsupported.
 Recovery does not repair corrupt ledgers/objects; those require manual review. Production
