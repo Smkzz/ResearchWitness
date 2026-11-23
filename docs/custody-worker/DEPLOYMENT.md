@@ -17,6 +17,8 @@ This port neither configures nor authorizes those controls. No accounts, ACLs,
 network rules or privileges are changed.
 
 The synthetic `recover` command has the same mandatory --dev-root boundary.
-It never removes referenced objects or records, and never clears stale
-.exclusive-lock files. Stale locks remain STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED;
-no automatic account/process probing or real-root repair is authorized.
+It never removes referenced objects or records. The persistent .exclusive-lock
+is never deleted: kernel advisory locks distinguish live V3 holders from dead
+ones. Explicit `recover` may migrate a legacy V2 marker only as an operator
+assertion that no old-version worker remains active. Use trusted local filesystems
+only; network filesystems are unsupported. No real-root repair is authorized.

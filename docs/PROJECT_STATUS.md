@@ -17,13 +17,17 @@ locked synthetic recovery: `recover` and import retries remove exact interrupted
 write temporaries and hash-valid unreferenced objects only after validating the
 import ledger and object integrity. Failed imports best-effort roll back only
 newly created objects before manifest commit. Verification remains read-only;
-referenced objects, records and manifest-based seals are preserved. Stale locks
-still require manual review and have a separate `custody-stale-lock-recovery`
-production prerequisite in EXECUTION_STATE.json. Production disabled / NOT RUN /
+referenced objects, records and manifest-based seals are preserved. The
+`devin/1795397327-custody-stale-lock-recovery` branch implements persistent OS
+advisory locks and V3 recovery after holder death, never deleting the lock file
+or taking over a live V3 holder. Legacy V2 takeover requires explicit recover
+and an operator assertion; unknown markers fail closed. Network filesystems are
+unsupported. The separate `custody-stale-lock-recovery` production prerequisite
+is in_progress, awaiting engineering review and merge. Production disabled / NOT RUN /
 not qualified / awaiting Sami's security
 review remain unchanged.
 
-**As of:** 2026-11-21
+**As of:** 2026-11-23
 **Version:** `0.3.1` (technically accepted engineering preview on main)
 **Release:** NO tagged GitHub Release / no PyPI upload
 **Branch:** protected `main`

@@ -33,8 +33,9 @@
       },
       {
         "id": "custody-stale-lock-recovery",
-        "status": "todo",
-        "note": "A stale .exclusive-lock left by a killed process fails with STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED and is not auto-cleared. Safe live-holder detection/recovery is needed before production. Production disabled / NOT RUN / not qualified / awaiting Sami's security review.",
+        "status": "in_progress",
+        "branch": "devin/1795397327-custody-stale-lock-recovery",
+        "note": "Persistent OS advisory locks and bounded V3 stale-marker recovery implemented on this branch; awaiting engineering review and merge. Live V3 holders are never cleared; legacy V2 takeover requires explicit recover and an operator assertion of no live legacy holder. Network filesystems unsupported. Production disabled / NOT RUN / not qualified / awaiting Sami's security review.",
         "requirement": "Safe live-holder detection and bounded stale-lock recovery before production custody can be enabled, without clearing a lock held by a live process.",
         "origin": "Reviewer follow-up after PR #108; stale operation locks were outside bounded store recovery scope",
         "blocks": "enabling production custody"

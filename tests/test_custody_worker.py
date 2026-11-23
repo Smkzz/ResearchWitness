@@ -5,10 +5,12 @@ import contextlib
 import io
 import json
 import os
+import queue
 import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 import uuid
 from pathlib import Path
@@ -401,12 +403,114 @@ class CustodyWorkerV5Tests(unittest.TestCase):
             recover_store(self.root)
         self.assertTrue(path.exists())
 
-    def test_recover_does_not_clear_stale_lock(self):
+    def test_live_subprocess_lock_is_preserved_and_recovers_after_kill(self):
+        self.source_setup(original=self.original_text())
+        batch = next((self.root / "incoming").glob("synthetic-batch-*.json")).stem
+        operations = (lambda: import_batch(self.root, batch),
+                      lambda: verify_all(self.root), lambda: recover_store(self.root))
         path = self.root / "audit" / ".exclusive-lock"
-        path.write_bytes(b"synthetic stale lock")
-        with self.assertRaisesRegex(CustodyError, "STORE_LOCK_HELD_MANUAL_REVIEW_REQUIRED"):
+        script = (
+            "import sys\nfrom pathlib import Path\n"
+            "from custody_worker.store import store_lock\n"
+            "with store_lock(Path(sys.argv[1])):\n"
+            " print('LOCKED', flush=True)\n sys.stdin.read()\n"
+        )
+        for operation in operations:
+            with self.subTest(operation=operation):
+                proc = subprocess.Popen(
+                    [sys.executable, "-c", script, str(self.root)],
+                    cwd=Path(__file__).resolve().parents[1], stdin=subprocess.PIPE,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                )
+                try:
+                    ready = queue.Queue()
+                    threading.Thread(target=lambda: ready.put(proc.stdout.readline()), daemon=True).start()
+                    self.assertEqual(ready.get(timeout=15).strip(), "LOCKED")
+                    before = path.read_bytes()
+                    self.assertEqual(before, b"OFFLINE_WORKER_LOCK_V3_HELD\n")
+                    for attempt in operations:
+                        with self.assertRaisesRegex(CustodyError, "STORE_LOCK_HELD_BY_LIVE_PROCESS"):
+                            attempt()
+                        self.assertEqual(path.read_bytes(), before)
+                    proc.kill()
+                    proc.communicate(timeout=15)
+                    self.assertEqual(path.read_bytes(), before)
+                    operation()
+                    self.assertEqual(path.read_bytes(), b"OFFLINE_WORKER_LOCK_V3_RELEASED\n")
+                finally:
+                    if proc.poll() is None:
+                        proc.kill()
+                    proc.communicate(timeout=15)
+
+    def test_nested_lock_rejects_and_normal_operations_leave_released_marker(self):
+        path = self.root / "audit" / ".exclusive-lock"
+        with worker_store.store_lock(self.root):
+            before = path.read_bytes()
+            with self.assertRaisesRegex(CustodyError, "STORE_LOCK_HELD_BY_LIVE_PROCESS"):
+                recover_store(self.root)
+            self.assertEqual(path.read_bytes(), before)
+        self.assertEqual(path.read_bytes(), b"OFFLINE_WORKER_LOCK_V3_RELEASED\n")
+        inode = path.stat().st_ino
+        make_store(self.root)
+        verify_all(self.root)
+        seal_inventory(self.root)
+        self.assertTrue(summarize(self.root)["current_inventory_sealed"])
+        self.assertEqual(path.read_bytes(), b"OFFLINE_WORKER_LOCK_V3_RELEASED\n")
+        self.assertEqual(path.stat().st_ino, inode)
+
+    def test_legacy_lock_requires_explicit_recover_before_import(self):
+        self.source_setup(original=self.original_text())
+        batch = next((self.root / "incoming").glob("synthetic-batch-*.json")).stem
+        path = self.root / "audit" / ".exclusive-lock"
+        marker = b"OFFLINE_WORKER_LOCK_V2\n"
+        path.write_bytes(marker)
+        with self.assertRaisesRegex(CustodyError, "STORE_LOCK_LEGACY_STALE_MANUAL_REVIEW_REQUIRED"):
+            import_batch(self.root, batch)
+        self.assertEqual(path.read_bytes(), marker)
+        recover_store(self.root)
+        self.assertEqual(import_batch(self.root, batch)["status"], "ALREADY_IMPORTED")
+        self.assertEqual(path.read_bytes(), b"OFFLINE_WORKER_LOCK_V3_RELEASED\n")
+
+    def test_unrecognized_oversized_and_directory_locks_are_unchanged(self):
+        path = self.root / "audit" / ".exclusive-lock"
+        for marker, code in ((b"synthetic stale lock", "STORE_LOCK_UNRECOGNIZED_MANUAL_REVIEW_REQUIRED"),
+                             (b"X" * 65, "STORE_LOCK_FAILED")):
+            with self.subTest(marker=marker):
+                path.write_bytes(marker)
+                with self.assertRaisesRegex(CustodyError, code):
+                    recover_store(self.root)
+                self.assertEqual(path.read_bytes(), marker)
+        path.unlink()
+        path.mkdir()
+        with self.assertRaises(CustodyError):
             recover_store(self.root)
-        self.assertTrue(path.exists())
+        self.assertTrue(path.is_dir())
+
+    def test_symlinked_lock_is_rejected_without_touching_target(self):
+        path = self.root / "audit" / ".exclusive-lock"
+        target = self.root / "incoming" / "synthetic-lock-target"
+        target.write_bytes(b"OFFLINE_WORKER_LOCK_V3_RELEASED\n")
+        try:
+            path.symlink_to(target)
+        except (OSError, NotImplementedError):
+            self.skipTest("symlink creation unavailable")
+        with self.assertRaises(CustodyError):
+            recover_store(self.root)
+        self.assertTrue(path.is_symlink())
+        self.assertEqual(target.read_bytes(), b"OFFLINE_WORKER_LOCK_V3_RELEASED\n")
+
+    def test_lock_cleanup_error_fails_closed_and_next_operation_recovers(self):
+        write_marker = worker_store._write_lock_marker
+
+        def fail_release(fd, marker):
+            if marker == b"OFFLINE_WORKER_LOCK_V3_RELEASED\n":
+                raise OSError("synthetic release failure")
+            write_marker(fd, marker)
+
+        with patch.object(worker_store, "_write_lock_marker", side_effect=fail_release):
+            with self.assertRaisesRegex(CustodyError, "STORE_LOCK_CLEANUP_FAILED"):
+                verify_all(self.root)
+        verify_all(self.root)
 
     def source_setup(self, *, original: str, correction: str | None = None,
                      document_id: str = DOCUMENT, source_version: str = "v1",
